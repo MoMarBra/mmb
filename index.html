@@ -3,26 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mein Video</title>
+  <title>Fullscreen Video</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
       background-color: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
     }
     video {
-      max-width: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
       height: auto;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      z-index: -1;
+      transform: translate(-50%, -50%);
+      background-size: cover;
     }
   </style>
 </head>
 <body>
-  <video controls autoplay muted playsinline>
-    <source src="vid.mp4" type="video/mp4">
+  <video autoplay muted loop playsinline>
+    <source src="meinvideo.mp4" type="video/mp4">
     Dein Browser unterstützt das Video-Tag nicht.
   </video>
 </body>
