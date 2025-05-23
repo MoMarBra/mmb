@@ -11,10 +11,9 @@
     padding: 0;
     height: 100%;
     overflow: hidden;
-    /* Sanfter linearer Graustufenverlauf für den gesamten Hintergrund */
-    background: linear-gradient(180deg, #EAEAEA 0%, #D2D2D2 50%, #B8B8B8 100%);
-    /* Alternativ ein etwas anderer Verlauf: */
-    /* background: linear-gradient(to bottom, #F5F5F7, #E8E8ED); */
+    /* Wichtig: Den expliziten Hintergrund vom Body entfernen oder auf transparent setzen,
+       damit das Video mit z-index: -1 sichtbar bleibt. */
+    background: transparent;
   }
 
   #fullscreenVideo {
@@ -23,12 +22,13 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    object-fit: contain; /* Behält das Seitenverhältnis des Videos bei, kann aber Ränder lassen */
-    /* Fallback-Hintergrund für das Video-Element selbst, falls es nicht den ganzen Viewport füllt oder transparente Bereiche hat */
-    /* Du kannst hier auch einen ähnlichen oder denselben Verlauf wie beim Body verwenden oder eine einzelne dunklere Farbe */
-    background: linear-gradient(180deg, #4A4A4A 0%, #333333 70%, #202020 100%);
-    /* Oder einfach ein dunkles Grau als Basis, wenn das Video darüber liegt */
-    /* background-color: #2C2C2E; */
+    object-fit: contain; /* Behält das Seitenverhältnis bei, kann Ränder erzeugen */
+    /* Schöner verlaufender Graustufen-Hintergrund für das Video-Element */
+    background: linear-gradient(180deg, #4A4A4A 0%, #333333 50%, #202020 100%);
+    /* Apple-artiger, hellerer Verlauf als Alternative (wähle einen): */
+    /* background: linear-gradient(to bottom, #F5F5F7, #E8E8ED); */
+    /* Oder der ursprünglich für den Body gedachte hellere Verlauf: */
+    /* background: linear-gradient(180deg, #EAEAEA 0%, #D2D2D2 50%, #B8B8B8 100%); */
     z-index: -1; /* Stellt sicher, dass das Video im Hintergrund ist. */
   }
 </style>
