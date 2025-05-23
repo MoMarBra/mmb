@@ -3,15 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vollbild Video (Ganzes Bild)</title>
+<link rel="icon" href="favicon.png" type="image/png">
+<title>brandauer</title>
 <style>
   body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden; /* Verhindert Scrollbalken auf dem Body */
-    /* Optional: Dem Body auch eine Hintergrundfarbe geben, falls das Video nicht geladen wird oder z-index Probleme macht */
-    /* background-color: #333333; */
+    overflow: hidden;
+    /* Sanfter linearer Graustufenverlauf für den gesamten Hintergrund */
+    background: linear-gradient(180deg, #EAEAEA 0%, #D2D2D2 50%, #B8B8B8 100%);
+    /* Alternativ ein etwas anderer Verlauf: */
+    /* background: linear-gradient(to bottom, #F5F5F7, #E8E8ED); */
   }
 
   #fullscreenVideo {
@@ -20,14 +23,12 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    object-fit: contain; /* WICHTIG: Zeigt das gesamte Video. Passt das Video so an,
-                             dass es vollständig in den Container passt, wobei das
-                             Seitenverhältnis erhalten bleibt. Ränder entstehen,
-                             wenn das Seitenverhältnis nicht übereinstimmt. */
-    background-color: #333333; /* Dunkelgrau (Hex-Code) für die Ränder.
-                                   Diese Farbe füllt den Hintergrund des Video-Elements
-                                   und wird in den Bereichen sichtbar, die nicht vom
-                                   Video (wegen 'object-fit: contain') bedeckt werden. */
+    object-fit: contain; /* Behält das Seitenverhältnis des Videos bei, kann aber Ränder lassen */
+    /* Fallback-Hintergrund für das Video-Element selbst, falls es nicht den ganzen Viewport füllt oder transparente Bereiche hat */
+    /* Du kannst hier auch einen ähnlichen oder denselben Verlauf wie beim Body verwenden oder eine einzelne dunklere Farbe */
+    background: linear-gradient(180deg, #4A4A4A 0%, #333333 70%, #202020 100%);
+    /* Oder einfach ein dunkles Grau als Basis, wenn das Video darüber liegt */
+    /* background-color: #2C2C2E; */
     z-index: -1; /* Stellt sicher, dass das Video im Hintergrund ist. */
   }
 </style>
