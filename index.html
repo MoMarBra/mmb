@@ -3,50 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fullscreen Video</title>
+  <title>Fullscreen Bild</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background: black;
     }
 
-    video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      z-index: -1;
-      object-fit: cover;
-    }
-
-    .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+    body {
+      background: url('bild.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: sans-serif;
+      color: white;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
-      font-family: sans-serif;
+    }
+
+    .content {
+      text-align: center;
       text-shadow: 0 0 10px black;
     }
   </style>
 </head>
 <body>
-  <video autoplay muted loop playsinline>
-    <source src="vid.mp4" type="video/mp4" />
-    Dein Browser unterstützt das Video-Tag nicht.
-  </video>
-  <div class="overlay">
-    <h1>Mein Video-Hintergrund</h1>
+  <div class="content">
+    <h1>Willkommen</h1>
+    <p>Dies ist ein Bild als Hintergrund.</p>
   </div>
 </body>
 </html>
