@@ -10,24 +10,20 @@
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background-color: #000;
+      background: black;
     }
-    video {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
+    .video-background {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       z-index: -1;
-      transform: translate(-50%, -50%);
-      background-size: cover;
     }
   </style>
 </head>
 <body>
-  <video autoplay muted loop playsinline>
+  <video class="video-background" autoplay muted loop playsinline>
     <source src="vid.mp4" type="video/mp4">
     Dein Browser unterstützt das Video-Tag nicht.
   </video>
