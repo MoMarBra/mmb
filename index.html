@@ -5,15 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fullscreen Video</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html, body {
-      height: 100%;
-      background: black;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: black; color: white; font-family: sans-serif; }
     video {
       position: fixed;
       top: 50%;
@@ -24,6 +17,11 @@
       object-fit: cover;
       z-index: -1;
     }
+    .overlay {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
@@ -31,5 +29,8 @@
     <source src="vid.mp4" type="video/mp4" />
     Dein Browser unterstützt das Video-Tag nicht.
   </video>
+  <div class="overlay">
+    <h1>Wird das Video abgespielt?</h1>
+  </div>
 </body>
 </html>
