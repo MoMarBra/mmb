@@ -9,22 +9,21 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
-      background: black;
+      background-color: black;
     }
-    .video-background {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+    video {
+      width: 100vw;
+      height: 100vh;
       object-fit: cover;
-      z-index: -1;
+      position: fixed;
+      top: 0;
+      left: 0;
     }
   </style>
 </head>
 <body>
-  <video class="video-background" autoplay muted loop playsinline>
-    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+  <video autoplay muted loop playsinline>
+    <source src="vid.mp4" type="video/mp4">
     Dein Browser unterstützt das Video-Tag nicht.
   </video>
 </body>
