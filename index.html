@@ -5,25 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fullscreen Video</title>
   <style>
-    html, body {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
       height: 100%;
-      background-color: black;
+      background: black;
     }
     video {
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      z-index: -1;
     }
   </style>
 </head>
 <body>
   <video autoplay muted loop playsinline>
-    <source src="vid.mp4" type="video/mp4">
+    <source src="vid.mp4" type="video/mp4" />
     Dein Browser unterstützt das Video-Tag nicht.
   </video>
 </body>
