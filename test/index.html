@@ -1,25 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-<title>Vollbild Video</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vollbild Video Responsive</title>
 <style>
   body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden; /* Verhindert Scrollbalken */
+    overflow: hidden; /* Verhindert Scrollbalken auf dem Body */
   }
+
   #fullscreenVideo {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    z-index: -100; /* Stellt sicher, dass das Video im Hintergrund ist */
-    background-size: cover;
-    overflow: hidden;
+    position: fixed; /* Positioniert das Video relativ zum Viewport */
+    top: 0;
+    left: 0;
+    width: 100vw; /* 100% der Viewport-Breite */
+    height: 100vh; /* 100% der Viewport-Höhe */
+    object-fit: cover; /* Wichtigste Eigenschaft:
+                          - Behält das Seitenverhältnis des Videos bei.
+                          - Füllt den gesamten Container (hier 100vw/100vh).
+                          - Schneidet das Video bei Bedarf an den Seiten oder oben/unten ab,
+                            um den Container ohne schwarze Balken zu füllen. */
+    z-index: -1;      /* Stellt sicher, dass das Video im Hintergrund ist,
+                          falls anderer Inhalt darüber liegen soll. */
   }
 </style>
 </head>
