@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BBE – Restaurant Ranking (2 Locations · 5 Köpfe)</title>
+<style>
+  :root{
+    --bg: #0f1320;
+    --panel: #161b2e;
+    --muted: #98a1b3;
+    --text: #e8ecf3;
+    --accent: #7bd389;
+    --accent-2: #8ab4ff;
+    --warn: #ffd166;
+    --danger: #ff6b6b;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font:500 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 600px at 20% -10%, #1b2140 0%, #0f1320 40%, #0b0f1a 100%);
+    color:var(--text);
+  }
+
+  .wrap{
+    max-width: 1100px;
+    margin: 28px auto 60px;
+    padding: 0 16px;
+  }
+
+  header{
+    display:flex; align-items: center; justify-content: space-between; gap:16px;
+    margin-bottom: 18px;
+  }
+  header h1{
+    font-size: clamp(20px, 4vw, 28px);
+    margin:0; letter-spacing:.2px;
+  }
+  .sub{
+    color:var(--muted); font-size:14px; margin-top:4px
+  }
+
+  .bar{
+    display:flex; flex-wrap: wrap; gap:10px;
+  }
+  .btn{
+    appearance:none; border:none; outline:none;
+    padding:10px 14px; border-radius: 10px;
+    background: linear-gradient(180deg, #222943, #181e37);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    cursor:pointer; transition:.2s transform, .2s filter, .2s background;
+    font-weight:600;
+  }
+  .btn:hover{ filter:brightness(1.08) }
+  .btn:active{ transform: translateY(1px) }
+  .btn.secondary{ background: linear-gradient(180deg, #1a213d, #121833); color:#d5dcf0 }
+  .btn.warn{ background: linear-gradient(180deg, #2a2b19, #24230f); color:var(--warn) }
+  .btn.danger{ background: linear-gradient(180deg, #3a1b1b, #271012); color:#ff9b9b }
+
+  /* Cards */
+  .grid{
+    display:grid; gap:16px;
+  }
+  @media (min-width: 880px){
+    .grid.columns-3{ grid-template-columns: 1.1fr 1.1fr 1.2fr }
+  }
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 16px 18px;
+  }
+  .card h3{
+    margin:0 0 10px; font-size:18px; letter-spacing:.2px
+  }
+
+  /* Stats */
+  .stats{
+    display:flex; gap:12px; align-items: center; flex-wrap: wrap;
+  }
+  .stat{
+    background: #11162b; border:1px solid rgba(255,255,255,.06);
+    border-radius: 12px; padding: 10px 12px; min-width: 160px;
+  }
+  .stat .label{ color:var(--muted); font-size:12px; margin-bottom:4px }
+  .stat .value{ font-size:20px; font-weight:700 }
+  .rank-pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 10px; border-radius:999px;
+    background: #10231a; border:1px solid #1f3b2b; color: #b6ffd0; font-weight:700
+  }
+  .rank-pill .medal{ font-size:18px }
+
+  /* Stars display (fractional) */
+  .stars{
+    position:relative; display:inline-block; font-size:20px; line-height:1; letter-spacing:2px;
+  }
+  .stars::before{ content:"★★★★★"; color:#3a456d }
+  .stars::after{
+    content:"★★★★★"; position:absolute; inset:0; color:#ffd166;
+    width: calc(var(--p) * 1%); overflow:hidden; white-space:nowrap
+  }
+
+  /* Ratings table */
+  table.ratings{
+    width:100%; border-collapse: collapse;
+  }
+  .ratings th, .ratings td{
+    padding: 10px 10px; text-align:left; border-bottom: 1px dashed rgba(255,255,255,.08);
+  }
+  .ratings thead th{
+    font-size:14px; color:var(--muted); font-weight:700;
+  }
+  .name-cell [contenteditable]{
+    padding:6px 10px; border-radius:8px; outline:none; display:inline-block; min-width: 130px;
+    background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+  }
+  .name-cell [contenteditable]:focus{ border-color:#6fb2ff; background: rgba(111,178,255,.09) }
+
+  /* Clickable star input */
+  .star-input{
+    display:inline-flex; align-items:center; gap:6px;
+    user-select:none;
+  }
+  .star-input button.star{
+    font-size:22px; line-height:1; background:none; border:none; cursor:pointer; padding:0 2px;
+    filter: drop-shadow(0 0 0 transparent); transition: transform .05s;
+  }
+  .star-input button.star.dim{ color:#3a456d }
+  .star-input button.star.lit{ color:#ffd166 }
+  .star-input button.star:focus-visible{ outline:2px solid #8ab4ff; outline-offset:2px; border-radius:6px }
+  .star-input button.star:active{ transform: translateY(1px) }
+  .cell-note{ color:var(--muted); font-size:12px; margin-left:8px }
+
+  /* Per Person list */
+  .person-list{
+    display:grid; gap:10px;
+  }
+  .person{
+    display:flex; align-items:center; justify-content: space-between; gap:10px;
+    padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.06);
+    background: #121833;
+  }
+  .person .who{ font-weight:700 }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+    background: #1d1f36; border:1px solid rgba(255,255,255,.08); font-size:13px;
+  }
+  .badge .stars{ font-size:16px; letter-spacing:1px }
+  .muted{ color:var(--muted) }
+
+  footer{ margin-top:20px; color:var(--muted); font-size:13px }
+  a.link{ color:#9ad0ff; text-decoration: none }
+  a.link:hover{ text-decoration: underline }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>BBE – Restaurant Ranking</h1>
+      <div class="sub">2 Locations nahe BBE · 5 Köpfe bewerten in ganzen Sternen (1–5) · Live-Auswertung &amp; Speicherung im Browser</div>
+    </div>
+    <div class="bar">
+      <button class="btn secondary" id="btn-export">CSV exportieren</button>
+      <label class="btn">
+        CSV importieren
+        <input id="file-import" type="file" accept=".csv" style="display:none">
+      </label>
+      <button class="btn warn" id="btn-reset">Zurücksetzen</button>
+    </div>
+  </header>
+
+  <div class="grid columns-3">
+    <section class="card" id="card-overall">
+      <h3>Gesamtübersicht</h3>
+      <div class="stats" id="overall-stats">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+
+    <section class="card" id="card-ratings">
+      <h3>Bewertungen (Köpfe × Restaurants)</h3>
+      <table class="ratings" id="ratings-table" aria-label="Bewertungstabelle mit 5 Köpfen und 2 Restaurants">
+        <thead>
+          <tr>
+            <th style="width:30%">Person</th>
+            <th id="th-rest-0">Café Luitpold</th>
+            <th id="th-rest-1">Brasserie OskarMaria</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Filled by JS -->
+        </tbody>
+      </table>
+      <div class="muted" style="margin-top:8px">Tipp: Namen können direkt in der Tabelle überschrieben werden.</div>
+    </section>
+
+    <section class="card" id="card-perperson">
+      <h3>Pro Person – persönliche Top-Reihenfolge</h3>
+      <div class="person-list" id="perperson-list">
+        <!-- Filled by JS -->
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div>Lokale Speicherung: <span id="save-status">–</span></div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "bbe_ratings_v1";
+
+  const restaurants = [
+    { id: "r0", name: "Café Luitpold" },
+    { id: "r1", name: "Brasserie OskarMaria" }
+  ];
+
+  const defaultPeople = ["Kopf 1", "Kopf 2", "Kopf 3", "Kopf 4", "Kopf 5"];
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+
+  function saveState(state, silent=false){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if(!silent) setSaveStatus("Gespeichert ✓");
+  }
+
+  function setSaveStatus(text){
+    const el = document.getElementById("save-status");
+    el.textContent = text;
+    clearTimeout(setSaveStatus._t);
+    setSaveStatus._t = setTimeout(() => el.textContent="–", 2500);
+  }
+
+  function makeEmptyRatings(peopleCount, restCount){
+    return Array.from({length: peopleCount}, () => Array(restCount).fill(0));
+  }
+
+  function initialState(){
+    return {
+      people: defaultPeople.slice(),
+      restaurants: restaurants.map(r => r.name),
+      ratings: makeEmptyRatings(defaultPeople.length, restaurants.length)
+    };
+  }
+
+  // Ranking helper: rank averages desc, ties share rank (average rank)
+  function computeRanks(values){
+    const arr = values.slice().map((v,i) => ({v,i})).sort((a,b)=> b.v - a.v);
+    const ranks = Array(values.length).fill(null);
+    let i = 0;
+    while(i < arr.length){
+      let j = i;
+      // tie block
+      while(j+1 < arr.length && arr[j+1].v === arr[i].v) j++;
+      const avgRank = (i+1 + j+1)/2;
+      for(let k=i;k<=j;k++){ ranks[arr[k].i] = avgRank; }
+      i = j+1;
+    }
+    return ranks;
+  }
+
+  function avgAndCount(nums){
+    const vals = nums.filter(n => n > 0);
+    const count = vals.length;
+    const avg = count ? vals.reduce((a,b)=>a+b,0)/count : 0;
+    return {avg, count};
+  }
+
+  // View
+  function render(state){
+    renderOverall(state);
+    renderTable(state);
+    renderPerPerson(state);
+  }
+
+  function renderOverall(state){
+    const container = document.getElementById("overall-stats");
+    container.innerHTML = "";
+    const avgs = state.restaurants.map((_, j) => avgAndCount(state.ratings.map(row => row[j])).avg);
+    const ranks = computeRanks(avgs.map(v => Number(v.toFixed(4)))); // stabilize
+
+    state.restaurants.forEach((restName, j) => {
+      const {avg, count} = avgAndCount(state.ratings.map(row => row[j]));
+      const card = document.createElement("div");
+      card.className = "stat";
+      const pct = Math.round((avg/5)*100);
+      card.innerHTML = `
+        <div class="label">${restName}</div>
+        <div class="value">
+          <span class="stars" style="--p:${pct}"></span>
+          <span style="margin-left:8px">${avg ? avg.toFixed(2) : "–"}/5</span>
+        </div>
+        <div class="sub" style="margin-top:6px">Bewertungen: ${count}</div>
+        <div style="margin-top:8px">
+          <span class="rank-pill" title="Rang (1 = beste Durchschnittsbewertung)">
+            <span class="medal">🏅</span> Rang ${avg ? ranks[j].toString().replace(".5","½") : "–"}
+          </span>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function starCell(current, onChange){
+    const wrap = document.createElement("div");
+    wrap.className = "star-input";
+    wrap.setAttribute("role","radiogroup");
+    wrap.setAttribute("aria-label","Sterne auswählen (1–5)");
+
+    const setVisual = (val) => {
+      [...wrap.querySelectorAll("button.star")].forEach(btn => {
+        const v = Number(btn.dataset.value);
+        btn.classList.toggle("lit", v <= val);
+        btn.classList.toggle("dim", v > val);
+        btn.setAttribute("aria-checked", v === val ? "true" : "false");
+      });
+    };
+
+    for(let v=1; v<=5; v++){
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "star " + (v <= current ? "lit" : "dim");
+      b.dataset.value = String(v);
+      b.setAttribute("role","radio");
+      b.setAttribute("aria-checked", v === current ? "true" : "false");
+      b.title = `${v} ${v===1?"Stern":"Sterne"}`;
+      b.textContent = "★";
+      b.addEventListener("click", () => { onChange(v); setVisual(v); });
+      b.addEventListener("keydown", (e) => {
+        if(e.key === "ArrowRight" || e.key === "ArrowUp"){
+          e.preventDefault();
+          const next = Math.min(5, (current||0) + 1);
+          onChange(next); current = next; setVisual(next);
+        }else if(e.key === "ArrowLeft" || e.key === "ArrowDown"){
+          e.preventDefault();
+          const prev = Math.max(1, (current||0) - 1);
+          onChange(prev); current = prev; setVisual(prev);
+        }else if(e.key === "0"){
+          e.preventDefault();
+          onChange(0); current = 0; setVisual(0);
+        }
+      });
+      wrap.appendChild(b);
+    }
+    const note = document.createElement("span");
+    note.className = "cell-note";
+    note.textContent = current ? `${current}/5` : "—";
+    wrap.appendChild(note);
+
+    return {el: wrap, updateNote: (val) => note.textContent = val ? `${val}/5` : "—", setVisual:(val)=>{
+      [...wrap.querySelectorAll("button.star")].forEach(btn => {
+        const v = Number(btn.dataset.value);
+        btn.classList.toggle("lit", v <= val);
+        btn.classList.toggle("dim", v > val);
+        btn.setAttribute("aria-checked", v === val ? "true" : "false");
+      });
+    }};
+  }
+
+  function renderTable(state){
+    const tbody = document.querySelector("#ratings-table tbody");
+    tbody.innerHTML = "";
+    state.people.forEach((person, i) => {
+      const tr = document.createElement("tr");
+
+      const tdName = document.createElement("td");
+      tdName.className = "name-cell";
+      const span = document.createElement("span");
+      span.textContent = person;
+      span.contentEditable = "true";
+      span.role = "textbox";
+      span.ariaLabel = "Name bearbeiten";
+      span.addEventListener("blur", () => {
+        state.people[i] = span.textContent.trim() || `Kopf ${i+1}`;
+        saveState(state, true); setSaveStatus("Name gespeichert");
+        renderPerPerson(state); // update labels
+        exportLinkCache = null;
+      });
+      tdName.appendChild(span);
+      tr.appendChild(tdName);
+
+      // Two restaurants
+      for(let j=0; j<2; j++){
+        const td = document.createElement("td");
+        const {el, updateNote, setVisual} = starCell(state.ratings[i][j], (val) => {
+          state.ratings[i][j] = val;
+          saveState(state, true); setSaveStatus("Bewertung gespeichert");
+          renderOverall(state);
+          renderPerPerson(state);
+          updateNote(val);
+          exportLinkCache = null;
+        });
+        // Ensure visual state matches current
+        setVisual(state.ratings[i][j]);
+        td.appendChild(el);
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderPerPerson(state){
+    const list = document.getElementById("perperson-list");
+    list.innerHTML = "";
+
+    state.people.forEach((person, i) => {
+      const ratings = state.ratings[i];
+      const pairs = ratings.map((r,idx)=>({name: state.restaurants[idx], val: r}));
+      const any = pairs.some(p => p.val>0);
+      const sorted = pairs.slice().sort((a,b)=> b.val - a.val || a.name.localeCompare(b.name));
+
+      const row = document.createElement("div");
+      row.className = "person";
+      const left = document.createElement("div");
+      left.className = "who";
+      left.textContent = person;
+
+      const right = document.createElement("div");
+      if(!any){
+        const m = document.createElement("span");
+        m.className = "muted";
+        m.textContent = "Noch keine Bewertung";
+        right.appendChild(m);
+      }else{
+        sorted.forEach((p, idx) => {
+          if(p.val === 0) return;
+          const b = document.createElement("span");
+          b.className = "badge";
+          b.innerHTML = `<strong>${idx===0?"Top 1":"Top 2"}</strong> · ${p.name} · <span class="stars" style="--p:${(p.val/5*100).toFixed(0)}"></span> ${p.val}/5`;
+          right.appendChild(b);
+        });
+      }
+
+      row.appendChild(left);
+      row.appendChild(right);
+      list.appendChild(row);
+    });
+  }
+
+  // CSV helpers
+  function toCSV(state){
+    const header = ["Person"].concat(state.restaurants);
+    const rows = state.people.map((p,i)=> [p].concat(state.ratings[i]));
+    return [header].concat(rows).map(r => r.map(x => (typeof x === "string" && x.includes(",")) ? `"${x}"` : x).join(",")).join("\n");
+  }
+  function fromCSV(text){
+    const lines = text.trim().split(/\r?\n/);
+    if(lines.length < 2) throw new Error("CSV zu kurz");
+    const header = lines[0].split(",").map(s=>s.trim());
+    if(header.length !== 3) throw new Error("CSV braucht genau 3 Spalten: Person, Restaurant 1, Restaurant 2");
+    const people = [], ratings = [];
+    for(let i=1;i<lines.length;i++){
+      const cols = lines[i].split(",").map(s=>s.trim());
+      if(!cols[0]) continue;
+      people.push(cols[0]);
+      ratings.push([Number(cols[1]||0), Number(cols[2]||0)]);
+    }
+    return {people, ratings};
+  }
+
+  // Export/Import
+  let exportLinkCache = null;
+  document.getElementById("btn-export").addEventListener("click", () => {
+    const csv = toCSV(state);
+    const blob = new Blob([csv], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "BBE_Restaurant_Ratings.csv";
+    a.click();
+    setTimeout(()=> URL.revokeObjectURL(url), 1500);
+  });
+  document.getElementById("file-import").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const {people, ratings} = fromCSV(String(reader.result));
+        state.people = people.slice(0,5);
+        // pad or trim to 5
+        while(state.people.length < 5) state.people.push(`Kopf ${state.people.length+1}`);
+        state.ratings = ratings.slice(0,5);
+        while(state.ratings.length < 5) state.ratings.push([0,0]);
+        saveState(state);
+        render(state);
+      }catch(err){
+        alert("Fehler beim Import: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("btn-reset").addEventListener("click", () => {
+    if(!confirm("Alle Namen & Bewertungen zurücksetzen?")) return;
+    Object.assign(state, initialState());
+    saveState(state);
+    render(state);
+  });
+
+  // Bootstrap
+  const state = Object.assign(initialState(), loadState() || {});
+  // ensure schema
+  state.people = (state.people||defaultPeople).slice(0,5);
+  while(state.people.length < 5) state.people.push(`Kopf ${state.people.length+1}`);
+  state.restaurants = restaurants.map(r => r.name);
+  state.ratings = (state.ratings && state.ratings.length === 5 && state.ratings[0].length === 2) ? state.ratings : makeEmptyRatings(5,2);
+
+  // Write restaurant names to table headers
+  document.getElementById("th-rest-0").textContent = state.restaurants[0];
+  document.getElementById("th-rest-1").textContent = state.restaurants[1];
+
+  render(state);
+  setSaveStatus("Bereit");
+})();
+</script>
+</body>
+</html>
