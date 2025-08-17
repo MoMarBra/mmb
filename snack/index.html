@@ -1,531 +1,275 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BBE – Restaurant Ranking (2 Locations · 5 Köpfe)</title>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Snack‑Glücksrad ©</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --bg: #0f1320;
-    --panel: #161b2e;
-    --muted: #98a1b3;
-    --text: #e8ecf3;
-    --accent: #7bd389;
-    --accent-2: #8ab4ff;
-    --warn: #ffd166;
-    --danger: #ff6b6b;
-    --shadow: 0 10px 30px rgba(0,0,0,.35);
-    --radius: 14px;
+    --bg:#0b1226; --panel:#0e1733; --card:#121e3f; --line:rgba(255,255,255,.07);
+    --text:#e6edff; --muted:#9fb1d9; --accent:#6aa5ff; --gold:#ffd166;
+    --shadow: 0 10px 30px rgba(0,0,0,.35); --radius:16px
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{
-    margin:0; font:500 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
-    background: radial-gradient(1200px 600px at 20% -10%, #1b2140 0%, #0f1320 40%, #0b0f1a 100%);
-    color:var(--text);
-  }
+  body{margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial; color:var(--text);
+       background: radial-gradient(1200px 700px at 20% -10%, #16245a 0%, #0b1226 40%, #090f1f 100%)}
+  .wrap{max-width:1400px; margin:28px auto 56px; padding:0 16px}
+  header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap}
+  header h1{margin:0; font-weight:800; letter-spacing:.2px; font-size:clamp(22px,4vw,30px)}
+  .sub{color:var(--muted); font-size:14px; margin-top:4px}
+  .bar{display:flex; flex-wrap:wrap; gap:10px}
+  .btn{appearance:none; border:1px solid var(--line); padding:10px 14px; border-radius:12px; background:linear-gradient(180deg,#192a5a,#0f1a3d); color:var(--text); box-shadow:var(--shadow); cursor:pointer; transition:.2s transform,.2s filter}
+  .btn:hover{filter:brightness(1.08)} .btn:active{transform:translateY(1px)}
 
-  .wrap{
-    max-width: 1100px;
-    margin: 28px auto 60px;
-    padding: 0 16px;
-  }
+  .grid{display:grid; gap:16px}
+  @media(min-width:1200px){.grid.cols-3{grid-template-columns:1.1fr 1.2fr 0.9fr}}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 16px 18px}
+  .card h3{margin:0 0 10px; font-size:18px}
 
-  header{
-    display:flex; align-items: center; justify-content: space-between; gap:16px;
-    margin-bottom: 18px;
-  }
-  header h1{
-    font-size: clamp(20px, 4vw, 28px);
-    margin:0; letter-spacing:.2px;
-  }
-  .sub{
-    color:var(--muted); font-size:14px; margin-top:4px
-  }
-
-  .bar{
-    display:flex; flex-wrap: wrap; gap:10px;
-  }
-  .btn{
-    appearance:none; border:none; outline:none;
-    padding:10px 14px; border-radius: 10px;
-    background: linear-gradient(180deg, #222943, #181e37);
-    color: var(--text);
-    box-shadow: var(--shadow);
-    cursor:pointer; transition:.2s transform, .2s filter, .2s background;
-    font-weight:600;
-  }
-  .btn:hover{ filter:brightness(1.08) }
-  .btn:active{ transform: translateY(1px) }
-  .btn.secondary{ background: linear-gradient(180deg, #1a213d, #121833); color:#d5dcf0 }
-  .btn.warn{ background: linear-gradient(180deg, #2a2b19, #24230f); color:var(--warn) }
-  .btn.danger{ background: linear-gradient(180deg, #3a1b1b, #271012); color:#ff9b9b }
-
-  /* Cards */
-  .grid{
-    display:grid; gap:16px;
-  }
-  @media (min-width: 880px){
-    .grid.columns-3{ grid-template-columns: 1.1fr 1.1fr 1.2fr }
-  }
-  .card{
-    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 16px 16px 18px;
-  }
-  .card h3{
-    margin:0 0 10px; font-size:18px; letter-spacing:.2px
-  }
+  /* Wheel */
+  .wheel-card{display:grid; gap:12px}
+  .wheel-wrap{display:flex; align-items:center; justify-content:center; position:relative}
+  canvas#wheel{width:100%; max-width:580px; aspect-ratio:1; border-radius:50%; background:radial-gradient(140px 140px at 50% 50%, rgba(255,255,255,.06), transparent 60%)}
+  .pointer{position:absolute; top:-2px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-bottom:26px solid var(--gold); filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+  .legend{display:flex; flex-wrap:wrap; gap:8px; justify-content:center}
+  .legend-item{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#0f1a3d; font-size:13px}
+  .swatch{width:14px; height:14px; border-radius:4px; border:1px solid rgba(255,255,255,.25)}
+  .winner{font-weight:800}
 
   /* Stats */
-  .stats{
-    display:flex; gap:12px; align-items: center; flex-wrap: wrap;
-  }
-  .stat{
-    background: #11162b; border:1px solid rgba(255,255,255,.06);
-    border-radius: 12px; padding: 10px 12px; min-width: 160px;
-  }
-  .stat .label{ color:var(--muted); font-size:12px; margin-bottom:4px }
-  .stat .value{ font-size:20px; font-weight:700 }
-  .rank-pill{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:8px 10px; border-radius:999px;
-    background: #10231a; border:1px solid #1f3b2b; color: #b6ffd0; font-weight:700
-  }
-  .rank-pill .medal{ font-size:18px }
+  .stats{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .stat{background:#0e1733; border:1px solid var(--line); border-radius:12px; padding:10px 12px; min-width:210px}
+  .stat .label{color:var(--muted); font-size:12px; margin-bottom:6px}
+  .stat .value{font-size:20px; font-weight:800}
+  .rank{display:inline-flex; gap:8px; padding:6px 10px; border-radius:999px; background:#0a2a1e; border:1px solid #1a573f; color:#c7ffe3; font-weight:800}
+  .stars{position:relative; display:inline-block; font-size:18px; line-height:1; letter-spacing:2px}
+  .stars::before{content:"★★★★★"; color:#334d8a}
+  .stars::after{content:"★★★★★"; position:absolute; inset:0; color:var(--gold); width:calc(var(--p)*1%); overflow:hidden; white-space:nowrap}
 
-  /* Stars display (fractional) */
-  .stars{
-    position:relative; display:inline-block; font-size:20px; line-height:1; letter-spacing:2px;
-  }
-  .stars::before{ content:"★★★★★"; color:#3a456d }
-  .stars::after{
-    content:"★★★★★"; position:absolute; inset:0; color:#ffd166;
-    width: calc(var(--p) * 1%); overflow:hidden; white-space:nowrap
-  }
+  /* Table */
+  .ratings-wrap{overflow:auto; border-radius:12px; border:1px solid var(--line)}
+  table.ratings{width:100%; border-collapse:separate; border-spacing:0; min-width:900px}
+  .ratings th,.ratings td{padding:10px 10px; text-align:left; border-bottom:1px dashed var(--line); background:transparent}
+  .ratings thead th{font-size:14px; color:var(--muted); font-weight:700; position:sticky; top:0; background:var(--bg)}
+  .ratings .sticky{position:sticky; left:0; background:var(--bg); z-index:2}
 
-  /* Ratings table */
-  table.ratings{
-    width:100%; border-collapse: collapse;
-  }
-  .ratings th, .ratings td{
-    padding: 10px 10px; text-align:left; border-bottom: 1px dashed rgba(255,255,255,.08);
-  }
-  .ratings thead th{
-    font-size:14px; color:var(--muted); font-weight:700;
-  }
-  .name-cell [contenteditable]{
-    padding:6px 10px; border-radius:8px; outline:none; display:inline-block; min-width: 130px;
-    background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
-  }
-  .name-cell [contenteditable]:focus{ border-color:#6fb2ff; background: rgba(111,178,255,.09) }
+  .star-input{display:inline-flex; align-items:center; gap:6px; user-select:none}
+  .star-input button.star{font-size:22px; background:none; border:none; cursor:pointer; padding:0 2px}
+  .star-input .dim{color:#334d8a} .star-input .lit{color:var(--gold)}
+  .cell-note{color:var(--muted); font-size:12px; margin-left:8px}
 
-  /* Clickable star input */
-  .star-input{
-    display:inline-flex; align-items:center; gap:6px;
-    user-select:none;
-  }
-  .star-input button.star{
-    font-size:22px; line-height:1; background:none; border:none; cursor:pointer; padding:0 2px;
-    filter: drop-shadow(0 0 0 transparent); transition: transform .05s;
-  }
-  .star-input button.star.dim{ color:#3a456d }
-  .star-input button.star.lit{ color:#ffd166 }
-  .star-input button.star:focus-visible{ outline:2px solid #8ab4ff; outline-offset:2px; border-radius:6px }
-  .star-input button.star:active{ transform: translateY(1px) }
-  .cell-note{ color:var(--muted); font-size:12px; margin-left:8px }
+  /* Spin panel */
+  .ratings-panel{display:none}
+  .ratings-panel.open{display:block}
+  .rating-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#0e1733; margin-top:8px}
 
-  /* Per Person list */
-  .person-list{
-    display:grid; gap:10px;
-  }
-  .person{
-    display:flex; align-items:center; justify-content: space-between; gap:10px;
-    padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.06);
-    background: #121833;
-  }
-  .person .who{ font-weight:700 }
-  .badge{
-    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
-    background: #1d1f36; border:1px solid rgba(255,255,255,.08); font-size:13px;
-  }
-  .badge .stars{ font-size:16px; letter-spacing:1px }
-  .muted{ color:var(--muted) }
-
-  footer{ margin-top:20px; color:var(--muted); font-size:13px }
-  a.link{ color:#9ad0ff; text-decoration: none }
-  a.link:hover{ text-decoration: underline }
+  footer{margin-top:20px; color:var(--muted); font-size:13px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <h1>BBE – Restaurant Ranking</h1>
-      <div class="sub">2 Locations nahe BBE · 5 Köpfe bewerten in ganzen Sternen (1–5) · Live-Auswertung &amp; Speicherung im Browser</div>
+      <h1>Snack‑Rad ©</h1>
+      <div class="sub">Was snacken wir heute?</div>
     </div>
     <div class="bar">
-      <button class="btn secondary" id="btn-export">CSV exportieren</button>
-      <label class="btn">
-        CSV importieren
-        <input id="file-import" type="file" accept=".csv" style="display:none">
-      </label>
-      <button class="btn warn" id="btn-reset">Zurücksetzen</button>
+      <button class="btn" id="btn-refresh">Neu laden</button>
     </div>
   </header>
 
-  <div class="grid columns-3">
-    <section class="card" id="card-overall">
+  <!-- Glücksrad -->
+  <section class="card wheel-card" aria-label="Glücksrad zur Auswahl">
+    <div class="wheel-wrap">
+      <canvas id="wheel" width="600" height="600" aria-label="Glücksrad"></canvas>
+      <div class="pointer" aria-hidden="true"></div>
+    </div>
+    <div class="bar" style="justify-content:center; gap:12px">
+      <button class="btn" id="btn-spin">🎡 Drehen</button>
+      <div id="spin-result" class="sub">Bereit</div>
+    </div>
+    <div id="legend" class="legend"></div>
+  </section>
+
+  <div class="grid cols-3" style="margin-top:16px">
+    <section class="card">
       <h3>Gesamtübersicht</h3>
-      <div class="stats" id="overall-stats">
-        <!-- Filled by JS -->
-      </div>
+      <div class="stats" id="overall-stats"></div>
     </section>
 
-    <section class="card" id="card-ratings">
-      <h3>Bewertungen (Köpfe × Restaurants)</h3>
-      <table class="ratings" id="ratings-table" aria-label="Bewertungstabelle mit 5 Köpfen und 2 Restaurants">
-        <thead>
-          <tr>
-            <th style="width:30%">Person</th>
-            <th id="th-rest-0">Café Luitpold</th>
-            <th id="th-rest-1">Brasserie OskarMaria</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Filled by JS -->
-        </tbody>
-      </table>
-      <div class="muted" style="margin-top:8px">Tipp: Namen können direkt in der Tabelle überschrieben werden.</div>
+    <section class="card">
+      <h3>Bewertungen</h3>
+      <div class="ratings-wrap">
+        <table class="ratings" id="ratings-table" aria-label="Bewertungstabelle">
+          <thead>
+            <tr id="thead-row">
+              <th class="sticky" style="width:28%">Snack</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-rows"></tbody>
+        </table>
+      </div>
+      <div class="sub" style="margin-top:8px">Hier eigenes Snackrating ausfüllen </div>
     </section>
 
-    <section class="card" id="card-perperson">
-      <h3>Pro Person – persönliche Top-Reihenfolge</h3>
-      <div class="person-list" id="perperson-list">
-        <!-- Filled by JS -->
-      </div>
+    <section class="card ratings-panel" id="spin-panel">
+      <h3>Ergebnis des Snack-Glücksrads</h3>
+      <div id="spin-summary" class="sub">–</div>
+      <div id="spin-list"></div>
     </section>
   </div>
 
-  <footer>
-    <div>Lokale Speicherung: <span id="save-status">–</span></div>
-  </footer>
+  <footer>Speicherstatus: <span id="save-status">–</span></footer>
 </div>
 
 <script>
 (() => {
-  const STORAGE_KEY = "bbe_ratings_v1";
+  // ===== Supabase =====
+  const SUPABASE_URL = "https://tvdipoczbbnllkwhhukh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_NfnGgGPf7hFMK38ji-gfxg_zlNRDvAg";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const restaurants = [
-    { id: "r0", name: "Café Luitpold" },
-    { id: "r1", name: "Brasserie OskarMaria" }
-  ];
+  // ===== State =====
+  const state = {
+    snacks: [],
+    people: [],
+    ratings: new Map(), // key `${personId}|${snackId}` -> stars
+    rotation: 0,
+    spinning: false
+  };
 
-  const defaultPeople = ["Kopf 1", "Kopf 2", "Kopf 3", "Kopf 4", "Kopf 5"];
+  // ===== Helpers =====
+  const $ = (id)=> document.getElementById(id);
+  const setSave = (t)=>{ const el=$("save-status"); el.textContent=t; clearTimeout(setSave._t); setSave._t=setTimeout(()=>el.textContent='–', 2400); };
+  const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
+  const TAU = Math.PI*2; const norm = (a)=>{ a%=TAU; if(a<0) a+=TAU; return a; };
+  const key = (p,s)=> `${p}|${s}`;
+  const hsl = (i,n)=> `hsl(${Math.round((360/(n||1))*i)} 80% 55%)`;
 
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return null;
-      return JSON.parse(raw);
-    }catch(e){ return null; }
+  // ===== Data Load =====
+  async function loadAll(){
+    const [snR, peR, raR] = await Promise.all([
+      sb.from('snack').select('id,name,color').eq('active', true).order('name',{ascending:true}),
+      sb.from('person').select('id,name').eq('active', true).order('id',{ascending:true}),
+      sb.from('snack_rating').select('person_id,snack_id,stars')
+    ]);
+    if(snR.error||peR.error||raR.error){ console.error(snR.error||peR.error||raR.error); setSave('Fehler beim Laden'); return; }
+    state.snacks = (snR.data||[]).map((x,i,arr)=>({id:x.id,name:x.name,color:x.color||hsl(i,arr.length)}));
+    state.people = peR.data||[];
+    state.ratings.clear();
+    (raR.data||[]).forEach(r=> state.ratings.set(key(r.person_id,r.snack_id), Number(r.stars||0)) );
+    renderAll(); setSave('Vom Server geladen ✓');
   }
 
-  function saveState(state, silent=false){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    if(!silent) setSaveStatus("Gespeichert ✓");
-  }
-
-  function setSaveStatus(text){
-    const el = document.getElementById("save-status");
-    el.textContent = text;
-    clearTimeout(setSaveStatus._t);
-    setSaveStatus._t = setTimeout(() => el.textContent="–", 2500);
-  }
-
-  function makeEmptyRatings(peopleCount, restCount){
-    return Array.from({length: peopleCount}, () => Array(restCount).fill(0));
-  }
-
-  function initialState(){
-    return {
-      people: defaultPeople.slice(),
-      restaurants: restaurants.map(r => r.name),
-      ratings: makeEmptyRatings(defaultPeople.length, restaurants.length)
-    };
-  }
-
-  // Ranking helper: rank averages desc, ties share rank (average rank)
-  function computeRanks(values){
-    const arr = values.slice().map((v,i) => ({v,i})).sort((a,b)=> b.v - a.v);
-    const ranks = Array(values.length).fill(null);
-    let i = 0;
-    while(i < arr.length){
-      let j = i;
-      // tie block
-      while(j+1 < arr.length && arr[j+1].v === arr[i].v) j++;
-      const avgRank = (i+1 + j+1)/2;
-      for(let k=i;k<=j;k++){ ranks[arr[k].i] = avgRank; }
-      i = j+1;
+  // ===== Wheel (HiDPI) =====
+  const wheel = $("wheel");
+  const ctx = wheel.getContext('2d');
+  function drawWheel(){
+    const dpr = window.devicePixelRatio||1; const css = wheel.clientWidth || 580;
+    wheel.width = Math.round(css*dpr); wheel.height = Math.round(css*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,css,css);
+    const W=css, H=css, cx=W/2, cy=H/2, r=Math.min(W,H)/2 - 16;
+    const items = state.snacks.length? state.snacks : [{name:'–', color:'#445'}];
+    const N = items.length||1; const seg = TAU/N; const rot = state.rotation;
+    for(let i=0;i<N;i++){
+      const start = rot + i*seg, end = start + seg;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,end); ctx.closePath();
+      ctx.fillStyle = items[i].color; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.stroke();
+      ctx.save(); const mid=start+seg/2; ctx.translate(cx,cy); ctx.rotate(mid);
+      ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='600 16px Inter, system-ui';
+      const label = items[i].name; wrapArcText(ctx,label,r-18, seg*0.92); ctx.restore();
     }
-    return ranks;
+    ctx.beginPath(); ctx.arc(cx,cy,34,0,TAU); ctx.fillStyle='#0b1226'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.stroke();
+  }
+  function wrapArcText(ctx, text, radius, maxArc){ let t=text; let w=ctx.measureText(t).width; const maxW=radius*maxArc; if(w>maxW){ while(w>maxW && t.length>3){ t=t.slice(0,-1); w=ctx.measureText(t+"…").width; } t=t+"…"; } ctx.fillText(t, radius-4, 6); }
+  function computeWinnerIndex(){ const N=Math.max(1,state.snacks.length); const seg=TAU/N; const pointer=-Math.PI/2; const A=norm(pointer - state.rotation); return Math.floor(A/seg); }
+  function spin(){ if(state.spinning||state.snacks.length===0) return; state.spinning=true; $("spin-result").textContent='Dreht…';
+    const N=state.snacks.length, seg=TAU/N, pointer=-Math.PI/2; const winnerIndex=Math.floor(Math.random()*N); const center=winnerIndex*seg + seg/2; const spins=4+Math.floor(Math.random()*3); const target = pointer - center + spins*TAU; const startT=performance.now(); const dur=3400+Math.random()*800; const startRot=state.rotation; const ease=(x)=>1-Math.pow(1-x,3);
+    function frame(t){ const k=Math.min(1,(t-startT)/dur); state.rotation = startRot + (target-startRot)*ease(k); drawWheel(); if(k<1) requestAnimationFrame(frame); else finish(); }
+    function finish(){ state.rotation=target; drawWheel(); const idx=computeWinnerIndex(); const win=state.snacks[idx]; $("spin-result").innerHTML=`Gewinner: <span class="winner">${win?.name||'–'}</span>`; showSnackRatings(win?.id,win?.name); state.spinning=false; }
+    requestAnimationFrame(frame);
   }
 
-  function avgAndCount(nums){
-    const vals = nums.filter(n => n > 0);
-    const count = vals.length;
-    const avg = count ? vals.reduce((a,b)=>a+b,0)/count : 0;
-    return {avg, count};
+  // ===== Legend =====
+  function renderLegend(){ const c=$("legend"); c.innerHTML=''; state.snacks.forEach(s=>{ const el=document.createElement('div'); el.className='legend-item'; el.innerHTML=`<span class="swatch" style="background:${s.color}"></span>${s.name}`; c.appendChild(el); }); }
+
+  // ===== Ratings Table (Snacks rows × People columns) =====
+  function starWidget(current, onChange){
+    const wrap=document.createElement('span'); wrap.className='star-input';
+    const note=document.createElement('span'); note.className='cell-note'; note.textContent=current?`${current}/5`:'—';
+    const setVis=(val)=>{ [...wrap.querySelectorAll('button.star')].forEach(btn=>{ const v=Number(btn.dataset.value); btn.classList.toggle('lit', v<=val); btn.classList.toggle('dim', v>val); btn.setAttribute('aria-checked', v===val? 'true':'false'); }); note.textContent = val? `${val}/5`:'—'; };
+    for(let v=1; v<=5; v++){ const b=document.createElement('button'); b.type='button'; b.className='star '+(v<=current?'lit':'dim'); b.dataset.value=String(v); b.textContent='★'; b.setAttribute('role','radio'); b.setAttribute('aria-checked', v===current? 'true':'false'); b.addEventListener('click', ()=>{ onChange(v); setVis(v); }); wrap.appendChild(b);} wrap.appendChild(note); return {el:wrap,set:setVis};
   }
+  function renderHeader(){ const tr=$("thead-row"); tr.innerHTML = `<th class="sticky" style="width:28%">Snack</th>`; state.people.forEach(p=>{ const th=document.createElement('th'); th.textContent=p.name; tr.appendChild(th); }); }
+  function renderTable(){ const tbody=$("tbody-rows"); tbody.innerHTML=''; state.snacks.forEach(sn=>{ const tr=document.createElement('tr'); const tdSnack=document.createElement('td'); tdSnack.className='sticky'; tdSnack.textContent=sn.name; tr.appendChild(tdSnack); state.people.forEach(p=>{ const td=document.createElement('td'); const cur = state.ratings.get(key(p.id,sn.id))||0; const {el,set}=starWidget(cur, (val)=> upsertRating(p.id,sn.id,val)); set(cur); td.appendChild(el); tr.appendChild(td); }); tbody.appendChild(tr); }); }
 
-  // View
-  function render(state){
-    renderOverall(state);
-    renderTable(state);
-    renderPerPerson(state);
-  }
+  function avgCount(vals){ const v=vals.filter(x=>x>0); return {avg:v.length? v.reduce((a,b)=>a+b,0)/v.length : 0, count:v.length}; }
+  function ranks(vals){ const arr=vals.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v); const r=Array(vals.length).fill(0); let i=0; while(i<arr.length){let j=i; while(j+1<arr.length && arr[j+1].v===arr[i].v) j++; const rank=(i+1+j+1)/2; for(let k=i;k<=j;k++) r[arr[k].i]=rank; i=j+1;} return r; }
+  function renderStats(){
+    const box = $("overall-stats");
+    box.innerHTML = '';
 
-  function renderOverall(state){
-    const container = document.getElementById("overall-stats");
-    container.innerHTML = "";
-    const avgs = state.restaurants.map((_, j) => avgAndCount(state.ratings.map(row => row[j])).avg);
-    const ranks = computeRanks(avgs.map(v => Number(v.toFixed(4)))); // stabilize
+    // Build stats per snack
+    const stats = state.snacks.map(sn => {
+      const vals = state.people.map(p => state.ratings.get(key(p.id, sn.id)) || 0);
+      const { avg, count } = avgCount(vals);
+      return { sn, avg, count };
+    });
 
-    state.restaurants.forEach((restName, j) => {
-      const {avg, count} = avgAndCount(state.ratings.map(row => row[j]));
-      const card = document.createElement("div");
-      card.className = "stat";
-      const pct = Math.round((avg/5)*100);
-      card.innerHTML = `
-        <div class="label">${restName}</div>
+    // Sort by average rating descending
+    stats.sort((a, b) => b.avg - a.avg);
+
+    // Assign tie-aware ranks based on rounded averages (4 decimals to avoid float noise)
+    let prev = null; let currentRank = 0;
+    for(let i = 0; i < stats.length; i++){
+      const v = Number(stats[i].avg.toFixed(4));
+      if(prev === null || v !== prev){
+        currentRank = i + 1;
+        prev = v;
+      }
+      stats[i].rank = currentRank;
+    }
+
+    // Render sorted cards
+    stats.forEach(({sn, avg, count, rank}) => {
+      const stat = document.createElement('div');
+      stat.className = 'stat';
+      const pct = Math.round((avg/5) * 100);
+      stat.innerHTML = `
+        <div class="label">${sn.name}</div>
         <div class="value">
           <span class="stars" style="--p:${pct}"></span>
-          <span style="margin-left:8px">${avg ? avg.toFixed(2) : "–"}/5</span>
+          <span style="margin-left:8px">${avg ? avg.toFixed(2) : '–'}/5</span>
         </div>
         <div class="sub" style="margin-top:6px">Bewertungen: ${count}</div>
-        <div style="margin-top:8px">
-          <span class="rank-pill" title="Rang (1 = beste Durchschnittsbewertung)">
-            <span class="medal">🏅</span> Rang ${avg ? ranks[j].toString().replace(".5","½") : "–"}
-          </span>
-        </div>
+        <div style="margin-top:8px"><span class="rank">🏅 Rang ${avg ? String(rank) : '–'}</span></div>
       `;
-      container.appendChild(card);
+      box.appendChild(stat);
     });
   }
 
-  function starCell(current, onChange){
-    const wrap = document.createElement("div");
-    wrap.className = "star-input";
-    wrap.setAttribute("role","radiogroup");
-    wrap.setAttribute("aria-label","Sterne auswählen (1–5)");
+  // ===== Spin panel =====
+  function showSnackRatings(snackId, snackName){ const panel=$("spin-panel"); const sum=$("spin-summary"); const list=$("spin-list"); if(!snackId){ panel.classList.remove('open'); return; } list.innerHTML=''; const rows = state.people.map(p=>({ person:p.name, stars:(state.ratings.get(key(p.id,snackId))||0) })).sort((a,b)=> b.stars-a.stars || a.person.localeCompare(b.person)); const cnt=rows.filter(r=>r.stars>0).length; const avg=cnt? (rows.reduce((a,r)=>a+r.stars,0)/cnt):0; const pct=Math.round((avg/5)*100); sum.innerHTML=`<strong>${snackName}</strong> · <span class="stars" style="--p:${pct}"></span> ${avg?avg.toFixed(2):'–'}/5 · Bewertungen: ${cnt}`; rows.forEach(r=>{ const el=document.createElement('div'); el.className='rating-row'; el.innerHTML=`<span>${r.person}</span><span>${r.stars>0? '★'.repeat(r.stars)+'<span class="cell-note"> '+r.stars+'/5</span>':'—'}</span>`; list.appendChild(el); }); panel.classList.add('open'); }
 
-    const setVisual = (val) => {
-      [...wrap.querySelectorAll("button.star")].forEach(btn => {
-        const v = Number(btn.dataset.value);
-        btn.classList.toggle("lit", v <= val);
-        btn.classList.toggle("dim", v > val);
-        btn.setAttribute("aria-checked", v === val ? "true" : "false");
-      });
-    };
+  // ===== IO (debounced upsert) =====
+  const timers = new Map();
+  function debounce(k,fn,ms=250){ clearTimeout(timers.get(k)); const t=setTimeout(fn,ms); timers.set(k,t); }
+  async function upsertRating(pid,sid,stars){ stars=clamp(stars,0,5); state.ratings.set(key(pid,sid),stars); debounce(`r:${pid}:${sid}`, async()=>{ const { error } = await sb.from('snack_rating').upsert({ person_id: pid, snack_id: sid, stars }); if(error){ console.error(error); setSave('Speicherfehler'); } else { setSave('Gespeichert ✓'); renderStats(); } }); }
 
-    for(let v=1; v<=5; v++){
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "star " + (v <= current ? "lit" : "dim");
-      b.dataset.value = String(v);
-      b.setAttribute("role","radio");
-      b.setAttribute("aria-checked", v === current ? "true" : "false");
-      b.title = `${v} ${v===1?"Stern":"Sterne"}`;
-      b.textContent = "★";
-      b.addEventListener("click", () => { onChange(v); setVisual(v); });
-      b.addEventListener("keydown", (e) => {
-        if(e.key === "ArrowRight" || e.key === "ArrowUp"){
-          e.preventDefault();
-          const next = Math.min(5, (current||0) + 1);
-          onChange(next); current = next; setVisual(next);
-        }else if(e.key === "ArrowLeft" || e.key === "ArrowDown"){
-          e.preventDefault();
-          const prev = Math.max(1, (current||0) - 1);
-          onChange(prev); current = prev; setVisual(prev);
-        }else if(e.key === "0"){
-          e.preventDefault();
-          onChange(0); current = 0; setVisual(0);
-        }
-      });
-      wrap.appendChild(b);
-    }
-    const note = document.createElement("span");
-    note.className = "cell-note";
-    note.textContent = current ? `${current}/5` : "—";
-    wrap.appendChild(note);
+  function renderAll(){ renderHeader(); renderTable(); renderStats(); renderLegend(); drawWheel(); }
 
-    return {el: wrap, updateNote: (val) => note.textContent = val ? `${val}/5` : "—", setVisual:(val)=>{
-      [...wrap.querySelectorAll("button.star")].forEach(btn => {
-        const v = Number(btn.dataset.value);
-        btn.classList.toggle("lit", v <= val);
-        btn.classList.toggle("dim", v > val);
-        btn.setAttribute("aria-checked", v === val ? "true" : "false");
-      });
-    }};
-  }
+  // ===== Events =====
+  $("btn-refresh").addEventListener('click', loadAll);
+  $("btn-spin").addEventListener('click', spin);
+  window.addEventListener('resize', drawWheel);
 
-  function renderTable(state){
-    const tbody = document.querySelector("#ratings-table tbody");
-    tbody.innerHTML = "";
-    state.people.forEach((person, i) => {
-      const tr = document.createElement("tr");
-
-      const tdName = document.createElement("td");
-      tdName.className = "name-cell";
-      const span = document.createElement("span");
-      span.textContent = person;
-      span.contentEditable = "true";
-      span.role = "textbox";
-      span.ariaLabel = "Name bearbeiten";
-      span.addEventListener("blur", () => {
-        state.people[i] = span.textContent.trim() || `Kopf ${i+1}`;
-        saveState(state, true); setSaveStatus("Name gespeichert");
-        renderPerPerson(state); // update labels
-        exportLinkCache = null;
-      });
-      tdName.appendChild(span);
-      tr.appendChild(tdName);
-
-      // Two restaurants
-      for(let j=0; j<2; j++){
-        const td = document.createElement("td");
-        const {el, updateNote, setVisual} = starCell(state.ratings[i][j], (val) => {
-          state.ratings[i][j] = val;
-          saveState(state, true); setSaveStatus("Bewertung gespeichert");
-          renderOverall(state);
-          renderPerPerson(state);
-          updateNote(val);
-          exportLinkCache = null;
-        });
-        // Ensure visual state matches current
-        setVisual(state.ratings[i][j]);
-        td.appendChild(el);
-        tr.appendChild(td);
-      }
-      tbody.appendChild(tr);
-    });
-  }
-
-  function renderPerPerson(state){
-    const list = document.getElementById("perperson-list");
-    list.innerHTML = "";
-
-    state.people.forEach((person, i) => {
-      const ratings = state.ratings[i];
-      const pairs = ratings.map((r,idx)=>({name: state.restaurants[idx], val: r}));
-      const any = pairs.some(p => p.val>0);
-      const sorted = pairs.slice().sort((a,b)=> b.val - a.val || a.name.localeCompare(b.name));
-
-      const row = document.createElement("div");
-      row.className = "person";
-      const left = document.createElement("div");
-      left.className = "who";
-      left.textContent = person;
-
-      const right = document.createElement("div");
-      if(!any){
-        const m = document.createElement("span");
-        m.className = "muted";
-        m.textContent = "Noch keine Bewertung";
-        right.appendChild(m);
-      }else{
-        sorted.forEach((p, idx) => {
-          if(p.val === 0) return;
-          const b = document.createElement("span");
-          b.className = "badge";
-          b.innerHTML = `<strong>${idx===0?"Top 1":"Top 2"}</strong> · ${p.name} · <span class="stars" style="--p:${(p.val/5*100).toFixed(0)}"></span> ${p.val}/5`;
-          right.appendChild(b);
-        });
-      }
-
-      row.appendChild(left);
-      row.appendChild(right);
-      list.appendChild(row);
-    });
-  }
-
-  // CSV helpers
-  function toCSV(state){
-    const header = ["Person"].concat(state.restaurants);
-    const rows = state.people.map((p,i)=> [p].concat(state.ratings[i]));
-    return [header].concat(rows).map(r => r.map(x => (typeof x === "string" && x.includes(",")) ? `"${x}"` : x).join(",")).join("\n");
-  }
-  function fromCSV(text){
-    const lines = text.trim().split(/\r?\n/);
-    if(lines.length < 2) throw new Error("CSV zu kurz");
-    const header = lines[0].split(",").map(s=>s.trim());
-    if(header.length !== 3) throw new Error("CSV braucht genau 3 Spalten: Person, Restaurant 1, Restaurant 2");
-    const people = [], ratings = [];
-    for(let i=1;i<lines.length;i++){
-      const cols = lines[i].split(",").map(s=>s.trim());
-      if(!cols[0]) continue;
-      people.push(cols[0]);
-      ratings.push([Number(cols[1]||0), Number(cols[2]||0)]);
-    }
-    return {people, ratings};
-  }
-
-  // Export/Import
-  let exportLinkCache = null;
-  document.getElementById("btn-export").addEventListener("click", () => {
-    const csv = toCSV(state);
-    const blob = new Blob([csv], {type:"text/csv"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "BBE_Restaurant_Ratings.csv";
-    a.click();
-    setTimeout(()=> URL.revokeObjectURL(url), 1500);
-  });
-  document.getElementById("file-import").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const {people, ratings} = fromCSV(String(reader.result));
-        state.people = people.slice(0,5);
-        // pad or trim to 5
-        while(state.people.length < 5) state.people.push(`Kopf ${state.people.length+1}`);
-        state.ratings = ratings.slice(0,5);
-        while(state.ratings.length < 5) state.ratings.push([0,0]);
-        saveState(state);
-        render(state);
-      }catch(err){
-        alert("Fehler beim Import: " + err.message);
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  });
-
-  document.getElementById("btn-reset").addEventListener("click", () => {
-    if(!confirm("Alle Namen & Bewertungen zurücksetzen?")) return;
-    Object.assign(state, initialState());
-    saveState(state);
-    render(state);
-  });
-
-  // Bootstrap
-  const state = Object.assign(initialState(), loadState() || {});
-  // ensure schema
-  state.people = (state.people||defaultPeople).slice(0,5);
-  while(state.people.length < 5) state.people.push(`Kopf ${state.people.length+1}`);
-  state.restaurants = restaurants.map(r => r.name);
-  state.ratings = (state.ratings && state.ratings.length === 5 && state.ratings[0].length === 2) ? state.ratings : makeEmptyRatings(5,2);
-
-  // Write restaurant names to table headers
-  document.getElementById("th-rest-0").textContent = state.restaurants[0];
-  document.getElementById("th-rest-1").textContent = state.restaurants[1];
-
-  render(state);
-  setSaveStatus("Bereit");
+  // Init
+  loadAll();
 })();
 </script>
 </body>
