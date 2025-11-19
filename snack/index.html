@@ -37,10 +37,7 @@
   .wheel-card{display:grid; gap:12px}
   .wheel-wrap{display:flex; align-items:center; justify-content:center; position:relative}
   canvas#wheel{width:100%; max-width:580px; aspect-ratio:1; border-radius:50%; background:radial-gradient(140px 140px at 50% 50%, rgba(255,255,255,.06), transparent 60%)}
-  .pointer{position:absolute; top:-34px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; z-index:5}
-  .pointer-tip{width:0; height:0; border-left:26px solid transparent; border-right:26px solid transparent; border-bottom:40px solid var(--gold); filter:drop-shadow(0 8px 16px rgba(0,0,0,.65))}
-  .pointer-base{width:20px; height:20px; background:var(--gold); border-radius:50%; box-shadow:0 4px 12px rgba(0,0,0,.6)}
-  .pointer-label{background:rgba(8,15,34,.92); color:var(--text); font-size:12px; text-transform:uppercase; letter-spacing:.12em; padding:6px 16px; border-radius:999px; border:1px solid rgba(255,255,255,.15); box-shadow:0 4px 14px rgba(0,0,0,.45); max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .pointer{position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:18px solid transparent; border-right:18px solid transparent; border-top:36px solid #ff4d6d; border-bottom:0; filter:drop-shadow(0 6px 12px rgba(0,0,0,.65)); pointer-events:none; z-index:5}
   .confetti-layer{position:absolute; inset:0; overflow:visible; pointer-events:none; z-index:4}
   .confetti-piece{position:absolute; top:6px; width:8px; height:14px; border-radius:3px; opacity:0; animation:confetti-fall var(--dur,1.6s) cubic-bezier(.2,.78,.24,.98) forwards}
   @keyframes confetti-fall{
@@ -109,11 +106,7 @@
     <div class="wheel-wrap">
       <canvas id="wheel" width="600" height="600" aria-label="Glücksrad"></canvas>
       <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
-      <div class="pointer" aria-hidden="true">
-        <span class="pointer-label" id="pointer-label">Bereit</span>
-        <div class="pointer-tip"></div>
-        <div class="pointer-base"></div>
-      </div>
+      <div class="pointer" aria-hidden="true"></div>
     </div>
     <div class="bar" style="justify-content:center; gap:12px">
       <button class="btn" id="btn-spin">🎡 Drehen</button>
@@ -177,9 +170,11 @@
   const TAU = Math.PI*2; const norm = (a)=>{ a%=TAU; if(a<0) a+=TAU; return a; };
   const key = (p,s)=> `${p}|${s}`;
   const hsl = (i,n)=> `hsl(${Math.round((360/(n||1))*i)} 80% 55%)`;
-  const pointerLabelEl = $("pointer-label");
   const confettiLayer = $("confetti-layer");
-  const setPointerLabel = (txt)=>{ if(pointerLabelEl) pointerLabelEl.textContent = txt || 'Bereit'; };
+  const setWinnerCard = (text)=>{
+    const box=$("spin-result");
+    if(box){ box.innerHTML = `<div class="label">Gewinner</div><div class="winner">${text}</div>`; }
+  };
   function triggerConfetti(accent){
     if(!confettiLayer) return;
     confettiLayer.innerHTML='';
@@ -198,7 +193,6 @@
     setTimeout(()=>{ if(confettiLayer) confettiLayer.innerHTML=''; }, 2200);
   }
   const clearConfetti = ()=>{ if(confettiLayer) confettiLayer.innerHTML=''; };
-  setPointerLabel('Bereit');
 
   // ===== Data Load =====
   async function loadAll(){
@@ -213,9 +207,8 @@
     state.ratings.clear();
     (raR.data||[]).forEach(r=> state.ratings.set(key(r.person_id,r.snack_id), Number(r.stars||0)) );
     renderAll();
-    const resultBox=$("spin-result");
-    if(resultBox){ resultBox.innerHTML = `<div class="label">Gewinner</div><div class="winner">${state.snacks.length? 'Bereit':'Keine Snacks'}</div>`; }
-    setPointerLabel(state.snacks.length? 'Bereit':'Keine Snacks'); setSave('Vom Server geladen ✓');
+    setWinnerCard(state.snacks.length? 'Bereit':'Keine Snacks');
+    setSave('Vom Server geladen ✓');
   }
 
   // ===== Wheel (HiDPI) =====
@@ -293,18 +286,15 @@
   function computeWinnerIndex(){ const N=Math.max(1,state.snacks.length); const seg=TAU/N; const pointer=-Math.PI/2; const A=norm(pointer - state.rotation); return Math.floor(A/seg); }
   function spin(){
     if(state.spinning) return;
-    if(state.snacks.length===0){ $("spin-result").textContent='Keine Snacks'; setPointerLabel('Keine Snacks'); return; }
-    state.spinning=true; $("spin-result").textContent='Dreht…'; setPointerLabel('Dreht…'); clearConfetti();
+    if(state.snacks.length===0){ setWinnerCard('Keine Snacks'); return; }
+    state.spinning=true; setWinnerCard('Dreht…'); clearConfetti();
     const N=state.snacks.length, seg=TAU/N, pointer=-Math.PI/2; const winnerIndex=Math.floor(Math.random()*N); const center=winnerIndex*seg + seg/2; const spins=4+Math.floor(Math.random()*3); const target = pointer - center + spins*TAU; const startT=performance.now(); const dur=3400+Math.random()*800; const startRot=state.rotation; const ease=(x)=>1-Math.pow(1-x,3);
     function frame(t){ const k=Math.min(1,(t-startT)/dur); state.rotation = startRot + (target-startRot)*ease(k); drawWheel(); if(k<1) requestAnimationFrame(frame); else finish(); }
     function finish(){
       state.rotation=target; drawWheel();
       const idx=computeWinnerIndex(); const win=state.snacks[idx];
-      const resultBox=$("spin-result");
-      if(resultBox){
-        resultBox.innerHTML = `<div class="label">Gewinner</div><div class="winner">${win?.name||'–'}</div>`;
-      }
-      setPointerLabel(win?.name||'–'); triggerConfetti(win?.color); showSnackRatings(win?.id,win?.name); state.spinning=false;
+      setWinnerCard(win?.name||'–');
+      triggerConfetti(win?.color); showSnackRatings(win?.id,win?.name); state.spinning=false;
     }
     requestAnimationFrame(frame);
   }
