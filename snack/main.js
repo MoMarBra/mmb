@@ -6,6 +6,7 @@ import {animateSpin,HubEasterEgg} from './motion.js';
 import {WheelSound} from './sound.js';
 import {createGravityCollapse} from './gravity.js';
 import {snackColor} from './colors.js';
+import {createWarpTransit} from './warp.js';
 const $=id=>document.getElementById(id);
 const store=new RatingStore(config.mode==='supabase'?new SupabaseAdapter(config):new LocalAdapter());
 const ui={tab:'wheel',personId:null,selectedId:null,selection:null,spinning:false,exploding:false,explosionProgress:0,explosionId:0,collapse:null,rotation:0,expanded:false,mineQuery:'',mineFilter:'all',rankingQuery:'',personQuery:'',wheelSignature:'',wheel3d:null};
@@ -123,13 +124,18 @@ async function explodeWheel(){
 
 const egg=new HubEasterEgg({canTap:()=>!ui.spinning&&!ui.exploding&&!store.loading&&store.snacks.length>0,wobble:wobbleWheel,explode:explodeWheel,
   async beforeLeave(){await store.drain();if(store.failures.length)return false;return true},
-  restore(){wobbleAnimation?.cancel();ui.collapse?.restore();ui.collapse=null;ui.exploding=false;ui.explosionProgress=0;document.body.classList.remove('egg-active');ui.wheel3d?.explode(0);ui.wheel3d?.setInteractive(true);ui.wheel3d?.select(ui.selectedId);drawFallback($('wheel-fallback'),store.snacks,ui.rotation,ui.selectedId);renderAll();if(store.failures.length)showError('Bitte die ungespeicherten Bewertungen zuerst erneut speichern.');$('wheel-hub').focus({preventScroll:true})}
+  async transit(){
+    const warp=createWarpTransit({reduced:matchMedia('(prefers-reduced-motion:reduce)').matches});ui.warp=warp;
+    await warp.play({onStart:()=>sounds.play('warp')});
+    // Keep the final dark frame until navigation; restore owns cancellation and cleanup.
+  },
+  restore(){wobbleAnimation?.cancel();ui.warp?.restore();ui.warp=null;sounds.stopVoices('warp');ui.collapse?.restore();ui.collapse=null;ui.exploding=false;ui.explosionProgress=0;document.body.classList.remove('egg-active');ui.wheel3d?.explode(0);ui.wheel3d?.setInteractive(true);ui.wheel3d?.select(ui.selectedId);drawFallback($('wheel-fallback'),store.snacks,ui.rotation,ui.selectedId);renderAll();if(store.failures.length)showError('Bitte die ungespeicherten Bewertungen zuerst erneut speichern.');$('wheel-hub').focus({preventScroll:true})}
 });
 $('wheel-hub').addEventListener('click',event=>{event.stopPropagation();sounds.unlock();egg.tap()});
 function renderSound(){const button=$('sound-toggle');button.setAttribute('aria-pressed',String(!sounds.muted));button.setAttribute('aria-label',sounds.muted?'Ton einschalten':'Ton ausschalten');button.title=button.getAttribute('aria-label')}
 $('sound-toggle').addEventListener('click',()=>{sounds.setMuted(!sounds.muted);try{localStorage.setItem('snack-sound-muted',sounds.muted?'1':'0')}catch{}renderSound()});renderSound();
-document.addEventListener('visibilitychange',()=>sounds.setVisible(!document.hidden));
-window.addEventListener('pagehide',()=>sounds.setVisible(false));
+document.addEventListener('visibilitychange',()=>{sounds.setVisible(!document.hidden);if(document.hidden&&egg.busy)egg.reset()});
+window.addEventListener('pagehide',()=>{sounds.setVisible(false);if(egg.busy)egg.reset()});
 window.addEventListener('pageshow',event=>{sounds.setVisible(!document.hidden);if(event.persisted&&egg.busy)egg.reset()});
 
 function closeDetail(){if(ui.exploding)return;ui.selectedId=null;ui.selection=null;renderDetail();renderChips();ui.wheel3d?.select(null);drawFallback($('wheel-fallback'),store.snacks,ui.rotation,null);const origin=$(ui.detailReturnFocus);(origin&&!origin.closest('[hidden]')&&!origin.closest('#restaurant-detail')?origin:$('spin')).focus({preventScroll:true})}

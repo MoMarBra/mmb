@@ -28,8 +28,8 @@ export function animateSpin({start,target,duration,onFrame,onStop,isCurrent=()=>
 }
 export const GTA_URL='https://brandauer.group/gta';
 export class HubEasterEgg{
-  constructor({canTap=()=>true,wobble,explode,beforeLeave=async()=>true,navigate=url=>location.assign(url),restore=()=>{},wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),delay=900}){
-    Object.assign(this,{canTap,wobble,explode,beforeLeave,navigate,restore,wait,delay});this.taps=0;this.busy=false;this.epoch=0;this.completion=Promise.resolve();
+  constructor({canTap=()=>true,wobble,explode,beforeLeave=async()=>true,transit=async()=>{},navigate=url=>location.assign(url),restore=()=>{},wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),delay=900}){
+    Object.assign(this,{canTap,wobble,explode,beforeLeave,transit,navigate,restore,wait,delay});this.taps=0;this.busy=false;this.epoch=0;this.completion=Promise.resolve();
   }
   tap(){
     if(this.busy||!this.canTap())return false;
@@ -43,6 +43,7 @@ export class HubEasterEgg{
       await this.wait(this.delay);if(epoch!==this.epoch)return;
       const ready=await this.beforeLeave();if(epoch!==this.epoch)return;
       if(!ready){this.reset();return}
+      await this.transit();if(epoch!==this.epoch)return;
       this.navigate(GTA_URL);
     }catch{if(epoch===this.epoch)this.reset()}
   }

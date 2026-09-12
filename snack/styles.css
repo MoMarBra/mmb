@@ -51,3 +51,4 @@ footer{margin-top:16px;padding:12px 0;font-size:12px}#save-status{margin-left:0}
 .gravity-piece{position:absolute;left:0;top:0;overflow:hidden;transform-origin:50% 50%;will-change:transform;pointer-events:none;filter:drop-shadow(0 3px 3px #0005)}
 .gravity-piece *{pointer-events:none!important;user-select:none!important}
 .gravity-floor{position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(transparent,#050916c9);border-bottom:2px solid #6aa5ff33;opacity:0}
+#warp-transit{position:fixed;inset:0;width:100vw;height:100dvh;z-index:220;pointer-events:none;contain:strict}
