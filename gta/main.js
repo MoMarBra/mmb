@@ -1,3 +1,7 @@
+import { FireStory } from './fire-story.js';
+import { STREET_ROADS, CIRCULAR_STREETS } from './city-streets.js';
+import { inIT } from './it-office.js';
+import { MouseControls } from './mouse-controls.js';
 import { hudIcon, updateCinematicHUD } from './cinematic-hud.js';
 import { WorkshopStory } from './workshop-story.js';
 import { CITY_LAYOUT, CITY_WALKS } from './city-layout.js';
@@ -51,6 +55,8 @@ export class Game {
     this.minigames = new Minigames(this);
     this.arcade = new Arcade(this);
     this.workshop = new WorkshopStory(this);
+    this.fireStory = new FireStory(this);
+    this.mouseControls = new MouseControls(this);
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
     this.intro();
@@ -62,7 +68,7 @@ export class Game {
       const hidden = document.hidden;
       const paused = !this.started || hidden || this.modal?.pause === true;
       if (!hidden) {
-        if (this.workshop.cinematic) this.workshop.film.render(Math.min(rawDelta, 0.25));
+        if (this.cinematic) this.activeFilm.render(Math.min(rawDelta, 0.25));
         else
           this.world.update(paused ? 0 : dt, !!this.modal || this.busy || !this.started || hidden);
       }
@@ -75,6 +81,7 @@ export class Game {
         }
       }
       this.audio.update(dt, this.world, !paused);
+      this.fireStory.update(rawDelta, paused);
       this.uiTimer += dt;
       this.fps = this.fps * 0.96 + (1 / Math.max(rawDelta, 0.001)) * 0.04;
       if (this.started && !paused && !this.world.lowQuality && this.world.time > 5) {
@@ -95,6 +102,7 @@ export class Game {
         this.uiTimer = 0;
         this.updateHUD();
       }
+      this.mouseControls.update();
       requestAnimationFrame(this.frame);
     };
     requestAnimationFrame(this.frame);
@@ -104,9 +112,19 @@ export class Game {
       if (document.hidden) this.sim.save();
     });
   }
+  get activeFilm() {
+    return this.fireStory?.cinematic
+      ? this.fireStory.film
+      : this.workshop?.cinematic
+        ? this.workshop.film
+        : null;
+  }
+  get cinematic() {
+    return !!this.activeFilm;
+  }
   renderShell() {
     $('#ui').innerHTML =
-      `<header class="hud-top"><div class="brand"><div class="brand-mark"><img src="${BBE_LOGO}" alt="BBE Handelsberatung GmbH"></div><div class="brand-copy"><b>Handelsberatung</b><span>MUNICH CONSULTING SIMULATOR</span></div></div><div class="top-state"><div class="clock"><span id="day-name">Montag</span><strong id="clock">08:17</strong><small id="weather">17 °C · Sonnig</small></div><div class="wallet"><span id="money">32,80 €</span><small>BANKKONTO</small></div><button class="icon-btn" id="phone-button" aria-label="Smartphone öffnen" title="Smartphone · P">${hudIcon('phone')}<span class="key-badge">P</span></button><button class="icon-btn" id="settings-button" aria-label="Einstellungen öffnen" title="Einstellungen · Esc">${hudIcon('settings')}</button></div></header><div class="zone-label"><b id="zone-name">BBE Handelsberatung</b><span id="zone-address">Brienner Straße 45</span></div><section class="mission-hud"><div class="eyebrow" id="quest-eyebrow">DEIN ERSTER ARBEITSTAG</div><h3 id="quest-title">Gute Folien. Gutes Mittagessen.</h3><p id="quest-description">An deinem Computer wartet der erste Auftrag. Mit E öffnest du den BBE Desktop.</p><div class="quest-meta"><span id="quest-location">BBE · Arbeitsplatz</span><strong id="quest-reward">ab 24,50 €</strong></div><button class="quest-button" id="tasks-button"><kbd>J</kbd> Aufträge ansehen</button></section><div class="waypoint" id="waypoint" hidden></div><div class="mini-wrap"><div class="mini-head"><span>MAXVORSTADT</span><span>N ↑</span></div><canvas id="minimap" width="424" height="328" class="mini-map" aria-label="Minikarte"></canvas><div class="mini-foot"><kbd>M</kbd> Karte <span>·</span> <b>BBE ist dein Zuhause.</b></div></div><button class="interaction" id="interaction"><kbd>E</kbd><span></span></button><div class="controls"><div id="context-controls"></div></div><div class="stats-hud"><div class="career-mini"><div><span class="level" id="level">LEVEL 1</span><strong id="career">Praktikant</strong></div><span id="rep">0 REP</span></div>${[
+      `<header class="hud-top"><div class="brand"><div class="brand-mark"><img src="${BBE_LOGO}" alt="BBE Handelsberatung GmbH"></div><div class="brand-copy"><b>Handelsberatung</b><span>MUNICH CONSULTING SIMULATOR</span></div></div><div class="top-state"><div class="clock"><span id="day-name">Montag</span><strong id="clock">08:17</strong><small id="weather">17 °C · Sonnig</small></div><div class="wallet"><span id="money">32,80 €</span><small>BANKKONTO</small></div><button class="icon-btn" id="phone-button" aria-label="Smartphone öffnen" title="Smartphone · P">${hudIcon('phone')}<span class="key-badge">P</span></button><button class="icon-btn" id="settings-button" aria-label="Einstellungen öffnen" title="Einstellungen · Esc">${hudIcon('settings')}</button></div></header><div class="zone-label"><b id="zone-name">BBE Handelsberatung</b><span id="zone-address">Brienner Straße 45</span></div><section class="mission-hud"><div class="eyebrow" id="quest-eyebrow" hidden>DEIN ERSTER ARBEITSTAG</div><h3 id="quest-title">BBE-Aufträge</h3><p id="quest-description"></p><div class="quest-meta" hidden><span id="quest-location">BBE · Arbeitsplatz</span><strong id="quest-reward">ab 24,50 €</strong></div><button class="quest-button" id="tasks-button" aria-label="Aufträge öffnen" title="Aufträge · J"><kbd>J</kbd></button></section><div class="waypoint" id="waypoint" hidden></div><div class="mini-wrap"><div class="mini-head"><span>MAXVORSTADT</span><span>N ↑</span></div><canvas id="minimap" width="424" height="328" class="mini-map" aria-label="Minikarte"></canvas><div class="mini-foot"><kbd>M</kbd> Karte <span>·</span> <b>BBE ist dein Zuhause.</b></div></div><button class="interaction" id="interaction"><kbd>E</kbd><span></span></button><div class="controls"><div id="context-controls"></div></div><div class="stats-hud"><div class="career-mini"><div><span class="level" id="level">LEVEL 1</span><strong id="career">Praktikant</strong></div><span id="rep">0 REP</span></div>${[
         ['hunger', 'Sättigung'],
         ['energy', 'Energie'],
         ['happy', 'Zufriedenheit'],
@@ -214,7 +232,7 @@ export class Game {
     const box = document.createElement('section');
     box.className = 'welcome';
     box.id = 'welcome';
-    box.innerHTML = `<div class="eyebrow">MÜNCHEN · MAXVORSTADT · ${this.sim.clock}</div><h1>Zwischen Folien<br>und <span>Feierabend.</span></h1><p class="greeting">Guten Morgen.<br>Neue Aufgaben verfügbar.</p><p>Dein Platz ist bei der BBE. Dein Mittagessen liegt auf der Augustenstraße. Dazwischen: eine Karriere, die mit einer einzigen Folie beginnt.</p><button class="primary" id="start-game">${this.sim.saved ? 'Aufstehen & weiterspielen' : 'Aufstehen & Arbeitstag beginnen'} <span style="float:right">↗</span></button><button class="story-welcome-button" id="start-story">BBE Stories · Zum Chef <span>↗</span></button><div class="save-note">${this.sim.saved ? `Spielstand geladen · ${this.sim.career.name} · ${euro(this.sim.s.money)}` : 'WASD bewegen · Maus ziehen · E interagieren'}</div><div class="divider"></div><div class="small-print">Eine fiktive Spielwelt mit realen Münchner Ortsnamen. Innenräume und Handlung frei interpretiert. Kein offizielles BBE-Produkt.</div>`;
+    box.innerHTML = `<div class="eyebrow">MÜNCHEN · MAXVORSTADT · ${this.sim.clock}</div><h1>Zwischen Folien<br>und <span>Feierabend.</span></h1><p class="greeting">Guten Morgen.<br>Neue Aufgaben verfügbar.</p><p>Dein Platz ist bei der BBE. Dein Mittagessen liegt auf der Augustenstraße. Dazwischen: eine Karriere, die mit einer einzigen Folie beginnt.</p><button class="primary" id="start-game">${this.sim.saved ? 'Aufstehen & weiterspielen' : 'Aufstehen & Arbeitstag beginnen'} <span style="float:right">↗</span></button><button class="story-welcome-button" id="start-story">BBE Stories · Zum Chef <span>↗</span></button><div class="save-note">${this.sim.saved ? `Spielstand geladen · ${this.sim.career.name} · ${euro(this.sim.s.money)}` : 'WASD bewegen · Maus bewegen · P Smartphone · E interagieren'}</div><div class="divider"></div><div class="small-print">Eine fiktive Spielwelt mit realen Münchner Ortsnamen. Innenräume und Handlung frei interpretiert. Kein offizielles BBE-Produkt.</div>`;
     $('#ui').append(box);
     this.uiClick('#start-story', () => {
       document.getElementById('start-game').click();
@@ -225,6 +243,8 @@ export class Game {
       this.world.started = true;
       this.world.pose = 'walk';
       this.audio.start();
+      this.mouseControls.resume();
+      this.fireStory.onStart();
       box.remove();
       $('#ui').classList.remove('intro-open');
       this.toast(
@@ -237,15 +257,16 @@ export class Game {
   open(
     title,
     html,
-    { eyebrow = 'BBE · MUNICH LIFE', pause = false, locked = false, onClose = null } = {},
+    { eyebrow = 'BBE · MUNICH LIFE', pause = false, locked = false, onClose = null, task = null } = {},
   ) {
     if (this.modal?.onClose) this.modal.onClose();
     if (!this.modal) this.focusReturn = document.activeElement;
-    this.modal = { title, pause, locked, onClose };
+    this.modal = { title, pause, locked, onClose, task };
     this.world.keys.clear();
-    document.exitPointerLock?.();
+    this.mouseControls?.release();
     $('#modal-root').innerHTML =
-      `<div class="modal-shade"><section class="panel" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="panel-header"><div><div class="eyebrow">${eyebrow}${pause ? '<span class="paused-badge">SPIEL PAUSIERT</span>' : ''}</div><h2 id="modal-title">${title}</h2></div>${locked ? '' : `<button class="close" aria-label="Schließen">×</button>`}</header><div class="panel-body">${html}</div></section></div>`;
+      `<div class="modal-shade"><section class="panel" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="panel-header"><div><div class="eyebrow">${eyebrow}${pause ? '<span class="paused-badge">SPIEL PAUSIERT</span>' : ''}</div><h2 id="modal-title">${title}</h2>${Number.isFinite(task?.deadline) ? '<p class="mission-deadline" role="timer" aria-live="off"></p>' : ''}</div>${locked ? '' : `<button class="close" aria-label="Schließen">×</button>`}</header><div class="panel-body">${html}</div></section></div>`;
+    this.updateTaskDeadline();
     $('.close')?.addEventListener('click', () => this.close());
     const openedModal = this.modal;
     setTimeout(() => {
@@ -261,6 +282,7 @@ export class Game {
     this.world.keys.clear();
     this.world.pose = 'walk';
     this.focusReturn?.focus?.();
+    this.mouseControls?.resume();
   }
   toast(title, body = '', gold = false) {
     const el = document.createElement('div');
@@ -287,7 +309,19 @@ export class Game {
     } else this.toast(e.message, e.body || '');
     if (e.type === 'day') this.world.updateBottles();
   }
+  updateTaskDeadline() {
+    const task = this.modal?.task;
+    if (!Number.isFinite(task?.deadline)) return;
+    const element = $('#modal-root .mission-deadline');
+    if (!element) return;
+    const current = this.sim.s.active.find((entry) => entry.id === task.id) || task;
+    const remaining = current.deadline - this.sim.absolute();
+    const label = remaining < 0 ? 'Frist abgelaufen' : `Noch ${Math.max(0, Math.ceil(remaining))} Spielmin.`;
+    if (element.textContent !== label) element.textContent = label;
+    element.classList.toggle('deadline-urgent', remaining <= 10);
+  }
   updateHUD() {
+    this.updateTaskDeadline();
     updateCinematicHUD(this);
     const s = this.sim.s;
     $('#money').textContent = euro(s.money);
@@ -341,35 +375,34 @@ export class Game {
         task.multiplier === 3 ? 'DRINGENDER BBE-AUFTRAG' : 'AKTIVER BBE-AUFTRAG';
       $('#quest-title').textContent = task.title;
       const hints = {
-        slide:
-          'Zurück an deinen Computer. Erstelle eine klare, sauber ausgerichtete Marktübersicht.',
-        benchmark: `Speisekarten fotografieren: ${task.progress.length}/3. Anschließend im BBE-Desktop abgeben.`,
-        mystery: `MAMMA BAO besuchen: ${task.progress.length}/2 Hinweise. Danach den Bericht am BBE-PC ausfüllen.`,
-        lunch: task.progress.includes('picked')
-          ? 'Bring das Mittagessen zum BBE-Empfang.'
-          : 'Hole bei PALMTREECLUB das Meeting-Lunch ab.',
-        meeting: task.progress.includes('met')
-          ? 'Termin abgeschlossen. Ergebnisse im BBE-Desktop abgeben.'
-          : 'Das Kundenbüro liegt an der Gabelsbergerstraße.',
+        benchmark: 'Speisekarten fotografieren · ' + task.progress.length + '/3',
+        mystery: task.progress.includes('service')
+          ? 'Bericht am BBE-PC abgeben'
+          : task.progress.includes('visited')
+            ? 'MAMMA BAO · Service befragen'
+            : 'MAMMA BAO besuchen',
+        lunch: task.progress.includes('delivered')
+          ? 'Am BBE-PC abgeben'
+          : task.progress.includes('picked')
+            ? 'Lunch zum BBE-Empfang bringen'
+            : 'PALMTREECLUB · Lunch abholen',
+        meeting: task.progress.includes('met') ? 'Am BBE-PC abgeben' : 'Kundenbüro besuchen',
       };
-      $('#quest-description').textContent =
-        hints[task.type] || 'Bearbeite den Auftrag am BBE-Computer. Kaffee hält den Fokus hoch.';
+      $('#quest-description').textContent = hints[task.type] || '';
       $('#quest-location').textContent =
         `Noch ${Math.max(0, Math.ceil(task.deadline - this.sim.absolute()))} Spielmin.`;
       $('#quest-reward').textContent =
         `ab ${euro(task.base * this.sim.career.pay * task.multiplier)}`;
     } else if (s.completed) {
       $('#quest-eyebrow').textContent = 'DEIN NÄCHSTER SCHRITT';
-      $('#quest-title').textContent = 'Die nächste gute Geschichte.';
-      $('#quest-description').textContent =
-        'Neue Aufträge warten an deinem BBE-Arbeitsplatz. Oder gönn dir eine Pause auf der Augustenstraße.';
+      $('#quest-title').textContent = 'BBE-Aufträge';
+      $('#quest-description').textContent = '';
       $('#quest-location').textContent = `${s.completed} Aufträge erledigt`;
       $('#quest-reward').textContent = `${s.xp} XP`;
     } else {
       $('#quest-eyebrow').textContent = 'DEIN ERSTER ARBEITSTAG';
-      $('#quest-title').textContent = 'Gute Folien. Gutes Mittagessen.';
-      $('#quest-description').textContent =
-        'An deinem Computer wartet der erste Auftrag. Mit E öffnest du den BBE Desktop.';
+      $('#quest-title').textContent = 'BBE-Aufträge';
+      $('#quest-description').textContent = '';
       $('#quest-location').textContent = 'BBE · Arbeitsplatz';
       $('#quest-reward').textContent = 'ab 24,50 €';
     }
@@ -395,8 +428,16 @@ export class Game {
       }
     } else $('#waypoint').hidden = true;
     this.workshop?.updateHUD();
+    this.fireStory?.updateHUD();
+    if (z === 'office' && this.world.player.position.x < -13.5) {
+      $('#zone-name').textContent = inIT(this.world.player.position)
+        ? 'BBE · IT / Benjamin'
+        : 'BBE · Westflügel';
+      $('#zone-address').textContent = 'Brienner Straße 45 · Immer da fürs Team';
+    }
   }
   transition(zone, id) {
+    if (this.fireStory?.beforeTransition() === false) return;
     this.close();
     this.busy = false;
     const f = document.createElement('div');
@@ -413,6 +454,7 @@ export class Game {
   interact() {
     if (!this.started || this.modal || this.busy) return;
     const n = this.world.nearest;
+    if (this.fireStory.interact(n)) return;
     if (this.workshop.interact(n)) return;
     if (this.arcade.interact(n)) return;
     if (!n) return;
@@ -557,13 +599,13 @@ export class Game {
     const active = s.active;
     this.open(
       'Dein BBE Desktop',
-      `<div class="desktop-top" style="border-radius:8px;margin-bottom:22px"><span>BBE Handelsberatung · ${this.sim.career.name}</span><span>${this.sim.clock} · Fokus ${Math.round(s.focus)} %</span></div>${s.focus < 30 ? '<div class="hint-inline">Dein Fokus ist niedrig. Kaffee verbessert Präzision und Bewertung.</div>' : ''}${s.event?.kind === 'crash' ? '<div class="hint-inline">PowerPoint-Wiederherstellung verfügbar. <button id="recover" class="small">Letzten Speicherstand wiederherstellen</button></div>' : ''}<div class="toolbar"><button class="selected" id="desk-tasks">Projekte (${active.length}/${this.sim.career.slots + (s.event?.kind === 'partner' ? 1 : 0)})</button><button id="desk-upgrades">Arbeitsplatz verbessern</button><button id="desk-save">Spiel speichern</button><button id="desk-courier">Eilauftrag · Koffer</button><button data-workshop-open>BBE Stories · Zum Chef</button></div>${active.length ? `<h3>Auf deinem Schreibtisch</h3><div class="two-col">${active.map((t) => this.taskCard(t, true)).join('')}</div><div class="divider"></div>` : ''}<h3>Neue BBE-Aufträge</h3><div class="two-col">${
+      `<div class="toolbar compact-desktop-actions"><button class="selected" id="desk-tasks">Aufträge ${active.length}/${this.sim.career.slots + (s.event?.kind === 'partner' ? 1 : 0)}</button><button id="desk-upgrades">Arbeitsplatz</button><button id="desk-save">Speichern</button></div>${s.focus < 30 ? '<p class="mission-note">Fokus niedrig · Kaffee hilft.</p>' : ''}${s.event?.kind === 'crash' ? '<p class="mission-note">Entwurf verfügbar. <button id="recover" class="small">Wiederherstellen</button></p>' : ''}${active.length ? `<h3 class="mission-list-heading">In Arbeit</h3><div class="mission-list">${active.map((t) => this.taskCard(t, true)).join('')}</div>` : ''}<h3 class="mission-list-heading">Verfügbar</h3><div class="mission-list">${
         this.sim
           .available()
           .map((t) => this.taskCard(t, false))
-          .join('') || '<p class="muted">Alle verfügbaren Auftragstypen sind bereits aktiv.</p>'
-      }</div><div class="divider"></div><p class="muted" style="font-size:.83rem">Mit jedem Karrierelevel steigen Vergütung, Projektplätze und Zugang. Die nächste Stufe: ${CAREERS[this.sim.level]?.name || 'Du hast das Partnerbüro erreicht.'}</p>`,
-      { eyebrow: 'GUTEN MORGEN. NEUE AUFGABEN VERFÜGBAR.' },
+          .join('') || '<p class="muted">Alles in Arbeit.</p>'
+      }</div><details class="mission-extra"><summary>Story-Missionen</summary><div class="mission-list">${this.workshop.entryCard()}${this.fireStory.entryCard()}<button id="desk-courier" class="mission-row mission-open"><span class="mission-row-title">Eilauftrag · Koffer</span><span aria-hidden="true">↗</span></button></div></details>`,
+      { eyebrow: 'BBE · AUFTRÄGE' },
     );
     document.querySelectorAll('[data-accept]').forEach(
       (b) =>
@@ -605,8 +647,8 @@ export class Game {
     });
   }
   taskCard(t, active) {
-    const outside = ['benchmark', 'mystery', 'lunch', 'meeting'].includes(t.type);
-    return `<article class="card"><span class="tag ${active ? 'gold' : ''}">${active ? 'IN BEARBEITUNG' : outside ? 'STADTAUFTRAG' : 'BBE · CONSULTING'}${t.multiplier === 3 ? ' · 3× VERDIENST' : ''}</span><h3>${esc(t.title)}</h3><p>${esc(t.brief)}</p><div class="card-footer"><span>${esc(t.location)}</span><strong style="color:var(--accent)">${euro(t.base * this.sim.career.pay * (t.multiplier || 1))}</strong></div><button class="primary" ${active ? `data-play="${t.id}"` : `data-accept="${t.type}"`}>${active ? (outside ? 'Fortschritt & Abgabe' : 'Auftrag bearbeiten') : 'Auftrag annehmen'}</button></article>`;
+    const action = active ? 'Bearbeiten' : 'Annehmen';
+    return `<button class="mission-row bbe-task-row" ${active ? `data-play="${t.id}"` : `data-accept="${t.type}"`} aria-label="${esc(t.title)} · ${action}" title="${action}"><span class="mission-row-title">${esc(t.title)}</span><span class="mission-row-icon" aria-hidden="true">${active ? '↗' : '+'}</span></button>`;
   }
   playTask(id) {
     const t = this.sim.s.active.find((a) => a.id === id);
@@ -627,10 +669,14 @@ export class Game {
             ? t.progress.includes('delivered')
             : t.progress.includes('met');
     const hint = {
-      benchmark: 'Fotografiere drei verschiedene Speisekarten mit E neben dem Restauranteingang.',
-      mystery: 'Gehe zu MAMMA BAO. Betritt das Restaurant und sprich mit dem Service.',
-      lunch: 'Hole im PALMTREECLUB das Meeting-Lunch ab und liefere es am BBE-Empfang.',
-      meeting: 'Gehe zum Kundenbüro an der Gabelsbergerstraße und führe das Gespräch.',
+      benchmark: '3 Speisekarten fotografieren · E',
+      mystery: t.progress.includes('visited')
+        ? 'MAMMA BAO · Service befragen'
+        : 'MAMMA BAO besuchen',
+      lunch: t.progress.includes('picked')
+        ? 'Lunch zum BBE-Empfang bringen'
+        : 'PALMTREECLUB · Lunch abholen',
+      meeting: 'Kundentermin · Gabelsbergerstraße',
     }[t.type];
     if (complete) {
       if (t.type === 'mystery') return this.minigames.mystery(t);
@@ -638,7 +684,8 @@ export class Game {
     }
     this.open(
       t.title,
-      `<div class="hint-inline">${hint}</div><p>${esc(t.brief)}</p><div class="card"><h3>Fortschritt</h3><p>${t.type === 'benchmark' ? `${t.progress.length} von 3 Speisekarten fotografiert` : t.progress.length ? esc(t.progress.map((x) => ({ visited: 'Restaurant besucht', service: 'Service befragt', picked: 'Essen abgeholt', delivered: 'Essen geliefert', met: 'Meeting abgeschlossen' })[x] || x).join(' · ')) : 'Noch keine Station abgeschlossen.'}</p><p class="muted">Abgabe am BBE-Computer. Die Uhr läuft während deiner Arbeit weiter.</p></div><div class="editor-bottom"><button class="primary" id="outside-map">Ziel auf der Karte zeigen</button><button class="ghost" id="outside-close">Losgehen</button></div>`,
+      `<p class="mission-objective">${hint}</p><div class="mission-meta"><span>${t.type === 'benchmark' ? t.progress.length + '/3 Fotos' : t.type === 'mystery' ? t.progress.length + '/2 Hinweise' : t.type === 'lunch' ? (t.progress.includes('picked') ? 'Abgeholt' : 'Zur Abholung') : 'Termin offen'}</span><span>Abgabe · BBE-PC</span></div><div class="editor-bottom"><button class="primary" id="outside-map">Karte</button><button class="ghost" id="outside-close">Losgehen</button></div>`,
+      { task: t },
     );
     this.uiClick('#outside-close', () => this.close());
     this.uiClick('#outside-map', () => {
@@ -953,14 +1000,7 @@ export class Game {
     if (page === 'mail')
       return `<h3>BBE Mail <span class="tag">${s.mail.length}</span></h3>${s.mail.map((m) => `<article class="mail-item"><small>${m.time}</small><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p></article>`).join('')}`;
     if (page === 'tasks')
-      return `${this.workshop.entryCard()}<h3>Deine Projekte</h3><article class="card" style="margin-bottom:16px"><span class="tag gold">BBE · EILAUFTRAG</span><h3>Der Koffer muss zum Kunden</h3><p>${s.courier.active ? Math.ceil(s.courier.remaining) + ' Sekunden verbleiben. Unterlagen zum Kundenempfang oder auf die Dachterrasse bringen.' : 'Sechs Minuten. Straße, Dachweg oder Helikopter-Seilwinde. Am BBE-Empfang oder hier im Büro übernehmen.'}</p><button id="phone-courier" class="primary">${s.courier.active ? 'Kofferauftrag auf Karte zeigen' : 'Eilauftrag · Koffer'}</button></article><div class="hint-inline">Aufträge erhältst und bearbeitest du an deinem BBE-Computer. Stadtmissionen geben dir einen Grund, München zu erkunden.</div>${s.active.map((t) => `<article class="card" style="margin:12px 0"><span class="tag gold">NOCH ${Math.ceil(t.deadline - this.sim.absolute())} SPIELMINUTEN</span><h3>${esc(t.title)}</h3><p>${esc(t.brief)}</p><div class="card-footer"><span>${esc(t.location)}</span><button class="small" data-focus-task="${t.id}">Anheften</button></div></article>`).join('') || '<p class="muted">Aktuell keine offenen Aufträge.</p>'}<button id="phone-desk" class="primary">Weg zur BBE markieren</button><div class="divider"></div><h3>Demnächst freigeschaltet</h3>${
-        TASKS.filter((t) => t.min > this.sim.level || t.rep > s.rep)
-          .map(
-            (t) =>
-              `<p style="font-size:.86rem"><span class="tag">LVL ${t.min} · ${t.rep} REP</span> ${t.title}</p>`,
-          )
-          .join('') || '<p>Alle Auftragstypen sind freigeschaltet.</p>'
-      }`;
+      return `<h3 class="mission-list-heading">Stories</h3><div class="mission-list">${this.fireStory.entryCard()}${this.workshop.entryCard()}<button id="phone-courier" class="mission-row mission-open" aria-label="Eilauftrag · Koffer · ${s.courier.active ? 'Karte' : 'Öffnen'}"><span class="mission-row-title">Eilauftrag · Koffer</span><span aria-hidden="true">↗</span></button></div><h3 class="mission-list-heading">BBE-Aufträge</h3><div class="mission-list">${s.active.map((t) => `<button class="mission-row bbe-task-row" data-focus-task="${t.id}" aria-label="${esc(t.title)} · Anheften" title="Anheften"><span class="mission-row-title">${esc(t.title)}</span><span class="mission-row-icon" aria-hidden="true">↗</span></button>`).join('') || '<p class="muted mission-empty">Keine offenen Aufträge.</p>'}</div><button id="phone-desk" class="mission-row mission-open mission-home"><span class="mission-row-title">BBE-Computer</span><span aria-hidden="true">↗</span></button>`;
     if (page === 'map')
       return `<h3>Dein München</h3><div class="hint-inline"><strong>Vom BBE-Ausgang aus:</strong> links 20 m zur Augustenstraße mit Restaurants · rechts 100 m zum Zugang Königsplatz. Dahinter führt der goldene Fußweg über den Karolinenplatz zur Frauenkirche.</div><canvas id="large-map" width="900" height="780" class="large-map" aria-label="Stadtkarte mit BBE und Restaurants"></canvas><div class="map-legend"><span>BBE / Ziel</span><span>Restaurants</span><span>Du</span></div><div class="toolbar"><button class="primary" id="map-home">BBE als Ziel</button><button id="map-remove">Ziel entfernen</button></div><div class="city-routes">${[...HELIPADS, ...CITY_STOPS].map((p) => `<button class="small" data-city-route="${p.id}">${p.name}</button>`).join('')}</div><p class="muted" style="font-size:.8rem">Goldene Linie: Fußweg ab BBE · Goldene Punkte: Sehenswürdigkeiten · H: Landeplätze · Blaue Quadrate: Fahrräder.</p><p class="muted" style="font-size:.8rem">Verdichteter, frei interpretierter Stadtplan. Kein Navigationsplan für das echte München.</p><button class="small ghost" id="map-recover">Festgesteckt? Zurück ins BBE-Büro</button>`;
     if (page === 'bank')
@@ -993,6 +1033,15 @@ export class Game {
   }
   drawMap(canvas, mini) {
     if (!canvas) return;
+    if (
+      this.world.zone === 'office' &&
+      (this.fireStory?.running ||
+        inIT(this.world.player.position) ||
+        this.world.player.position.x < -13.5)
+    ) {
+      this.fireStory.drawOfficeMap(canvas, mini);
+      return;
+    }
     const c = canvas.getContext('2d'),
       W = canvas.width,
       H = canvas.height;
@@ -1020,9 +1069,26 @@ export class Game {
       c.fillRect(X(x - w / 2), Z(z - h / 2), w * scale, h * scale);
     };
     for (const b of this.world.cityBlocks || []) rect(b.x, b.z, b.w, b.d, '#355057');
-    rect(0, -25, 18, 300, '#162d35');
-    for (const z of [-43, 40, 117]) rect(0, z, 300, z === 40 ? 8 : 12, '#152c35');
-    this.arcade?.expansion.drawMap(c, { X, Z, scale, mini });
+    for (const b of this.world.expansionBlocks || []) rect(b.x, b.z, b.w, b.d, '#34515a');
+    for (const road of STREET_ROADS) rect(road.x, road.z, road.w, road.d, '#152c35');
+    for (const ring of CIRCULAR_STREETS) {
+      c.beginPath();
+      c.arc(
+        X(ring.x),
+        Z(ring.z),
+        ((ring.innerRadius + ring.outerRadius) / 2) * scale,
+        0,
+        Math.PI * 2,
+      );
+      c.lineWidth = (ring.outerRadius - ring.innerRadius) * scale;
+      c.strokeStyle = '#152c35';
+      c.stroke();
+      c.beginPath();
+      c.arc(X(ring.x), Z(ring.z), ring.islandRadius * scale, 0, Math.PI * 2);
+      c.fillStyle = '#52654c';
+      c.fill();
+    }
+    this.arcade?.expansion.drawMap(c, { X, Z, scale, mini, surfaces: false });
     c.strokeStyle = '#cba96c';
     c.lineWidth = mini ? 1.5 : 2;
     c.setLineDash([4, 4]);
@@ -1109,7 +1175,7 @@ export class Game {
   settings() {
     this.open(
       'Eine kurze Pause',
-      `<div class="settings-list"><div class="setting-row"><div><strong>Dein Spielstand</strong><p>Automatisch alle 20 Sekunden. Gespeichert in diesem Browser.</p></div><button id="settings-save">Jetzt speichern</button></div><div class="setting-row"><div><strong>Atmosphäre & Geräusche</strong><p>Tastaturen, Schritte, Straße und viel zu viel Kaffee.</p></div><button id="audio-toggle">${this.audio.enabled ? 'Ton an' : 'Ton aus'}</button></div><div class="setting-row"><div><strong>Grafikqualität</strong><p>Hohe Qualität mit Ambient Occlusion und weichen Schatten. Sparmodus für langsamere Geräte.</p></div><button id="quality-toggle">${this.world.lowQuality ? 'Sparmodus' : 'Hohe Qualität'}</button></div><div class="setting-row"><div><strong>Steuerung</strong><p>WASD bewegen · Shift sprinten · Maus ziehen für Kamera<br>E interagieren · Tab Stats · M Karte · J Aufgaben · P Smartphone<br>Scrollen: Kameraabstand · Esc: Schließen / Pause</p></div></div><div class="toolbar"><button class="primary" id="resume">Weiterspielen</button><button id="export-save">Spielstand exportieren</button><button id="import-save">Spielstand importieren</button><button id="sources">Orte & Mitwirkende</button><button id="reset-game" class="danger ghost">Neues Spiel</button><input type="file" id="save-file" accept="application/json" hidden></div></div>`,
+      `<div class="settings-list"><div class="setting-row"><div><strong>Dein Spielstand</strong><p>Automatisch alle 20 Sekunden. Gespeichert in diesem Browser.</p></div><button id="settings-save">Jetzt speichern</button></div><div class="setting-row"><div><strong>Atmosphäre & Geräusche</strong><p>Tastaturen, Schritte, Straße und viel zu viel Kaffee.</p></div><button id="audio-toggle">${this.audio.enabled ? 'Ton an' : 'Ton aus'}</button></div><div class="setting-row"><div><strong>Grafikqualität</strong><p>Hohe Qualität mit Ambient Occlusion und weichen Schatten. Sparmodus für langsamere Geräte.</p></div><button id="quality-toggle">${this.world.lowQuality ? 'Sparmodus' : 'Hohe Qualität'}</button></div><div class="setting-row"><div><strong>Steuerung</strong><p>WASD bewegen · Shift sprinten · Maus bewegen: frei umsehen · Alt halten: HUD bedienen<br>E interagieren · Tab Stats · M Karte · J Aufgaben · P Smartphone<br>Scrollen: Kameraabstand · Esc: Schließen / Pause</p></div></div><div class="toolbar"><button class="primary" id="resume">Weiterspielen</button><button id="export-save">Spielstand exportieren</button><button id="import-save">Spielstand importieren</button><button id="sources">Orte & Mitwirkende</button><button id="reset-game" class="danger ghost">Neues Spiel</button><input type="file" id="save-file" accept="application/json" hidden></div></div>`,
       { pause: true },
     );
     this.uiClick('#resume', () => this.close());
@@ -1170,7 +1236,7 @@ export class Game {
   sources() {
     this.open(
       'München, mit etwas dichterer Storyline',
-      `<p><strong>BBE Handelsberatung: Munich Consulting Simulator</strong> ist eine fiktive, unabhängige Spielinterpretation. Die BBE ist das Hauptquartier. Menschen, Dialoge, Büroräume, Marktwerte, Speisekarten und Preise wurden für das Spiel erfunden.</p><p>Reale Restaurantnamen und Adressen wurden am 10.09.2026 anhand der Betreiberseiten recherchiert. Stadtplan und Entfernungen sind verdichtet und frei interpretiert. Die Innenräume bilden keine tatsächlichen Geschäftsräume ab.</p><p>Original-Logo: <a href="https://www.bbe.de/static/images/bbe-logo.svg" target="_blank" rel="noopener noreferrer">BBE Handelsberatung GmbH</a>, unveränderte SVG vom offiziellen Webauftritt. Die Verwendung macht das Spiel nicht zu einem offiziellen BBE-Produkt. Helikopter, Landeplätze und Arcade-Ereignisse sind erfunden.</p><ul class="source-list">${CITY_STOPS.map((p) => `<li><a href="${p.source}" target="_blank" rel="noopener noreferrer">${p.name} · Ortsquelle</a></li>`).join('')}<li><a href="https://www.bbe.de/de/kontakt/" target="_blank" rel="noopener noreferrer">BBE Handelsberatung · Brienner Straße 45</a></li>${RESTAURANTS.map((r) => `<li><a href="${r.source}" target="_blank" rel="noopener noreferrer">${r.name} · ${r.address}</a></li>`).join('')}</ul><div class="divider"></div><p><a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">Three.js</a> · 3D-Darstellung · MIT-Lizenz<br><a href="https://pmndrs.github.io/cannon-es/" target="_blank" rel="noopener noreferrer">Cannon-es</a> · Kollisionen und Physik · MIT-Lizenz</p><p class="muted">Prozedurale 3D-Modelle, PBR-Materialien, Umgebungsreflexionen, Ambient Occlusion, Kontakt- und Sonnenschatten. Echte lizenzierte Geräuschaufnahmen, gestaltete Effekte, 150 deutsche Sprechzeilen, drei Radiosongs und zwei eigene Story-Kompositionen. Kein Konto, keine In-App-Käufe. Spielstände bleiben lokal.</p><p>Audioaufnahmen: Kenney, rubberduck, unicaegames, looneybits, domasx2, IgnasD und Ylmir (CC0). Kitchen Ambience, SFX: <a href="https://opengameart.org/content/kitchen-ambience-sfx" target="_blank" rel="noopener noreferrer">DavidW</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Fliesen- und Wasserschritte: swuing, ceberation, EminYILDIRIM; bearbeitet von congusbongus, <a href="https://opengameart.org/content/footsteps-on-different-surfaces" target="_blank" rel="noopener noreferrer">Quelle</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Aufnahmen gekürzt, gefiltert und komprimiert; Wasser-/Kaffeeeffekte aus DavidWs Aufnahme gestaltet. Verkehrsaufnahme dient als allgemeine Stadtatmosphäre.</p><p>Dialoge und Musik wurden eigens für das fiktive Spiel geschrieben. Stimmen: lokal erzeugte deutsche Windows-Sprachsynthese (Hedda, Katja, Stefan), keine menschlichen Studioaufnahmen oder nachgeahmten realen Personen.</p>`,
+      `<p><strong>BBE Handelsberatung: Munich Consulting Simulator</strong> ist eine fiktive, unabhängige Spielinterpretation. Die BBE ist das Hauptquartier. Menschen, Dialoge, Büroräume, Marktwerte, Speisekarten und Preise wurden für das Spiel erfunden.</p><p>Reale Restaurantnamen und Adressen wurden am 10.09.2026 anhand der Betreiberseiten recherchiert. Stadtplan und Entfernungen sind verdichtet und frei interpretiert. Die Innenräume bilden keine tatsächlichen Geschäftsräume ab.</p><p>Original-Logo: <a href="https://www.bbe.de/static/images/bbe-logo.svg" target="_blank" rel="noopener noreferrer">BBE Handelsberatung GmbH</a>, unveränderte SVG vom offiziellen Webauftritt. Die Verwendung macht das Spiel nicht zu einem offiziellen BBE-Produkt. Helikopter, Landeplätze und Arcade-Ereignisse sind erfunden.</p><ul class="source-list">${CITY_STOPS.map((p) => `<li><a href="${p.source}" target="_blank" rel="noopener noreferrer">${p.name} · Ortsquelle</a></li>`).join('')}<li><a href="https://www.bbe.de/de/kontakt/" target="_blank" rel="noopener noreferrer">BBE Handelsberatung · Brienner Straße 45</a></li>${RESTAURANTS.map((r) => `<li><a href="${r.source}" target="_blank" rel="noopener noreferrer">${r.name} · ${r.address}</a></li>`).join('')}</ul><div class="divider"></div><p><a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">Three.js</a> · 3D-Darstellung · MIT-Lizenz<br><a href="https://pmndrs.github.io/cannon-es/" target="_blank" rel="noopener noreferrer">Cannon-es</a> · Kollisionen und Physik · MIT-Lizenz</p><p class="muted">Prozedurale 3D-Modelle, PBR-Materialien, Umgebungsreflexionen, Ambient Occlusion, Kontakt- und Sonnenschatten. Echte lizenzierte Geräuschaufnahmen, gestaltete Effekte, 176 deutsche Sprechzeilen, drei Radiosongs und fünf eigene Story-Kompositionen. Kein Konto, keine In-App-Käufe. Spielstände bleiben lokal.</p><p>Audioaufnahmen: Kenney, rubberduck, unicaegames, looneybits, domasx2, IgnasD und Ylmir (CC0). Kitchen Ambience, SFX: <a href="https://opengameart.org/content/kitchen-ambience-sfx" target="_blank" rel="noopener noreferrer">DavidW</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Fliesen- und Wasserschritte: swuing, ceberation, EminYILDIRIM; bearbeitet von congusbongus, <a href="https://opengameart.org/content/footsteps-on-different-surfaces" target="_blank" rel="noopener noreferrer">Quelle</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Aufnahmen gekürzt, gefiltert und komprimiert; Wasser-/Kaffeeeffekte aus DavidWs Aufnahme gestaltet. Verkehrsaufnahme dient als allgemeine Stadtatmosphäre.</p><p>Dialoge und Musik wurden eigens für das fiktive Spiel geschrieben. Stimmen: lokal erzeugte deutsche Windows-Sprachsynthese (Hedda, Katja, Stefan), keine menschlichen Studioaufnahmen oder nachgeahmten realen Personen.</p>`,
       { pause: true },
     );
   }
@@ -1191,6 +1257,9 @@ window.bbeStatus = () => ({
   zone: game.world?.zone,
   started: game.started,
   workshop: game.workshop?.status,
+  fire: game.fireStory?.status,
+  mouse: { locked: !!game.mouseControls?.locked, available: !game.mouseControls?.unavailable },
+  camera: { yaw: game.world?.yaw, pitch: game.world?.pitch, distance: game.world?.distance },
   renderedFrames: game.world?.renderer.info.render.frame,
   postprocessing: !!game.world?.composer && !game.world?.lowQuality,
   position: game.world?.player.position.toArray(),

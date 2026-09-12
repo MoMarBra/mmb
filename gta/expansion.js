@@ -153,7 +153,7 @@ export class Expansion {
       this.game.audio.play('bike-bell');
       this.game.toast(
         'Zwei Räder. Sehr kurze Entscheidungswege.',
-        'W/S Fahren · A/D Lenken · Shift Sprint · SPACE Bremse · F Drive-by · Maus ziehen zum Zielen · T Nachladen',
+        'W/S Fahren · A/D Lenken · Shift Sprint · SPACE Bremse · F Drive-by · Maus bewegen zum Zielen · T Nachladen',
       );
     }
     return true;
@@ -431,7 +431,7 @@ export class Expansion {
       }
     }
     car.speed = this.a.speed;
-    if (active && !w.dragging)
+    if (active && !(w.dragging || w.time < (w.cameraLookUntil || 0)))
       w.yaw +=
         Math.atan2(
           Math.sin(car.mesh.rotation.y + Math.PI - w.yaw),
@@ -838,10 +838,7 @@ export class Expansion {
         target.label = `Trinkvogel · ${Math.round(s.birdWater)} % Wasser${wet ? '' : ' · Nachfüllen!'}`;
     }
     if (!isSpecialVehicle(car))
-      setHTML(
-        document.getElementById('arcade-guide'),
-        'F1 <span>Steuerung</span>',
-      );
+      setHTML(document.getElementById('arcade-guide'), 'F1 <span>Steuerung</span>');
     if (isSpecialVehicle(car)) {
       setHTML(
         document.getElementById('arcade-guide'),
@@ -862,12 +859,12 @@ export class Expansion {
       );
     }
   }
-  drawMap(ctx, { X, Z, scale, mini }) {
-    for (const r of EXPANSION_ROADS) {
+  drawMap(ctx, { X, Z, scale, mini, surfaces = true }) {
+    for (const r of surfaces ? EXPANSION_ROADS : []) {
       ctx.fillStyle = '#152c35';
       ctx.fillRect(X(r.x - r.w / 2), Z(r.z - r.d / 2), r.w * scale, r.d * scale);
     }
-    for (const b of this.w.expansionBlocks || []) {
+    for (const b of surfaces ? this.w.expansionBlocks || [] : []) {
       ctx.fillStyle = '#34515a';
       ctx.fillRect(X(b.x - b.w / 2), Z(b.z - b.d / 2), b.w * scale, b.d * scale);
     }

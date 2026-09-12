@@ -11,7 +11,9 @@ export function gradeSlide(draft, elapsed, focus) {
   const expected = [50, 28, 22];
   let content = 0;
   if (draft.title === 'Gartencenter dominieren den Beispielmarkt') content += 30;
-  expected.forEach((v, i) => (content += Math.max(0, 20 - Math.abs(Number(draft.values[i]) - v) * 2)));
+  expected.forEach(
+    (v, i) => (content += Math.max(0, 20 - Math.abs(Number(draft.values[i]) - v) * 2)),
+  );
   if (draft.source === 'BBE Research · Fallbeispiel 2026') content += 10;
   let distance = 0;
   for (const [id, target] of Object.entries(SLIDE_TARGETS)) {
@@ -95,11 +97,9 @@ export class Minigames {
       game.sim.save();
     };
     game.open(
-      revision
-        ? `Präsentationsvorbereitung · Revision ${(task.revision || 0) + 1}/7`
-        : 'Eine Folie. Eine klare Geschichte.',
-      `<div class="hint-inline"><b>Briefing:</b> Erstelle eine Marktübersicht. Im fiktiven Beispiel entfallen <b>50 % auf Gartencenter, 28 % auf Baumärkte und 22 % auf Fachhandel</b>. Formuliere eine präzise Aussage, verwende BBE Petrol und richte alle fünf Elemente aus.</div><div class="desktop"><div class="desktop-top"><span>BBE PowerPoint · ${revision ? `final_final_v${(task.revision || 0) + 1}.pptx` : 'gartenmarkt_2026.pptx'}</span><span id="slide-save-label">Entwurf</span></div><div class="desktop-nav"><b>START</b><span>Einfügen</span><span>Entwurf</span><span>Ansicht</span></div><div class="slide-workspace"><div class="slide-canvas" id="slide-canvas"><div class="slide-guide"></div><div class="slide-piece headline" data-piece="headline"></div><div class="slide-piece chart" data-piece="chart">${['Gartencenter', 'Baumärkte', 'Fachhandel'].map((name, i) => `<div class="chart-bar" data-bar="${i}"><b></b><span>${name}</span></div>`).join('')}</div><div class="slide-piece summary" data-piece="summary"><b>Wesentliche Erkenntnis</b><br>Gartencenter führen mit 50 %.<br><br>Klare Positionierung schafft Wachstum.</div><div class="slide-piece logo" data-piece="logo">BBE</div><div class="slide-piece footer" data-piece="footer"></div></div><aside class="slide-inspector"><label>Überschrift<select id="slide-title"><option>Der deutsche Gartenmarkt wächst irgentwie</option><option>Gartencenter dominieren den Beispielmarkt</option><option>Alle Anbieter sind gleich groß</option></select></label><label>Gartencenter (%)<input id="chart-0" type="number" min="0" max="100" step="1"></label><label>Baumärkte (%)<input id="chart-1" type="number" min="0" max="100" step="1"></label><label>Fachhandel (%)<input id="chart-2" type="number" min="0" max="100" step="1"></label><label>Diagrammfarbe<select id="slide-color"><option value="#d77547">Orange</option><option value="#1e6d7d">BBE Petrol</option><option value="#954b89">Violett</option></select></label><label>Quelle<select id="slide-source"><option>Quelle: Bauchgefühl</option><option>BBE Research · Fallbeispiel 2026</option><option>Internet, vermutlich</option></select></label></aside></div><div class="light-info">Elemente auf der Folie ziehen oder präzise ausrichten. <b id="selected-name">Ausgewählt: Überschrift</b><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="small" id="align-element" style="background:#1c5864;color:#fff">Ausgewähltes Element ausrichten</button><button class="small" id="select-next" style="background:#d0ded6;color:#284b55">Nächstes Element</button><span id="position-readout" style="padding:6px;font-size:.75rem"></span></div></div></div><div class="editor-bottom"><p>${revision ? '„Bitte nur noch eine kleine Änderung.“' : 'Fokus beeinflusst die Präzision beim Ziehen.'}<br>Die Deadline läuft weiter. Zwischenspeichern schützt den Entwurf.</p><div class="toolbar" style="margin:0"><button id="save-slide">Entwurf speichern</button><button class="primary" id="submit-slide">${revision ? 'Revision prüfen' : 'Folie abgeben'}</button></div></div>`,
-      { eyebrow: `BBE DESKTOP · FOKUS ${Math.round(game.sim.s.focus)} %`, onClose: persist },
+      revision ? `${task.title} · ${(task.revision || 0) + 1}/7` : task.title,
+      `<div class="hint-inline"><b>Fallbeispiel:</b> Gartencenter 50 % · Baumärkte 28 % · Fachhandel 22 %.<br>Aussage wählen · BBE Petrol · fünf Elemente ausrichten.</div><div class="desktop"><div class="desktop-top"><span>BBE PowerPoint · ${revision ? `final_final_v${(task.revision || 0) + 1}.pptx` : 'gartenmarkt_2026.pptx'}</span><span id="slide-save-label">Entwurf</span></div><div class="desktop-nav"><b>START</b><span>Einfügen</span><span>Entwurf</span><span>Ansicht</span></div><div class="slide-workspace"><div class="slide-canvas" id="slide-canvas"><div class="slide-guide"></div><div class="slide-piece headline" data-piece="headline"></div><div class="slide-piece chart" data-piece="chart">${['Gartencenter', 'Baumärkte', 'Fachhandel'].map((name, i) => `<div class="chart-bar" data-bar="${i}"><b></b><span>${name}</span></div>`).join('')}</div><div class="slide-piece summary" data-piece="summary"><b>Wesentliche Erkenntnis</b><br>Gartencenter führen mit 50 %.<br><br>Klare Positionierung schafft Wachstum.</div><div class="slide-piece logo" data-piece="logo">BBE</div><div class="slide-piece footer" data-piece="footer"></div></div><aside class="slide-inspector"><label>Überschrift<select id="slide-title"><option>Der deutsche Gartenmarkt wächst irgentwie</option><option>Gartencenter dominieren den Beispielmarkt</option><option>Alle Anbieter sind gleich groß</option></select></label><label>Gartencenter (%)<input id="chart-0" type="number" min="0" max="100" step="1"></label><label>Baumärkte (%)<input id="chart-1" type="number" min="0" max="100" step="1"></label><label>Fachhandel (%)<input id="chart-2" type="number" min="0" max="100" step="1"></label><label>Diagrammfarbe<select id="slide-color"><option value="#d77547">Orange</option><option value="#1e6d7d">BBE Petrol</option><option value="#954b89">Violett</option></select></label><label>Quelle<select id="slide-source"><option>Quelle: Bauchgefühl</option><option>BBE Research · Fallbeispiel 2026</option><option>Internet, vermutlich</option></select></label></aside></div><div class="light-info">Ziehen oder ausrichten. <b id="selected-name">Überschrift</b><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="small" id="align-element" style="background:#1c5864;color:#fff">Ausrichten</button><button class="small" id="select-next" style="background:#d0ded6;color:#284b55">Nächstes Element</button><span id="position-readout" style="padding:6px;font-size:.75rem"></span></div></div></div><div class="editor-bottom"><p>${revision ? '„Bitte nur noch eine kleine Änderung.“' : 'Fokus bestimmt die Präzision.'}<br>Die Deadline läuft weiter.</p><div class="toolbar" style="margin:0"><button id="save-slide">Entwurf speichern</button><button class="primary" id="submit-slide">${revision ? 'Revision prüfen' : 'Folie abgeben'}</button></div></div>`,
+      { eyebrow: `BBE DESKTOP · FOKUS ${Math.round(game.sim.s.focus)} %`, onClose: persist, task },
     );
     const names = {
       headline: 'Überschrift',
@@ -123,7 +123,7 @@ export class Minigames {
         b.style.background = draft.color;
         b.querySelector('b').textContent = v + ' %';
       });
-      $('#selected-name').textContent = 'Ausgewählt: ' + names[selected];
+      $('#selected-name').textContent = names[selected];
       const p = draft.positions[selected];
       $('#position-readout').textContent = `X ${p.x.toFixed(1)} % · Y ${p.y.toFixed(1)} %`;
     };
@@ -265,10 +265,13 @@ export class Minigames {
     ];
     this.game.open(
       task.title,
-      `<div class="hint-inline">Wähle genau <b>drei belastbare Aussagen</b> für die Management Summary. Falsche Aussagen kosten Punkte.</div><div class="choice-list">${facts.map(([a, b], i) => `<label class="choice"><input type="checkbox" value="${i}" class="market-choice"><span><b>${a}</b>${b}</span></label>`).join('')}</div><div class="editor-bottom"><p>Fallbeispiel · alle Zahlen fiktiv.</p><button class="primary" id="submit-market">Analyse abgeben</button></div>`,
+      `<div class="hint-inline"><b>Drei belastbare Aussagen wählen.</b> Fehlwahl kostet Punkte.</div><div class="choice-list">${facts.map(([a, b], i) => `<label class="choice"><input type="checkbox" value="${i}" class="market-choice"><span><b>${a}</b>${b}</span></label>`).join('')}</div><div class="editor-bottom"><p>Fiktives Fallbeispiel</p><button class="primary" id="submit-market">Analyse abgeben</button></div>`,
+      { task },
     );
     $('#submit-market').onclick = () => {
-      const a = [...document.querySelectorAll('.market-choice:checked')].map((x) => Number(x.value));
+      const a = [...document.querySelectorAll('.market-choice:checked')].map((x) =>
+        Number(x.value),
+      );
       if (a.length !== 3) return this.game.toast('Bitte genau drei Aussagen auswählen.');
       this.done(task, gradeMarket(a));
     };
@@ -276,7 +279,7 @@ export class Minigames {
   excel(task) {
     this.game.open(
       task.title,
-      `<div class="hint-inline"><b>Handelsmarge (%) = (Umsatz − Wareneinsatz) ÷ Umsatz × 100.</b><br>Berechne drei Margen, identifiziere den Spitzenreiter und sortiere nach Umsatz absteigend.</div><table class="data-table"><thead><tr><th>Standort</th><th>Umsatz (€)</th><th>Wareneinsatz (€)</th><th>Marge (%)</th></tr></thead><tbody>${[
+      `<div class="hint-inline"><b>Marge (%) = (Umsatz − Wareneinsatz) ÷ Umsatz × 100</b></div><table class="data-table"><thead><tr><th>Standort</th><th>Umsatz (€)</th><th>Wareneinsatz (€)</th><th>Marge (%)</th></tr></thead><tbody>${[
         ['A · Schwabing', 180000, 126000],
         ['B · Maxvorstadt', 240000, 144000],
         ['C · Giesing', 120000, 90000],
@@ -287,7 +290,8 @@ export class Minigames {
         )
         .join(
           '',
-        )}</tbody></table><label class="input-row"><span>Höchste Marge</span><select id="margin-leader"><option value="">Bitte wählen</option><option>A</option><option>B</option><option>C</option></select></label><label class="input-row"><span>Umsatz absteigend</span><select id="margin-sort"><option value="">Bitte wählen</option><option value="A,B,C">A → B → C</option><option value="B,A,C">B → A → C</option><option value="C,A,B">C → A → B</option></select></label><div class="editor-bottom"><p>„Die Formel ist richtig. Nur das Ergebnis irritiert.“</p><button class="primary" id="submit-excel">Workbook abgeben</button></div>`,
+        )}</tbody></table><label class="input-row"><span>Höchste Marge</span><select id="margin-leader"><option value="">Bitte wählen</option><option>A</option><option>B</option><option>C</option></select></label><label class="input-row"><span>Umsatz absteigend</span><select id="margin-sort"><option value="">Bitte wählen</option><option value="A,B,C">A → B → C</option><option value="B,A,C">B → A → C</option><option value="C,A,B">C → A → B</option></select></label><div class="editor-bottom"><button class="primary" id="submit-excel">Workbook abgeben</button></div>`,
+      { task },
     );
     $('#submit-excel').onclick = () => {
       const a = [0, 1, 2].map((i) => $('#margin-' + i).value);
@@ -299,7 +303,8 @@ export class Minigames {
   classifications(task, title, rows, options, correct, quote) {
     this.game.open(
       title,
-      `<div class="hint-inline">Ordne jede Aussage dem passenden Schwerpunkt zu. ${quote || ''}</div><div>${rows.map((row, i) => `<label class="input-row"><span>${row}</span><select id="class-${i}"><option value="">Bitte wählen</option>${options.map((o, j) => `<option value="${j}">${o}</option>`).join('')}</select></label>`).join('')}</div><div class="editor-bottom"><p>Eine klare Struktur ist schon die halbe Beratung.</p><button class="primary" id="submit-class">Auswertung abgeben</button></div>`,
+      `<div class="hint-inline">Passenden Schwerpunkt wählen. ${quote || ''}</div><div>${rows.map((row, i) => `<label class="input-row"><span>${row}</span><select id="class-${i}"><option value="">Bitte wählen</option>${options.map((o, j) => `<option value="${j}">${o}</option>`).join('')}</select></label>`).join('')}</div><div class="editor-bottom"><button class="primary" id="submit-class">Auswertung abgeben</button></div>`,
+      { task },
     );
     $('#submit-class').onclick = () => {
       const a = rows.map((_, i) => $('#class-' + i).value);
@@ -321,7 +326,7 @@ export class Minigames {
       ],
       ['Filialisierter Großflächenhandel', 'Spezialisierter Fachhandel', 'Online-Pure-Player'],
       [0, 1, 2, 0, 1, 2],
-      'Die Unternehmen sind fiktive Fallbeispiele.',
+      'Fiktive Unternehmen.',
     );
   }
   interview(t) {
@@ -342,8 +347,9 @@ export class Minigames {
   }
   mystery(t) {
     this.game.open(
-      'Mystery Shopping · Abschlussbericht',
-      `<div class="hint-inline">Nutze deine Beobachtungen aus MAMMA BAO. Recherche geschieht vor Ort, der Bericht entsteht bei der BBE.</div><label class="input-row"><span>Was ist der kulinarische Schwerpunkt?</span><select id="mystery-kind"><option value="">Bitte wählen</option><option value="0">Handgezogene Nudeln & Bao</option><option value="1">Bayerische Küche</option><option value="2">Holzofenpizza</option></select></label><label class="input-row"><span>Spielpreis für gedämpfte Bao?</span><select id="mystery-price"><option value="">Bitte wählen</option><option value="0">4,20 €</option><option value="1">8,50 €</option><option value="2">18,90 €</option></select></label><div class="editor-bottom"><p>Restaurantbesuch ✓ · Servicegespräch ✓</p><button class="primary" id="submit-mystery">Bericht abgeben</button></div>`,
+      t.title,
+      `<div class="hint-inline">MAMMA BAO · Besuch auswerten</div><label class="input-row"><span>Was ist der kulinarische Schwerpunkt?</span><select id="mystery-kind"><option value="">Bitte wählen</option><option value="0">Handgezogene Nudeln & Bao</option><option value="1">Bayerische Küche</option><option value="2">Holzofenpizza</option></select></label><label class="input-row"><span>Spielpreis für gedämpfte Bao?</span><select id="mystery-price"><option value="">Bitte wählen</option><option value="0">4,20 €</option><option value="1">8,50 €</option><option value="2">18,90 €</option></select></label><div class="editor-bottom"><p>Restaurantbesuch ✓ · Servicegespräch ✓</p><button class="primary" id="submit-mystery">Bericht abgeben</button></div>`,
+      { task: t },
     );
     $('#submit-mystery').onclick = () => {
       const a = $('#mystery-kind').value,
@@ -388,9 +394,9 @@ export class Minigames {
     const render = () => {
       const s = steps[stage];
       game.open(
-        'Kundentermin · Retail Lab',
-        `<div class="eyebrow">BBE HANDELSBERATUNG · GESPRÄCH ${stage + 1}/3</div><h2>${s.line}</h2><div class="choice-list">${s.choices.map((c, i) => `<button class="choice" data-answer="${i}"><span>${c}</span></button>`).join('')}</div><div class="divider"></div><p class="muted">Gute Beratung ist konkret, ehrlich und hört zuerst zu.</p>`,
-        { eyebrow: 'GABELSBERGERSTRASSE · KUNDENBÜRO' },
+        t.title,
+        `<div class="eyebrow">FRAGE ${stage + 1}/3</div><h2>${s.line}</h2><div class="choice-list">${s.choices.map((c, i) => `<button class="choice" data-answer="${i}"><span>${c}</span></button>`).join('')}</div>`,
+        { eyebrow: 'GABELSBERGERSTRASSE · KUNDENBÜRO', task: t },
       );
       document.querySelectorAll('[data-answer]').forEach(
         (b) =>
@@ -403,10 +409,7 @@ export class Minigames {
               t.meetingScore = Math.round((score / 3) * 100);
               game.sim.stamp('meeting', 'met');
               game.close();
-              game.toast(
-                'Kundentermin abgeschlossen.',
-                'Zurück zur BBE. Dort werden die Ergebnisse abgegeben.',
-              );
+              game.toast('Kundentermin abgeschlossen.', 'Ergebnisse bei der BBE abgeben.');
             } else {
               game.sim.save();
               render();

@@ -17,7 +17,9 @@ export const CITY_WALKS = Object.freeze({
   koenigsplatz: [CITY_LAYOUT.hq, CITY_LAYOUT.koenigsplatzApproach, CITY_LAYOUT.koenigsplatz],
   frauenkirche: [
     CITY_LAYOUT.koenigsplatz,
-    { x: 239, z: 29 },
+    { x: 204, z: 29 },
+    { x: 204, z: 45.2 },
+    { x: 239, z: 45.2 },
     { x: 239, z: 269 },
     { x: 280, z: 269 },
     { x: 280, z: 249 },
@@ -27,11 +29,11 @@ export const CITY_WALKS = Object.freeze({
 // Continuous pedestrian surfaces. The crossing segments get road-level markings.
 export const CITY_FOOTWAYS = [
   { x: 41, z: 47, w: 36, d: 5 },
-  { x: 78, z: 45.2, w: 140, d: 2.3 },
+  { x: 124, z: 45.2, w: 232, d: 2.3 },
   { x: 131, z: 30.75, w: 3, d: 8.5 },
-  { x: 185, z: 29, w: 111, d: 3 },
+  { x: 167.5, z: 29, w: 76, d: 3 },
+  { x: 204, z: 37.1, w: 3, d: 16.2 },
   { x: 239, z: 158, w: 3, d: 225 },
-  { x: 243.5, z: 29, w: 12, d: 3 },
   { x: 265, z: 269, w: 50, d: 3 },
   { x: 280, z: 258.5, w: 3, d: 20 },
 ];

@@ -1297,5 +1297,171 @@ export const AUDIO_ASSETS = {
     "path": "./assets/audio/story_underscore.mp3",
     "group": "music",
     "duration": 35.122
+  },
+  "voice_fire_intro_01": {
+    "path": "./assets/audio/voice_fire_intro_01.mp3",
+    "group": "voice",
+    "duration": 2.3748
+  },
+  "voice_fire_intro_02": {
+    "path": "./assets/audio/voice_fire_intro_02.mp3",
+    "group": "voice",
+    "duration": 5.3755
+  },
+  "voice_fire_intro_03": {
+    "path": "./assets/audio/voice_fire_intro_03.mp3",
+    "group": "voice",
+    "duration": 2.3428
+  },
+  "voice_fire_intro_04": {
+    "path": "./assets/audio/voice_fire_intro_04.mp3",
+    "group": "voice",
+    "duration": 4.874
+  },
+  "voice_fire_intro_05": {
+    "path": "./assets/audio/voice_fire_intro_05.mp3",
+    "group": "voice",
+    "duration": 3.4393
+  },
+  "voice_fire_intro_06": {
+    "path": "./assets/audio/voice_fire_intro_06.mp3",
+    "group": "voice",
+    "duration": 5.6616
+  },
+  "voice_fire_intro_07": {
+    "path": "./assets/audio/voice_fire_intro_07.mp3",
+    "group": "voice",
+    "duration": 1.7441
+  },
+  "voice_fire_run_01": {
+    "path": "./assets/audio/voice_fire_run_01.mp3",
+    "group": "voice",
+    "duration": 3.7781
+  },
+  "voice_fire_run_02": {
+    "path": "./assets/audio/voice_fire_run_02.mp3",
+    "group": "voice",
+    "duration": 4.61
+  },
+  "voice_fire_run_03": {
+    "path": "./assets/audio/voice_fire_run_03.mp3",
+    "group": "voice",
+    "duration": 4.2935
+  },
+  "voice_fire_run_04": {
+    "path": "./assets/audio/voice_fire_run_04.mp3",
+    "group": "voice",
+    "duration": 4.2504
+  },
+  "voice_fire_run_05": {
+    "path": "./assets/audio/voice_fire_run_05.mp3",
+    "group": "voice",
+    "duration": 4.802
+  },
+  "voice_fire_warn_30": {
+    "path": "./assets/audio/voice_fire_warn_30.mp3",
+    "group": "voice",
+    "duration": 4.9773
+  },
+  "voice_fire_warn_15": {
+    "path": "./assets/audio/voice_fire_warn_15.mp3",
+    "group": "voice",
+    "duration": 4.0526
+  },
+  "voice_fire_warn_10": {
+    "path": "./assets/audio/voice_fire_warn_10.mp3",
+    "group": "voice",
+    "duration": 4.4849
+  },
+  "voice_fire_rescue_01": {
+    "path": "./assets/audio/voice_fire_rescue_01.mp3",
+    "group": "voice",
+    "duration": 4.2596
+  },
+  "voice_fire_rescue_02": {
+    "path": "./assets/audio/voice_fire_rescue_02.mp3",
+    "group": "voice",
+    "duration": 4.7032
+  },
+  "voice_fire_rescue_03": {
+    "path": "./assets/audio/voice_fire_rescue_03.mp3",
+    "group": "voice",
+    "duration": 4.9602
+  },
+  "voice_fire_rescue_04": {
+    "path": "./assets/audio/voice_fire_rescue_04.mp3",
+    "group": "voice",
+    "duration": 4.4354
+  },
+  "voice_fire_rescue_05": {
+    "path": "./assets/audio/voice_fire_rescue_05.mp3",
+    "group": "voice",
+    "duration": 4.054
+  },
+  "voice_fire_rescue_06": {
+    "path": "./assets/audio/voice_fire_rescue_06.mp3",
+    "group": "voice",
+    "duration": 4.8774
+  },
+  "voice_fire_rescue_07": {
+    "path": "./assets/audio/voice_fire_rescue_07.mp3",
+    "group": "voice",
+    "duration": 6.4928
+  },
+  "voice_fire_rescue_08": {
+    "path": "./assets/audio/voice_fire_rescue_08.mp3",
+    "group": "voice",
+    "duration": 5.336
+  },
+  "voice_fire_success_01": {
+    "path": "./assets/audio/voice_fire_success_01.mp3",
+    "group": "voice",
+    "duration": 3.0179
+  },
+  "voice_fire_failure_01": {
+    "path": "./assets/audio/voice_fire_failure_01.mp3",
+    "group": "voice",
+    "duration": 4.5996
+  },
+  "voice_fire_failure_02": {
+    "path": "./assets/audio/voice_fire_failure_02.mp3",
+    "group": "voice",
+    "duration": 6.866
+  },
+  "fire_tension": {
+    "path": "./assets/audio/fire_tension.mp3",
+    "group": "music",
+    "duration": 16,
+    "loop": true
+  },
+  "fire_angel": {
+    "path": "./assets/audio/fire_angel.mp3",
+    "group": "music",
+    "duration": 9,
+    "loop": false
+  },
+  "fire_complete": {
+    "path": "./assets/audio/fire_complete.mp3",
+    "group": "music",
+    "duration": 5,
+    "loop": false
+  },
+  "fire_crackle": {
+    "path": "./assets/audio/fire_crackle.mp3",
+    "group": "effect",
+    "duration": 8,
+    "loop": true
+  },
+  "fire_extinguish": {
+    "path": "./assets/audio/fire_extinguish.mp3",
+    "group": "effect",
+    "duration": 4,
+    "loop": false
+  },
+  "fire_alert": {
+    "path": "./assets/audio/fire_alert.mp3",
+    "group": "effect",
+    "duration": 0.8,
+    "loop": false
   }
 };

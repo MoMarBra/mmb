@@ -25,11 +25,15 @@ export function detail(car) {
   const nativeDoors = car.mesh.userData.doors;
   const native = nativeDoors && Object.values(nativeDoors).some((door) => door?.isGroup);
   // The native police model's first direct mesh is its windshield, NOT its body.
-  const body = car.mesh.userData.dentMesh || (native
-    ? children.find(
-        (m) => m.name === 'police-body static details' && m.material.color?.getHexString() === 'dedfd8',
-      )
-    : children[0]);
+  const body =
+    car.mesh.userData.dentMesh ||
+    (native
+      ? children.find(
+          (m) =>
+            m.name === 'police-body static details' &&
+            m.material.color?.getHexString() === 'dedfd8',
+        )
+      : children[0]);
   if (body) {
     body.geometry = body.geometry.clone();
     car.dentMesh = body;
@@ -148,7 +152,9 @@ export function openDoor(car, open, worldPoint = null) {
   if (worldPoint) {
     car.mesh.updateWorldMatrix(true, false);
     side =
-      car.mesh.worldToLocal(new THREE.Vector3(worldPoint.x, worldPoint.y, worldPoint.z)).x < 0 ? -1 : 1;
+      car.mesh.worldToLocal(new THREE.Vector3(worldPoint.x, worldPoint.y, worldPoint.z)).x < 0
+        ? -1
+        : 1;
   }
   const door = car.doors.find((d) => d.front && d.side === side) || car.doors[0];
   door.target = door.openAngle;
@@ -165,7 +171,8 @@ function newDriver(car, role) {
   actor.name = role + ' seated vehicle visual';
   // The human rig is deliberately tall-headed. A cabin-sized proxy fits below glass/roof
   // without moving or rescaling the physical world.player or the outside officer.
-  const scale = car.type === 'police' ? 0.7 : car.type === 'bus' || car.type === 'van' ? 0.82 : 0.74;
+  const scale =
+    car.type === 'police' ? 0.7 : car.type === 'bus' || car.type === 'van' ? 0.82 : 0.74;
   actor.scale.setScalar(scale);
   const head = new THREE.Group();
   head.name = 'Driving head';
@@ -276,7 +283,14 @@ export function poseDriver(car, actor, time = 0, steering = 0, speed = 0) {
 /** One visible seated proxy per car; refuses to duplicate the same outside actor. */
 export function syncDriver(
   car,
-  { occupied = false, role = 'player', outsideActor = null, time = 0, steering = 0, speed = 0 } = {},
+  {
+    occupied = false,
+    role = 'player',
+    outsideActor = null,
+    time = 0,
+    steering = 0,
+    speed = 0,
+  } = {},
 ) {
   car.driverVisuals ||= new Map();
   for (const actor of car.driverVisuals.values()) actor.visible = false;

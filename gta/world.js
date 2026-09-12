@@ -1,3 +1,5 @@
+import { buildITOffice } from './it-office.js';
+import { updateStreetSignals } from './street-signs.js';
 import { blenderVehicle } from './blender-vehicles.js';
 import { buildCityStreets } from './city-streets.js';
 import { installCityTraffic, updateCityTraffic } from './city-traffic.js';
@@ -419,6 +421,7 @@ export class GameWorld {
     this.makeCity();
     this.makeRestaurant();
     this.makeAnnex();
+    buildITOffice(this);
     this.addLife();
     buildCityExpansion(this, { box, cylinder, sphere, label, material, human });
     this.cars.push(...this.expansionVehicles);
@@ -556,7 +559,13 @@ export class GameWorld {
     box(g, 0, 3.15, -11, 27, 0.5, 0.2, '#e7e8de');
     for (const x of [-13.3, -11.1, -6.1, -1.1, 3.9, 8.9, 13.3])
       box(g, x, 1.7, -11, 0.95, 3.4, 0.2, '#e7e8de');
-    this.solid('office', g, -13.5, 1.7, 0, 0.2, 3.4, 22, '#e0e4dc');
+    // A real 2.5 m opening joins the existing office to the IT corridor.
+    for (const [a, b] of [
+      [-11, 4.75],
+      [7.25, 11],
+    ])
+      this.solid('office', g, -13.5, 1.7, (a + b) / 2, 0.2, 3.4, b - a, '#e0e4dc');
+    this.solid('office', g, -13.5, 3.05, 6, 0.2, 0.7, 2.5, '#e0e4dc');
     this.solid('office', g, 13.5, 1.7, 0, 0.2, 3.4, 22, '#e4e8df');
     // Reception exit and WC belong to the corridor wall, with real openings.
     for (const [a, b] of [
@@ -906,7 +915,7 @@ export class GameWorld {
     for (const z of [40, -43]) {
       for (const zz of [z - 9, z + 9])
         for (let x = -7; x < 8; x += 2.1) box(g, x, 0.094, zz, 1.2, 0.016, 3, '#e2e0d4', false);
-      for (const x of [-11, 11]) this.trafficLight(g, x, z, x < 0 ? 0 : Math.PI);
+      // Directional signals are installed with the final street geometry.
     }
     for (let i = 0; i < 14; i++) {
       const z = 110 - i * 20;
@@ -1074,14 +1083,26 @@ export class GameWorld {
     }
     for (let x = 41; x < 235; x += 40) this.lamp(g, x, 46.8);
     for (let x = 51; x < 235; x += 40) this.lamp(g, x, 33.2);
+    this.bicycleParking = [];
     for (let i = 0; i < 9; i++) {
-      this.bicycle(g, 13.3, -118 + i * 24, Math.PI / 2);
-      const rack = new THREE.Mesh(
-        new THREE.TorusGeometry(0.4, 0.03, 8, 20, Math.PI),
-        material('#a4afad', 0.4, 0.6),
-      );
-      rack.position.set(13.3, 0.48, -117.4 + i * 24);
+      const x = 12.3,
+        z = -118 + i * 24;
+      // Park entirely on the footway, leaving the Gabelsberger junction empty.
+      if (Math.abs(z + 43) < 9) continue;
+      const bike = this.bicycle(g, x, z, Math.PI / 2);
+      bike.position.y = 0.105;
+      const rack = new THREE.Group();
+      rack.position.set(x, 0, z + 0.6);
       g.add(rack);
+      const metal = material('#a4afad', 0.4, 0.6);
+      const arch = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.03, 8, 20, Math.PI), metal);
+      arch.position.y = 0.53;
+      rack.add(arch);
+      for (const side of [-1, 1]) {
+        cylinder(rack, side * 0.4, 0.3, 0, 0.03, 0.46, metal);
+        box(rack, side * 0.4, 0.084, 0, 0.13, 0.025, 0.13, metal);
+      }
+      this.bicycleParking.push({ x, z, bike, rack });
     }
     // Stop, delivery vehicles, work zone, and a return machine.
     box(g, 11.2, 1.65, 98, 0.08, 3.3, 0.08, '#79908c');
@@ -1195,9 +1216,6 @@ export class GameWorld {
         body,
       });
     }
-    label(g, 'Brienner Straße', -8.5, 3.4, 35.8, 5.5, 0.66, { bg: '#244c74' });
-    label(g, 'Augustenstraße', 9.5, 3.4, 48, 5.3, 0.65, { rotation: Math.PI / 2, bg: '#244c74' });
-    label(g, 'Gabelsbergerstraße', -9, 3.4, -49, 6, 0.65, { bg: '#244c74' });
   }
   tree(g, x, z) {
     cylinder(g, x, 2.25, z, 0.19, 4.5, '#71664e', 0.13);
@@ -1289,11 +1307,12 @@ export class GameWorld {
     bar(0.9, 0.02, 0.65, Math.PI / 2);
     bar(0.87, -0.32, 0.55, -0.2);
     box(root, 0, 1.13, -0.35, 0.22, 0.04, 0.22, '#273840');
+    bar(1.025, 0.53, 0.295, 0.137, '#4e696a');
     box(root, 0, 1.17, 0.55, 0.5, 0.025, 0.035, '#4e696a');
     return root;
   }
   car(g, type, color) {
-    return blenderVehicle(g, type, color, {box, label, contactShadow});
+    return blenderVehicle(g, type, color, { box, label, contactShadow });
   }
   bottleMesh(g, cents = 25) {
     const c = cents === 8 ? '#69805a' : cents === 15 ? '#996443' : '#81bbb6';
@@ -1845,28 +1864,67 @@ export class GameWorld {
     this.bottles?.forEach((b) => (b.mesh.visible = !this.sim.s.picked.includes(b.id)));
   }
   bindInput() {
+    const canLook = () =>
+      this.mouseControls ? this.mouseControls.canLook() : this.started && !this.blocked;
+    let drag = null;
+    const stopDrag = (event = null) => {
+      if (event && (!drag || event.pointerId !== drag.id)) return;
+      drag = null;
+      this.dragging = false;
+    };
+    const look = (dx, dy) => {
+      if (!canLook() || !Number.isFinite(dx) || !Number.isFinite(dy) || (!dx && !dy)) return;
+      this.yaw -= dx * 0.004;
+      this.pitch = clamp(this.pitch + dy * 0.003, -0.08, 0.8);
+      this.cameraLookUntil = this.time + 2;
+    };
     this.canvas.addEventListener('pointerdown', (e) => {
-      if (e.button === 0 || e.button === 2) {
-        this.dragging = true;
-        this.canvas.setPointerCapture?.(e.pointerId);
-      }
+      if (
+        !canLook() ||
+        (e.button !== 0 && e.button !== 2) ||
+        document.pointerLockElement === this.canvas
+      )
+        return;
+      // A menu/lock release can clear the public flag before this pointer ends.
+      if (!this.dragging) drag = null;
+      if (drag) return;
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      this.dragging = true;
+      this.canvas.setPointerCapture?.(e.pointerId);
     });
-    window.addEventListener('pointerup', () => (this.dragging = false));
+    for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
+      window.addEventListener(event, stopDrag);
+    document.addEventListener('pointerlockchange', () => {
+      if (document.pointerLockElement === this.canvas) stopDrag();
+    });
     window.addEventListener('blur', () => {
       this.keys.clear();
-      this.dragging = false;
+      stopDrag();
+    });
+    // Pointer lock reports relative mouse deltas. Touch/pen/drag instead use
+    // client coordinates: their movementX/Y may stay zero in mobile browsers.
+    window.addEventListener('mousemove', (e) => {
+      if (document.pointerLockElement === this.canvas) look(e.movementX, e.movementY);
     });
     window.addEventListener('pointermove', (e) => {
-      if (!this.started || this.blocked) return;
-      if (this.dragging || document.pointerLockElement === this.canvas) {
-        this.yaw -= e.movementX * 0.004;
-        this.pitch = clamp(this.pitch + e.movementY * 0.003, -0.08, 0.8);
-      }
+      if (
+        document.pointerLockElement === this.canvas ||
+        !this.dragging ||
+        !drag ||
+        e.pointerId !== drag.id
+      )
+        return;
+      const dx = e.clientX - drag.x,
+        dy = e.clientY - drag.y;
+      drag.x = e.clientX;
+      drag.y = e.clientY;
+      look(dx, dy);
     });
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     this.canvas.addEventListener(
       'wheel',
       (e) => {
+        if (!canLook()) return;
         this.distance = clamp(
           this.distance + e.deltaY * 0.003,
           2,
@@ -2076,15 +2134,7 @@ export class GameWorld {
       }
     }
     this.trafficPhase = this.time % 16;
-    for (const l of this.trafficLights || []) {
-      l.lights.forEach((m, i) =>
-        m.material.emissive.set(
-          i === (this.trafficPhase < 7 ? 2 : this.trafficPhase < 9 ? 1 : 0)
-            ? ['#ff3822', '#ffc658', '#76e1ac'][i]
-            : '#000000',
-        ),
-      );
-    }
+    updateStreetSignals(this, this.trafficPhase);
     if (this.zone === 'city') {
       updateCityTraffic(this, dt, this.trafficPhase);
       this.sun.position.set(b.position.x - 35, 55, b.position.z + 22);
@@ -2168,6 +2218,7 @@ export class GameWorld {
     );
     this.gameplay?.update(dt, blocked);
     this.workshop?.updateWorld(dt, blocked);
+    this.fireStory?.updateWorld(dt, blocked);
     this.updateCrowd();
     // The SSAO normal pass reuses the shadow map from the first colour pass.
     this.renderer.shadowMap.autoUpdate = false;

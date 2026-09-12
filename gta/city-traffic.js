@@ -1,3 +1,5 @@
+import { KAROLINENPLATZ_RING } from './city-streets.js';
+import { signalStage } from './street-signs.js';
 // Lane-centred, closed traffic circuits. All coordinates are game-space metres.
 // This controller owns only ambient traffic: parked, story and player cars retain
 // their existing state and physics. No runtime recycling happens in the camera.
@@ -163,6 +165,15 @@ export const CITY_TRAFFIC_ROUTES = [
   // Local circuits serve the open ends without crossing those buildings.
   capsule('suedviertel-ost', true, 70, 133, 117, 3.35, 6.3),
   capsule('suedviertel-west', true, -133, -70, 117, 3.35, 6.3),
+  circuit(
+    'karolinenplatz',
+    Array.from({ length: 96 }, (_, i) => {
+      const angle = (i * Math.PI * 2) / 96,
+        r = KAROLINENPLATZ_RING;
+      return [r.x + Math.sin(angle) * 13.5, r.z + Math.cos(angle) * 13.5];
+    }),
+    5,
+  ),
 ];
 
 export function sampleTrafficRoute(route, along) {
@@ -247,11 +258,7 @@ function rebuildSolids(world, state) {
     state.solids.push(solid);
     const reach = Math.hypot(e.x, e.z);
     for (let x = Math.floor((solid.x - reach) / 24); x <= Math.floor((solid.x + reach) / 24); x++)
-      for (
-        let z = Math.floor((solid.z - reach) / 24);
-        z <= Math.floor((solid.z + reach) / 24);
-        z++
-      ) {
+      for (let z = Math.floor((solid.z - reach) / 24); z <= Math.floor((solid.z + reach) / 24); z++) {
         const key = `${x},${z}`;
         if (!state.cells.has(key)) state.cells.set(key, []);
         state.cells.get(key).push(solid);
@@ -286,8 +293,7 @@ function clearSpawn(world, state, car, route, s) {
 }
 
 function assign(world, state, car, route, preferred = null) {
-  const initial =
-    preferred === null ? project(route, car.mesh.position, car.mesh.rotation.y) : preferred;
+  const initial = preferred === null ? project(route, car.mesh.position, car.mesh.rotation.y) : preferred;
   let s = initial;
   for (let i = 0; i < Math.ceil(route.length / 7); i++) {
     const candidate = mod(initial + i * 7, route.length);
@@ -324,7 +330,16 @@ export function installCityTraffic(world) {
     (c) => !c.parked && !c.controlled && !['bike', 'helicopter', 'police'].includes(c.type),
   );
   const avenue = existing.filter((c) => !c.route);
-  avenue.forEach((car) => assign(world, state, car, CITY_TRAFFIC_ROUTES[0]));
+  avenue.forEach((car, i) =>
+    assign(
+      world,
+      state,
+      car,
+      i === avenue.length - 1
+        ? CITY_TRAFFIC_ROUTES.find((r) => r.id === 'karolinenplatz')
+        : CITY_TRAFFIC_ROUTES[0],
+    ),
+  );
   existing
     .filter((c) => c.route && !c.traffic)
     .forEach((car, i) => {
@@ -360,7 +375,7 @@ export function installCityTraffic(world) {
 function redFor(p, junction, phase) {
   if (!junction.signals) return false;
   const vertical = Math.abs(p.dz) > Math.abs(p.dx);
-  return vertical ? phase >= 7 : phase < 9 || phase >= 14.5;
+  return signalStage(vertical ? 'vertical' : 'horizontal', phase) !== 2;
 }
 
 function junctionAhead(p) {
@@ -381,12 +396,9 @@ function trafficLimit(world, state, car, p, phase) {
   const own = footprint(car),
     route = car.traffic.route;
   const next = sampleTrafficRoute(route, car.traffic.s + 4);
-  const bend = Math.abs(
-    Math.atan2(p.dx * next.dz - p.dz * next.dx, p.dx * next.dx + p.dz * next.dz),
-  );
+  const bend = Math.abs(Math.atan2(p.dx * next.dz - p.dz * next.dx, p.dx * next.dx + p.dz * next.dz));
   let limit =
-    Math.min(car.max || route.limit, route.limit) *
-    (bend > 0.11 ? clamp(1 - bend * 0.8, 0.24, 0.78) : 1);
+    Math.min(car.max || route.limit, route.limit) * (bend > 0.11 ? clamp(1 - bend * 0.8, 0.24, 0.78) : 1);
   const corridor = (q, radius, length = 0) => {
     const x = q.x - p.x,
       z = q.z - p.z;
@@ -438,12 +450,7 @@ function reserveJunctions(world, state, phase) {
   for (const [id, r] of state.reservations) {
     const car = r.car,
       j = JUNCTIONS[id];
-    if (
-      car.controlled ||
-      car.parked ||
-      distance(car.mesh.position, j) > 19 ||
-      state.time - r.since > 18
-    )
+    if (car.controlled || car.parked || distance(car.mesh.position, j) > 19 || state.time - r.since > 18)
       state.reservations.delete(id);
   }
   const candidates = state.cars
@@ -469,11 +476,7 @@ function safelyRecover(world, state, car) {
   const t = car.traffic,
     p = car.mesh.position,
     camera = world.camera;
-  if (
-    t.blocked < 38 ||
-    distance(p, world.player.position) < 100 ||
-    distance(p, camera.position) < 110
-  )
+  if (t.blocked < 38 || distance(p, world.player.position) < 100 || distance(p, camera.position) < 110)
     return;
   // Frustum membership plus distance is deliberately conservative: when the
   // camera is looking down a long street, a queued car never visibly vanishes.

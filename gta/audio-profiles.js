@@ -14,6 +14,15 @@ export const ROOMS = {
     interval: 8,
   },
   garage: GARAGE_PROFILE,
+  it: {
+    title: 'BBE · IT / Serverraum',
+    material: 'tile',
+    reverb: 0.15,
+    tone: 3900,
+    loops: [['vent', 0.13]],
+    events: ['typing'],
+    interval: 18,
+  },
   office: {
     title: 'BBE · Büro',
     material: 'carpet',
@@ -106,6 +115,7 @@ export function roomFor(world) {
   if (world.zone === 'restaurant') return world.currentRestaurant?.id || 'seen';
   if (world.zone === 'city') return 'city';
   const p = world.player.position;
+  if (p.x < -13.5) return 'it';
   if (p.x > 44 && p.x < 71 && p.z > 28 && p.z < 48) return 'garage';
   if (p.x > 22 && p.z > 15) return 'wc';
   if (p.x > 4 && p.x < 16 && p.z > 3) return 'kitchen';

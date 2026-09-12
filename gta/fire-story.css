@@ -1,0 +1,365 @@
+/* Chapter 02: all type, fades and framing belong to the movie's own layer. */
+.fire-loading {
+  padding: 18px 0 22px;
+}
+.fire-loading > small {
+  color: #dcbf87;
+  font-size: 10px;
+  letter-spacing: 0.23em;
+}
+.fire-loading h2 {
+  font-weight: 500;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+.fire-loading > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 25px;
+}
+.fire-film {
+  --fire-gold: #e8c989;
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  overflow: hidden;
+  color: #f1eee5;
+  pointer-events: auto;
+  user-select: none;
+  background: linear-gradient(#071015e0, transparent 28%, transparent 64%, #060e14ed);
+  font-family: inherit;
+  isolation: isolate;
+}
+.fire-film::before,
+.fire-film::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: clamp(12px, 4vh, 38px);
+  background: #050b0f;
+  pointer-events: none;
+}
+.fire-film::after {
+  inset: auto 0 0;
+}
+.fire-film header {
+  position: absolute;
+  top: max(30px, 7vh);
+  left: 4.5%;
+  right: 4.5%;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+.fire-film header small {
+  font-size: 9px;
+  color: var(--fire-gold);
+  letter-spacing: 0.2em;
+}
+.fire-film header h2 {
+  font-size: clamp(15px, 1.65vw, 21px);
+  margin: 8px 0 0;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.fire-film nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+.fire-film button,
+.fire-loading button {
+  min-height: 40px;
+  padding: 10px 13px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #152731b8;
+  border: 1px solid #d7c49735;
+  color: #eee5d6;
+  border-radius: 5px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+.fire-film button:hover {
+  background: #28404bbf;
+  border-color: #e0c38280;
+}
+.fire-film button:focus-visible,
+.fire-loading button:focus-visible {
+  outline: 2px solid #edca82;
+  outline-offset: 4px;
+}
+.fire-film [hidden],
+.fire-loading [hidden] {
+  display: none !important;
+}
+.fire-film #fire-paused {
+  position: absolute;
+  z-index: 6;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 23px 34px;
+  min-width: 220px;
+  text-align: center;
+  background: #10232fea;
+  border: 1px solid #eed39b38;
+  border-radius: 7px;
+  backdrop-filter: blur(16px);
+}
+#fire-paused small {
+  font-size: 17px;
+  color: var(--fire-gold, #e8c989);
+  letter-spacing: 0.32em;
+}
+#fire-paused p {
+  margin: 12px 0 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+#fire-title-card {
+  position: absolute;
+  left: 7%;
+  top: 28%;
+  max-width: 650px;
+  text-shadow: 0 4px 35px #00131cf0;
+  opacity: 0;
+  pointer-events: none;
+}
+#fire-title-card small {
+  font-size: 10px;
+  letter-spacing: 0.23em;
+  color: var(--fire-gold);
+}
+#fire-title-card h1 {
+  font-size: clamp(36px, 6.5vw, 84px);
+  line-height: 0.99;
+  margin: 17px 0 21px;
+  letter-spacing: -0.065em;
+  font-weight: 580;
+}
+#fire-title-card p {
+  color: #dfdfd0;
+  font-size: 13px;
+}
+#fire-subtitles {
+  position: absolute;
+  left: 50%;
+  bottom: max(72px, 11.5vh);
+  transform: translateX(-50%);
+  width: min(860px, 87%);
+  box-sizing: border-box;
+  padding: 14px 24px 17px;
+  text-align: center;
+  background: #071820d6;
+  border: 1px solid #e0c89026;
+  border-radius: 5px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 35px #05121d60;
+}
+#fire-speaker {
+  color: var(--fire-gold);
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.045em;
+  margin-bottom: 7px;
+}
+#fire-line {
+  margin: 0;
+  font-size: clamp(16px, 1.75vw, 22px);
+  line-height: 1.42;
+  font-weight: 450;
+  text-wrap: balance;
+}
+.fire-film footer {
+  position: absolute;
+  bottom: max(29px, 6.8vh);
+  left: 4.5%;
+  right: 4.5%;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  color: #b8c1c0;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.fire-progress {
+  height: 2px;
+  background: #ead6ae28;
+  flex: 1;
+}
+.fire-progress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left;
+  background: var(--fire-gold);
+}
+#fire-time {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.fire-film-success {
+  background: linear-gradient(#071015dd, #091a2452 47%, #061018ef);
+}
+.fire-result {
+  position: absolute;
+  top: 31%;
+  left: 5%;
+  right: 5%;
+  text-align: center;
+  text-shadow: 0 4px 32px #051018;
+}
+.fire-result-line {
+  display: block;
+  margin: 0 auto 25px;
+  width: 64px;
+  height: 2px;
+  background: #edca84;
+  box-shadow: 0 0 14px #efcb8160;
+}
+.fire-result > small {
+  display: block;
+  color: var(--fire-gold);
+  font-size: clamp(12px, 1.6vw, 20px);
+  letter-spacing: 0.32em;
+  font-weight: 700;
+}
+.fire-result h1 {
+  font-size: clamp(33px, 5.1vw, 70px);
+  font-weight: 550;
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+  margin: 18px 0 24px;
+}
+.fire-result strong {
+  display: block;
+  color: #f1d294;
+  font-size: clamp(11px, 1.35vw, 17px);
+  font-weight: 500;
+  letter-spacing: 0.09em;
+}
+.fire-result strong b {
+  padding: 0 12px;
+  color: #b9ad92;
+}
+.fire-result p {
+  font-size: 12px;
+  color: #cbd3cf;
+  margin-top: 16px;
+}
+.fire-result-failure > small {
+  color: #e3a586;
+  letter-spacing: 0.19em;
+}
+.fire-result-failure h1 {
+  font-size: clamp(32px, 4.8vw, 64px);
+}
+body.fire-cinematic #ui,
+body.fire-cinematic #toasts,
+body.fire-cinematic #voice-caption {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+@media (max-width: 650px) {
+  .fire-film header {
+    top: max(25px, 5vh);
+    gap: 12px;
+    flex-direction: column;
+  }
+  .fire-film header small {
+    font-size: 8px;
+    letter-spacing: 0.13em;
+  }
+  .fire-film nav {
+    justify-content: start;
+  }
+  .fire-film button {
+    font-size: 10px;
+    min-height: 38px;
+    padding: 9px 12px;
+  }
+  #fire-title-card {
+    top: 31%;
+  }
+  #fire-subtitles {
+    width: 92%;
+    padding: 12px 14px;
+    bottom: 62px;
+  }
+  #fire-line {
+    font-size: 16px;
+  }
+  .fire-film footer {
+    bottom: 33px;
+    gap: 12px;
+  }
+  .fire-film footer > span:first-child {
+    display: none;
+  }
+  .fire-result {
+    top: 34%;
+  }
+  .fire-result h1 {
+    margin-bottom: 18px;
+  }
+  .fire-result strong b {
+    padding: 0 4px;
+  }
+  .fire-result p {
+    max-width: 280px;
+    margin-inline: auto;
+    line-height: 1.4;
+  }
+}
+@media (max-height: 520px) and (min-width: 651px) {
+  .fire-film header {
+    top: 21px;
+  }
+  .fire-film header h2 {
+    margin-top: 4px;
+  }
+  .fire-film::before,
+  .fire-film::after {
+    height: 10px;
+  }
+  #fire-subtitles {
+    bottom: 40px;
+    padding: 8px 15px;
+  }
+  #fire-line {
+    font-size: 15px;
+  }
+  #fire-speaker {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .fire-film footer {
+    bottom: 19px;
+  }
+  .fire-result {
+    top: 26%;
+  }
+  .fire-result-line {
+    margin-bottom: 10px;
+  }
+  .fire-result h1 {
+    margin: 10px 0 12px;
+    font-size: 34px;
+  }
+  .fire-result p {
+    margin-top: 10px;
+  }
+  #fire-title-card {
+    top: 25%;
+  }
+  #fire-title-card h1 {
+    font-size: 42px;
+    margin: 12px 0;
+  }
+}

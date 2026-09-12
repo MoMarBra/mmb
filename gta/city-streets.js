@@ -1,5 +1,20 @@
 import * as THREE from 'three';
 import { CITY_WALKS, CITY_FOOTWAYS } from './city-layout.js';
+import { buildStreetSigns } from './street-signs.js';
+
+// Compact game-space interpretation, not GPS coordinates. The circular Munich
+// square is Karolinenplatz; Königsplatz remains a rectangular museum ensemble.
+export const KAROLINENPLATZ_RING = Object.freeze({
+  id: 'karolinenplatz',
+  x: 228,
+  z: 17,
+  islandRadius: 8.5,
+  innerRadius: 9.5,
+  outerRadius: 17.5,
+  sidewalkRadius: 20,
+  segments: 96,
+});
+export const CIRCULAR_STREETS = Object.freeze([KAROLINENPLATZ_RING]);
 
 // One metre-based source for the visible carriageways, navigation and traffic.
 // The north-west connector and the southern Altstadtring now actually join.
@@ -12,7 +27,9 @@ export const STREET_ROADS = Object.freeze(
     { id: 'benno-approach', x: -150, z: -43, w: 92, d: 12 },
     { id: 'west-connector', x: -144, z: 14.5, w: 12, d: 115 },
     { id: 'benno', x: -180, z: -61, w: 12, d: 37 },
-    { id: 'altstadt-west', x: 249, z: 160, w: 12, d: 240 },
+    { id: 'altstadt-west', x: 249, z: 148.5, w: 12, d: 263 },
+    { id: 'karolinen-south', x: 228, z: 36, w: 8, d: 12, service: true },
+    { id: 'karolinen-east', x: 245, z: 17, w: 9, d: 8, service: true },
     { id: 'altstadt-south', x: 329, z: 280, w: 172, d: 12 },
     { id: 'altstadt-north', x: 328, z: 117, w: 170, d: 12 },
     { id: 'altstadt-east', x: 410, z: 199, w: 12, d: 175 },
@@ -30,7 +47,14 @@ const contains = (r, x, z) => x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1;
 const overlaps = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.z0 < b.z1 && a.z1 > b.z0;
 
 export function isRoadPoint(x, z, roads = STREET_ROADS, margin = 0) {
-  return roads.some((r) => contains(rect(r, margin), x, z));
+  return (
+    roads.some((r) => contains(rect(r, margin), x, z)) ||
+    (roads === STREET_ROADS &&
+      CIRCULAR_STREETS.some((r) => {
+        const distance = Math.hypot(x - r.x, z - r.z);
+        return distance >= r.innerRadius - margin && distance <= r.outerRadius + margin;
+      }))
+  );
 }
 
 /** A disjoint rectangular arrangement. Each occupied area is emitted once,
@@ -60,23 +84,134 @@ function arrangement(areas, holes) {
   return { cells, xs, zs, occupancy };
 }
 
+function polygon(r) {
+  return Array.isArray(r)
+    ? r
+    : [
+        [r.x0, r.z0],
+        [r.x0, r.z1],
+        [r.x1, r.z1],
+        [r.x1, r.z0],
+      ];
+}
+function circlePolygon(r, radius) {
+  return Array.from({ length: r.segments }, (_, i) => {
+    const angle = (i * Math.PI * 2) / r.segments;
+    return [r.x + Math.cos(angle) * radius, r.z + Math.sin(angle) * radius];
+  });
+}
+function clipHalfPlane(points, a, b, inside) {
+  const distance = (p) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+  const result = [];
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i],
+      q = points[(i + 1) % points.length],
+      dp = distance(p),
+      dq = distance(q);
+    const keepP = inside ? dp >= -1e-9 : dp <= 1e-9;
+    const keepQ = inside ? dq >= -1e-9 : dq <= 1e-9;
+    if (keepP) result.push(p);
+    if (keepP !== keepQ) {
+      const t = dp / (dp - dq);
+      result.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]);
+    }
+  }
+  return result;
+}
+function boundsOf(points) {
+  return {
+    x0: Math.min(...points.map((p) => p[0])),
+    x1: Math.max(...points.map((p) => p[0])),
+    z0: Math.min(...points.map((p) => p[1])),
+    z1: Math.max(...points.map((p) => p[1])),
+  };
+}
+function subtractConvex(cells, hole) {
+  const result = [],
+    bounds = boundsOf(hole);
+  for (const cell of cells) {
+    let pending = polygon(cell);
+    if (!overlaps(boundsOf(pending), bounds)) {
+      result.push(pending);
+      continue;
+    }
+    for (let i = 0; i < hole.length && pending.length >= 3; i++) {
+      const a = hole[i],
+        b = hole[(i + 1) % hole.length];
+      const outside = clipHalfPlane(pending, a, b, false);
+      if (outside.length >= 3) result.push(outside);
+      pending = clipHalfPlane(pending, a, b, true);
+    }
+  }
+  return result;
+}
+function subtractRects(cells, holes) {
+  for (const r of holes)
+    cells = subtractConvex(cells, [
+      [r.x0, r.z0],
+      [r.x1, r.z0],
+      [r.x1, r.z1],
+      [r.x0, r.z1],
+    ]);
+  return cells;
+}
+function annulus(r, inner, outer) {
+  const a = circlePolygon(r, inner),
+    b = circlePolygon(r, outer);
+  return a.map((p, i) => [p, b[i], b[(i + 1) % a.length], a[(i + 1) % a.length]]);
+}
+function withRings(cells, holes, outerProperty = 'outerRadius', roads = []) {
+  for (const ring of CIRCULAR_STREETS) {
+    const outer = ring[outerProperty];
+    cells = subtractConvex(cells, circlePolygon(ring, outer));
+    const inner = outerProperty === 'outerRadius' ? ring.innerRadius : ring.outerRadius;
+    const strip = subtractRects(annulus(ring, inner, outer), [...holes, ...roads]);
+    cells.push(...strip);
+  }
+  return cells;
+}
+function outsideRoundaboutEdges(edges) {
+  let result = edges;
+  for (const r of CIRCULAR_STREETS) {
+    result = result.flatMap((edge) => {
+      const offset = edge.at - (edge.horizontal ? r.z : r.x);
+      if (Math.abs(offset) >= r.outerRadius + 0.05) return [edge];
+      const span = Math.sqrt((r.outerRadius + 0.05) ** 2 - offset ** 2);
+      const center = edge.horizontal ? r.x : r.z,
+        lo = center - span,
+        hi = center + span;
+      if (edge.b <= lo || edge.a >= hi) return [edge];
+      return [
+        { ...edge, b: Math.min(edge.b, lo) },
+        { ...edge, a: Math.max(edge.a, hi) },
+      ].filter((e) => e.b - e.a > 0.08);
+    });
+  }
+  return result;
+}
+
 function surface(cells, y, uvScale) {
   const positions = [],
     normals = [],
     uvs = [];
-  for (const r of cells) {
-    // Counter-clockwise from above: the normal points upwards.
-    for (const [x, z] of [
-      [r.x0, r.z0],
-      [r.x0, r.z1],
-      [r.x1, r.z1],
-      [r.x0, r.z0],
-      [r.x1, r.z1],
-      [r.x1, r.z0],
-    ]) {
-      positions.push(x, y, z);
-      normals.push(0, 1, 0);
-      uvs.push(x * uvScale, z * uvScale);
+  for (const cell of cells) {
+    let points = polygon(cell);
+    let winding = 0;
+    points.forEach((a, i) => {
+      const b = points[(i + 1) % points.length];
+      winding += a[0] * b[1] - b[0] * a[1];
+    });
+    if (winding > 0) points = points.slice().reverse();
+    for (let i = 1; i + 1 < points.length; i++) {
+      const a = points[0],
+        b = points[i],
+        c = points[i + 1];
+      if (Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) < 1e-8) continue;
+      for (const [x, z] of [a, b, c]) {
+        positions.push(x, y, z);
+        normals.push(0, 1, 0);
+        uvs.push(x * uvScale, z * uvScale);
+      }
     }
   }
   const geometry = new THREE.BufferGeometry();
@@ -92,12 +227,13 @@ export function buildRoadSurfaceGeometry(roads = STREET_ROADS, blocks = [], opti
   const areas = roads.map((r) => rect(r));
   const holes = blocks.map((r) => rect(r, options.clearance ?? 0.03));
   const result = arrangement(areas, holes);
-  return surface(result.cells, options.y ?? 0.086, options.uvScale ?? 1 / 9);
+  const cells = roads === STREET_ROADS ? withRings(result.cells, holes) : result.cells;
+  return surface(cells, options.y ?? 0.086, options.uvScale ?? 1 / 9);
 }
 
 const OPEN_SPACES = [
   { x: 167, z: -1, w: 104, d: 72 },
-  { x: 228, z: 21, w: 36, d: 33 },
+  { x: 228, z: 17, w: 44, d: 44 },
   { x: 280, z: 251, w: 78, d: 43 },
   { x: 365, z: 302, w: 102, d: 40 },
   { x: -182, z: -78, w: 79, d: 41 },
@@ -216,8 +352,20 @@ function architecture(world, kit, initialBlocks) {
     return false;
   };
   const add = (r, facing, index) => {
-    const h = 17.8 + (index % 4) * 2.35;
-    const body = kit.box(g, r.x, h / 2, r.z, r.w, h, r.d, facades[index % facades.length]);
+    const museum = r.x === 189 && r.z === 55;
+    const h = museum ? 13.6 : 17.8 + (index % 4) * 2.35;
+    const body = kit.box(
+      g,
+      r.x,
+      h / 2,
+      r.z,
+      r.w,
+      h,
+      r.d,
+      museum
+        ? new THREE.MeshStandardMaterial({ color: '#d5c7aa', roughness: 0.91 })
+        : facades[index % facades.length],
+    );
     body.name = 'Münchner Blockrand · ' + index;
     world.obstacle('city', r.x, r.z, r.w, r.d, h / 2, h, body);
     (world.cityBlocks ||= []).push({ ...r });
@@ -238,6 +386,38 @@ function architecture(world, kit, initialBlocks) {
     const dz = horizontal ? sign * (r.d / 2 + 0.06) : 0;
     kit.box(g, r.x + dx, 1.44, r.z + dz, horizontal ? 1.6 : 0.09, 2.88, horizontal ? 0.09 : 1.6, '#36494b');
     kit.box(g, r.x + dx, 2.69, r.z + dz, horizontal ? 1.25 : 0.12, 0.36, horizontal ? 0.12 : 1.25, '#b4b5a0');
+    if (museum) {
+      // South-facing museum counterpart to the Glyptothek across Königsplatz.
+      const stone = new THREE.MeshStandardMaterial({ color: '#dcd0b8', roughness: 0.86 });
+      const columnGeometry = new THREE.CylinderGeometry(0.32, 0.42, 9.1, 16);
+      for (const dx of [-9, -5.4, -1.8, 1.8, 5.4, 9]) {
+        const column = new THREE.Mesh(columnGeometry, stone);
+        column.position.set(r.x + dx, 5.15, 47.85);
+        column.castShadow = column.receiveShadow = true;
+        g.add(column);
+        world.obstacle('city', r.x + dx, 47.85, 0.84, 0.84, 5.15, 9.1, column);
+        kit.box(g, r.x + dx, 9.8, 47.85, 1, 0.3, 1, stone);
+      }
+      kit.box(g, r.x, 10.65, 48.4, 25, 1.25, 2.7, stone);
+      const shape = new THREE.Shape();
+      shape.moveTo(-12.5, 0);
+      shape.lineTo(12.5, 0);
+      shape.lineTo(0, 4.3);
+      shape.closePath();
+      const pediment = new THREE.Mesh(new THREE.ShapeGeometry(shape), stone);
+      pediment.position.set(r.x, 11.3, 47.04);
+      pediment.rotation.y = Math.PI;
+      pediment.castShadow = true;
+      g.add(pediment);
+      (world.urbanLandmarks ||= []).push({
+        id: 'antikensammlungen',
+        x: r.x,
+        z: r.z,
+        w: r.w,
+        d: r.d,
+        name: 'Staatliche Antikensammlungen',
+      });
+    }
     additions.push({ ...r });
     blocks.push({ ...r });
   };
@@ -252,38 +432,39 @@ function architecture(world, kit, initialBlocks) {
   }
   // Fill road frontages only where a real parcel is available. Narrow parcels
   // close gaps, while intersections and established entrances stay clear.
-  for (const road of STREET_ROADS) {
-    if (road.service) continue;
-    const horizontal = road.w > road.d;
-    const length = horizontal ? road.w : road.d,
-      width = horizontal ? road.d : road.w;
-    for (const side of [-1, 1])
-      for (let t = -length / 2 + 17; t < length / 2 - 11; t += 29) {
-        if (additions.length >= 76) break;
-        let placed = false;
-        for (const depth of [22, 16, 12]) {
-          for (const frontage of [26, 20, 13]) {
-            if (placed) break;
-            const offset = width / 2 + 5.5 + depth / 2;
-            const r = {
-              x: road.x + (horizontal ? t : side * offset),
-              z: road.z + (horizontal ? side * offset : t),
-              w: horizontal ? frontage : depth,
-              d: horizontal ? depth : frontage,
-            };
-            if (!blocked(r)) {
-              add(
-                r,
-                horizontal ? (side < 0 ? 'south' : 'north') : side < 0 ? 'east' : 'west',
-                additions.length,
-              );
-              placed = true;
+  for (const phase of [0, 14.5])
+    for (const road of STREET_ROADS) {
+      if (road.service) continue;
+      const horizontal = road.w > road.d;
+      const length = horizontal ? road.w : road.d,
+        width = horizontal ? road.d : road.w;
+      for (const side of [-1, 1])
+        for (let t = -length / 2 + 17 + phase; t < length / 2 - 11; t += 29) {
+          if (additions.length >= 62) break;
+          let placed = false;
+          for (const depth of [22, 16, 12]) {
+            for (const frontage of [26, 20, 13]) {
+              if (placed) break;
+              const offset = width / 2 + 5.5 + depth / 2;
+              const r = {
+                x: road.x + (horizontal ? t : side * offset),
+                z: road.z + (horizontal ? side * offset : t),
+                w: horizontal ? frontage : depth,
+                d: horizontal ? depth : frontage,
+              };
+              if (!blocked(r)) {
+                add(
+                  r,
+                  horizontal ? (side < 0 ? 'south' : 'north') : side < 0 ? 'east' : 'west',
+                  additions.length,
+                );
+                placed = true;
+              }
             }
+            if (placed) break;
           }
-          if (placed) break;
         }
-      }
-  }
+    }
   return { blocks, additions };
 }
 
@@ -328,6 +509,9 @@ function avenueTrees(world, kit, blocks) {
       return h && h.x <= 0.4 && h.z <= 0.4 && h.y >= 1.3 && b.position.y > 1;
     })
     .map((b) => ({ x: b.position.x, z: b.position.z }));
+  // Short signposts no longer pass the tall-trunk collider heuristic. Reserve
+  // every authored sign explicitly so tree crowns cannot hide its lettering.
+  existingTrees.push(...(world.streetSigns || []).map(({ x, z }) => ({ x, z })));
   const noFurniture = [
     { x: 54, z: 48, w: 69, d: 15 },
     { x: -144, z: 72, w: 33, d: 33 },
@@ -392,7 +576,8 @@ export function buildCityStreets(world, kit) {
   const holes = blocks.map((r) => rect(r, 0.035));
   const grid = arrangement(roads, holes);
   const materials = streetMaterials();
-  const roadMesh = new THREE.Mesh(surface(grid.cells, 0.086, 1 / 9), materials.asphalt);
+  const carriagewayCells = withRings(grid.cells, holes);
+  const roadMesh = new THREE.Mesh(surface(carriagewayCells, 0.086, 1 / 9), materials.asphalt);
   roadMesh.name = 'Continuous Munich asphalt · no overlapping intersections';
   roadMesh.receiveShadow = true;
   g.add(roadMesh);
@@ -400,11 +585,17 @@ export function buildCityStreets(world, kit) {
     STREET_ROADS.map((r) => rect(r, 4.6)),
     [...roads, ...holes, ...CITY_FOOTWAYS.map((r) => rect(r, 0.01))],
   );
-  const pavementMesh = new THREE.Mesh(surface(sidewalks.cells, 0.101, 1 / 4), materials.paving);
+  const pavementCells = withRings(
+    sidewalks.cells,
+    [...holes, ...CITY_FOOTWAYS.map((r) => rect(r, 0.01))],
+    'sidewalkRadius',
+    roads,
+  );
+  const pavementMesh = new THREE.Mesh(surface(pavementCells, 0.101, 1 / 4), materials.paving);
   pavementMesh.name = 'Continuous granite sidewalks · exterior road edges';
   pavementMesh.receiveShadow = true;
   g.add(pavementMesh);
-  const edges = curbSegments(grid);
+  const edges = outsideRoundaboutEdges(curbSegments(grid));
   for (const e of edges) {
     const length = e.b - e.a;
     if (length < 0.25) continue;
@@ -438,6 +629,7 @@ export function buildCityStreets(world, kit) {
         )
       )
         continue;
+      if (CIRCULAR_STREETS.some((r) => Math.hypot(x - r.x, z - r.z) < r.outerRadius + 2)) continue;
       const paintRect = { x, z, w: horizontal ? 3.4 : 0.13, d: horizontal ? 0.13 : 3.4 };
       if (holes.some((b) => overlaps(rect(paintRect, 0.1), b))) continue;
       // Overlapping parallel source rectangles have only one owner for road paint.
@@ -446,14 +638,27 @@ export function buildCityStreets(world, kit) {
       markings++;
     }
   }
+  for (const ring of CIRCULAR_STREETS) {
+    const outerKerb = subtractRects(
+      annulus(ring, ring.outerRadius - 0.08, ring.outerRadius + 0.13),
+      STREET_ROADS.map((r) => rect(r, 0.16)),
+    );
+    const innerKerb = annulus(ring, ring.innerRadius - 0.12, ring.innerRadius + 0.1);
+    const kerbMesh = new THREE.Mesh(surface([...outerKerb, ...innerKerb], 0.118, 1 / 4), materials.curb);
+    kerbMesh.receiveShadow = true;
+    kerbMesh.name = 'Karolinenplatz · rounded kerbs';
+    g.add(kerbMesh);
+  }
+  buildStreetSigns(world);
   const greenery = avenueTrees(world, kit, blocks);
   world.streetNetwork = {
     roads: STREET_ROADS,
+    rings: CIRCULAR_STREETS,
     frontages: additions,
     trees: greenery.trees,
     lamps: greenery.lamps,
-    asphaltCells: grid.cells.length,
-    sidewalkCells: sidewalks.cells.length,
+    asphaltCells: carriagewayCells.length,
+    sidewalkCells: pavementCells.length,
     curbSegments: edges.length,
     markings,
     roadMesh,

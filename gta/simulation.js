@@ -1,3 +1,4 @@
+import { freshFireStory, normalizeFireStory } from './fire-state.js';
 import { freshWorkshopStory, normalizeWorkshopStory } from './workshop-state.js';
 import { CAREERS, RESTAURANTS, TASKS, ACHIEVEMENTS, clamp } from './data.js';
 export const SAVE_KEY = 'bbe-munich-life-v1';
@@ -13,6 +14,7 @@ export const freshState = () => ({
   vehicleDamage: {},
   wetness: 0,
   workshopStory: freshWorkshopStory(),
+  fireStory: freshFireStory(),
   courier: { active: false },
   courierCompleted: 0,
   money: 32.8,
@@ -217,6 +219,7 @@ export class Simulation {
           .map(([id, v]) => [id, { health: clamp(v.health, 10, 100) }]),
       );
       base.workshopStory = normalizeWorkshopStory(base.workshopStory);
+      base.fireStory = normalizeFireStory(base.fireStory);
       const c = base.courier;
       base.courier =
         c?.active && Number.isFinite(c.remaining) && c.remaining > 0

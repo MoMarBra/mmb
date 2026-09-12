@@ -1836,5 +1836,420 @@
         "story_underscore"
       ]
     }
+  },
+  "fireStory": {
+    "chapter": "Ticket in Flammen",
+    "type": "Original fictional German game dialogue",
+    "syntheticVoices": true,
+    "source": "Locally rendered Windows System.Speech using Microsoft Stefan and Microsoft Katja. These are synthetic voices, not recordings of real people and not imitations of named individuals.",
+    "lines": [
+      {
+        "id": "fire_intro_01",
+        "actor": "Lena",
+        "text": "Der Laptop brennt schon wieder!",
+        "syntheticVoice": "Microsoft Katja",
+        "rate": 0,
+        "duration": 2.3748,
+        "sha256": "b4632d2b2781a79a1c92df231b97a50c5d18003614afb09028855b75965c18f4",
+        "peakDbfs": -6.07
+      },
+      {
+        "id": "fire_intro_02",
+        "actor": "Tobias",
+        "text": "Das kann nur Empower gewesen sein. Empower ist schuld.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 0,
+        "duration": 5.3755,
+        "sha256": "bafdb8024e376e88eaee9daaaa35ca4618afcb322aa8641af11932f6926ed127",
+        "peakDbfs": -4.49
+      },
+      {
+        "id": "fire_intro_03",
+        "actor": "player",
+        "text": "Ist das die neue Brandstrategie?",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 1,
+        "duration": 2.3428,
+        "sha256": "0eec9cbd2ce0ed82e94acc1098e30e0f68d4147cd1296e62d8ac59a5210ab9c9",
+        "peakDbfs": -5.01
+      },
+      {
+        "id": "fire_intro_04",
+        "actor": "lukas",
+        "text": "Abstand halten. Tobias, sichern!",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 4.874,
+        "sha256": "b3eb79629eaffceb36de89f468cc74ed52fc307810c36df0425fafe59b1c563f",
+        "peakDbfs": -4.44
+      },
+      {
+        "id": "fire_intro_05",
+        "actor": "Lena",
+        "text": "Ticketpriorität: leicht flambiert.",
+        "syntheticVoice": "Microsoft Katja",
+        "rate": 0,
+        "duration": 3.4393,
+        "sha256": "bafa30da9290238b00238c547631787bc50003233569c70aa156c920c9b757e8",
+        "peakDbfs": -4.43
+      },
+      {
+        "id": "fire_intro_06",
+        "actor": "lukas",
+        "text": "Hol Benjamin aus der IT. Du hast sechzig Sekunden!",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 5.6616,
+        "sha256": "319966b1d2687e25667d3dba89aa194bac08294be5b822e71c98a42512b1e818",
+        "peakDbfs": -4.47
+      },
+      {
+        "id": "fire_intro_07",
+        "actor": "player",
+        "text": "Ich bin unterwegs.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 1,
+        "duration": 1.7441,
+        "sha256": "65658ece55f6a053a8ae01384aa8109e8e0c4ff91b1d3c8d629261cc1ec3c04a",
+        "peakDbfs": -4.68
+      },
+      {
+        "id": "fire_run_01",
+        "actor": "player",
+        "text": "Zur IT. Bitte heute ohne Warteschleife.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 1,
+        "duration": 3.7781,
+        "sha256": "8b4ce8801868ef6c6a62cd253c80afa27f46c893c007e15e44fdd7c60b0d3cdf",
+        "peakDbfs": -4.44
+      },
+      {
+        "id": "fire_run_02",
+        "actor": "Tobias",
+        "text": "Benjamin ist im IT-Büro. Folge der Markierung.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 0,
+        "duration": 4.61,
+        "sha256": "594360848a25629c02e200e26c4b50cf736c74cb5611e94208445da820c76814",
+        "peakDbfs": -4.42
+      },
+      {
+        "id": "fire_run_03",
+        "actor": "Lena",
+        "text": "Der Kunde fragt, ob die Folie schon warmgelaufen ist.",
+        "syntheticVoice": "Microsoft Katja",
+        "rate": 0,
+        "duration": 4.2935,
+        "sha256": "5d9f6bfc53a356648f1dd90fe2752732ad3c5b7a52e50632cb498cdd50bd79b5",
+        "peakDbfs": -5.73
+      },
+      {
+        "id": "fire_run_04",
+        "actor": "player",
+        "text": "Ja. Die Präsentation hat jetzt einen Brennpunkt.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 1,
+        "duration": 4.2504,
+        "sha256": "464e85b0585468ba424d660f7ecaca8c36d60f2a1724136b7fb96bfe3030db7b",
+        "peakDbfs": -4.45
+      },
+      {
+        "id": "fire_run_05",
+        "actor": "Tobias",
+        "text": "Benjamin mitbringen. Keinen Verbesserungsvorschlag.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 0,
+        "duration": 4.802,
+        "sha256": "6611103da01cf886aa168b9c2de8b600068338cde99c517c37deaa2bd10d5b48",
+        "peakDbfs": -4.45
+      },
+      {
+        "id": "fire_warn_30",
+        "actor": "lukas",
+        "text": "Noch dreißig Sekunden. Benjamin zuerst.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 4.9773,
+        "sha256": "6e74c8b9ff25465f96b7cceeb6ad6c87a13fc8648054426770dad3c67eca41c3",
+        "peakDbfs": -4.46
+      },
+      {
+        "id": "fire_warn_15",
+        "actor": "Lena",
+        "text": "Fünfzehn Sekunden! Wir brauchen Benjamin!",
+        "syntheticVoice": "Microsoft Katja",
+        "rate": 0,
+        "duration": 4.0526,
+        "sha256": "94c1a272eb3b21bd695a5514c804b44ecc7c63f2fb64c7311db9b1393d075635",
+        "peakDbfs": -5.9
+      },
+      {
+        "id": "fire_warn_10",
+        "actor": "Tobias",
+        "text": "Zehn Sekunden. Das ist jetzt wirklich dringend.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 0,
+        "duration": 4.4849,
+        "sha256": "eb4c592af9b0d0a439a8141f0d9ac427d076816511dbee99aa7aafeca3dd43fb",
+        "peakDbfs": -4.45
+      },
+      {
+        "id": "fire_rescue_01",
+        "actor": "Tobias",
+        "text": "Moment. Wieso kommt Benjamin von oben?",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 0,
+        "duration": 4.2596,
+        "sha256": "9058fcbdd20072f18597d298314369c5b22ae93dbc40c781b3c0e1e67af8c78e",
+        "peakDbfs": -4.43
+      },
+      {
+        "id": "fire_rescue_02",
+        "actor": "benjamin",
+        "text": "Für dieses Ticket nehme ich den direkten Eskalationsweg.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 4.7032,
+        "sha256": "6c69f3505998b62abaeb3c4fa33c356e3ced814c7fcae13ad8dedce55aecebc8",
+        "peakDbfs": -5.35
+      },
+      {
+        "id": "fire_rescue_03",
+        "actor": "Lena",
+        "text": "Da ist der Feuerlöscher. Endlich ein Tool, das liefert.",
+        "syntheticVoice": "Microsoft Katja",
+        "rate": 0,
+        "duration": 4.9602,
+        "sha256": "a198cd6368ec542fbbad323f21cd2c2711755392040ec5dd6988d6c5306ab124",
+        "peakDbfs": -4.5
+      },
+      {
+        "id": "fire_rescue_04",
+        "actor": "benjamin",
+        "text": "Benjamin steht für: Immer da fürs Team!",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 4.4354,
+        "sha256": "f34dfb35d9b4878ac3dbf39f02cba999285a5ac8984ae25616f96df0f4427fba",
+        "peakDbfs": -4.52
+      },
+      {
+        "id": "fire_rescue_05",
+        "actor": "player",
+        "text": "Das ist die erste Lösung, die nicht als PDF kommt.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 1,
+        "duration": 4.054,
+        "sha256": "0b23e145f60090358f50e030ea4d66109147ad1dbc4d4f63cf25c5a57f80a67b",
+        "peakDbfs": -4.52
+      },
+      {
+        "id": "fire_rescue_06",
+        "actor": "Tobias",
+        "text": "Feuer aus. Und die Folie hat sogar weniger Text.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 0,
+        "duration": 4.8774,
+        "sha256": "fe67124a793974f34b964ec82cd7611c5946c0d11ade55ed9e3ded45b447a068",
+        "peakDbfs": -4.43
+      },
+      {
+        "id": "fire_rescue_07",
+        "actor": "lukas",
+        "text": "Danke, Benjamin. Genau so sieht Löschungskompetenz aus.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 6.4928,
+        "sha256": "873467586f3c57b6ebb7028a3b438ecfc356f22527a4484e44c1cdb876932756",
+        "peakDbfs": -4.43
+      },
+      {
+        "id": "fire_rescue_08",
+        "actor": "benjamin",
+        "text": "Ich sichere das Gerät. Ihr atmet erst einmal durch.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 5.336,
+        "sha256": "6d3f7ffe00ffaa3ed4c614f0e94d28612dfdf3f082f866104bc9c70cf6f5ed40",
+        "peakDbfs": -5.03
+      },
+      {
+        "id": "fire_success_01",
+        "actor": "player",
+        "text": "Wir müssen echt dieses Empower loswerden.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 1,
+        "duration": 3.0179,
+        "sha256": "890c9701c0bf91818459e7ab1ddeeb8aa9312406edf78dc807215fae95a8c672",
+        "peakDbfs": -4.59
+      },
+      {
+        "id": "fire_failure_01",
+        "actor": "Tobias",
+        "text": "Zu spät. Das Ticket hat sich selbst eskaliert.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": 0,
+        "duration": 4.5996,
+        "sha256": "614dacdcf7281e67c2aa36408912d60743198c8b94a065ff31028bf29fd0e31d",
+        "peakDbfs": -4.45
+      },
+      {
+        "id": "fire_failure_02",
+        "actor": "lukas",
+        "text": "Alle raus, keiner verletzt. Wir üben den Weg zur IT noch einmal.",
+        "syntheticVoice": "Microsoft Stefan",
+        "rate": -1,
+        "duration": 6.866,
+        "sha256": "fc3573ad36620c56309e91ab3ed48c9a93b12ae0791e7c913ed80df70b42933d",
+        "peakDbfs": -4.42
+      }
+    ],
+    "music": [
+      {
+        "id": "fire_tension",
+        "title": "Ticketpriorität: leicht flambiert",
+        "group": "music",
+        "loop": true,
+        "authorship": "Original composition and procedural audio synthesis for the fictional game, created from oscillators and noise. No external recordings, sampled choir, pre-existing music, or real-person voice imitation.",
+        "passed": true,
+        "duration": 16,
+        "frames": 705600,
+        "peak": 0.1582358181476593,
+        "peakDbFS": -16.013904062384093,
+        "truePeakDbTP": -16,
+        "integratedLUFS": -28.6,
+        "rms": 0.03598194004807645,
+        "dc": -0.000011816349832530023,
+        "boundary": [
+          0.0026996188831844847,
+          0.0006257646386416127
+        ],
+        "clipped": 0,
+        "bytes": 385706,
+        "sha256": "c0703f437990728d2eecaf492601f3aa404b66b21dd116ee4ac17e905b79bba0",
+        "processing": "loudnorm=I=-28:TP=-3:LRA=9,alimiter=limit=0.8:level=false"
+      },
+      {
+        "id": "fire_angel",
+        "title": "Der direkte Eskalationsweg",
+        "group": "music",
+        "loop": false,
+        "authorship": "Original composition and procedural audio synthesis for the fictional game, created from oscillators and noise. No external recordings, sampled choir, pre-existing music, or real-person voice imitation.",
+        "passed": true,
+        "duration": 9,
+        "frames": 396900,
+        "peak": 0.196349635720253,
+        "peakDbFS": -14.139398002445311,
+        "truePeakDbTP": -14.1,
+        "integratedLUFS": -25.6,
+        "rms": 0.036574773571442974,
+        "dc": -1.1552486190594854e-7,
+        "boundary": [
+          3.2258211746238885e-7,
+          7.464145852509319e-7
+        ],
+        "clipped": 0,
+        "bytes": 217678,
+        "sha256": "cbb0616a3c498812e4e01375de80524ce01556449f7b6a36d52e2a2d068b9548",
+        "processing": "loudnorm=I=-25:TP=-3:LRA=9,alimiter=limit=0.8:level=false"
+      },
+      {
+        "id": "fire_complete",
+        "title": "Gelöscht. Gelöst.",
+        "group": "music",
+        "loop": false,
+        "authorship": "Original composition and procedural audio synthesis for the fictional game, created from oscillators and noise. No external recordings, sampled choir, pre-existing music, or real-person voice imitation.",
+        "passed": true,
+        "duration": 5,
+        "frames": 220500,
+        "peak": 0.4738275110721588,
+        "peakDbFS": -6.48759454301361,
+        "truePeakDbTP": -6.5,
+        "integratedLUFS": -19.9,
+        "rms": 0.07520948435724506,
+        "dc": -0.00004283912428593338,
+        "boundary": [
+          4.786621587982154e-8,
+          8.278574341602507e-7
+        ],
+        "clipped": 0,
+        "bytes": 121750,
+        "sha256": "c7be77283d5fd4022b3a0f4d8a4aa2f861649d4927a30ab3acdef226b0a5da00",
+        "processing": "loudnorm=I=-19:TP=-3:LRA=9,alimiter=limit=0.8:level=false"
+      },
+      {
+        "id": "fire_crackle",
+        "title": "Kleiner Bürobrand",
+        "group": "effect",
+        "loop": true,
+        "authorship": "Original composition and procedural audio synthesis for the fictional game, created from oscillators and noise. No external recordings, sampled choir, pre-existing music, or real-person voice imitation.",
+        "passed": true,
+        "duration": 8,
+        "frames": 352800,
+        "peak": 0.2546652555465698,
+        "peakDbFS": -11.880606051939864,
+        "truePeakDbTP": -11.6,
+        "integratedLUFS": -26.8,
+        "rms": 0.030481076189789003,
+        "dc": -0.0000035012344710487995,
+        "boundary": [
+          0.007637795784830814,
+          0.0031889387801129487
+        ],
+        "clipped": 0,
+        "bytes": 193847,
+        "sha256": "7c82f8b4f4f6c43fc93c604862b866d5aaa0689a5c03d80746d1ce73db8998e2",
+        "processing": "loudnorm=I=-26:TP=-3:LRA=9,alimiter=limit=0.8:level=false"
+      },
+      {
+        "id": "fire_extinguish",
+        "title": "Feuerlöscher: zwei kontrollierte Stöße",
+        "group": "effect",
+        "loop": false,
+        "authorship": "Original composition and procedural audio synthesis for the fictional game, created from oscillators and noise. No external recordings, sampled choir, pre-existing music, or real-person voice imitation.",
+        "passed": true,
+        "duration": 4,
+        "frames": 176400,
+        "peak": 0.189100444316864,
+        "peakDbFS": -14.466149014412208,
+        "truePeakDbTP": -14.5,
+        "integratedLUFS": -21.3,
+        "rms": 0.04160091960545426,
+        "dc": 0.000001942978020709601,
+        "boundary": [
+          0,
+          0
+        ],
+        "clipped": 0,
+        "bytes": 97948,
+        "sha256": "32ee392c9a5224684f47b8fc9799d710e015217dad1e2a0715c849b830fcb841",
+        "processing": "loudnorm=I=-21:TP=-3:LRA=9,alimiter=limit=0.8:level=false"
+      },
+      {
+        "id": "fire_alert",
+        "title": "Flambiertes Ticket: Benachrichtigung",
+        "group": "effect",
+        "loop": false,
+        "authorship": "Original composition and procedural audio synthesis for the fictional game, created from oscillators and noise. No external recordings, sampled choir, pre-existing music, or real-person voice imitation.",
+        "passed": true,
+        "duration": 0.8,
+        "frames": 35280,
+        "peak": 0.24172061681747437,
+        "peakDbFS": -12.333726123976863,
+        "truePeakDbTP": -12.3,
+        "integratedLUFS": -20.2,
+        "rms": 0.061280750541011626,
+        "dc": -0.00028786241498422754,
+        "boundary": [
+          0.00003648342408268945,
+          0.000036028067597726476
+        ],
+        "clipped": 0,
+        "bytes": 20830,
+        "sha256": "19b934eafaa6a0c96d94a8132fd320460e1ac66c6e27a8fbacc817a1f68ba028",
+        "processing": "loudnorm=I=-20:TP=-3:LRA=9,alimiter=limit=0.8:level=false"
+      }
+    ],
+    "validation": "All final MP3 assets independently decoded and checked for clipping, finite samples, exact duration, loop boundaries and measured loudness. Music and effects are original procedural synthesis; the choir is synthesized, not a sampled choir recording."
   }
 }

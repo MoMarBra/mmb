@@ -36,10 +36,7 @@ export class CourierMission {
     this.hooked = false;
     if (this.g.sim.s.courier.active) {
       this.g.sim.s.courier.mode = 'carry';
-      this.g.toast(
-        'Koffer wieder am BBE-Arbeitsplatz.',
-        'Der gespeicherte Auftrag und seine Restzeit wurden übernommen.',
-      );
+      this.g.toast('Eilauftrag fortgesetzt.', 'Koffer am BBE-Arbeitsplatz.');
     }
     window.addEventListener('keydown', (e) => {
       if (e.repeat || this.g.modal || this.g.busy || !this.g.started || !this.a.active) return;
@@ -48,9 +45,7 @@ export class CourierMission {
         this.lowered = !this.lowered;
         this.g.toast(
           'Seilwinde',
-          this.lowered
-            ? 'Seil wird ausgefahren. X hängt den nahen Koffer ein.'
-            : 'Seil wird eingeholt. X löst die Last.',
+          this.lowered ? 'Ausgefahren · X einhängen' : 'Eingeholt · X lösen',
         );
       }
       if (e.code === 'KeyX' && this.a.vehicle?.type === 'helicopter') this.attach();
@@ -60,15 +55,16 @@ export class CourierMission {
     return this.g.sim.s.courier;
   }
   brief() {
-    if (this.g.workshop?.active) {
+    if (this.g.workshop?.active || this.g.fireStory?.active) {
       this.g.toast(
-        'Lukas wartet auf den Workshop-Koffer.',
-        'Schließe zuerst die Story am Marienplatz ab. Danach ist der Eilauftrag wieder verfügbar.',
+        this.g.fireStory?.active
+          ? 'Zuerst Ticket in Flammen abschließen.'
+          : 'Zuerst den Workshop-Koffer abgeben.',
       );
       return;
     }
     if (this.state.active) {
-      this.g.toast('Der Kunde wartet bereits.', 'M zeigt den Dachtermin. B setzt den Koffer ab.');
+      this.g.toast('Koffer zum Kunden bringen.', 'M · Route');
       return;
     }
     this.g.audio.voices?.say('Lena', 'mission.briefing', {
@@ -77,8 +73,8 @@ export class CourierMission {
       priority: 4,
     });
     this.g.open(
-      'Eilauftrag · Der Koffer muss zum Kunden',
-      `<div class="eyebrow">BBE · AUSSENTERMIN</div><h2>Ein Koffer. Drei Wege. Sechs Minuten.</h2><p>Auf der Dachterrasse hinter der BBE beginnt gleich eine Präsentation. Im Koffer liegen die Unterlagen. Bitte möglichst zusammenhängend anliefern.</p><div class="three-col"><article class="card"><h3>Straße</h3><p>Zu Fuß, per Rad oder im Auto zum Kundenempfang. Der Empfang bringt den Koffer nach oben.</p></article><article class="card"><h3>Dächer</h3><p>Feuerleiter an der BBE-Seitenwand zum Hof, Treppe und zwei Stege bis zur Kundenterrasse. Direkte Übergabe bringt einen Bonus.</p></article><article class="card"><h3>Seilwinde</h3><p>Den Koffer am Landeplatz mit B absetzen. Im Helikopter Q für die Winde, X zum Anhängen oder Lösen. Über der Terrasse absetzen.</p></article></div><p>Honorar: 90 € · Dachbonus: 35 € · Restzeitbonus bis 30 € · 45 XP</p><div id="dialogue-voice-slot"></div><button id="courier-routes">Mara erklärt die Wege</button><button class="primary" id="courier-accept">Koffer übernehmen</button>`,
+      'Eilauftrag · Koffer',
+      `<div class="mission-brief"><p>Koffer zum Kunden hinter der BBE bringen.</p><p class="mission-row-meta">6 min · 90 € + Bonus · 45 XP · +4 REP</p><button class="primary" id="courier-accept">Koffer übernehmen</button><details class="mission-help"><summary>Wege &amp; Bonus</summary><p class="mission-row-meta">Empfang, Dachweg oder Seilwinde.<br>Dach: +35 € · Restzeit: bis +30 €</p><button id="courier-routes">Mara fragen</button></details><div id="dialogue-voice-slot"></div></div>`,
       { pause: true },
     );
     document.getElementById('courier-routes').onclick = () =>
@@ -106,10 +102,7 @@ export class CourierMission {
         z: COURIER_DESTINATION.z,
       };
       this.g.sim.save();
-      this.g.toast(
-        'Die Uhr läuft.',
-        '„Der Koffer ist wichtig. Der Koffer mit dem Kunden noch wichtiger.“',
-      );
+      this.g.toast('Eilauftrag gestartet.', '6 min · Koffer zum Kunden bringen.');
     };
   }
   drop() {
@@ -135,7 +128,7 @@ export class CourierMission {
       this.state.mode = 'ground';
       this.state.zone = 'city';
       this.state.position = this.mesh.position.toArray();
-      this.g.toast('Last gelöst.', 'Auf der Terrasse liegt der Koffer sicher; E übergibt ihn.');
+      this.g.toast('Last gelöst.', 'E · Koffer übergeben');
       return;
     }
     if (this.state.mode === 'ground' || this.state.mode === 'snagged') {
@@ -143,18 +136,14 @@ export class CourierMission {
         this.hooked = true;
         this.state.mode = 'winch';
         this.state.air = true;
-        this.g.toast('Koffer eingehängt.', 'Ruhig fliegen. Gebäude und Balkone brauchen Abstand.');
-      } else
-        this.g.toast(
-          'Koffer außerhalb der Reichweite.',
-          'Winde mit Q ausfahren und den Haken näher an den Koffer bringen.',
-        );
+        this.g.toast('Koffer eingehängt.');
+      } else this.g.toast('Koffer außer Reichweite.', 'Q · Winde näher heranführen');
     }
   }
   deliver(route) {
     const s = this.state;
     if (!s.active) {
-      this.g.toast('Kein aktiver Eilauftrag.', 'Der Koffer wartet bei der BBE am Empfang.');
+      this.g.toast('Eilauftrag am BBE-Empfang starten.');
       return;
     }
     if (
@@ -166,10 +155,7 @@ export class CourierMission {
         ) < 4
       )
     ) {
-      this.g.toast(
-        'Die Unterlagen fehlen noch.',
-        'Den Koffer aufnehmen oder mit der Winde auf der Terrasse absetzen.',
-      );
+      this.g.toast('Koffer fehlt.', 'Aufnehmen oder auf der Terrasse absetzen.');
       return;
     }
     const earned = 90 + (route === 'roof' ? 35 : 0) + Math.floor(s.remaining / 12),
@@ -188,10 +174,7 @@ export class CourierMission {
     this.w.makeWorkstation();
     this.g.sim.change('rep', 4);
     this.g.sim.save();
-    this.g.toast(
-      'Unterlagen da. Kunde erleichtert.',
-      '+' + earned + ' € · +45 XP · „Bitte jetzt noch schnell auf einen One-Pager kürzen.“',
-    );
+    this.g.toast('Koffer geliefert.', '+' + earned + ' € · +45 XP · +4 REP');
     this.g.audio.play('success');
     this.g.audio.voices?.say('Lena', 'mission.success');
   }
@@ -212,7 +195,7 @@ export class CourierMission {
       this.state.mode = 'carry';
       this.hooked = false;
       this.g.sim.save();
-      this.g.toast('Koffer wieder in der Hand.', 'Die Präsentation lebt noch.');
+      this.g.toast('Koffer aufgenommen.');
       return true;
     }
     return false;
@@ -266,10 +249,7 @@ export class CourierMission {
       this.hooked = false;
       this.g.sim.change('rep', -2);
       this.g.sim.save();
-      this.g.toast(
-        'Der Termin ist vorbei.',
-        'Am BBE-Empfang lässt sich ein neuer Versuch starten.',
-      );
+      this.g.toast('Zeit abgelaufen.', 'Neustart am BBE-Empfang.');
       return;
     }
     if (s.mode === 'carry' && car) {
@@ -277,10 +257,7 @@ export class CourierMission {
         s.mode = 'ground';
         s.zone = 'city';
         s.position = [car.mesh.position.x + 4, 0, car.mesh.position.z];
-        this.g.toast(
-          'Koffer am Landeplatz abgestellt.',
-          'Für den Lufttransport: Q Winde ausfahren · X anhängen.',
-        );
+        this.g.toast('Koffer am Landeplatz.', 'Q · Winde  |  X · Anhängen');
       } else {
         s.mode = 'vehicle';
       }
@@ -327,10 +304,7 @@ export class CourierMission {
         this.hooked = false;
         s.mode = 'snagged';
         s.position = [CITY_LAYOUT.balcony.x, CITY_LAYOUT.balcony.y, CITY_LAYOUT.balcony.z];
-        this.g.toast(
-          'Die Last hängt am Balkon fest.',
-          'Wartungsleiter am BBE-Hof benutzen und den Koffer mit E bergen.',
-        );
+        this.g.toast('Koffer am Balkon bergen.', 'Hofleiter nehmen · E aufnehmen');
       }
     } else {
       this.mesh.position.fromArray(s.position);

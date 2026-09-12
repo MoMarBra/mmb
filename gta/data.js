@@ -223,6 +223,7 @@ export const TASKS = [
   },
 ];
 export const ACHIEVEMENTS = [
+  ['fire-story', 'Himmlischer Hotfix', 'Den brennenden Laptop rechtzeitig zu Benjamin gebracht.'],
   [
     'workshop-story',
     'Persönlich geliefert.',

@@ -6,6 +6,7 @@ const esc = (value) =>
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
   );
 const names = {
+  benjamin: 'Benjamin · IT',
   lukas: 'Lukas Fleischmann',
   clara: 'Clara · Auftraggeberin',
   officer: 'Polizei · Funk',

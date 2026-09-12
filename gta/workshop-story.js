@@ -20,13 +20,13 @@ const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const ordinaryCar = (car) => car && !['bike', 'helicopter'].includes(car.type);
 const MEET = { x: 34, z: 45.5 };
 const objectives = {
-  intro: 'Lukas Fleischmann hat einen Auftrag für dich.',
-  meet: 'Verlasse die BBE und sprich draußen mit Tobias. E: ansprechen.',
-  car: 'Steige in den bereitgestellten Wagen. Tobias nimmt auf dem Beifahrersitz Platz.',
-  drive: 'Fahre mit Tobias zum Marienplatz. Folge den Wegpunkten. E: aussteigen, sobald du stehst.',
-  arrive: 'Nimm den Koffer mit zu Clara auf dem Marienplatz. E: persönlich übergeben.',
-  handoff: 'Clara prüft den Workshop-Koffer.',
-  workshop: 'Später am Abend: Der Workshop beginnt.',
+  intro: 'Mit Lukas sprechen.',
+  meet: 'Tobias vor der BBE treffen.',
+  car: 'Mit Tobias ins Auto steigen.',
+  drive: 'Mit Tobias zum Marienplatz fahren.',
+  arrive: 'Koffer an Clara übergeben.',
+  handoff: 'Clara prüft den Koffer.',
+  workshop: 'Workshop begleiten.',
 };
 
 export class WorkshopStory {
@@ -83,16 +83,20 @@ export class WorkshopStory {
     if (!this.state.log.includes(key)) this.state.log.push(key);
   }
   entryCard() {
-    return `<article class="card story-entry"><span class="tag gold">BBE STORIES · VOLL VERTONT</span><h3>Nur noch kurz zum Marienplatz.</h3><p>${this.active ? esc(objectives[this.state.phase]) : 'Lukas Fleischmann. Ein Workshop-Koffer. Ein Kollege mit konstruktiven Zwischenrufen.'}</p><div class="story-entry-foot"><span>${this.state.completed ? 'Kapitel abgeschlossen' : '180 € · 70 XP · +6 Reputation'}</span><button data-workshop-open class="primary">${this.active ? 'Story fortsetzen' : this.state.completed ? 'Kapitel ansehen' : 'Zum Chef'}</button></div></article>`;
+    return `<button type="button" class="mission-row mission-open" data-workshop-open><span class="mission-row-title">Nur noch kurz zum Marienplatz.</span><span aria-hidden="true">↗</span></button>`;
   }
   brief() {
+    if (this.g.fireStory?.active) {
+      this.g.toast('Zuerst Ticket in Flammen abschließen.');
+      return;
+    }
     if (this.cinematic || this.film.loading) return;
     const s = this.state,
       atOffice = this.w.zone === 'office';
     const history = s.log.map((key) => WORKSHOP_LINES.find((l) => l.key === key)).filter(Boolean);
     this.g.open(
       'Nur noch kurz zum Marienplatz.',
-      `<div class="story-brief"><span class="tag gold">BBE STORIES · KAPITEL 01</span><h2>Ein Auftrag mit Sitzplatzgarantie.</h2><p>Lukas Fleischmann erwartet dich in seinem Büro. Clara braucht den Workshop-Koffer am Marienplatz. Tobias fährt mit. Der Abend endet mit einem Workshop bei der Frauenkirche.</p><div class="story-chapters"><span>01 · Beim Chef</span><span>02 · Gemeinsam durch München</span><span>03 · Persönlich geliefert</span><span>04 · Der Abendworkshop</span></div><p class="muted">30 Sekunden Eröffnung, danach freie Fahrt. Alle Szenen sind pausierbar und überspringbar. Fortschritt wird gespeichert. Die Handlung und der Workshopraum sind fiktiv.</p>${this.g.sim.s.courier.active ? '<p class="hint-inline">Liefere zuerst den laufenden Eilkoffer. Danach hat Lukas Zeit für diesen Auftrag.</p>' : `<button id="workshop-start" class="primary">${this.active && this.enabled ? 'Zurück zum Auftrag' : this.active ? 'Am letzten Abschnitt fortsetzen' : !atOffice ? 'Weg zur BBE markieren' : s.completed ? 'Kapitel erneut spielen' : 'Im Büro von Lukas beginnen'}</button>`}${this.active && this.enabled && !s.delivered ? '<button id="workshop-checkpoint">Fahrt ab BBE neu beginnen</button>' : ''}<p class="small-print">${s.rewardClaimed ? 'Wiederholungen sind ohne erneute Geld- und XP-Belohnung.' : 'Honorar: 180 € · 70 XP · 6 Reputation.'}</p>${history.length ? `<details class="story-journal"><summary>Dialogbuch · ${history.length} gehörte Zeilen</summary>${history.map((l) => `<p><b>${esc(l.speaker)}</b><br>${esc(l.text)}</p>`).join('')}</details>` : ''}</div>`,
+      `<div class="story-brief mission-brief"><p>${this.active ? esc(objectives[s.phase] || 'Koffer zu Clara am Marienplatz bringen.') : 'Koffer mit Tobias zu Clara am Marienplatz bringen.'}</p><p class="mission-row-meta">${s.rewardClaimed ? 'Wiederholung · ohne Honorar' : '180 € · 70 XP · +6 REP'}</p>${this.g.sim.s.courier.active ? '<p class="hint-inline">Zuerst den Eilkoffer abgeben.</p>' : `<button id="workshop-start" class="primary">${this.active ? 'Fortsetzen' : !atOffice ? 'BBE markieren' : s.completed ? 'Noch einmal' : 'Starten'}</button>`}${this.active && this.enabled && !s.delivered ? '<button id="workshop-checkpoint">Ab BBE neu starten</button>' : ''}${history.length ? `<details class="story-journal"><summary>Dialogbuch</summary>${history.map((l) => `<p><b>${esc(l.speaker)}</b><br>${esc(l.text)}</p>`).join('')}</details>` : ''}</div>`,
       { pause: true },
     );
     document.getElementById('workshop-checkpoint')?.addEventListener('click', () => {
@@ -119,7 +123,13 @@ export class WorkshopStory {
     });
   }
   start() {
-    if (this.g.sim.s.courier.active || this.cinematic || this.film.loading) return;
+    if (
+      this.g.fireStory?.active ||
+      this.g.sim.s.courier.active ||
+      this.cinematic ||
+      this.film.loading
+    )
+      return;
     const s = this.state;
     Object.assign(s, {
       phase: 'intro',
@@ -153,10 +163,7 @@ export class WorkshopStory {
     // Vehicles are deliberately session-local; a reload resumes the road chapter safely at BBE.
     if (this.w.zone !== 'office') this.g.transition('office');
     this.beginPlayable();
-    this.g.toast(
-      'Fahrt am BBE-Checkpoint fortgesetzt.',
-      'Koffer und Tobias warten wieder. Dein Dialogbuch bleibt erhalten.',
-    );
+    this.g.toast('Fahrt fortgesetzt.', 'Tobias wartet vor der BBE.');
   }
   beginPlayable() {
     Object.assign(this.state, {
@@ -175,11 +182,7 @@ export class WorkshopStory {
     this.ensureCar();
     this.markObjective();
     this.g.sim.save();
-    this.g.toast(
-      'Auftrag: Nur noch kurz zum Marienplatz.',
-      'Koffer übernommen. Tobias wartet vor der BBE. Verlasse das Büro und sprich ihn mit E an.',
-      true,
-    );
+    this.g.toast('Nur noch kurz zum Marienplatz.', 'Tobias vor der BBE treffen.', true);
   }
   ensureCar() {
     let spot;
@@ -257,17 +260,11 @@ export class WorkshopStory {
       this.queue = WORKSHOP_LINES.filter((l) => l.key.startsWith('meet_'));
       this.markObjective();
       this.g.sim.save();
-      this.g.toast(
-        'Tobias kommt mit.',
-        'Steige in ein Auto. Er nimmt auf dem Beifahrersitz Platz.',
-      );
+      this.g.toast('Tobias kommt mit.', 'E · Gemeinsam ins Auto.');
       return true;
     }
     if (n?.kind === 'workshop-wait') {
-      this.g.toast(
-        'Wir liefern gemeinsam.',
-        'Warte, bis Tobias neben dir steht. Bei Bedarf unter J die Fahrt ab BBE neu beginnen.',
-      );
+      this.g.toast('Wir liefern gemeinsam.', 'Auf Tobias warten. J · Neustart ab BBE.');
       return true;
     }
     if (n?.kind === 'workshop-deliver') {
@@ -342,10 +339,7 @@ export class WorkshopStory {
       this.nextBoardAttempt = this.time + 2;
       if (this.time > (this.nextBoardNotice || 0)) {
         this.nextBoardNotice = this.time + 12;
-        this.g.toast(
-          'Tobias braucht Platz an der Beifahrertür.',
-          'Halte auf einer freien Fläche in seiner Nähe. Er wartet draußen.',
-        );
+        this.g.toast('Beifahrertür freihalten.', 'In Tobias’ Nähe parken.');
       }
       return;
     }
@@ -673,10 +667,8 @@ export class WorkshopStory {
           this.g.waypoint = null;
           this.g.sim.save();
           this.g.toast(
-            'Mission bestanden · Nur noch kurz.',
-            result.paid
-              ? '180 € Honorar · 70 XP · +6 Reputation. Dein Dialogbuch liegt unter J → BBE Stories.'
-              : 'Kapitel erneut abgeschlossen. Dein Dialogbuch liegt unter J → BBE Stories.',
+            'Nur noch kurz · Abgeschlossen',
+            result.paid ? '+180 € · +70 XP · +6 REP' : 'Wiederholung abgeschlossen.',
             true,
           );
         },
