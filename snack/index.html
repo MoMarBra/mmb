@@ -1,427 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta name="robots" content="noindex,nofollow">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Snack‑Glücksrad ©</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  :root{
-    --bg:#0b1226; --panel:#0e1733; --card:#121e3f; --line:rgba(255,255,255,.07);
-    --text:#e6edff; --muted:#9fb1d9; --accent:#6aa5ff; --gold:#ffd166;
-    --shadow: 0 10px 30px rgba(0,0,0,.35); --radius:16px
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial; color:var(--text);
-       background: radial-gradient(1200px 700px at 20% -10%, #16245a 0%, #0b1226 40%, #090f1f 100%);
-       line-height:1.5; overflow-x:hidden}
-  .wrap{max-width:1600px; margin:28px auto 56px; padding:0 16px}
-  header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap}
-  header h1{margin:0; font-weight:800; letter-spacing:.2px; font-size:clamp(22px,4vw,30px)}
-  .sub{color:var(--muted); font-size:14px; margin-top:4px}
-  .bar{display:flex; flex-wrap:wrap; gap:10px}
-  .btn{appearance:none; border:1px solid var(--line); padding:10px 14px; border-radius:12px; background:linear-gradient(180deg,#192a5a,#0f1a3d); color:var(--text); box-shadow:var(--shadow); cursor:pointer; transition:.2s transform,.2s filter}
-  .btn:hover{filter:brightness(1.08)} .btn:active{transform:translateY(1px)}
-
-  .grid{display:grid; gap:16px}
-  .grid.cols-3{grid-template-columns:repeat(auto-fit, minmax(260px,1fr))}
-  @media(min-width:1200px){.grid.cols-3{grid-template-columns:1.05fr 1.35fr 0.85fr}}
-  .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 16px 18px}
-  .card h3{margin:0 0 10px; font-size:18px}
-
-  /* Wheel */
-  .wheel-card{display:grid; gap:12px}
-  .wheel-wrap{display:flex; align-items:center; justify-content:center; position:relative}
-  canvas#wheel{width:100%; max-width:580px; aspect-ratio:1; border-radius:50%; background:radial-gradient(140px 140px at 50% 50%, rgba(255,255,255,.06), transparent 60%)}
-  .pointer{position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:18px solid transparent; border-right:18px solid transparent; border-top:36px solid #ff4d6d; border-bottom:0; filter:drop-shadow(0 6px 12px rgba(0,0,0,.65)); pointer-events:none; z-index:5}
-  .confetti-layer{position:absolute; inset:0; overflow:visible; pointer-events:none; z-index:4}
-  .confetti-piece{position:absolute; top:6px; width:8px; height:14px; border-radius:3px; opacity:0; animation:confetti-fall var(--dur,1.6s) cubic-bezier(.2,.78,.24,.98) forwards}
-  @keyframes confetti-fall{
-    0%{transform:translate3d(0,0,0) rotate(0deg); opacity:1}
-    100%{transform:translate3d(var(--tx,0),var(--ty,120px),0) rotate(320deg); opacity:0}
-  }
-  .legend-bar{display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap; margin-top:12px}
-  .legend-wrap{flex:1 1 320px; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; max-height:220px; overflow:auto; padding-right:4px}
-  .legend-item{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#0f1a3d; font-size:13px; white-space:nowrap}
-  .swatch{width:14px; height:14px; border-radius:4px; border:1px solid rgba(255,255,255,.25)}
-  .winner{font-weight:800; font-size:clamp(24px,4vw,34px); letter-spacing:.4px}
-  .winner-card{background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:12px 20px; box-shadow:var(--shadow); min-width:220px; text-align:center}
-  .winner-card .label{font-size:13px; text-transform:uppercase; letter-spacing:.2em; color:var(--muted)}
-
-  /* Stats */
-  .stats{display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-  .stat{background:#0e1733; border:1px solid var(--line); border-radius:12px; padding:12px 14px; min-width:0}
-  .stat .label{color:var(--muted); font-size:12px; margin-bottom:6px}
-  .stat .value{font-size:20px; font-weight:800}
-  .rank{display:inline-flex; gap:8px; padding:6px 10px; border-radius:999px; background:#0a2a1e; border:1px solid #1a573f; color:#c7ffe3; font-weight:800}
-  .stars{position:relative; display:inline-block; font-size:18px; line-height:1; letter-spacing:2px}
-  .stars::before{content:"★★★★★"; color:#334d8a}
-  .stars::after{content:"★★★★★"; position:absolute; inset:0; color:var(--gold); width:calc(var(--p)*1%); overflow:hidden; white-space:nowrap}
-
-  /* Rating board */
-  .ratings-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; align-items:flex-start}
-  .ratings-board{margin-top:16px; display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-  .rating-card{background:#0b152f; border:1px solid var(--line); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow)}
-  .rating-card h4{margin:4px 0 0; font-size:18px}
-  .rating-card__head{display:flex; justify-content:space-between; gap:12px; align-items:flex-start}
-  .rating-card__avg{display:flex; flex-direction:column; align-items:flex-end; gap:4px; font-size:13px; color:var(--muted)}
-  .rating-card__avg strong{font-size:20px; color:var(--text)}
-  .rating-list{display:flex; flex-direction:column; gap:10px; max-height:320px; overflow:auto; padding-right:6px}
-  .rating-entry{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border-radius:12px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.03); flex-wrap:wrap}
-  .rating-entry__label{font-weight:600; font-size:14px; color:var(--text); flex:1 1 200px; display:flex; align-items:center; gap:8px; min-width:0}
-  .rating-entry__label .swatch{width:12px; height:12px}
-  .rating-entry .star-input{flex:0 0 auto; white-space:nowrap}
-  .star-input{display:inline-flex; align-items:center; gap:4px; user-select:none; flex-wrap:nowrap}
-  .star-input button.star{font-size:19px; background:none; border:none; cursor:pointer; padding:0 2px}
-  .star-input button.star:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-  .star-input .dim{color:#334d8a} .star-input .lit{color:var(--gold)}
-  .cell-note{color:var(--muted); font-size:12px; margin-left:4px; min-width:32px; text-align:right}
-
-  /* Spin panel */
-  .ratings-panel{display:none}
-  .ratings-panel.open{display:block}
-  .rating-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#0e1733; margin-top:8px}
-
-  footer{margin-top:20px; color:var(--muted); font-size:13px}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0b1226">
+  <meta name="description" content="Snack Glücksrad und Bewertungen.">
+  <title>Snack Glücksrad ™</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>Snack‑Rad ©</h1>
-      <div class="sub">Was snacken wir heute?</div>
-    </div>
-    <div class="bar">
-      <button class="btn" id="btn-refresh">Neu laden</button>
-    </div>
-  </header>
-
-  <!-- Glücksrad -->
-  <section class="card wheel-card" aria-label="Glücksrad zur Auswahl">
-    <div class="wheel-wrap">
-      <canvas id="wheel" width="600" height="600" aria-label="Glücksrad"></canvas>
-      <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
-      <div class="pointer" aria-hidden="true"></div>
-    </div>
-    <div class="bar" style="justify-content:center; gap:12px">
-      <button class="btn" id="btn-spin">🎡 Drehen</button>
-      <div id="spin-result" class="winner-card">
-        <div class="label">Gewinner</div>
-        <div class="winner">Bereit</div>
+  <a class="skip-link" href="#main">Zum Inhalt</a>
+  <div class="app-shell">
+    <header class="site-header">
+      <h1 class="wordmark"><a href="./">Snack Glücksrad <sup>™</sup></a></h1>
+      <div class="header-actions">
+        <button class="icon-button" id="sound-toggle" aria-pressed="true" aria-label="Ton ausschalten" title="Ton ausschalten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path class="sound-waves" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-off" d="m16 9 5 6m0-6-5 6"/></svg></button>
+        <button class="icon-button" id="refresh" aria-label="Daten neu laden" title="Neu laden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 18 17"/></svg></button>
+        <button class="profile-button" id="choose-person"><span class="avatar" id="my-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></span><span id="my-name">Dein Name</span><svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></button>
       </div>
-    </div>
-    <div class="legend-bar">
-      <div class="legend-wrap" id="legend"></div>
-    </div>
-  </section>
-
-  <div class="grid cols-3" style="margin-top:16px">
-    <section class="card">
-      <h3>Gesamtübersicht</h3>
-      <div class="stats" id="overall-stats"></div>
-    </section>
-
-    <section class="card">
-      <div class="ratings-head">
-        <div>
-          <h3>Bewertungen</h3>
-          <div class="sub" style="margin-top:6px">Hier eigenes Snackrating ausfüllen</div>
+    </header>
+    <nav class="tabs" role="tablist" aria-label="Ansichten">
+      <button id="tab-wheel" role="tab" aria-selected="true" aria-controls="view-wheel" tabindex="0" data-tab="wheel">Glücksrad</button>
+      <button id="tab-mine" role="tab" aria-selected="false" aria-controls="view-mine" tabindex="-1" data-tab="mine">Meine Bewertungen</button>
+      <button id="tab-ranking" role="tab" aria-selected="false" aria-controls="view-ranking" tabindex="-1" data-tab="ranking">Gesamtübersicht</button>
+    </nav>
+    <main id="main">
+      <div class="error-banner" id="global-error" role="alert" hidden><span></span><button class="text-button" id="retry-load">Erneut versuchen</button></div>
+      <section id="view-wheel" role="tabpanel" aria-labelledby="tab-wheel">
+        <h2 class="wheel-question">Was snacken wir heute?</h2>
+        <span class="quiet-count" id="restaurant-count" hidden></span>
+        <div class="play-layout">
+          <section class="wheel-panel" aria-label="Restaurant auswählen">
+            <div class="wheel-stage" id="wheel-stage">
+              <canvas id="wheel-fallback" width="1000" height="1000" role="img" aria-label="Snack-Rad. Restaurants lassen sich auch über die Liste unter dem Rad auswählen."></canvas>
+              <div id="wheel-3d" aria-hidden="true"></div>
+              <button class="wheel-hub" id="wheel-hub" type="button" aria-label="Nabe antippen" disabled></button>
+            </div>
+            <div class="spin-actions"><button class="primary-button" id="spin" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 18 17"/></svg><span>Drehen</span></button></div>
+          </section>
+          <aside class="detail-panel" id="restaurant-detail" aria-labelledby="detail-title" aria-busy="true" hidden>
+            <div class="detail-topline"><span class="eyebrow" id="selection-label">Bewertungen</span><span class="rank-badge" id="detail-rank"></span><button id="close-detail" class="icon-button" aria-label="Bewertungen schließen">×</button></div>
+            <h2 id="detail-title" tabindex="-1">Einen Moment …</h2>
+            <div class="rating-summary"><span class="score" id="detail-score">–</span><span class="score-context"><span id="detail-stars" class="display-stars" aria-hidden="true"></span><span id="detail-count">Bewertungen werden geladen</span></span></div>
+            <div class="your-rating" id="quick-rating"></div>
+            <div class="community-heading"><h3>Bewertungen</h3><span id="community-count"></span></div>
+            <div id="community-list" class="community-list"></div>
+            <button id="toggle-community" class="text-button" hidden>Alle Bewertungen anzeigen</button>
+          </aside>
         </div>
-        <div class="sub" id="ratings-meta">–</div>
-      </div>
-      <div id="ratings-board" class="ratings-board" aria-live="polite"></div>
-    </section>
-
-    <section class="card ratings-panel" id="spin-panel">
-      <h3>Ergebnis des Snack-Glücksrads</h3>
-      <div id="spin-summary" class="sub">–</div>
-      <div id="spin-list"></div>
-    </section>
+        <section class="restaurant-picker" aria-labelledby="all-restaurants-title"><h2 id="all-restaurants-title" class="sr-only">Restaurants</h2><div class="restaurant-chips" id="restaurant-chips"></div></section>
+      </section>
+      <section id="view-mine" role="tabpanel" aria-labelledby="tab-mine" hidden>
+        <div class="section-heading"><div><h2>Bewertungen</h2></div><button class="secondary-button" id="mine-change-person">Person wählen</button></div>
+        <div id="mine-content"></div>
+      </section>
+      <section id="view-ranking" role="tabpanel" aria-labelledby="tab-ranking" hidden>
+        <div class="section-heading"><div><h2>Gesamtübersicht</h2></div><span class="quiet-count" id="ranking-count"></span></div>
+        <div class="list-toolbar"><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="ranking-search" type="search" placeholder="Restaurant suchen" aria-label="Restaurant in der Rangliste suchen"></label><span class="muted">Nach Durchschnitt</span></div>
+        <div class="ranking-list" id="ranking-list"></div>
+      </section>
+    </main>
+    <footer><span id="data-mode" hidden></span><span>Speicherstatus:</span><span id="save-status" role="status" aria-live="polite">Wird geladen …</span><button id="retry-save" class="text-button" hidden>Erneut speichern</button><span id="people-count"></span></footer>
   </div>
-
-  <footer>Speicherstatus: <span id="save-status">–</span></footer>
-</div>
-
-<script>
-(() => {
-  // ===== Supabase =====
-  const SUPABASE_URL = "https://tvdipoczbbnllkwhhukh.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_NfnGgGPf7hFMK38ji-gfxg_zlNRDvAg";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // ===== State =====
-  const state = {
-    snacks: [],
-    people: [],
-    ratings: new Map(), // key `${personId}|${snackId}` -> stars
-    rotation: 0,
-    spinning: false
-  };
-
-  // ===== Helpers =====
-  const $ = (id)=> document.getElementById(id);
-  const setSave = (t)=>{ const el=$("save-status"); el.textContent=t; clearTimeout(setSave._t); setSave._t=setTimeout(()=>el.textContent='–', 2400); };
-  const clamp = (v,min,max)=> Math.max(min, Math.min(max, v));
-  const TAU = Math.PI*2; const norm = (a)=>{ a%=TAU; if(a<0) a+=TAU; return a; };
-  const key = (p,s)=> `${p}|${s}`;
-  const hsl = (i,n)=> `hsl(${Math.round((360/(n||1))*i)} 80% 55%)`;
-  const confettiLayer = $("confetti-layer");
-  const setWinnerCard = (text)=>{
-    const box=$("spin-result");
-    if(box){ box.innerHTML = `<div class="label">Gewinner</div><div class="winner">${text}</div>`; }
-  };
-  function triggerConfetti(accent){
-    if(!confettiLayer) return;
-    confettiLayer.innerHTML='';
-    const palette = accent ? [accent,'#ffd166','#6aa5ff','#e6edff'] : ['#ffd166','#6aa5ff','#ff8ad4','#e6edff'];
-    const pieces = 55;
-    for(let i=0;i<pieces;i++){
-      const piece=document.createElement('span');
-      piece.className='confetti-piece';
-      piece.style.left = Math.random()*100 + '%';
-      piece.style.setProperty('--tx', (Math.random()*140 - 70) + 'px');
-      piece.style.setProperty('--ty', (140 + Math.random()*140) + 'px');
-      piece.style.setProperty('--dur', (1.4 + Math.random()*0.9)+'s');
-      piece.style.background = palette[i % palette.length];
-      confettiLayer.appendChild(piece);
-    }
-    setTimeout(()=>{ if(confettiLayer) confettiLayer.innerHTML=''; }, 2200);
-  }
-  const clearConfetti = ()=>{ if(confettiLayer) confettiLayer.innerHTML=''; };
-
-  // ===== Data Load =====
-  async function loadAll(){
-    const [snR, peR, raR] = await Promise.all([
-      sb.from('snack').select('id,name,color').eq('active', true).order('name',{ascending:true}),
-      sb.from('person').select('id,name').eq('active', true).order('id',{ascending:true}),
-      sb.from('snack_rating').select('person_id,snack_id,stars')
-    ]);
-    if(snR.error||peR.error||raR.error){ console.error(snR.error||peR.error||raR.error); setSave('Fehler beim Laden'); return; }
-    state.snacks = (snR.data||[]).map((x,i,arr)=>({id:x.id,name:x.name,color:x.color||hsl(i,arr.length)}));
-    state.people = peR.data||[];
-    state.ratings.clear();
-    (raR.data||[]).forEach(r=> state.ratings.set(key(r.person_id,r.snack_id), Number(r.stars||0)) );
-    renderAll();
-    setWinnerCard(state.snacks.length? 'Bereit':'Keine Snacks');
-    setSave('Vom Server geladen ✓');
-  }
-
-  // ===== Wheel (HiDPI) =====
-  const wheel = $("wheel");
-  const ctx = wheel.getContext('2d');
-  function drawWheel(){
-    const dpr = window.devicePixelRatio||1; const css = wheel.clientWidth || 580;
-    wheel.width = Math.round(css*dpr); wheel.height = Math.round(css*dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,css,css);
-    const W=css, H=css, cx=W/2, cy=H/2, r=Math.min(W,H)/2 - 16;
-    const items = state.snacks.length? state.snacks : [{name:'–', color:'#445'}];
-    const N = items.length||1; const seg = TAU/N; const rot = state.rotation;
-    for(let i=0;i<N;i++){
-      const start = rot + i*seg, end = start + seg;
-      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,end); ctx.closePath();
-      ctx.fillStyle = items[i].color; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.stroke();
-      ctx.save(); const mid=start+seg/2; ctx.translate(cx,cy); ctx.rotate(mid);
-      ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.textBaseline='middle';
-      drawArcLabel(ctx, items[i].name, r-18, seg*0.92);
-      ctx.restore();
-    }
-    ctx.beginPath(); ctx.arc(cx,cy,34,0,TAU); ctx.fillStyle='#0b1226'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.stroke();
-  }
-  function drawArcLabel(ctx,text,radius,maxArc){
-    const label = text||'';
-    const maxWidth = Math.max(40, radius*maxArc);
-    let fontSize = Math.min(18, Math.max(11, radius*0.05));
-    let lines = [];
-    while(fontSize>=10){
-      ctx.font=`600 ${fontSize}px Inter, system-ui`;
-      lines = breakLabelIntoLines(ctx,label,maxWidth);
-      const fits = lines.every(line=> ctx.measureText(line).width <= maxWidth);
-      if(fits) break;
-      fontSize -=1;
-    }
-    if(fontSize<10){ fontSize=10; ctx.font=`600 ${fontSize}px Inter, system-ui`; lines = breakLabelIntoLines(ctx,label,maxWidth); }
-    const lineHeight = fontSize+2;
-    const yStart = -((lines.length-1)*lineHeight)/2;
-    lines.forEach((line, idx)=> ctx.fillText(line, radius-6, yStart + idx*lineHeight));
-  }
-  function breakLabelIntoLines(ctx,label,maxWidth){
-    const cleaned = (label||'').trim();
-    if(!cleaned) return [''];
-    const words = cleaned.split(/\s+/);
-    const lines=[];
-    let current=words.shift()||'';
-    for(const word of words){
-      const attempt = current ? `${current} ${word}` : word;
-      if(ctx.measureText(attempt).width <= maxWidth){
-        current = attempt;
-      } else {
-        if(current) lines.push(current);
-        current = word;
-      }
-    }
-    if(current) lines.push(current);
-    return lines.flatMap(line=>{
-      return ctx.measureText(line).width <= maxWidth ? [line] : chunkLine(ctx,line,maxWidth);
-    });
-  }
-  function chunkLine(ctx,text,maxWidth){
-    const chunks=[]; let buffer='';
-    for(const ch of text){
-      const attempt = buffer ? buffer + ch : ch;
-      if(ctx.measureText(attempt).width > maxWidth && buffer){
-        chunks.push(buffer);
-        buffer = ch;
-      } else {
-        buffer = attempt;
-      }
-    }
-    if(buffer) chunks.push(buffer);
-    return chunks.length? chunks : [text];
-  }
-  function computeWinnerIndex(){ const N=Math.max(1,state.snacks.length); const seg=TAU/N; const pointer=-Math.PI/2; const A=norm(pointer - state.rotation); return Math.floor(A/seg); }
-  function spin(){
-    if(state.spinning) return;
-    if(state.snacks.length===0){ setWinnerCard('Keine Snacks'); return; }
-    state.spinning=true; setWinnerCard('Dreht…'); clearConfetti();
-    const N=state.snacks.length, seg=TAU/N, pointer=-Math.PI/2; const winnerIndex=Math.floor(Math.random()*N); const center=winnerIndex*seg + seg/2; const spins=4+Math.floor(Math.random()*3); const target = pointer - center + spins*TAU; const startT=performance.now(); const dur=3400+Math.random()*800; const startRot=state.rotation; const ease=(x)=>1-Math.pow(1-x,3);
-    function frame(t){ const k=Math.min(1,(t-startT)/dur); state.rotation = startRot + (target-startRot)*ease(k); drawWheel(); if(k<1) requestAnimationFrame(frame); else finish(); }
-    function finish(){
-      state.rotation=target; drawWheel();
-      const idx=computeWinnerIndex(); const win=state.snacks[idx];
-      setWinnerCard(win?.name||'–');
-      triggerConfetti(win?.color); showSnackRatings(win?.id,win?.name); state.spinning=false;
-    }
-    requestAnimationFrame(frame);
-  }
-
-  // ===== Legend =====
-  function renderLegend(){ const c=$("legend"); c.innerHTML=''; state.snacks.forEach(s=>{ const el=document.createElement('div'); el.className='legend-item'; el.innerHTML=`<span class="swatch" style="background:${s.color}"></span>${s.name}`; c.appendChild(el); }); }
-
-  // ===== Ratings Übersicht als Karten =====
-  function starWidget(current, onChange){
-    const wrap=document.createElement('span'); wrap.className='star-input';
-    const note=document.createElement('span'); note.className='cell-note'; note.textContent=current?`${current}/5`:'—';
-    const setVis=(val)=>{ [...wrap.querySelectorAll('button.star')].forEach(btn=>{ const v=Number(btn.dataset.value); btn.classList.toggle('lit', v<=val); btn.classList.toggle('dim', v>val); btn.setAttribute('aria-checked', v===val? 'true':'false'); }); note.textContent = val? `${val}/5`:'—'; };
-    for(let v=1; v<=5; v++){ const b=document.createElement('button'); b.type='button'; b.className='star '+(v<=current?'lit':'dim'); b.dataset.value=String(v); b.textContent='★'; b.setAttribute('role','radio'); b.setAttribute('aria-checked', v===current? 'true':'false'); b.addEventListener('click', ()=>{ onChange(v); setVis(v); }); wrap.appendChild(b);} wrap.appendChild(note); return {el:wrap,set:setVis};
-  }
-  function renderRatingsBoard(){
-    const board=$("ratings-board"); if(!board) return;
-    board.innerHTML='';
-    const meta=$("ratings-meta");
-    if(meta){ meta.textContent = state.snacks.length||state.people.length ? `${state.people.length} Personen · ${state.snacks.length} Restaurants` : '–'; }
-    if(!state.people.length){
-      const empty=document.createElement('p'); empty.className='sub'; empty.textContent='Keine aktiven Personen vorhanden.';
-      board.appendChild(empty); return;
-    }
-    state.people.forEach(person=>{
-      const card=document.createElement('article'); card.className='rating-card';
-      const head=document.createElement('div'); head.className='rating-card__head';
-      const title=document.createElement('h4'); title.textContent=person.name;
-      head.appendChild(title);
-      const vals = state.snacks.map(sn=> state.ratings.get(key(person.id,sn.id)) || 0);
-      const ratedVals = vals.filter(v=>v>0);
-      const avg = ratedVals.length? (ratedVals.reduce((a,b)=>a+b,0)/ratedVals.length):0;
-      const pct = Math.round((avg/5)*100);
-      const headRight=document.createElement('div'); headRight.className='rating-card__avg';
-      const starSpan=document.createElement('span'); starSpan.className='stars'; starSpan.style.setProperty('--p', pct);
-      const avgLine=document.createElement('div'); const strong=document.createElement('strong'); strong.textContent=avg?avg.toFixed(2):'–';
-      const outOf=document.createElement('span'); outOf.textContent='/5'; outOf.style.marginLeft='4px';
-      avgLine.appendChild(strong); avgLine.appendChild(outOf);
-      const countEl=document.createElement('div'); countEl.textContent=`${ratedVals.length} Bewertungen`;
-      headRight.appendChild(starSpan); headRight.appendChild(avgLine); headRight.appendChild(countEl);
-      head.appendChild(headRight);
-      card.appendChild(head);
-      const list=document.createElement('div'); list.className='rating-list';
-      if(!state.snacks.length){
-        const info=document.createElement('p'); info.className='sub'; info.textContent='Keine aktiven Snacks vorhanden.';
-        list.appendChild(info);
-      } else {
-        state.snacks.forEach(sn=>{
-          const row=document.createElement('div'); row.className='rating-entry';
-          const label=document.createElement('div'); label.className='rating-entry__label';
-          const sw=document.createElement('span'); sw.className='swatch'; sw.style.background=sn.color; label.appendChild(sw);
-          const name=document.createElement('span'); name.textContent=sn.name; label.appendChild(name);
-          row.appendChild(label);
-          const cur=state.ratings.get(key(person.id,sn.id))||0;
-          const widget=starWidget(cur, (val)=> upsertRating(person.id,sn.id,val));
-          widget.set(cur);
-          row.appendChild(widget.el);
-          list.appendChild(row);
-        });
-      }
-      card.appendChild(list);
-      board.appendChild(card);
-    });
-  }
-
-  function avgCount(vals){ const v=vals.filter(x=>x>0); return {avg:v.length? v.reduce((a,b)=>a+b,0)/v.length : 0, count:v.length}; }
-  function ranks(vals){ const arr=vals.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v); const r=Array(vals.length).fill(0); let i=0; while(i<arr.length){let j=i; while(j+1<arr.length && arr[j+1].v===arr[i].v) j++; const rank=(i+1+j+1)/2; for(let k=i;k<=j;k++) r[arr[k].i]=rank; i=j+1;} return r; }
-  function renderStats(){
-    const box = $("overall-stats");
-    box.innerHTML = '';
-
-    // Build stats per snack
-    const stats = state.snacks.map(sn => {
-      const vals = state.people.map(p => state.ratings.get(key(p.id, sn.id)) || 0);
-      const { avg, count } = avgCount(vals);
-      return { sn, avg, count };
-    });
-
-    // Sort by average rating descending
-    stats.sort((a, b) => b.avg - a.avg);
-
-    // Assign tie-aware ranks based on rounded averages (4 decimals to avoid float noise)
-    let prev = null; let currentRank = 0;
-    for(let i = 0; i < stats.length; i++){
-      const v = Number(stats[i].avg.toFixed(4));
-      if(prev === null || v !== prev){
-        currentRank = i + 1;
-        prev = v;
-      }
-      stats[i].rank = currentRank;
-    }
-
-    // Render sorted cards
-    stats.forEach(({sn, avg, count, rank}) => {
-      const stat = document.createElement('div');
-      stat.className = 'stat';
-      const pct = Math.round((avg/5) * 100);
-      stat.innerHTML = `
-        <div class="label">${sn.name}</div>
-        <div class="value">
-          <span class="stars" style="--p:${pct}"></span>
-          <span style="margin-left:8px">${avg ? avg.toFixed(2) : '–'}/5</span>
-        </div>
-        <div class="sub" style="margin-top:6px">Bewertungen: ${count}</div>
-        <div style="margin-top:8px"><span class="rank">🏅 Rang ${avg ? String(rank) : '–'}</span></div>
-      `;
-      box.appendChild(stat);
-    });
-  }
-
-  // ===== Spin panel =====
-  function showSnackRatings(snackId, snackName){ const panel=$("spin-panel"); const sum=$("spin-summary"); const list=$("spin-list"); if(!snackId){ panel.classList.remove('open'); return; } list.innerHTML=''; const rows = state.people.map(p=>({ person:p.name, stars:(state.ratings.get(key(p.id,snackId))||0) })).sort((a,b)=> b.stars-a.stars || a.person.localeCompare(b.person)); const cnt=rows.filter(r=>r.stars>0).length; const avg=cnt? (rows.reduce((a,r)=>a+r.stars,0)/cnt):0; const pct=Math.round((avg/5)*100); sum.innerHTML=`<strong>${snackName}</strong> · <span class="stars" style="--p:${pct}"></span> ${avg?avg.toFixed(2):'–'}/5 · Bewertungen: ${cnt}`; rows.forEach(r=>{ const el=document.createElement('div'); el.className='rating-row'; el.innerHTML=`<span>${r.person}</span><span>${r.stars>0? '★'.repeat(r.stars)+'<span class="cell-note"> '+r.stars+'/5</span>':'—'}</span>`; list.appendChild(el); }); panel.classList.add('open'); }
-
-  // ===== IO (debounced upsert) =====
-  const timers = new Map();
-  function debounce(k,fn,ms=250){ clearTimeout(timers.get(k)); const t=setTimeout(fn,ms); timers.set(k,t); }
-  async function upsertRating(pid,sid,stars){ stars=clamp(stars,0,5); state.ratings.set(key(pid,sid),stars); debounce(`r:${pid}:${sid}`, async()=>{ const { error } = await sb.from('snack_rating').upsert({ person_id: pid, snack_id: sid, stars }); if(error){ console.error(error); setSave('Speicherfehler'); } else { setSave('Gespeichert ✓'); renderStats(); } }); }
-
-  function renderAll(){ renderRatingsBoard(); renderStats(); renderLegend(); drawWheel(); }
-
-  // ===== Events =====
-  $("btn-refresh").addEventListener('click', loadAll);
-  $("btn-spin").addEventListener('click', spin);
-  window.addEventListener('resize', drawWheel);
-
-  // Init
-  loadAll();
-})();
-</script>
+  <dialog id="person-dialog" aria-labelledby="person-dialog-title"><div class="dialog-heading"><div><h2 id="person-dialog-title">Person wählen</h2></div><button id="close-person-dialog" class="icon-button" aria-label="Personenauswahl schließen">×</button></div><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="person-search" type="search" placeholder="Deinen Namen suchen" autocomplete="off" aria-label="Person suchen"></label><div class="person-options" id="person-options"></div></dialog>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+  <noscript>Bitte aktiviere JavaScript, um das Snack-Rad und die Bewertungen zu verwenden.</noscript>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>
