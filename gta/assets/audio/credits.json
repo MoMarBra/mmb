@@ -1,0 +1,1840 @@
+{
+  "recordings": [
+    {
+      "id": "footstep_carpet_000",
+      "original": "Audio/footstep_carpet_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_carpet_001",
+      "original": "Audio/footstep_carpet_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_carpet_002",
+      "original": "Audio/footstep_carpet_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_carpet_003",
+      "original": "Audio/footstep_carpet_003.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_carpet_004",
+      "original": "Audio/footstep_carpet_004.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_concrete_000",
+      "original": "Audio/footstep_concrete_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_concrete_001",
+      "original": "Audio/footstep_concrete_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_concrete_002",
+      "original": "Audio/footstep_concrete_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_concrete_003",
+      "original": "Audio/footstep_concrete_003.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_concrete_004",
+      "original": "Audio/footstep_concrete_004.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_grass_000",
+      "original": "Audio/footstep_grass_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_grass_001",
+      "original": "Audio/footstep_grass_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_grass_002",
+      "original": "Audio/footstep_grass_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_grass_003",
+      "original": "Audio/footstep_grass_003.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_grass_004",
+      "original": "Audio/footstep_grass_004.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_wood_000",
+      "original": "Audio/footstep_wood_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_wood_001",
+      "original": "Audio/footstep_wood_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_wood_002",
+      "original": "Audio/footstep_wood_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_wood_003",
+      "original": "Audio/footstep_wood_003.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_wood_004",
+      "original": "Audio/footstep_wood_004.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPunch_medium_000",
+      "original": "Audio/impactPunch_medium_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPunch_medium_001",
+      "original": "Audio/impactPunch_medium_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPunch_medium_002",
+      "original": "Audio/impactPunch_medium_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPunch_heavy_000",
+      "original": "Audio/impactPunch_heavy_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPunch_heavy_001",
+      "original": "Audio/impactPunch_heavy_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPunch_heavy_002",
+      "original": "Audio/impactPunch_heavy_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactMetal_heavy_000",
+      "original": "Audio/impactMetal_heavy_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactMetal_heavy_001",
+      "original": "Audio/impactMetal_heavy_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactMetal_heavy_002",
+      "original": "Audio/impactMetal_heavy_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactGlass_light_000",
+      "original": "Audio/impactGlass_light_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactGlass_light_001",
+      "original": "Audio/impactGlass_light_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactGlass_light_002",
+      "original": "Audio/impactGlass_light_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPlate_light_000",
+      "original": "Audio/impactPlate_light_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPlate_light_001",
+      "original": "Audio/impactPlate_light_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactPlate_light_002",
+      "original": "Audio/impactPlate_light_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactSoft_medium_000",
+      "original": "Audio/impactSoft_medium_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactSoft_medium_001",
+      "original": "Audio/impactSoft_medium_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactSoft_medium_002",
+      "original": "Audio/impactSoft_medium_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactWood_light_000",
+      "original": "Audio/impactWood_light_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactWood_light_001",
+      "original": "Audio/impactWood_light_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactWood_light_002",
+      "original": "Audio/impactWood_light_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactTin_medium_000",
+      "original": "Audio/impactTin_medium_000.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactTin_medium_001",
+      "original": "Audio/impactTin_medium_001.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "impactTin_medium_002",
+      "original": "Audio/impactTin_medium_002.ogg",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "toilet_01",
+      "original": "toilet_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "toilet_02",
+      "original": "toilet_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "dishes_01",
+      "original": "dishes_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "dishes_02",
+      "original": "dishes_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "dishes_03",
+      "original": "dishes_03.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "dishes_04",
+      "original": "dishes_04.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "paper_01",
+      "original": "paper_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "paper_02",
+      "original": "paper_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "paper_03",
+      "original": "paper_03.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "paper_04",
+      "original": "paper_04.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "machine_01",
+      "original": "machine_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "machine_02",
+      "original": "machine_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "machine_03",
+      "original": "machine_03.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "pot_01",
+      "original": "pot_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "pot_02",
+      "original": "pot_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "door_close_01",
+      "original": "door_close_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "door_close_02",
+      "original": "door_close_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "door_close_03",
+      "original": "door_close_03.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "door_close_04",
+      "original": "door_close_04.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "glass_01",
+      "original": "glass_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "glass_02",
+      "original": "glass_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "glass_03",
+      "original": "glass_03.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "splash_01",
+      "original": "splash_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "splash_02",
+      "original": "splash_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "switch_01",
+      "original": "switch_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "switch_02",
+      "original": "switch_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "bell_01",
+      "original": "bell_01.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "bell_02",
+      "original": "bell_02.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "bell_03",
+      "original": "bell_03.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "microwave_door_open",
+      "original": "microwave_door_open.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "microwave_door_close",
+      "original": "microwave_door_close.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "door_open",
+      "original": "door_open.ogg",
+      "author": "rubberduck",
+      "source": "https://opengameart.org/content/100-cc0-sfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_01",
+      "original": "Human Typing/human_vel-001.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_02",
+      "original": "Human Typing/human_vel-002.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_03",
+      "original": "Human Typing/human_vel-003.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_04",
+      "original": "Human Typing/human_vel-004.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_05",
+      "original": "Human Typing/human_vel-005.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_06",
+      "original": "Human Typing/human_vel-006.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_07",
+      "original": "Human Typing/human_vel-007.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_08",
+      "original": "Human Typing/human_vel-008.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_09",
+      "original": "Human Typing/human_vel-009.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "typing_10",
+      "original": "Human Typing/human_vel-010.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_1",
+      "original": "Single Keys/keypress-001.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_2",
+      "original": "Single Keys/keypress-002.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_3",
+      "original": "Single Keys/keypress-003.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_4",
+      "original": "Single Keys/keypress-004.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_5",
+      "original": "Single Keys/keypress-005.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_6",
+      "original": "Single Keys/keypress-006.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_7",
+      "original": "Single Keys/keypress-007.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "keyboard_key_8",
+      "original": "Single Keys/keypress-008.wav",
+      "author": "unicaegames",
+      "source": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "rain",
+      "original": "1.ogg",
+      "author": "Ylmir",
+      "source": "https://opengameart.org/content/rain-loopable",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "rain_loop_2",
+      "original": "2.ogg",
+      "author": "Ylmir",
+      "source": "https://opengameart.org/content/rain-loopable",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "rain_loop_3",
+      "original": "3.ogg",
+      "author": "Ylmir",
+      "source": "https://opengameart.org/content/rain-loopable",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "rain_loop_4",
+      "original": "4.ogg",
+      "author": "Ylmir",
+      "source": "https://opengameart.org/content/rain-loopable",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "engine_start",
+      "original": "generic_car_startengine.wav",
+      "author": "looneybits",
+      "source": "https://opengameart.org/content/car-engine-start-01",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "engine_start_alt",
+      "original": "generic_car_startengine_1.wav",
+      "author": "looneybits",
+      "source": "https://opengameart.org/content/car-engine-start-01",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "engine_loop",
+      "original": "loop_0.wav",
+      "author": "domasx2",
+      "source": "https://opengameart.org/content/racing-car-engine-sound-loops",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "car_door_open",
+      "original": "door_opening.wav",
+      "author": "looneybits",
+      "source": "https://opengameart.org/content/cardoorsfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "car_door_close",
+      "original": "door_closing.wav",
+      "author": "looneybits",
+      "source": "https://opengameart.org/content/cardoorsfx",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "traffic",
+      "original": "gatve%20Varniu_2.ogg",
+      "author": "IgnasD",
+      "source": "https://opengameart.org/content/high-traffic-road-sounds",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "chop",
+      "original": "fast_chops_on_cutting_board.wav",
+      "author": "DavidW",
+      "source": "https://opengameart.org/content/kitchen-ambience-sfx",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "boil",
+      "original": "water_boiling_in_pot.wav",
+      "author": "DavidW",
+      "source": "https://opengameart.org/content/kitchen-ambience-sfx",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "fire",
+      "original": "gas_burner_flicker_on_2.wav",
+      "author": "DavidW",
+      "source": "https://opengameart.org/content/kitchen-ambience-sfx",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "cookware",
+      "original": "cookware_clatter.wav",
+      "author": "DavidW",
+      "source": "https://opengameart.org/content/kitchen-ambience-sfx",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_000",
+      "original": "footsteps/tile/0.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_001",
+      "original": "footsteps/tile/1.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_002",
+      "original": "footsteps/tile/2.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_003",
+      "original": "footsteps/tile/3.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_004",
+      "original": "footsteps/tile/4.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_005",
+      "original": "footsteps/tile/5.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_006",
+      "original": "footsteps/tile/6.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_007",
+      "original": "footsteps/tile/7.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_tile_008",
+      "original": "footsteps/tile/8.ogg",
+      "author": "congusbongus, swuing, ceberation",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_water_000",
+      "original": "footsteps/water/0.ogg",
+      "author": "congusbongus, swuing, EminYILDIRIM",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_water_001",
+      "original": "footsteps/water/1.ogg",
+      "author": "congusbongus, swuing, EminYILDIRIM",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_water_002",
+      "original": "footsteps/water/2.ogg",
+      "author": "congusbongus, swuing, EminYILDIRIM",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_water_003",
+      "original": "footsteps/water/3.ogg",
+      "author": "congusbongus, swuing, EminYILDIRIM",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "footstep_water_004",
+      "original": "footsteps/water/4.ogg",
+      "author": "congusbongus, swuing, EminYILDIRIM",
+      "source": "https://opengameart.org/content/footsteps-on-different-surfaces",
+      "license": "CC-BY-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "modifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+    },
+    {
+      "id": "wash, coffee",
+      "author": "DavidW",
+      "source": "https://opengameart.org/content/kitchen-ambience-sfx",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "Designed water and steam effects derived from boiling-water recording: pitch shift, filtering, envelope and trimming. These are designed effects, not direct tap/espresso-machine field recordings."
+    }
+  ],
+  "voices": {
+    "description": "Locally rendered Microsoft Windows speech synthesis, not human studio recordings; original fictional dialogue.",
+    "roles": [
+      "Lena",
+      "Tobias",
+      "Mara",
+      "Jan",
+      "player",
+      "seen",
+      "bao",
+      "palm",
+      "gyoza",
+      "wirt",
+      "mentors",
+      "diner",
+      "cyclist",
+      "bus_driver",
+      "taxi_driver",
+      "passerby"
+    ],
+    "lines": 103,
+    "voices": [
+      "Microsoft Katja",
+      "Microsoft Stefan",
+      "Microsoft Hedda",
+      "Microsoft Hedda Desktop"
+    ]
+  },
+  "music": [
+    {
+      "title": "Brienner Lo-Fi · Eine letzte Folie",
+      "bpm": 88,
+      "durationSeconds": 43.636371882086166,
+      "authorship": "Original music composed and procedurally synthesized for this game by OpenAI Codex; no third-party audio or existing composition used.",
+      "instruments": [
+        "FM electric piano",
+        "Karplus–Strong plucked strings",
+        "Detuned additive pads",
+        "Harmonic bass",
+        "Synthesized acoustic-inspired percussion"
+      ]
+    },
+    {
+      "title": "Isar Afterhours · Decks im Abendlicht",
+      "bpm": 108,
+      "durationSeconds": 53.333333333333336,
+      "authorship": "Original music composed and procedurally synthesized for this game by OpenAI Codex; no third-party audio or existing composition used.",
+      "instruments": [
+        "FM electric piano",
+        "Karplus–Strong plucked strings",
+        "Detuned additive pads",
+        "Harmonic bass",
+        "Synthesized acoustic-inspired percussion"
+      ]
+    },
+    {
+      "title": "Augusten Drive · Feierabend ist ein Mindset",
+      "bpm": 118,
+      "durationSeconds": 48.81356009070295,
+      "authorship": "Original music composed and procedurally synthesized for this game by OpenAI Codex; no third-party audio or existing composition used.",
+      "instruments": [
+        "FM electric piano",
+        "Karplus–Strong plucked strings",
+        "Detuned additive pads",
+        "Harmonic bass",
+        "Synthesized acoustic-inspired percussion"
+      ]
+    }
+  ],
+  "immersion": {
+    "effects": [
+      {
+        "id": "police-siren",
+        "file": "aaa_police_siren.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 4,
+        "loop": true,
+        "loopStart": 0,
+        "loopEnd": 4,
+        "recommendedGain": 0.35,
+        "description": "Designed European-style alternating pneumatic two-tone police horn; 435/580 Hz, eight half-second horn pulses. Not a field recording or a certified warning signal.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [],
+        "modifications": "Original harmonic horn model, compressor-air layer, soft valve envelopes, restrained upper harmonics, exact four-second loop, peak mastering.",
+        "sourceLicense": "Original DSP synthesis; no third-party recordings",
+        "bytes": 352844,
+        "master": {
+          "peakDbfs": -9.7,
+          "rmsDbfs": -15
+        }
+      },
+      {
+        "id": "glass-break",
+        "file": "aaa_glass_break.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 2.15,
+        "loop": false,
+        "loopStart": 0,
+        "loopEnd": 2.15,
+        "recommendedGain": 0.7,
+        "description": "Layered window-sized glass fracture with a sharp crack and a diminishing, irregular shard cascade.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [
+          {
+            "assetId": "glass_01",
+            "inputPath": "dist/assets/audio/glass_01.mp3",
+            "author": "rubberduck",
+            "source": "https://opengameart.org/content/100-cc0-sfx",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "glass_01.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          },
+          {
+            "assetId": "glass_02",
+            "inputPath": "dist/assets/audio/glass_02.mp3",
+            "author": "rubberduck",
+            "source": "https://opengameart.org/content/100-cc0-sfx",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "glass_02.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          },
+          {
+            "assetId": "impactGlass_light_001",
+            "inputPath": "dist/assets/audio/impactGlass_light_001.mp3",
+            "author": "Kenney",
+            "source": "https://kenney.nl/assets/impact-sounds",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "Audio/impactGlass_light_001.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          }
+        ],
+        "modifications": "CC0 glass recordings pitch shifted, high-pass filtered, layered and trimmed; original brittle noise transient and 28 damped glass-mode fragments; three-millisecond attack, natural tail and peak mastering.",
+        "sourceLicense": "All recording sources CC0-1.0; original DSP layers added",
+        "bytes": 189674,
+        "master": {
+          "peakDbfs": -5.5,
+          "rmsDbfs": -32.13
+        }
+      },
+      {
+        "id": "metal-impact",
+        "file": "aaa_metal_impact.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 1.6,
+        "loop": false,
+        "loopStart": 0,
+        "loopEnd": 1.6,
+        "recommendedGain": 0.68,
+        "description": "Weighty vehicle or railing collision: low body strike, resonant metal and a short loose-panel rattle.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [
+          {
+            "assetId": "impactMetal_heavy_000",
+            "inputPath": "dist/assets/audio/impactMetal_heavy_000.mp3",
+            "author": "Kenney",
+            "source": "https://kenney.nl/assets/impact-sounds",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "Audio/impactMetal_heavy_000.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          },
+          {
+            "assetId": "impactMetal_heavy_002",
+            "inputPath": "dist/assets/audio/impactMetal_heavy_002.mp3",
+            "author": "Kenney",
+            "source": "https://kenney.nl/assets/impact-sounds",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "Audio/impactMetal_heavy_002.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          },
+          {
+            "assetId": "impactTin_medium_001",
+            "inputPath": "dist/assets/audio/impactTin_medium_001.mp3",
+            "author": "Kenney",
+            "source": "https://kenney.nl/assets/impact-sounds",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "Audio/impactTin_medium_001.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          }
+        ],
+        "modifications": "CC0 impact recordings re-pitched and layered; added original damped body resonances; tail trim, fade and peak mastering.",
+        "sourceLicense": "All recording sources CC0-1.0; original DSP layers added",
+        "bytes": 141164,
+        "master": {
+          "peakDbfs": -5.5,
+          "rmsDbfs": -29.37
+        }
+      },
+      {
+        "id": "door-slam",
+        "file": "aaa_door_slam.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 1.2,
+        "loop": false,
+        "loopStart": 0,
+        "loopEnd": 1.2,
+        "recommendedGain": 0.68,
+        "description": "Solid door-panel slam with seal thump and a small mechanical latch after-click.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [
+          {
+            "assetId": "car_door_close",
+            "inputPath": "dist/assets/audio/car_door_close.mp3",
+            "author": "looneybits",
+            "source": "https://opengameart.org/content/cardoorsfx",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "door_closing.wav",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          },
+          {
+            "assetId": "door_close_03",
+            "inputPath": "dist/assets/audio/door_close_03.mp3",
+            "author": "rubberduck",
+            "source": "https://opengameart.org/content/100-cc0-sfx",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "door_close_03.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          },
+          {
+            "assetId": "microwave_door_close",
+            "inputPath": "dist/assets/audio/microwave_door_close.mp3",
+            "author": "rubberduck",
+            "source": "https://opengameart.org/content/100-cc0-sfx",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "microwave_door_close.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          }
+        ],
+        "modifications": "CC0 car and room door recordings re-pitched, filtered and layered; added low door-body resonance; shortened latch detail and peak mastering.",
+        "sourceLicense": "All recording sources CC0-1.0; original DSP layers added",
+        "bytes": 105884,
+        "master": {
+          "peakDbfs": -5.5,
+          "rmsDbfs": -25.93
+        }
+      },
+      {
+        "id": "cloth-vault",
+        "file": "aaa_cloth_vault.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 1.02,
+        "loop": false,
+        "loopStart": 0,
+        "loopEnd": 1.02,
+        "recommendedGain": 0.65,
+        "description": "Subtle close-up jacket scrape and soft contact for vaulting a waist-high obstacle.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [
+          {
+            "assetId": "footstep_carpet_001",
+            "inputPath": "dist/assets/audio/footstep_carpet_001.mp3",
+            "author": "Kenney",
+            "source": "https://kenney.nl/assets/impact-sounds",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "Audio/footstep_carpet_001.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          },
+          {
+            "assetId": "impactSoft_medium_001",
+            "inputPath": "dist/assets/audio/impactSoft_medium_001.mp3",
+            "author": "Kenney",
+            "source": "https://kenney.nl/assets/impact-sounds",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "Audio/impactSoft_medium_001.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          }
+        ],
+        "modifications": "CC0 carpet friction and soft-impact recordings filtered and re-pitched; original band-limited cloth friction with a natural movement envelope; soft contact, tail fade and peak mastering.",
+        "sourceLicense": "All recording sources CC0-1.0; original DSP layers added",
+        "bytes": 90008,
+        "master": {
+          "peakDbfs": -10.35,
+          "rmsDbfs": -26
+        }
+      },
+      {
+        "id": "rope-winch",
+        "file": "aaa_rope_winch.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 4,
+        "loop": true,
+        "loopStart": 0,
+        "loopEnd": 4,
+        "recommendedGain": 0.5,
+        "description": "Designed compact electric rope winch with motor hum, gear chatter, tension friction and soft ratchet ticks.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [
+          {
+            "assetId": "machine_01",
+            "inputPath": "dist/assets/audio/machine_01.mp3",
+            "author": "rubberduck",
+            "source": "https://opengameart.org/content/100-cc0-sfx",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "machine_01.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          }
+        ],
+        "modifications": "Filtered CC0 machine recording supports original periodic motor/gear synthesis and generated friction; circular crossfade and matched join; exact four-second loop.",
+        "sourceLicense": "All recording sources CC0-1.0; original DSP layers added",
+        "bytes": 352844,
+        "master": {
+          "peakDbfs": -10.93,
+          "rmsDbfs": -20
+        }
+      },
+      {
+        "id": "startled-crowd",
+        "file": "aaa_startled_crowd.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 3.05,
+        "loop": false,
+        "loopStart": 0,
+        "loopEnd": 3.05,
+        "recommendedGain": 0.55,
+        "description": "Seven entirely synthetic, nonverbal startled breath/vowel gestures forming a short fictional crowd murmur. No human recordings, no intelligible words, no voice imitation.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [],
+        "modifications": "Original breath noise, changing vowel formants and glottal harmonic synthesis; varied pitches, staggered reaction timing and restrained tail; peak mastering.",
+        "sourceLicense": "Original DSP synthesis; no third-party recordings",
+        "bytes": 269054,
+        "master": {
+          "peakDbfs": -8,
+          "rmsDbfs": -24.14
+        }
+      },
+      {
+        "id": "rain-on-glass",
+        "file": "aaa_rain_on_glass.wav",
+        "format": "PCM WAV signed 16-bit mono",
+        "sampleRate": 44100,
+        "durationSeconds": 8,
+        "loop": true,
+        "loopStart": 0,
+        "loopEnd": 8,
+        "recommendedGain": 0.7,
+        "description": "Rain heard from inside through a window, with softened outdoor wash and fine irregular droplets striking the glass.",
+        "designAuthor": "Original procedural sound design for BBE Munich Consulting Simulator",
+        "sources": [
+          {
+            "assetId": "rain",
+            "inputPath": "dist/assets/audio/rain.mp3",
+            "author": "Ylmir",
+            "source": "https://opengameart.org/content/rain-loopable",
+            "license": "CC0-1.0",
+            "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+            "original": "1.ogg",
+            "priorModifications": "Mono conversion, high-pass filtering, peak limiting and MP3 encoding; long recordings trimmed for runtime."
+          }
+        ],
+        "modifications": "CC0 Ylmir rain recording high-/low-pass filtered, trimmed and circularly crossfaded; 145 original damped droplet resonances added; matched loop join and moderate ambience master level.",
+        "sourceLicense": "All recording sources CC0-1.0; original DSP layers added",
+        "bytes": 705644,
+        "master": {
+          "peakDbfs": -10.12,
+          "rmsDbfs": -26
+        }
+      }
+    ],
+    "voices": [
+      {
+        "id": "police_spotted",
+        "actor": "officer",
+        "event": "police.spotted",
+        "text": "Sie dort! Bitte bleiben Sie stehen.",
+        "sourceActor": "officer",
+        "voice": "Microsoft Stefan",
+        "rate": 0,
+        "synthetic": true,
+        "actualVoice": "Microsoft Stefan",
+        "file": "voice_police_spotted.mp3",
+        "duration": 3.6801,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "Slight radio-like band filtering and presence EQ, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=230,lowpass=f=5200,equalizer=f=1900:t=q:w=0.8:g=1.5,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 45260,
+        "sha256": "5e9855bdfc57a117102a8d3bd069cc32ba4ec5bcf32b345f1b96a5f62c29baac",
+        "peak": 0.600271,
+        "peakDbfs": -4.43,
+        "rms": 0.078871
+      },
+      {
+        "id": "police_stop",
+        "actor": "officer",
+        "event": "police.vehicle_stop",
+        "text": "Fahren Sie rechts ran und stellen Sie den Motor ab.",
+        "sourceActor": "officer",
+        "voice": "Microsoft Stefan",
+        "rate": 0,
+        "synthetic": true,
+        "actualVoice": "Microsoft Stefan",
+        "file": "voice_police_stop.mp3",
+        "duration": 3.7414,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "Slight radio-like band filtering and presence EQ, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=230,lowpass=f=5200,equalizer=f=1900:t=q:w=0.8:g=1.5,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 45836,
+        "sha256": "24d46c753f28982de7ff5d723efc451a5221377f6a5fd76bdb1ead3dc046fb98",
+        "peak": 0.581805,
+        "peakDbfs": -4.7,
+        "rms": 0.078858
+      },
+      {
+        "id": "police_search",
+        "actor": "officer",
+        "event": "police.search",
+        "text": "Sichtkontakt verloren. Wir prüfen die nächste Querstraße.",
+        "sourceActor": "officer",
+        "voice": "Microsoft Stefan",
+        "rate": 0,
+        "synthetic": true,
+        "actualVoice": "Microsoft Stefan",
+        "file": "voice_police_search.mp3",
+        "duration": 5.3376,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "Slight radio-like band filtering and presence EQ, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=230,lowpass=f=5200,equalizer=f=1900:t=q:w=0.8:g=1.5,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 65132,
+        "sha256": "60b0e5a8b4c888109d56c9cf34d5af4ef417d3b5687880968ce0414fd36c711a",
+        "peak": 0.59977,
+        "peakDbfs": -4.44,
+        "rms": 0.083657
+      },
+      {
+        "id": "wanted_cleared",
+        "actor": "player",
+        "event": "police.clear",
+        "text": "Wieder ruhig. Vielleicht jetzt eine Karriere mit weniger Blaulicht.",
+        "sourceActor": "player",
+        "voice": "Microsoft Stefan",
+        "rate": 1,
+        "synthetic": true,
+        "actualVoice": "Microsoft Stefan",
+        "file": "voice_wanted_cleared.mp3",
+        "duration": 5.002,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "High-/low-pass filtering, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 61100,
+        "sha256": "08e3e74370ba422416ac26d563970c5d052190cebe9da34a2b4705ec14bb7ded",
+        "peak": 0.600166,
+        "peakDbfs": -4.43,
+        "rms": 0.085127
+      },
+      {
+        "id": "pedestrian_flee",
+        "actor": "passerby",
+        "event": "npc.flee",
+        "text": "Ich geh hier erst mal aus dem Weg!",
+        "sourceActor": "passerby",
+        "voice": "Microsoft Hedda Desktop",
+        "rate": 1,
+        "synthetic": true,
+        "actualVoice": "Microsoft Hedda Desktop",
+        "file": "voice_pedestrian_flee.mp3",
+        "duration": 2.3607,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "High-/low-pass filtering, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 29420,
+        "sha256": "dc0da0a5834ae928201ddee73ddd5028e9916344d3ecb3da1c66e5e4898096ad",
+        "peak": 0.482074,
+        "peakDbfs": -6.34,
+        "rms": 0.083515
+      },
+      {
+        "id": "pedestrian_nearmiss",
+        "actor": "passerby",
+        "event": "npc.near_miss",
+        "text": "He! Ich bin zu Fuß unterwegs, nicht im Crashtest!",
+        "sourceActor": "passerby",
+        "voice": "Microsoft Hedda Desktop",
+        "rate": 1,
+        "synthetic": true,
+        "actualVoice": "Microsoft Hedda Desktop",
+        "file": "voice_pedestrian_nearmiss.mp3",
+        "duration": 4.6235,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "High-/low-pass filtering, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 56492,
+        "sha256": "f71db41389228fd53fc071fa14c8304adc4ad95b2cd6c1c995d5a5b463f2e28c",
+        "peak": 0.598907,
+        "peakDbfs": -4.45,
+        "rms": 0.094275
+      },
+      {
+        "id": "bin_toppled",
+        "actor": "Lena",
+        "event": "prop.bin_toppled",
+        "text": "Die Tonne war vorher ordentlich sortiert. Das gilt übrigens auch für Daten.",
+        "sourceActor": "lena",
+        "voice": "Microsoft Katja",
+        "rate": 0,
+        "synthetic": true,
+        "actualVoice": "Microsoft Katja",
+        "file": "voice_bin_toppled.mp3",
+        "duration": 5.8588,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "High-/low-pass filtering, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 71468,
+        "sha256": "f394e54f43974975428982aa78a5f4861ab371efcd670ec8ee2f8898eae9638a",
+        "peak": 0.59727,
+        "peakDbfs": -4.48,
+        "rms": 0.089096
+      },
+      {
+        "id": "case_briefing",
+        "actor": "Lena",
+        "event": "mission.briefing",
+        "text": "Nimm den Präsentationskoffer mit zum Kunden hinter der BBE. Du hast sechs Minuten. Übergabe am Kundenempfang oder direkt auf der Dachterrasse. Hauptsache, die Unterlagen kommen vollständig an.",
+        "voice": "Microsoft Katja",
+        "rate": 0,
+        "synthetic": true,
+        "revision": "Only replaced nördlich der BBE with hinter der BBE to match the revised city route; same voice, rate and processing.",
+        "actualVoice": "Microsoft Katja",
+        "file": "voice_case_briefing.mp3",
+        "duration": 14.3111,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Original fictional writing, local Microsoft Windows German speech synthesis; no imitation of real individuals.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 172844,
+        "sha256": "1d8090bf7d5c52f5589d9e96f705c2a19f1d4cc7f8930039f50c3c4898667191",
+        "peak": 0.556136,
+        "peakDbfs": -5.1,
+        "rms": 0.087308
+      },
+      {
+        "id": "case_routes",
+        "actor": "Mara",
+        "event": "mission.routes",
+        "text": "Drei Wege: auf der Straße zum Kundenempfang, über Leitern und Stege zur Dachterrasse oder mit dem Helikopter und der Seilwinde. Wähle, was du sicher beherrschst. Mut ersetzt keine Landefläche.",
+        "voice": "Microsoft Hedda",
+        "rate": 1,
+        "synthetic": true,
+        "revision": "Corrected destination and route instructions to BBE → customer reception/roof; six-minute deadline; roof or helicopter/winch route. case_recovery is specifically for retrieval from snagged balcony.",
+        "actualVoice": "Microsoft Hedda",
+        "file": "voice_case_routes.mp3",
+        "duration": 13.5084,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Original fictional writing, local Microsoft Windows German speech synthesis; no imitation of real individuals.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 163052,
+        "sha256": "80e95ef34cb60f3db0255a323397f3a759ac8630ef24025a36fa737b04223908",
+        "peak": 0.598672,
+        "peakDbfs": -4.46,
+        "rms": 0.090178
+      },
+      {
+        "id": "case_pickup",
+        "actor": "player",
+        "event": "mission.pickup",
+        "text": "Gefunden. Der Koffer ist schwerer als die Management Summary vermuten lässt.",
+        "sourceActor": "player",
+        "voice": "Microsoft Stefan",
+        "rate": 1,
+        "synthetic": true,
+        "actualVoice": "Microsoft Stefan",
+        "file": "voice_case_pickup.mp3",
+        "duration": 5.5109,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "High-/low-pass filtering, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 67148,
+        "sha256": "0f8f8caea996e0cd1f103ed526419050421ccaafc3ec5b89d8fbad38752901f0",
+        "peak": 0.559648,
+        "peakDbfs": -5.04,
+        "rms": 0.08315
+      },
+      {
+        "id": "case_carry",
+        "actor": "Lena",
+        "event": "mission.carry",
+        "text": "Gut. Jetzt zum Kunden hinter der BBE. Der Empfang nimmt den Koffer an. Für die direkte Übergabe auf der Dachterrasse gibt es einen Bonus.",
+        "voice": "Microsoft Katja",
+        "rate": 0,
+        "synthetic": true,
+        "revision": "Only replaced nördlich der BBE with hinter der BBE to match the revised city route; same voice, rate and processing.",
+        "actualVoice": "Microsoft Katja",
+        "file": "voice_case_carry.mp3",
+        "duration": 10.8162,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Original fictional writing, local Microsoft Windows German speech synthesis; no imitation of real individuals.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 130796,
+        "sha256": "ad6201058d61d6266d62ecb113ce615492581c88ac44baf60c7f3106835b24e6",
+        "peak": 0.544956,
+        "peakDbfs": -5.27,
+        "rms": 0.089169
+      },
+      {
+        "id": "case_dropped",
+        "actor": "Mara",
+        "event": "mission.dropped",
+        "text": "Der Koffer liegt noch da. Sammle ihn wieder ein. Verloren ist erst mal nur der elegante Teil deiner Route.",
+        "sourceActor": "mara",
+        "voice": "Microsoft Hedda",
+        "rate": 1,
+        "synthetic": true,
+        "actualVoice": "Microsoft Hedda",
+        "file": "voice_case_dropped.mp3",
+        "duration": 7.5469,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "High-/low-pass filtering, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 91628,
+        "sha256": "4580340c0e5d57f4eb30577ed4852b6635b1d0cafac73d360c60c5aa6b4cb7e6",
+        "peak": 0.599893,
+        "peakDbfs": -4.44,
+        "rms": 0.089636
+      },
+      {
+        "id": "case_recovery",
+        "actor": "Lena",
+        "event": "mission.recovery",
+        "text": "Gut, der Koffer ist vom Balkon geborgen. Jetzt weiter zum Kunden. Der Auftrag läuft noch, also bitte die Restzeit im Blick behalten.",
+        "voice": "Microsoft Katja",
+        "rate": 0,
+        "synthetic": true,
+        "revision": "Corrected destination and route instructions to BBE → customer reception/roof; six-minute deadline; roof or helicopter/winch route. case_recovery is specifically for retrieval from snagged balcony.",
+        "actualVoice": "Microsoft Katja",
+        "file": "voice_case_recovery.mp3",
+        "duration": 10.5739,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Original fictional writing, local Microsoft Windows German speech synthesis; no imitation of real individuals.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 127916,
+        "sha256": "51d07d0b413c0b92bceda6c081cae4e50825a6b243b63083122ebe8d0fd023b1",
+        "peak": 0.599527,
+        "peakDbfs": -4.44,
+        "rms": 0.090211
+      },
+      {
+        "id": "case_success",
+        "actor": "Lena",
+        "event": "mission.success",
+        "text": "Koffer da, Unterlagen vollständig, Termin gerettet. Genau so sieht eine saubere Übergabe aus. Die drei Pixel am Logo besprechen wir nach dem Mittagessen.",
+        "sourceActor": "lena",
+        "voice": "Microsoft Katja",
+        "rate": 0,
+        "synthetic": true,
+        "actualVoice": "Microsoft Katja",
+        "file": "voice_case_success.mp3",
+        "duration": 11.8737,
+        "sampleRate": 24000,
+        "channels": 1,
+        "bitrateKbps": 96,
+        "source": "Locally rendered Microsoft Windows German speech synthesis; original fictional dialogue; no human actor or real-person imitation.",
+        "modifications": "High-/low-pass filtering, gentle compression, speech loudness normalization, peak limiting, onset fade and MP3 encoding.",
+        "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+        "bytes": 143468,
+        "sha256": "b9005db87ef7fcce77b18594745041fd4ddbec34e4dafb2abdfc58bc168b8e32",
+        "peak": 0.598693,
+        "peakDbfs": -4.46,
+        "rms": 0.090511
+      }
+    ]
+  },
+  "workshopStory": {
+    "voices": {
+      "type": "Locally synthesised German speech, original fictional dialogue, no real-person imitation",
+      "count": 33,
+      "actors": [
+        "Lukas Fleischmann",
+        "Tobias",
+        "Du",
+        "Clara"
+      ]
+    },
+    "music": {
+      "type": "Original compositions for this game; no GTA audio or melody used",
+      "tracks": [
+        "story_success",
+        "story_underscore"
+      ]
+    }
+  }
+}

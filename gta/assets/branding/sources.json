@@ -1,0 +1,142 @@
+{
+  "checkedAt": "2026-09-10",
+  "logo": {
+    "id": "bbe-original-logo",
+    "localPath": "dist/assets/branding/bbe-logo-original.svg",
+    "downloadUrl": "https://www.bbe.de/static/images/bbe-logo.svg",
+    "sourcePage": "https://www.bbe.de/de/",
+    "sourceEvidence": "The current official navbar-brand image uses src=/static/images/bbe-logo.svg and alt=BBE.",
+    "owner": "BBE Handelsberatung GmbH",
+    "license": "Official company logo; no open-content license asserted.",
+    "format": "image/svg+xml",
+    "bytes": 1592,
+    "sha256": "A53AAD754ADDBCD4035D694669670CB38CAA9EE838A362A8292AB3CBC47CAFEF",
+    "viewBox": "0 0 90.71 90.71",
+    "colors": [
+      "#004f87",
+      "#ffffff"
+    ],
+    "modified": false
+  },
+  "coordinateNotes": "Coordinates are public map reference points, not surveyed building footprints. The BBE coordinate comes from the official site's data-latitude/data-longitude attributes. Landmark coordinates come from app.muenchen.de/smap image URLs embedded in official city portal pages. Relative distances and offsets are approximate calculated straight-line measurements; positive eastMeters means east, positive northMeters means north. They are not walking distances.",
+  "origin": {
+    "name": "BBE Handelsberatung, Brienner Straße 45, 80333 München",
+    "latitude": 48.146561,
+    "longitude": 11.561806,
+    "source": "https://www.bbe.de/de/kontakt/standorte/"
+  },
+  "landmarks": [
+    {
+      "id": "frauenkirche",
+      "name": "Frauenkirche / Dom Zu Unserer Lieben Frau",
+      "address": "Frauenplatz 1, München",
+      "latitude": 48.1386,
+      "longitude": 11.5728,
+      "mapUrl": "https://app.muenchen.de/smap/48.1386/11.5728/map_small.png",
+      "coordinateSource": "https://www.muenchen.de/sehenswuerdigkeiten/top-sehenswuerdigkeiten/frauenkirche",
+      "eastMetersFromBBE": 817,
+      "northMetersFromBBE": -886,
+      "distanceMetersFromBBE": 1205,
+      "relativeLocation": "Südöstlich der BBE/Augustenstraße; nordwestlich des Marienplatzes.",
+      "architecture": [
+        "Spätgotischer Backsteinbau mit langem Hallenkirchenschiff",
+        "Zwei annähernd 99 Meter hohe Türme mit charakteristischen Welschen Hauben",
+        "Hohe schmale Spitzbogenfenster und großer steiler Dachkörper"
+      ],
+      "sources": [
+        "https://www.muenchner-dom.de/die-kathedrale/geschichte/baugeschichte/",
+        "https://www.munich.travel/pois/stadt-viertel/frauenkirche",
+        "https://www.munich.travel/artikel/stadt-viertel/meilensteine-muenchner-architektur"
+      ]
+    },
+    {
+      "id": "marienplatz",
+      "name": "Marienplatz / Mariensäule",
+      "latitude": 48.1372,
+      "longitude": 11.5755,
+      "mapUrl": "https://app.muenchen.de/smap/48.1372/11.5755/map_small.png",
+      "coordinateSource": "https://www.muenchen.de/sehenswuerdigkeiten/bauwerke-und-denkmaeler/mariensaeule",
+      "eastMetersFromBBE": 1017,
+      "northMetersFromBBE": -1042,
+      "distanceMetersFromBBE": 1456,
+      "relativeLocation": "Südöstlich der BBE/Augustenstraße; südöstlich der Frauenkirche.",
+      "architecture": [
+        "Zentraler Platz der Altstadt und Fußgängerzone",
+        "Mariensäule mit vergoldeter Marienfigur",
+        "Fischbrunnen am Neuen Rathaus"
+      ],
+      "sources": [
+        "https://www.munich.travel/pois/stadt-viertel/marienplatz",
+        "https://www.muenchen.de/sehenswuerdigkeiten/bauwerke-und-denkmaeler/mariensaeule"
+      ]
+    },
+    {
+      "id": "neues-rathaus",
+      "name": "Neues Rathaus",
+      "latitude": 48.1374,
+      "longitude": 11.576,
+      "mapUrl": "https://app.muenchen.de/smap/48.1374/11.576/map_small.png",
+      "coordinateSource": "https://www.muenchen.de/sehenswuerdigkeiten/bauwerke-und-denkmaeler/neues-rathaus",
+      "eastMetersFromBBE": 1054,
+      "northMetersFromBBE": -1020,
+      "distanceMetersFromBBE": 1467,
+      "relativeLocation": "An der Nordseite des Marienplatzes, südöstlich der BBE/Augustenstraße.",
+      "architecture": [
+        "Neugotischer Bau von Georg von Hauberrisser, 1867–1905",
+        "98,5 Meter lange Hauptfassade mit reichem Figuren- und Maßwerkdekor",
+        "Hoher zentraler Glockenspielturm, Spitzgiebel, Erker, kleine Türmchen und Arkaden"
+      ],
+      "sources": [
+        "https://www.munich.travel/pois/stadt-viertel/neues-rathaus",
+        "https://www.muenchen.de/sehenswuerdigkeiten/bauwerke-und-denkmaeler/neues-rathaus",
+        "https://www.muenchen.de/sehenswuerdigkeiten/webcam-live-aus-muenchen-marienplatz-olympiapark-und-mehr"
+      ]
+    },
+    {
+      "id": "koenigsplatz",
+      "name": "Königsplatz / Propyläen",
+      "latitude": 48.1457,
+      "longitude": 11.5657,
+      "mapUrl": "https://app.muenchen.de/smap/48.1457/11.5657/map_small.png",
+      "coordinateSource": "https://www.muenchen.de/sehenswuerdigkeiten/sehenswerte-plaetze/koenigsplatz",
+      "eastMetersFromBBE": 289,
+      "northMetersFromBBE": -96,
+      "distanceMetersFromBBE": 305,
+      "relativeLocation": "Östlich der BBE und der Augustenstraße entlang der Brienner Straße. Die Propyläen bilden den westlichen Platzabschluss.",
+      "architecture": [
+        "Klassizistisches Ensemble mit antiken Säulenordnungen und offenen Grünflächen",
+        "Propyläen: dorisches Torbauwerk mit zentralem Säulenportikus, Dreiecksgiebel und zwei blockhaften seitlichen Türmen",
+        "Glyptothek an der Nordseite mit ionischen Säulen; Antikensammlung gegenüber mit korinthischem Portikus"
+      ],
+      "sources": [
+        "https://www.munich.travel/pois/stadt-viertel/koenigsplatz",
+        "https://stadt.muenchen.de/dam/jcr:611a5acd-b971-48d2-b01f-7acb5723745a/KulturGeschichtsPfad-3-Maxvorstadt.pdf"
+      ],
+      "sourceNote": "KulturGeschichtsPfad Maxvorstadt, gedruckte Seiten 40–41 / PDF-Seite 21 (zero-based). Coordinate refers to the square map marker, not specifically the gateway."
+    },
+    {
+      "id": "st-benno",
+      "name": "St. Benno",
+      "address": "Ferdinand-Miller-Platz 1, München",
+      "latitude": 48.1519,
+      "longitude": 11.5523,
+      "mapUrl": "https://app.muenchen.de/smap/48.1519/11.5523/map_small.png",
+      "coordinateSource": "https://www.muenchen.de/sehenswuerdigkeiten/kirchen-und-kloester/st-benno",
+      "eastMetersFromBBE": -706,
+      "northMetersFromBBE": 594,
+      "distanceMetersFromBBE": 923,
+      "relativeLocation": "Nordwestlich der BBE, westlich der Augustenstraße; freistehend am Ferdinand-Miller-Platz.",
+      "architecture": [
+        "Neuromanische kreuzförmige Basilika",
+        "Zwei Fassadentürme und Vierungskuppel",
+        "1888–1895 von Leonhard Romeis; freistehend in Platzmitte"
+      ],
+      "sources": [
+        "https://www.geodaten.bayern.de/denkmal_static_data/externe_denkmalliste/pdf/denkmalliste_merge_162000.pdf",
+        "https://www.muenchen.de/sehenswuerdigkeiten/kirchen-und-kloester/st-benno",
+        "http://cms.st-benno-muenchen.de/ueber-uns/unsere-kirchen/st-benno/"
+      ],
+      "sourceNote": "Bayerisches Landesamt für Denkmalpflege, Denkmalliste München, D-1-62-000-1681, Seite 264/927, Stand 16.11.2025."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "voices": {
+    "type": "Locally synthesised German speech, original fictional dialogue, no real-person imitation",
+    "count": 33,
+    "actors": [
+      "Lukas Fleischmann",
+      "Tobias",
+      "Du",
+      "Clara"
+    ]
+  },
+  "music": {
+    "type": "Original compositions for this game; no GTA audio or melody used",
+    "tracks": [
+      "story_success",
+      "story_underscore"
+    ]
+  }
+}
