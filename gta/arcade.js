@@ -1,3 +1,5 @@
+import { VehiclePreload } from './vehicle-preload.js';
+import { VehicleLighting } from './vehicle-lighting.js';
 import { animateVehicleWheels } from './blender-vehicles.js';
 import { Immersion } from './immersion.js';
 import { Expansion, isSpecialVehicle } from './expansion.js';
@@ -37,6 +39,7 @@ export class Arcade {
     this.loot = [];
     this.vehicle = null;
     this.speed = 0;
+    this.vehicleLighting = new VehicleLighting(this.world);
     this.music = new Soundtrack(game.audio, this.sim);
     this.atmosphere = new Atmosphere(this.world);
     this.leisure = new Leisure(this);
@@ -82,6 +85,7 @@ export class Arcade {
     });
     this.expansion = new Expansion(this);
     this.immersion = new Immersion(this);
+    this.vehiclePreload = new VehiclePreload(this.world);
     this.world.keys.clear();
   }
   batchVehicles() {
@@ -271,6 +275,7 @@ export class Arcade {
     this.world.zoneData.city.physics.addBody(body);
     car.body = body;
     this.vehicle = null;
+    this.vehicleLighting?.update(null);
     this.world.player.visible = true;
     this.world.playerShadow.visible = true;
     this.world.teleport(spot.x, spot.z);
@@ -301,12 +306,15 @@ export class Arcade {
     car.speed = 0;
     this.vehicle = null;
     this.speed = 0;
+    this.vehicleLighting?.update(null);
     this.world.player.visible = true;
     this.world.playerShadow.visible = true;
   }
   updateVehicle(dt, blocked) {
-    if (isSpecialVehicle(this.vehicle)) return this.expansion.updateVehicle(dt, blocked);
-    if (!this.vehicle) return false;
+    if (!this.vehicle || isSpecialVehicle(this.vehicle)) {
+      this.vehicleLighting?.update(null);
+      return this.vehicle ? this.expansion.updateVehicle(dt, blocked) : false;
+    }
     const car = this.vehicle,
       w = this.world,
       keys = w.keys;
@@ -396,23 +404,7 @@ export class Arcade {
       (this.world.keys.has('KeyA') ? 1 : 0) - (this.world.keys.has('KeyD') ? 1 : 0),
     );
     this.game.audio.engine?.(Math.abs(this.speed) / 25);
-    if (!car.lamps) {
-      car.lamps = [];
-      for (const side of [-1, 1]) {
-        const light = new THREE.SpotLight('#fff0cb', 0, 27, 0.42, 0.65, 1.5);
-        const front =
-          (car.length || (car.type === 'bus' ? 8.5 : car.type === 'van' ? 5.3 : 4.4)) / 2 - 0.05;
-        light.position.set(
-          side * (car.type === 'bus' ? 0.95 : 0.64),
-          car.type === 'bus' ? 1.03 : 0.82,
-          front,
-        );
-        light.target.position.set(side * 0.64, 0, 18);
-        car.mesh.add(light, light.target);
-        car.lamps.push(light);
-      }
-    }
-    for (const lamp of car.lamps) lamp.intensity = car.headlights ? 12 : 0;
+    this.vehicleLighting?.update(car);
     return true;
   }
   targetNPC() {
@@ -745,6 +737,7 @@ export class Arcade {
     this.expansion?.update(dt, blocked);
     this.immersion?.update(dt, blocked);
     this.updateVehicleBatches();
+    this.vehiclePreload?.update();
   }
   interact(n) {
     if (n?.kind === 'prop-pick') {

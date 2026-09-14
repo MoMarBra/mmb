@@ -31,7 +31,11 @@ function kit(T) {
       opacity: 0.85,
       side: T.DoubleSide,
     }),
-    blueLamp: mat('#368aff', 0.18, 0.08, { emissive: '#186aff', emissiveIntensity: 2.0, clearcoat: 1 }),
+    blueLamp: mat('#368aff', 0.18, 0.08, {
+      emissive: '#186aff',
+      emissiveIntensity: 2.0,
+      clearcoat: 1,
+    }),
     amberLamp: mat('#ffb148', 0.2, 0.05, { emissive: '#ff9923', emissiveIntensity: 1.2 }),
     redLamp: mat('#ee4533', 0.18, 0.1, { emissive: '#fa2419', emissiveIntensity: 0.6 }),
     whiteLamp: mat('#f6efda', 0.16, 0.08, { emissive: '#fff1c4', emissiveIntensity: 0.9 }),
@@ -142,7 +146,21 @@ function kit(T) {
     geom.computeVertexNormals();
     return mesh(g, geom, material);
   };
-  const K = { T, M, geo, mesh, box, sphere, tube, cylinder, torus, round, curve, surface, unitCylinder };
+  const K = {
+    T,
+    M,
+    geo,
+    mesh,
+    box,
+    sphere,
+    tube,
+    cylinder,
+    torus,
+    round,
+    curve,
+    surface,
+    unitCylinder,
+  };
   cache.set(T, K);
   return K;
 }
@@ -386,6 +404,7 @@ export function createPoliceCar(THREE) {
     { T, M, box, round, tube, curve, cylinder, torus, surface, sphere } = K;
   const g = new T.Group();
   g.name = 'Munich police estate car';
+  g.rotation.order = 'YXZ';
   hull(
     K,
     g,
@@ -425,7 +444,8 @@ export function createPoliceCar(THREE) {
       tube(g, [side * 0.84, 1.51, z], [side * 0.71, 1.46, z], 0.024, M.black);
     round(g, [side * 0.947, 0.57, -0.05], [0.065, 0.12, 2.67], M.black);
     for (const z of [-1.43, 1.45])
-      torus(g, [side * 0.953, 0.35, z], 0.356, 0.022, M.black, Math.PI, 6, 28).rotation.y = Math.PI / 2;
+      torus(g, [side * 0.953, 0.35, z], 0.356, 0.022, M.black, Math.PI, 6, 28).rotation.y =
+        Math.PI / 2;
   }
   surface(
     g,
@@ -566,7 +586,8 @@ export function createPoliceCar(THREE) {
   lettering(K, g, 'POLIZEI', 0.145, M.blue, [0, 0.944, 1.68], [-Math.PI / 2, 0, 0]);
   round(g, [0, 0.608, 2.34], [1.57, 0.16, 0.14], M.black);
   round(g, [0, 0.778, 2.25], [0.73, 0.12, 0.055], M.black);
-  for (let i = 0; i < 7; i++) box(g, [-0.3 + i * 0.1, 0.778, 2.281], [0.032, 0.085, 0.01], M.chrome);
+  for (let i = 0; i < 7; i++)
+    box(g, [-0.3 + i * 0.1, 0.778, 2.281], [0.032, 0.085, 0.01], M.chrome);
   round(g, [0, 0.6, -2.355], [1.61, 0.14, 0.12], M.black);
   round(g, [0, 0.718, -2.413], [0.47, 0.103, 0.012], M.white);
   round(g, [0, 0.647, 2.414], [0.47, 0.096, 0.012], M.white);
@@ -613,6 +634,12 @@ export function createPoliceCar(THREE) {
   }
   const allAxles = wheels.map((w) => w.parent);
   bake(K, g, 'police-body', [...hinges, ...allAxles, ...headlights, ...taillights, ...flashers]);
+  // The native mesh was authored with tyre contact at .005 m; streets are .086 m.
+  // Lift visual parts and their cabin sockets together, leaving the world root/exits untouched.
+  const roadLift = 0.086 - (0.345 - 0.34);
+  for (const child of g.children) child.position.y += roadLift;
+  for (const seat of seats) seat.y += roadLift;
+  for (const axle of allAxles) axle.userData.restPosition = axle.position.clone();
   g.userData = {
     doors,
     doorPivots: hinges,
@@ -622,15 +649,17 @@ export function createPoliceCar(THREE) {
     lights: flashers,
     headlights,
     taillights,
+    groundAlignedWheels: true,
     wheelRadius: 0.34,
     wheelbase: 2.88,
     forward: '+Z',
-    groundY: 0,
+    groundY: 0.086,
+    steeringWheel: new T.Vector3(-0.45, 1.04 + roadLift, 0.82),
     driverSeat: seats[0],
     passengerSeats: seats.slice(1),
     exitPoints: [new T.Vector3(-1.47, 0, 0.42), new T.Vector3(1.47, 0, 0.42)],
-    cameraTarget: new T.Vector3(0, 1.0, -0.2),
-    colliderCenter: new T.Vector3(0, 0.78, 0),
+    cameraTarget: new T.Vector3(0, 1.0 + roadLift, -0.2),
+    colliderCenter: new T.Vector3(0, 0.78 + roadLift, 0),
     colliderHalfExtents: new T.Vector3(1.0, 0.76, 2.4),
   };
   return g;
@@ -977,7 +1006,15 @@ export function createUmbrella(THREE) {
       16,
     );
     tube(canopy, [0, 0.515, 0], [Math.sin(a) * 0.28, 0.81, Math.cos(a) * 0.28], 0.0038, M.chrome);
-    cylinder(canopy, [Math.sin(a) * 0.61, 0.641, Math.cos(a) * 0.61], 0.007, 0.016, M.black, 0.005, 6);
+    cylinder(
+      canopy,
+      [Math.sin(a) * 0.61, 0.641, Math.cos(a) * 0.61],
+      0.007,
+      0.016,
+      M.black,
+      0.005,
+      6,
+    );
   }
   const slider = cylinder(g, [0, 0.516, 0], 0.017, 0.059, M.black);
   sphere(g, [0, 0.929, 0], [0.019, 0.04, 0.019], M.black);

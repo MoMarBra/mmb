@@ -39,6 +39,15 @@ export function detail(car) {
     car.dentMesh = body;
     car.originalVertices = body.geometry.attributes.position.array.slice();
   }
+  // A detailed car is no longer instanced, but its wheels still use the shared LODs.
+  car.detailLodMeshes = [];
+  car.mesh.traverse((mesh) => {
+    if (mesh.isMesh && mesh.userData.lodGeometry && mesh !== car.dentMesh) {
+      mesh.userData.detailGeometry = mesh.geometry;
+      car.detailLodMeshes.push(mesh);
+    }
+  });
+  car.detailFarLOD = false;
   car.glazing = [];
   car.mesh.traverse((m) => {
     if (isWindow(m)) car.glazing.push(m);
@@ -138,6 +147,14 @@ export function detail(car) {
     // Keeps the existing deformation routine; restored damage makes no glass-break sound.
     this.damage(car, 0, false);
   }
+}
+
+/** Keep visited cars efficient at distance without replacing their unique dent geometry. */
+export function setDetailedVehicleLod(car, far) {
+  if (car.detailFarLOD === far) return;
+  car.detailFarLOD = far;
+  for (const mesh of car.detailLodMeshes || [])
+    mesh.geometry = far ? mesh.userData.lodGeometry : mesh.userData.detailGeometry;
 }
 
 /** Direct replacement. Optional worldPoint selects the exit-side door. */
@@ -255,7 +272,7 @@ export function poseDriver(car, actor, time = 0, steering = 0, speed = 0) {
   actor.updateMatrix();
   const turn = THREE.MathUtils.clamp(steering, -1, 1) * 0.42;
   const wheel = isPolice
-    ? new THREE.Vector3(-0.45, 1.04, 0.82)
+    ? car.mesh.userData.steeringWheel?.clone() || new THREE.Vector3(-0.45, 1.04, 0.82)
     : new THREE.Vector3(seat.x, seat.y + 0.3, seat.z + 0.4);
   for (const side of [-1, 1]) {
     const grip = wheel

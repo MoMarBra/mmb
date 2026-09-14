@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, label, human } from './world.js';
+import { box, label, human, chair } from './world.js';
 import { portal } from './doors.js';
 
 export const IT_LAYOUT = Object.freeze({
@@ -61,7 +61,6 @@ export function buildITOffice(w) {
     back.material.side = THREE.FrontSide;
   }
   for (const [x, z, rotation] of [
-    [-12.7, 6, Math.PI / 2],
     [-19, 4.55, 0],
     [-27.1, 8.85, Math.PI],
   ]) {
@@ -126,8 +125,13 @@ export function buildITOffice(w) {
   }
   const actor = human({ jacket: '#e3e9dd', pants: '#3c5863', hair: '#604a38' });
   actor.name = 'Benjamin · IT';
-  actor.position.set(-34.4, 0, 1.1);
+  actor.position.set(IT_LAYOUT.benjamin.x, 0, IT_LAYOUT.benjamin.z);
+  actor.rotation.y = Math.PI;
   g.add(actor);
+  const deskChair = chair(g, IT_LAYOUT.benjamin.x, IT_LAYOUT.benjamin.z, Math.PI, '#344c58', 0.49);
+  deskChair.name = 'Benjamin · ergonomic desk chair';
+  const footrest = box(g, IT_LAYOUT.benjamin.x, 0.1175, 0.64, 0.55, 0.055, 0.34, '#344c58');
+  footrest.name = 'Benjamin · footrest';
   w.zoneData.office.npcs.push({
     mesh: actor,
     name: 'Benjamin · IT',
@@ -148,6 +152,6 @@ export function buildITOffice(w) {
       bg: '#304b51',
       fg: '#b8e0ca',
     }).rotation.x = -Math.PI / 2;
-  w.itOffice = { entry, door, actor };
+  w.itOffice = { entry, door, actor, deskChair, footrest };
   return w.itOffice;
 }

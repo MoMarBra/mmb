@@ -1,10 +1,10 @@
 {
   "channel": "stable",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "publishedPath": "/gta/",
-  "sourceCommit": "3b8985583414972645388b6347ccbc2a091fcb3e",
+  "sourceCommit": "af97c67b86d7a4788859226eb888a8fb56cc4887",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-12T07:19:19.353Z",
+  "preparedAt": "2026-09-14T15:51:21.683Z",
   "gameTestsRun": true,
-  "validation": "Chrome and Edge: compact mission UI and actual PowerPoint completion; Chrome: task deadline follow-up. Full prior city and fire-story checks documented with version 1.5.0."
+  "validation": "Vehicle lighting/preload/wheel checks, office geometry and door routes, three-minute HQ traffic simulation, actual browser entry/exit for car/van/bus, full fire mission in Chrome and offline build in Edge."
 }

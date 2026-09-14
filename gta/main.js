@@ -241,6 +241,8 @@ export class Game {
     this.uiClick('#start-game', () => {
       this.started = true;
       this.world.started = true;
+      // Stand beside the chair, with a free path to the desk and corridor.
+      this.world.teleport(-9.15, 2.65);
       this.world.pose = 'walk';
       this.audio.start();
       this.mouseControls.resume();

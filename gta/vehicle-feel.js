@@ -1,4 +1,5 @@
-import { detail, openDoor, syncDriver } from './vehicle-detail.js';
+import { detail, openDoor, syncDriver, setDetailedVehicleLod } from './vehicle-detail.js';
+import { alignVehicleWheelsToRoad } from './blender-vehicles.js';
 import * as THREE from 'three';
 export class VehicleFeel {
   constructor(d) {
@@ -57,6 +58,14 @@ export class VehicleFeel {
     const car = this.a.vehicle;
     for (const c of this.w.cars) {
       if (!c.detailReady) continue;
+      setDetailedVehicleLod(c, c !== car && !!c.farLOD);
+      if (c !== car && (c.mesh.userData.blenderModel || c.mesh.userData.groundAlignedWheels)) {
+        // Exit must not leave the parked car suspended at its last cornering angle.
+        c.mesh.position.y = THREE.MathUtils.damp(c.mesh.position.y, 0, 9, dt);
+        c.mesh.rotation.x = THREE.MathUtils.damp(c.mesh.rotation.x, 0, 9, dt);
+        c.mesh.rotation.z = THREE.MathUtils.damp(c.mesh.rotation.z, 0, 9, dt);
+        alignVehicleWheelsToRoad(c);
+      }
       for (const door of c.doors || []) {
         door.pivot.rotation.y = THREE.MathUtils.damp(door.pivot.rotation.y, door.target, 9, dt);
         door.pivot.rotation.z = c.health < 40 ? door.side * 0.2 : 0;
@@ -73,7 +82,9 @@ export class VehicleFeel {
     const steering = (this.w.keys.has('KeyA') ? 1 : 0) - (this.w.keys.has('KeyD') ? 1 : 0),
       curb = Math.abs(Math.abs(car.mesh.position.x) - 8.4) < 0.9 && car.mesh.position.z < 125,
       bounce = curb
-        ? Math.sin(this.d.time * Math.max(8, Math.abs(this.a.speed) * 2)) * 0.1
+        ? Math.sin(this.d.time * Math.max(8, Math.abs(this.a.speed) * 2)) *
+          0.045 *
+          Math.min(1, Math.abs(this.a.speed) / 2)
         : Math.sin(this.d.time * 5) * Math.min(0.014, Math.abs(this.a.speed) * 0.001);
     car.mesh.position.y = Math.max(-0.04, bounce);
     car.mesh.rotation.x = THREE.MathUtils.damp(
@@ -88,6 +99,7 @@ export class VehicleFeel {
       5,
       dt,
     );
+    alignVehicleWheelsToRoad(car);
     syncDriver(car, {
       occupied: true,
       role: 'player',

@@ -1,5 +1,6 @@
 import { KAROLINENPLATZ_RING } from './city-streets.js';
 import { signalStage } from './street-signs.js';
+import { animateVehicleWheels } from './blender-vehicles.js';
 // Lane-centred, closed traffic circuits. All coordinates are game-space metres.
 // This controller owns only ambient traffic: parked, story and player cars retain
 // their existing state and physics. No runtime recycling happens in the camera.
@@ -258,7 +259,11 @@ function rebuildSolids(world, state) {
     state.solids.push(solid);
     const reach = Math.hypot(e.x, e.z);
     for (let x = Math.floor((solid.x - reach) / 24); x <= Math.floor((solid.x + reach) / 24); x++)
-      for (let z = Math.floor((solid.z - reach) / 24); z <= Math.floor((solid.z + reach) / 24); z++) {
+      for (
+        let z = Math.floor((solid.z - reach) / 24);
+        z <= Math.floor((solid.z + reach) / 24);
+        z++
+      ) {
         const key = `${x},${z}`;
         if (!state.cells.has(key)) state.cells.set(key, []);
         state.cells.get(key).push(solid);
@@ -293,7 +298,8 @@ function clearSpawn(world, state, car, route, s) {
 }
 
 function assign(world, state, car, route, preferred = null) {
-  const initial = preferred === null ? project(route, car.mesh.position, car.mesh.rotation.y) : preferred;
+  const initial =
+    preferred === null ? project(route, car.mesh.position, car.mesh.rotation.y) : preferred;
   let s = initial;
   for (let i = 0; i < Math.ceil(route.length / 7); i++) {
     const candidate = mod(initial + i * 7, route.length);
@@ -330,16 +336,26 @@ export function installCityTraffic(world) {
     (c) => !c.parked && !c.controlled && !['bike', 'helicopter', 'police'].includes(c.type),
   );
   const avenue = existing.filter((c) => !c.route);
-  avenue.forEach((car, i) =>
-    assign(
-      world,
-      state,
-      car,
+  const museumRoute = CITY_TRAFFIC_ROUTES.find((r) => r.id === 'museen-altstadt');
+  // The HQ frontage is part of the city circuit. Redistribute four existing
+  // cars from the crowded avenue instead of increasing the vehicle budget.
+  const museumStarts = [
+    project(museumRoute, { x: 50, z: 37.8 }),
+    project(museumRoute, { x: 23, z: 42.2 }),
+    museumRoute.length * 0.55,
+    museumRoute.length * 0.72,
+  ];
+  avenue.forEach((car, i) => {
+    const museumIndex = i - (avenue.length - 5);
+    const onMuseum = museumIndex >= 0 && museumIndex < 4;
+    const route =
       i === avenue.length - 1
         ? CITY_TRAFFIC_ROUTES.find((r) => r.id === 'karolinenplatz')
-        : CITY_TRAFFIC_ROUTES[0],
-    ),
-  );
+        : onMuseum
+          ? museumRoute
+          : CITY_TRAFFIC_ROUTES[0];
+    assign(world, state, car, route, onMuseum ? museumStarts[museumIndex] : null);
+  });
   existing
     .filter((c) => c.route && !c.traffic)
     .forEach((car, i) => {
@@ -396,9 +412,12 @@ function trafficLimit(world, state, car, p, phase) {
   const own = footprint(car),
     route = car.traffic.route;
   const next = sampleTrafficRoute(route, car.traffic.s + 4);
-  const bend = Math.abs(Math.atan2(p.dx * next.dz - p.dz * next.dx, p.dx * next.dx + p.dz * next.dz));
+  const bend = Math.abs(
+    Math.atan2(p.dx * next.dz - p.dz * next.dx, p.dx * next.dx + p.dz * next.dz),
+  );
   let limit =
-    Math.min(car.max || route.limit, route.limit) * (bend > 0.11 ? clamp(1 - bend * 0.8, 0.24, 0.78) : 1);
+    Math.min(car.max || route.limit, route.limit) *
+    (bend > 0.11 ? clamp(1 - bend * 0.8, 0.24, 0.78) : 1);
   const corridor = (q, radius, length = 0) => {
     const x = q.x - p.x,
       z = q.z - p.z;
@@ -446,11 +465,43 @@ function trafficLimit(world, state, car, p, phase) {
   return limit;
 }
 
+function junctionPathClear(car, junction, obstacles) {
+  const own = footprint(car);
+  // A car in a parking bay beside the intersection cannot reserve the entire
+  // junction forever. Test the candidate's actual swept path, including enough
+  // exit space to prevent queuing cars from stopping inside the crossing.
+  for (let ahead = Math.max(0, junction.ahead - 10); ahead <= junction.ahead + 11; ahead += 2) {
+    const p = sampleTrafficRoute(car.traffic.route, car.traffic.s + ahead);
+    const swept = { ...own, x: p.x, z: p.z, angle: Math.atan2(p.dx, p.dz) };
+    if (
+      obstacles.some(
+        (other) =>
+          other.car !== car &&
+          Math.hypot(other.x - p.x, other.z - p.z) < (own.l + other.l) * 0.5 + 1 &&
+          trafficFootprintsOverlap(swept, other, 0.25),
+      )
+    )
+      return false;
+  }
+  return true;
+}
+
 function reserveJunctions(world, state, phase) {
+  const obstacles = world.cars
+    .filter((other) => other.mesh.position.y < 3)
+    .map((other) => ({ ...footprint(other), car: other }));
+  const player = world.zoneData.city.body?.position || world.player.position;
+  if (!world.gameplay?.vehicle && player.y < 2.4)
+    obstacles.push({ x: player.x, z: player.z, w: 1.1, l: 1.1, angle: 0 });
   for (const [id, r] of state.reservations) {
     const car = r.car,
       j = JUNCTIONS[id];
-    if (car.controlled || car.parked || distance(car.mesh.position, j) > 19 || state.time - r.since > 18)
+    if (
+      car.controlled ||
+      car.parked ||
+      distance(car.mesh.position, j) > 19 ||
+      state.time - r.since > 18
+    )
       state.reservations.delete(id);
   }
   const candidates = state.cars
@@ -465,10 +516,8 @@ function reserveJunctions(world, state, phase) {
     .sort((a, b) => a.wait - b.wait || a.j.ahead - b.j.ahead);
   for (const { car, j } of candidates) {
     if (state.reservations.has(j.id)) continue;
-    const occupied = world.cars.some(
-      (other) => other !== car && other.mesh.position.y < 3 && distance(other.mesh.position, j) < 8,
-    );
-    if (!occupied) state.reservations.set(j.id, { car, since: state.time });
+    if (junctionPathClear(car, j, obstacles))
+      state.reservations.set(j.id, { car, since: state.time });
   }
 }
 
@@ -476,7 +525,11 @@ function safelyRecover(world, state, car) {
   const t = car.traffic,
     p = car.mesh.position,
     camera = world.camera;
-  if (t.blocked < 38 || distance(p, world.player.position) < 100 || distance(p, camera.position) < 110)
+  if (
+    t.blocked < 38 ||
+    distance(p, world.player.position) < 100 ||
+    distance(p, camera.position) < 110
+  )
     return;
   // Frustum membership plus distance is deliberately conservative: when the
   // camera is looking down a long street, a queued car never visibly vanishes.
@@ -539,9 +592,19 @@ export function updateCityTraffic(world, dt, phase = world.time % 16) {
       const near = sampleTrafficRoute(t.route, t.s - 0.35),
         far = sampleTrafficRoute(t.route, t.s + 0.35);
       car.mesh.rotation.y = Math.atan2(far.x - near.x, far.z - near.z);
-      for (const wheel of car.mesh.userData.wheels || [])
-        wheel.rotation[wheel.userData.axis || 'y'] +=
-          travel / (wheel.userData.radius || (car.type === 'bus' ? 0.4 : 0.32));
+      const behind = sampleTrafficRoute(t.route, t.s - 1),
+        ahead = sampleTrafficRoute(t.route, t.s + 1);
+      const curvature =
+        Math.atan2(
+          behind.dz * ahead.dx - behind.dx * ahead.dz,
+          behind.dx * ahead.dx + behind.dz * ahead.dz,
+        ) / 2;
+      const steering = clamp(
+        Math.atan((car.mesh.userData.wheelbase || 2.6) * curvature) / 0.35,
+        -1,
+        1,
+      );
+      animateVehicleWheels(car, travel / dt, dt, steering);
       car.routeIndex = next.index;
       t.moving += travel;
     }

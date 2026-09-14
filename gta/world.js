@@ -1,4 +1,5 @@
 import { buildITOffice } from './it-office.js';
+import { buildOfficeDetail } from './office-detail.js';
 import { updateStreetSignals } from './street-signs.js';
 import { blenderVehicle } from './blender-vehicles.js';
 import { buildCityStreets } from './city-streets.js';
@@ -174,14 +175,16 @@ function monitor(g, x, y, z, w = 0.8) {
     sub: 'RETAIL. INSIGHT. IMPACT.',
   });
 }
-function chair(g, x, z, rot = 0, color = '#344c58') {
+export function chair(g, x, z, rot = 0, color = '#344c58', seatHeight = 0.62) {
   const root = new THREE.Group();
   root.position.set(x, 0, z);
   root.rotation.y = rot;
   g.add(root);
-  cylinder(root, 0, 0.33, 0, 0.04, 0.56, '#8e989a');
-  box(root, 0, 0.62, 0, 0.58, 0.11, 0.55, color);
-  const back = box(root, 0, 0.94, -0.24, 0.55, 0.58, 0.09, color);
+  const stemHeight = seatHeight - 0.06;
+  cylinder(root, 0, 0.05 + stemHeight / 2, 0, 0.04, stemHeight, '#8e989a');
+  const seat = box(root, 0, seatHeight, 0, 0.58, 0.11, 0.55, color);
+  seat.name = 'Office chair cushion';
+  const back = box(root, 0, seatHeight + 0.32, -0.24, 0.55, 0.58, 0.09, color);
   back.rotation.x = -0.08;
   for (let i = 0; i < 5; i++) {
     const a = (i * Math.PI * 2) / 5;
@@ -199,8 +202,8 @@ function chair(g, x, z, rot = 0, color = '#344c58') {
     sphere(root, Math.sin(a) * 0.28, 0.08, Math.cos(a) * 0.28, 0.055, 0.055, 0.055, '#24292b');
   }
   for (const sx of [-1, 1]) {
-    box(root, sx * 0.31, 0.8, 0, 0.06, 0.04, 0.33, '#232e34');
-    box(root, sx * 0.31, 0.7, -0.06, 0.035, 0.2, 0.035, '#5e6970');
+    box(root, sx * 0.31, seatHeight + 0.18, 0, 0.06, 0.04, 0.33, '#232e34');
+    box(root, sx * 0.31, seatHeight + 0.08, -0.06, 0.035, 0.2, 0.035, '#5e6970');
   }
   return root;
 }
@@ -212,19 +215,20 @@ function desk(g, x, z, { width = 2.3, dual = false } = {}) {
   monitor(g, x + (dual ? -0.43 : 0), 1.29, z - 0.28, dual ? 0.74 : 0.84);
   if (dual) monitor(g, x + 0.43, 1.29, z - 0.28, 0.74);
   box(g, x - 0.12, 0.838, z + 0.2, 0.48, 0.025, 0.16, '#d4d7d4');
+  const keys = new THREE.InstancedMesh(boxGeo, material('#667378'), 40);
+  keys.name = 'Office keyboard · 40 shared keys';
+  const keyTransform = new THREE.Object3D();
   for (let j = 0; j < 4; j++)
-    for (let i = 0; i < 10; i++)
-      box(
-        g,
-        x - 0.32 + i * 0.046,
-        0.854,
-        z + 0.15 + j * 0.035,
-        0.03,
-        0.007,
-        0.024,
-        '#667378',
-        false,
-      );
+    for (let i = 0; i < 10; i++) {
+      keyTransform.position.set(x - 0.32 + i * 0.046, 0.854, z + 0.15 + j * 0.035);
+      keyTransform.scale.set(0.03, 0.007, 0.024);
+      keyTransform.updateMatrix();
+      keys.setMatrixAt(j * 10 + i, keyTransform.matrix);
+    }
+  keys.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+  keys.computeBoundingSphere();
+  keys.receiveShadow = true;
+  g.add(keys);
   sphere(g, x + 0.4, 0.851, z + 0.24, 0.055, 0.025, 0.08, '#d9dad4');
   box(g, x - 0.78, 0.85, z + 0.02, 0.29, 0.04, 0.36, '#fcf5df');
   mug(g, x + 0.8, 0.89, z - 0.1);
@@ -553,12 +557,24 @@ export class GameWorld {
       22,
       new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.7 }),
     );
-    const backWall = this.solid('office', g, 0, 1.7, -11, 27, 3.4, 0.2, '#e7e8de');
-    backWall.visible = false;
-    box(g, 0, 0.32, -11, 27, 0.64, 0.2, '#e7e8de');
-    box(g, 0, 3.15, -11, 27, 0.5, 0.2, '#e7e8de');
-    for (const x of [-13.3, -11.1, -6.1, -1.1, 3.9, 8.9, 13.3])
-      box(g, x, 1.7, -11, 0.95, 3.4, 0.2, '#e7e8de');
+    // Glazing and masonry meet exactly; no invisible wall or open slits.
+    for (const [a, b] of [
+      [-13.5, 7.25],
+      [8.75, 13.5],
+    ])
+      this.solid('office', g, (a + b) / 2, 0.35, -11, b - a, 0.7, 0.2, '#e7e8de');
+    this.solid('office', g, 0, 3.15, -11, 27, 0.5, 0.2, '#e7e8de');
+    for (const [a, b] of [
+      [-13.5, -11.9],
+      [-8.1, -6.9],
+      [-3.1, -1.9],
+      [1.9, 3.1],
+      [6.9, 7.25],
+      [8.75, 9.4],
+      [12.6, 13.5],
+    ])
+      this.solid('office', g, (a + b) / 2, 1.8, -11, b - a, 2.2, 0.2, '#e7e8de');
+    this.solid('office', g, 8, 2.81, -11, 1.5, 0.18, 0.2, '#e7e8de');
     // A real 2.5 m opening joins the existing office to the IT corridor.
     for (const [a, b] of [
       [-11, 4.75],
@@ -585,30 +601,30 @@ export class GameWorld {
       for (const side of [-1, 1])
         box(g, x + (side * width) / 2, 1.55, 11.6, 0.08, 3.1, 1.2, '#d6ddd4');
     }
-    for (const x of [-9, -4, 1, 6, 11]) {
-      box(
-        g,
-        x,
-        1.8,
-        -10.87,
-        3.8,
-        2.2,
-        0.07,
-        new THREE.MeshPhysicalMaterial({
-          color: '#b5d4dc',
-          transparent: true,
-          opacity: 0.2,
-          roughness: 0.09,
-          metalness: 0.3,
-          depthWrite: false,
-        }),
-      );
-      box(g, x, 0.73, -10.65, 4.05, 0.12, 0.45, '#e9e7db');
-      box(g, x, 1.8, -10.78, 0.07, 2.2, 0.09, '#ebeee7');
-      box(g, x, 2.2, -10.78, 3.8, 0.055, 0.09, '#ebeee7');
-      for (let i = 0; i < 12; i++)
-        box(g, x, 2.62 + i * 0.035, -10.74, 3.8, 0.018, 0.1, '#d6d6c9', false);
-      label(g, 'BRIENNER STRASSE', x, 1.23, -10.72, 2.7, 0.3, { bg: '#8fa2a7', fg: '#dfe8e7' });
+    const windowGlass = new THREE.MeshPhysicalMaterial({
+      color: '#b5d4dc',
+      transparent: true,
+      opacity: 0.14,
+      roughness: 0.09,
+      metalness: 0.2,
+      depthWrite: false,
+    });
+    for (const [x, width] of [
+      [-10, 3.8],
+      [-5, 3.8],
+      [0, 3.8],
+      [5, 3.8],
+      [11, 3.2],
+    ]) {
+      const pane = this.solid('office', g, x, 1.8, -10.96, width, 2.2, 0.045, windowGlass);
+      pane.name = 'Office street window';
+      pane.castShadow = false;
+      box(g, x, 0.73, -10.74, width + 0.12, 0.12, 0.45, '#e9e7db');
+      for (const xx of [x - width / 2 + 0.045, x, x + width / 2 - 0.045])
+        box(g, xx, 1.8, -10.87, 0.07, 2.2, 0.09, '#ebeee7');
+      for (const y of [0.74, 2.2, 2.87]) box(g, x, y, -10.87, width, 0.055, 0.09, '#ebeee7');
+      for (let i = 0; i < 8; i++)
+        box(g, x, 2.62 + i * 0.035, -10.8, width, 0.018, 0.1, '#d6d6c9', false);
     }
     for (const z of [-6, 0, 6]) {
       box(g, 0, 3.22, z, 24, 0.08, 0.045, '#cbd0c9');
@@ -666,8 +682,8 @@ export class GameWorld {
       for (const zz of [z - d / 2, z + d / 2]) box(g, 3, 1.45, zz, 0.07, 2.9, 0.07, '#516c71');
     }
     for (const x of [4.75, 11.25]) this.solid('office', g, x, 1.45, -5.8, 3.5, 2.9, 0.07, glass);
-    box(g, 8, 1.45, 4, 10, 2.9, 0.07, glass);
-    this.obstacle('office', 8, 4, 10, 0.07, 1.45, 2.9);
+    const meetingGlass = this.solid('office', g, 8, 1.45, 4, 10, 2.9, 0.07, glass);
+    meetingGlass.name = 'Meeting room · rear glass';
     label(g, 'ISAR · BESPRECHUNG', 3.1, 2.25, -3.6, 2.5, 0.4, { rotation: -Math.PI / 2 });
     box(g, 8, 0.8, -1, 4.5, 0.13, 2, '#9e805c');
     for (const x of [6.5, 9.5])
@@ -684,34 +700,43 @@ export class GameWorld {
       bg: '#173b49',
       sub: 'WACHSTUM BEGINNT MIT EINER GUTEN FRAGE.',
     });
-    box(g, 7, 1.75, 3.91, 2.6, 1.4, 0.045, '#e9e8df');
-    label(g, 'Strategie 2026', 7, 2, 3.87, 2.3, 0.7, {
+    const strategyBoard = box(g, 7, 1.75, 3.91, 2.6, 1.4, 0.045, '#e9e8df');
+    strategyBoard.name = 'Meeting room · strategy board backing';
+    this.zoneData.office.obstacles.push(strategyBoard);
+    const strategyCaption = label(g, 'Strategie 2026', 7, 2, 3.87, 2.3, 0.7, {
       rotation: Math.PI,
       bg: '#f1f0e8',
       fg: '#244e60',
       sub: 'INSIGHT → ENTSCHEIDUNG → WIRKUNG',
     });
+    strategyCaption.name = 'Meeting room · strategy board text';
+    strategyCaption.material.side = THREE.FrontSide;
     // Reception, kitchen, printer, pinboard, archive and restrooms.
     this.solid('office', g, -6, 0.59, 7, 4, 1.18, 1.1, '#1b4755');
     box(g, -6, 1.21, 7, 4.25, 0.07, 1.3, '#c3ae8b');
     label(g, 'BBE Handelsberatung', -6, 0.77, 7.56, 3.6, 0.6, {
       sub: 'BRIENNER STRASSE 45 · MÜNCHEN',
     });
-    monitor(g, -6, 1.65, 6.8, 0.68);
+    const receptionScreen = new THREE.Group();
+    receptionScreen.name = 'Reception monitor · operator side';
+    receptionScreen.position.set(-6, 0, 6.8);
+    receptionScreen.rotation.y = Math.PI;
+    g.add(receptionScreen);
+    monitor(receptionScreen, 0, 1.7195, 0, 0.68);
+    chair(g, -6, 6.15, 0);
     this.interact('office', 'reception', 'Empfang · Aufträge & Spielstand', -6, 8.9, {
       kind: 'reception',
       radius: 2.4,
     });
     this.solid('office', g, 10, 0.46, 8.4, 6, 0.92, 0.75, '#e0dfd2');
     box(g, 10, 0.94, 8.4, 6.15, 0.07, 0.92, '#8a9895');
-    for (let x = 7.7; x < 12.7; x += 1) box(g, x, 0.55, 8.81, 0.025, 0.65, 0.015, '#a6ada5');
+    for (let x = 7.7; x < 12.7; x += 1) box(g, x, 0.55, 7.99, 0.025, 0.65, 0.015, '#a6ada5');
     box(g, 8.1, 1.26, 8.4, 0.52, 0.55, 0.47, material('#515c5d', 0.4, 0.5));
-    box(g, 8.1, 1.31, 8.66, 0.38, 0.19, 0.02, '#17333a');
-    label(g, 'KAFFEE', 8.1, 1.35, 8.674, 0.3, 0.13, { fg: '#80eed1' });
-    box(g, 8.1, 1.03, 8.63, 0.45, 0.04, 0.26, '#1b2b2e');
-    mug(g, 8.1, 1.12, 8.67);
+    box(g, 8.1, 1.31, 8.14, 0.38, 0.19, 0.02, '#17333a');
+    label(g, 'KAFFEE', 8.1, 1.35, 8.126, 0.3, 0.13, { fg: '#80eed1', rotation: Math.PI });
+    box(g, 8.1, 1.01, 8.13, 0.45, 0.04, 0.26, '#1b2b2e');
+    mug(g, 8.1, 1.095, 8.06);
     this.interact('office', 'coffee', 'Kaffee holen · kostenlos', 8.1, 7.1, { kind: 'coffee' });
-    box(g, 10.5, 0.989, 8.4, 0.9, 0.018, 0.5, material('#8eaaa9', 0.2, 0.8));
     cylinder(g, 10.5, 1.18, 8.25, 0.025, 0.37, '#d6ded8');
     box(g, 12.5, 1.05, 9.7, 1.1, 2.1, 0.8, '#cbd4d0');
     label(g, 'KÜCHE', 10, 2.35, 10.87, 2, 0.5, { rotation: Math.PI, bg: '#dee4da', fg: '#31575e' });
@@ -778,8 +803,19 @@ export class GameWorld {
         radius: 1.8,
       },
     );
-    box(g, 8, 1.4, -10.84, 2.2, 2.8, 0.09, '#637a77');
-    label(g, 'PARTNERBÜRO', 8, 2.1, -10.74, 1.8, 0.45, { sub: 'AB LEVEL 7' });
+    const partnerDoor = portal(this, 'office', 'partner-entry', 8, -10.94, {
+      width: 1.4,
+      rotation: 0,
+      title: 'PARTNERBÜRO · LEVEL 7',
+    });
+    partnerDoor.root.userData.dynamic = false;
+    partnerDoor.mesh.userData.dynamic = true;
+    for (const x of [-0.685, 0.685])
+      box(partnerDoor.root, x, 1.325, -0.067, 0.085, 2.65, 0.03, '#465e61');
+    box(partnerDoor.root, 0, 2.62, -0.067, 1.4, 0.04, 0.03, '#465e61');
+    box(g, 8, -0.035, -11.6, 1.5, 0.07, 1.3, '#a0aaa3');
+    box(g, 8, 1.55, -12.2, 1.5, 3.1, 0.1, '#cbd5cc');
+    for (const x of [7.25, 8.75]) box(g, x, 1.55, -11.6, 0.08, 3.1, 1.2, '#d6ddd4');
     this.interact('office', 'partner', 'Partnerbüro', 8, -9.2, { kind: 'partner' });
     for (const [x, z] of [
       [-12, -9],
@@ -824,6 +860,9 @@ export class GameWorld {
   makeWorkstation() {
     const g = this.workstation;
     if (!g) return;
+    g.traverse((object) => {
+      if (object.isInstancedMesh) object.dispose();
+    });
     g.clear();
     const level = this.sim.level;
     desk(g, -8, 1, {
@@ -831,7 +870,18 @@ export class GameWorld {
       dual: level >= 3 || this.sim.s.upgrades.includes('monitor'),
     });
     chair(g, -8, 2.15, Math.PI, level >= 4 ? '#6c493a' : '#344c58');
-    label(g, 'DEIN ARBEITSPLATZ', -8, 1.05, 1.58, 1.6, 0.21, { bg: '#ded9c9', fg: '#224a58' });
+    const plaque = box(g, -8, 1.05, 1.55, 1.6, 0.21, 0.03, '#ded9c9', false);
+    plaque.name = 'Desk nameplate backing';
+    const nameplate = label(g, 'DEIN ARBEITSPLATZ', -8, 1.05, 1.567, 1.6, 0.21, {
+      bg: '#ded9c9',
+      fg: '#224a58',
+    });
+    nameplate.name = 'Desk nameplate face';
+    nameplate.material.side = THREE.FrontSide;
+    for (const x of [-8.55, -7.45]) {
+      box(g, x, 0.885, 1.5, 0.035, 0.135, 0.1, '#a6b5b1', false);
+      box(g, x, 0.825, 1.485, 0.13, 0.015, 0.16, '#a6b5b1', false);
+    }
     if (level >= 2 || this.sim.s.upgrades.includes('mouse'))
       sphere(g, -7.56, 0.863, 1.23, 0.065, 0.032, 0.09, '#213b47');
     if (this.sim.s.upgrades.includes('plant')) {
@@ -1202,7 +1252,7 @@ export class GameWorld {
     for (let i = 0; i < 9; i++) {
       const car = this.car(g, i === 2 ? 'van' : 'car', ['#b0b9b7', '#42566b', '#e1dacb'][i % 3]);
       car.userData.dynamic = true;
-      car.position.set(i % 2 ? 7.8 : -7.8, 0, -124 + i * 25);
+      car.position.set(i % 2 ? 7.8 : -7.8, 0, i === 7 ? 57 : -124 + i * 25);
       if ([40, -43].some((t) => Math.abs(car.position.z - t) < 13)) {
         car.position.z -= 12;
       }
@@ -1557,7 +1607,8 @@ export class GameWorld {
       [28, 0, 0.15, 14],
       [40, 0, 0.15, 14],
       [34, -7, 12, 0.15],
-      [34, 7, 12, 0.15],
+      [30.625, 7, 5.25, 0.15],
+      [37.375, 7, 5.25, 0.15],
     ])
       this.solid('office', g, x, 1.75, z, w, 3.5, d, '#dce0d3');
     for (const z of [-3, 2]) {
@@ -1579,7 +1630,19 @@ export class GameWorld {
       kind: 'computer',
     });
     this.interact('office', 'suite-back', 'Zurück ins BBE-Büro', 34, 5.5, { kind: 'office-back' });
-    label(g, 'BBE · BÜRO', 34, 2.2, 6.9, 3, 0.55, { rotation: Math.PI });
+    this.solid('office', g, 34, 3.11, 7, 1.5, 0.78, 0.15, '#dce0d3');
+    const suiteDoor = portal(this, 'office', 'suite-back', 34, 6.94, {
+      width: 1.4,
+      title: 'BBE · BÜRO',
+    });
+    suiteDoor.root.userData.dynamic = false;
+    suiteDoor.mesh.userData.dynamic = true;
+    for (const x of [-0.685, 0.685])
+      box(suiteDoor.root, x, 1.325, -0.067, 0.085, 2.65, 0.03, '#465e61');
+    box(suiteDoor.root, 0, 2.62, -0.067, 1.4, 0.04, 0.03, '#465e61');
+    box(g, 34, -0.035, 7.6, 1.5, 0.07, 1.3, '#a0aaa3');
+    box(g, 34, 1.55, 8.2, 1.5, 3.1, 0.1, '#cbd5cc');
+    for (const x of [33.25, 34.75]) box(g, x, 1.55, 7.6, 0.08, 3.1, 1.2, '#d6ddd4');
     // Actual bathroom room with sinks, mirrors and individual cubicles.
     const bathroomTile = canvasTexture(256, 256, (c) => {
       c.fillStyle = '#bac9c3';
@@ -1679,6 +1742,7 @@ export class GameWorld {
       fg: '#31616b',
       sub: '1. VERSTEHEN   2. VERDICHTEN   3. ENTSCHEIDEN',
     });
+    buildOfficeDetail(this, { material });
   }
   batchScenes() {
     this.crowdBatches = [];

@@ -57,6 +57,7 @@ export function blenderVehicle(parent, type, paint, kit) {
   const data = BLENDER_VEHICLES.models[model];
   const root = new THREE.Group();
   root.name = 'München ' + type + ' · Blender 4.5';
+  root.rotation.order = 'YXZ';
   root.userData.dynamic = true;
   root.userData.blenderModel = model;
   root.userData.doors = {};
@@ -78,8 +79,17 @@ export function blenderVehicle(parent, type, paint, kit) {
     root.add(group);
     parts[name] = group;
     if (p.kind === 'door') root.userData.doors[name] = group;
-    if (p.kind === 'wheel') root.userData.wheels.push(group);
+    if (p.kind === 'wheel') {
+      // Steering rotates the axle first; spin must never rotate the steering axis.
+      group.rotation.order = 'YXZ';
+      group.userData.restPosition = group.position.clone();
+      group.userData.rollAngle = 0;
+      group.userData.steerAngle = 0;
+      root.userData.wheels.push(group);
+    }
   }
+  const wheelZ = root.userData.wheels.map((wheel) => wheel.position.z);
+  root.userData.wheelbase = Math.max(...wheelZ) - Math.min(...wheelZ);
   const lods = new Map(
     (data.lod?.meshes || []).map((mesh, i) => [
       mesh.part + ':' + mesh.material,
@@ -120,11 +130,63 @@ export function blenderVehicle(parent, type, paint, kit) {
   return root;
 }
 
+const FULL_TURN = Math.PI * 2;
+const wheelYaw = new THREE.Quaternion();
+const chassisInverse = new THREE.Quaternion();
+const levelWheel = new THREE.Quaternion();
+const wheelSteer = new THREE.Quaternion();
+const wheelSpin = new THREE.Quaternion();
+const xAxis = new THREE.Vector3(1, 0, 0);
+const yAxis = new THREE.Vector3(0, 1, 0);
+
+/** +Z is forward; positive steering turns towards +X. Spin remains around the axle. */
 export function animateVehicleWheels(car, speed, dt, steering = 0) {
-  for (const wheel of car.mesh.userData.wheels || []) {
-    const axis = wheel.userData.axis || 'y';
-    wheel.rotation[axis] += (speed * dt) / (wheel.userData.radius || 0.37);
-    if (axis === 'x' && wheel.userData.front)
-      wheel.rotation.y = THREE.MathUtils.damp(wheel.rotation.y, steering * 0.35, 10, dt);
+  if (!Number.isFinite(dt) || dt < 0 || !Number.isFinite(speed)) return;
+  const rig = car.mesh.userData;
+  const nativeAxles = rig.frontAxles;
+  const turn = Number.isFinite(steering) ? THREE.MathUtils.clamp(steering, -1, 1) * 0.35 : 0;
+  for (const wheel of rig.wheels || []) {
+    // The police model supplies separate steering axles, with X-spinning child wheels.
+    const axis = wheel.userData.axis || (nativeAxles ? 'x' : 'y');
+    const radius = wheel.userData.radius || rig.wheelRadius || 0.37;
+    const angle =
+      ((wheel.userData.rollAngle ?? wheel.rotation[axis]) + (speed * dt) / radius) % FULL_TURN;
+    wheel.userData.rollAngle = angle;
+    if (axis === 'x') {
+      const steer = wheel.userData.front
+        ? THREE.MathUtils.damp(wheel.userData.steerAngle || 0, turn, 10, dt)
+        : 0;
+      wheel.userData.steerAngle = steer;
+      // XYZ combines roll with yaw and makes the wheel wobble once per revolution.
+      wheel.rotation.set(angle, steer, 0, 'YXZ');
+    } else wheel.rotation[axis] = angle;
+  }
+  for (const axle of nativeAxles || []) {
+    axle.userData.steerAngle = THREE.MathUtils.damp(axle.userData.steerAngle || 0, turn, 10, dt);
+    axle.rotation.set(0, axle.userData.steerAngle, 0, 'YXZ');
+  }
+}
+
+/** Suspension belongs to the chassis; tyres keep their authored road contact. */
+export function alignVehicleWheelsToRoad(car) {
+  const rig = car.mesh.userData;
+  if (!rig.blenderModel && !rig.groundAlignedWheels) return;
+  wheelYaw.setFromAxisAngle(yAxis, car.mesh.rotation.y);
+  chassisInverse.copy(car.mesh.quaternion).invert();
+  levelWheel.copy(chassisInverse).multiply(wheelYaw);
+  for (const wheel of rig.wheels || []) {
+    const mount = rig.frontAxles ? wheel.parent : wheel;
+    const rest = mount.userData.restPosition;
+    if (!rest) continue;
+    // Convert a level axle centre back into the tilted chassis coordinate system.
+    mount.position.copy(rest).applyQuaternion(wheelYaw);
+    mount.position.y -= car.mesh.position.y;
+    mount.position.applyQuaternion(chassisInverse);
+    wheelSteer.setFromAxisAngle(yAxis, mount.userData.steerAngle || 0);
+    mount.quaternion.copy(levelWheel).multiply(wheelSteer);
+    if (mount === wheel) {
+      wheelSpin.setFromAxisAngle(xAxis, wheel.userData.rollAngle || 0);
+      wheel.quaternion.multiply(wheelSpin);
+    }
   }
 }
