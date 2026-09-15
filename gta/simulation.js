@@ -1,9 +1,11 @@
+import { freshExtras, normalizeExtras } from './extras-state.js';
 import { freshFireStory, normalizeFireStory } from './fire-state.js';
 import { freshWorkshopStory, normalizeWorkshopStory } from './workshop-state.js';
 import { CAREERS, RESTAURANTS, TASKS, ACHIEVEMENTS, clamp } from './data.js';
 export const SAVE_KEY = 'bbe-munich-life-v1';
 export const freshState = () => ({
   version: 1,
+  extras: freshExtras(),
   vaults: 0,
   propsThrown: 0,
   glassBroken: 0,
@@ -216,8 +218,9 @@ export class Simulation {
               Number.isFinite(v.health),
           )
           .slice(0, 80)
-          .map(([id, v]) => [id, { health: clamp(v.health, 10, 100) }]),
+          .map(([id, v]) => [id, { health: clamp(v.health, 0, 100) }]),
       );
+      base.extras = normalizeExtras(base.extras);
       base.workshopStory = normalizeWorkshopStory(base.workshopStory);
       base.fireStory = normalizeFireStory(base.fireStory);
       const c = base.courier;

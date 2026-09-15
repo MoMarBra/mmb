@@ -158,7 +158,7 @@ export class Immersion {
     this.vehicles.update(step);
     this.physics.update(step);
     this.life.update(step);
-    this.weather.update(step);
+    this.weather.update(this.game.extras?.intro.current ? dt : step);
     this.courier.update(step);
     for (const door of [...this.world.cityDoors, ...Object.values(this.world.portals || {})])
       door.mesh.rotation.y = THREE.MathUtils.damp(
@@ -168,7 +168,7 @@ export class Immersion {
         step,
       );
     if (this.lastZone !== this.world.zone) {
-      if (this.world.zone === 'office') this.life.onReturn();
+      if (this.world.zone === 'office' && !this.game.cinematic) this.life.onReturn();
       this.lastZone = this.world.zone;
     }
     if (this.world.zone === 'city' && !this.arcade.vehicle && !this.world.nearest) {

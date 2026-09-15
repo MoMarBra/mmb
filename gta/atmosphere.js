@@ -115,13 +115,32 @@ export class Atmosphere {
     w.scene.fog.density = city ? 0.0018 + cloud * 0.0042 : 0.004;
     if (city) {
       const altitude = Math.max(0, w.player.position.y),
-        span = 45 + altitude * 0.5;
+        span = 45 + Math.ceil(altitude / 10) * 5;
       w.sun.position.set(
         w.player.position.x - 36,
         24 + day * 20 + altitude,
         w.player.position.z + 18,
       );
-      w.sun.target.position.set(w.player.position.x, altitude, w.player.position.z);
+      // Snap the shadow target in the light camera's own horizontal/vertical axes.
+      // This prevents sub-texel shimmer while the player/car moves through the world.
+      const direction = new THREE.Vector3(-36, 24 + day * 20, 18).normalize();
+      const right = new THREE.Vector3()
+        .crossVectors(new THREE.Vector3(0, 1, 0), direction)
+        .normalize();
+      const up = new THREE.Vector3().crossVectors(direction, right).normalize();
+      const target = new THREE.Vector3(
+        w.player.position.x,
+        Math.round(altitude / 2) * 2,
+        w.player.position.z,
+      );
+      const texel = (span * 2) / w.sun.shadow.mapSize.x;
+      const x = target.dot(right),
+        y = target.dot(up);
+      target
+        .addScaledVector(right, Math.round(x / texel) * texel - x)
+        .addScaledVector(up, Math.round(y / texel) * texel - y);
+      w.sun.target.position.copy(target);
+      w.sun.position.copy(target).add(new THREE.Vector3(-36, 24 + day * 20, 18));
       Object.assign(w.sun.shadow.camera, {
         left: -span,
         right: span,

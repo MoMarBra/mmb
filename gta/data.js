@@ -21,6 +21,21 @@ export const CAREERS = [
 ];
 export const RESTAURANTS = [
   {
+    id: 'dogtown',
+    name: 'DOGTOWN BURRITO CO.',
+    address: 'Augustenstraße 16',
+    kind: 'Burritos · Spielsortiment',
+    color: '#be6541',
+    x: 17,
+    z: 88,
+    source: 'https://neotaste.com/de/restaurants/munich/dogtown-burrito-co',
+    foods: [
+      { name: 'California Burrito', price: 9.5, hunger: 50, happy: 12, energy: 5, focus: 0 },
+      { name: 'Veggie Burrito', price: 9.5, hunger: 50, happy: 12, energy: 8, focus: 4 },
+      { name: 'Limonade', price: 3.5, hunger: 0, happy: 7, energy: 8, focus: 0 },
+    ],
+  },
+  {
     id: 'seen',
     name: 'SEEN',
     address: 'Augustenstraße 7',
@@ -237,7 +252,7 @@ export const ACHIEVEMENTS = [
   ['slide', 'Slide Master', '5 Folien mit mindestens 95 % abliefern.'],
   ['pixel', 'Pixel Perfect', '100 % Alignment erreichen.'],
   ['veteran', 'BBE-Urgestein', '50 Aufträge abschließen.'],
-  ['gourmet', 'Augustenstraßen-Gourmet', 'In allen 6 Restaurants essen.'],
+  ['gourmet', 'Augustenstraßen-Gourmet', 'In allen Restaurants essen.'],
   ['bottle', 'Pfandlord', '100 Flaschen abgeben.'],
   ['coffee', 'Koffeinberater', '10 Kaffee an einem Tag trinken.'],
   ['revision', 'final_final_v7.pptx', '7 Revisionen abschließen.'],

@@ -125,7 +125,8 @@ export function blenderVehicle(parent, type, paint, kit) {
     model === 'bus' ? 3.2 : 2.6,
     model === 'bus' ? 9.1 : model === 'van' ? 5.9 : 5.0,
   );
-  shadow.position.y = 0.091;
+  shadow.position.y = 0.098;
+  root.userData.contactShadow = shadow;
   parent.add(root);
   return root;
 }
@@ -174,6 +175,12 @@ export function alignVehicleWheelsToRoad(car) {
   wheelYaw.setFromAxisAngle(yAxis, car.mesh.rotation.y);
   chassisInverse.copy(car.mesh.quaternion).invert();
   levelWheel.copy(chassisInverse).multiply(wheelYaw);
+  if (rig.contactShadow) {
+    const shadow = rig.contactShadow;
+    shadow.position.set(0, 0.098 - car.mesh.position.y, 0).applyQuaternion(chassisInverse);
+    wheelSpin.setFromAxisAngle(xAxis, -Math.PI / 2);
+    shadow.quaternion.copy(levelWheel).multiply(wheelSpin);
+  }
   for (const wheel of rig.wheels || []) {
     const mount = rig.frontAxles ? wheel.parent : wheel;
     const rest = mount.userData.restPosition;

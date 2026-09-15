@@ -1,3 +1,4 @@
+import { PedestrianNavigation } from './pedestrian-navigation.js';
 import { buildITOffice } from './it-office.js';
 import { buildOfficeDetail } from './office-detail.js';
 import { updateStreetSignals } from './street-signs.js';
@@ -432,6 +433,7 @@ export class GameWorld {
     buildVerticalCity(this, { box, cylinder, label, material });
     buildCityStreets(this, { box });
     installCityTraffic(this);
+    this.pedestrianNav = new PedestrianNavigation(this);
     this.cityRoofAt = (x, z) =>
       ROOF_ROUTE.filter((r) => Math.abs(x - r.x) < r.w / 2 && Math.abs(z - r.z) < r.d / 2).reduce(
         (h, r) => Math.max(h, r.y),
@@ -1122,7 +1124,6 @@ export class GameWorld {
       const x = i % 2 ? 11.6 : -11.6;
       if ([40, -43].some((t) => Math.abs(t - z) < 13)) continue;
       this.tree(g, x, z);
-      this.obstacle('city', x, z, 0.6, 0.6, 1.4, 2.8);
       if (i % 3 === 0) {
         cylinder(g, x + 1, 0.55, z + 2, 0.28, 1.1, '#516267');
         cylinder(g, x + 1, 1.1, z + 2, 0.31, 0.08, '#2d4248');
@@ -1224,6 +1225,7 @@ export class GameWorld {
         skin: i % 4 === 0 ? '#865a44' : '#d7af8c',
         scale: 0.93 + (i % 4) * 0.035,
       });
+      npc.position.set(x, 0, z);
       g.add(npc);
       const n = {
         mesh: npc,
@@ -1268,6 +1270,10 @@ export class GameWorld {
     }
   }
   tree(g, x, z) {
+    if (g === this.groups.city) {
+      (this.treeObstacles ||= []).push({ x, z, radius: 0.3 });
+      this.obstacle('city', x, z, 0.55, 0.55, 1.1, 2.2);
+    }
     cylinder(g, x, 2.25, z, 0.19, 4.5, '#71664e', 0.13);
     for (let i = 0; i < 7; i++) {
       const a = i * 2.4;
@@ -1887,6 +1893,18 @@ export class GameWorld {
       }
       this.distance = 5.8;
       this.pitch = 0.24;
+    } else if (zone === 'brewery') {
+      this.currentRestaurant = {
+        id: 'brewery',
+        name: 'Brienner Bräu',
+        address: 'Brienner Straße · Hausbrauerei',
+        x: 106,
+        z: 47.2,
+      };
+      this.teleport(0, 7.6);
+      this.yaw = 0;
+      this.distance = 3.4;
+      this.pitch = 0.16;
     } else {
       this.currentRestaurant = RESTAURANTS.find((a) => a.id === restaurantId) || RESTAURANTS[0];
       this.restaurantWall.material = material(this.currentRestaurant.color);
@@ -2092,6 +2110,7 @@ export class GameWorld {
           Math.cos(angle - this.player.rotation.y),
         ) * Math.min(dt * 12, 1);
     }
+    this.player.rotation.z = 0;
     animateHuman(this.player, this.time, this.moveSpeed * 0.35, this.pose);
     this.gameplay?.animatePlayer(dt);
     this.heldFork.visible = this.pose === 'eat';
@@ -2130,14 +2149,12 @@ export class GameWorld {
             step = Math.min(d, dt * n.speed);
           if (d < 0.12) n.routeIndex = (n.routeIndex + 1) % n.route.length;
           else {
-            p.x += (dx / d) * step;
-            p.z += (dz / d) * step;
-            n.mesh.rotation.y = Math.atan2(dx, dz);
+            n.actualSpeed = this.pedestrianNav.move(n, target, n.speed, dt);
           }
           n.x = p.x;
           n.z = p.z;
           n.mesh.visible = true;
-          animateHuman(n.mesh, this.time, n.speed, 'walk');
+          animateHuman(n.mesh, this.time, n.actualSpeed || 0, 'walk');
           continue;
         }
         const isCrossing = [40, -43].find((z) => Math.abs(n.z - z) < 11);
@@ -2146,15 +2163,24 @@ export class GameWorld {
           (n.cycle ? this.trafficPhase >= 7 : this.trafficPhase < 7) &&
           ((n.dir > 0 && n.z < isCrossing - 7) || (n.dir < 0 && n.z > isCrossing + 7));
         if (n.pose !== 'phone' && !stop) {
-          n.z += dt * n.speed * n.dir;
-          if (n.z > 119) n.z = -154;
-          if (n.z < -154) n.z = 119;
+          n.navLane ??= n.x;
+          n.actualSpeed = this.pedestrianNav.move(
+            n,
+            { x: n.navLane, z: n.dir > 0 ? 121 : -156 },
+            n.speed,
+            dt,
+          );
+          if (n.z > 119 || n.z < -154) {
+            n.dir *= -1;
+            n.navTarget = null;
+          }
+        } else {
+          n.actualSpeed = 0;
         }
         n.mesh.visible = true;
         n.mesh.position.x = n.x;
         n.mesh.position.z = n.z;
-        n.mesh.rotation.y = n.dir > 0 ? 0 : Math.PI;
-        animateHuman(n.mesh, this.time, stop ? 0 : n.speed, n.pose);
+        animateHuman(n.mesh, this.time, n.actualSpeed || 0, n.pose);
         if (n.bike) {
           n.bike.visible = n.mesh.visible;
           n.bike.position.set(n.x, 0, n.z);
@@ -2271,6 +2297,7 @@ export class GameWorld {
     this.camera.position.lerp(desired, 1 - Math.exp(-dt * 12));
     this.camera.lookAt(this.target);
     this.camera.updateMatrixWorld();
+    this.gameplay?.game?.extras?.intro?.camera();
     this.visibilityFrustum ||= new THREE.Frustum();
     this.visibilityProjection ||= new THREE.Matrix4();
     this.visibilitySphere ||= new THREE.Sphere();
@@ -2291,6 +2318,11 @@ export class GameWorld {
     const refreshShadow =
       !this.lowQuality ||
       this.shadowFrame % 2 === 0 ||
+      (this.zone === 'city' &&
+        (Math.abs(this.gameplay?.speed || 0) > 0.1 ||
+          this.cars.some(
+            (c) => c.speed > 0.1 && c.mesh.position.distanceToSquared(this.player.position) < 900,
+          ))) ||
       !this.sun.shadow.map ||
       this.shadowZone !== this.zone ||
       this.lastShadowPosition.distanceToSquared(this.player.position) > 1;
@@ -2299,6 +2331,7 @@ export class GameWorld {
       this.shadowZone = this.zone;
       this.lastShadowPosition.copy(this.player.position);
     }
+    this.gameplay?.game?.extras?.beforeRender(dt);
     if (this.composer && !this.lowQuality) this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
   }

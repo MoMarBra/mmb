@@ -41,7 +41,9 @@ export class Soundscape {
       return;
     }
     try {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)({
+        latencyHint: 'interactive',
+      });
       const c = this.ctx;
       this.master = c.createGain();
       this.master.gain.value = 0.8;
@@ -107,7 +109,10 @@ export class Soundscape {
           return;
         if (this.ctx.currentTime < (this.keyAt || 0)) return;
         this.keyAt = this.ctx.currentTime + 0.065;
-        this.sample('keyboard_key_' + (1 + Math.floor(Math.random() * 8)), { bus: 'ui', volume: 0.2 });
+        this.sample('keyboard_key_' + (1 + Math.floor(Math.random() * 8)), {
+          bus: 'ui',
+          volume: 0.2,
+        });
       });
       document.addEventListener('click', (e) => {
         if (e.target.closest?.('button') && !e.target.closest?.('.touch-controls,.touch-actions'))
@@ -164,7 +169,13 @@ export class Soundscape {
       set(
         this.buses[bus].gain,
         clamp(s[key] ?? (bus === 'music' ? 0.4 : 0.8)) *
-          (this.voices.current ? (bus === 'music' ? 0.35 : bus === 'ambience' ? 0.72 : 1) : 1),
+          (this.voices.current || this.cinematicVoice
+            ? bus === 'music'
+              ? 0.35
+              : bus === 'ambience'
+                ? 0.72
+                : 1
+            : 1),
         t,
       );
     const quiet = s.audioRange === 'night';
@@ -419,12 +430,14 @@ export class Soundscape {
       if (oldZone !== this.zone) {
         this.epoch++;
         this.voices.stop();
-        for (const h of this.sources) if (!['music', 'ui'].includes(h.bus)) h.stop(0.25);
+        for (const h of this.sources)
+          if (!['music', 'ui'].includes(h.bus) && !(this.cinematicMix && h.bus === 'dialogue'))
+            h.stop(0.25);
         for (const [key, slot] of this.loops) {
           slot.target = 0;
           this.loops.delete(key);
         }
-        if (active) this.voices.arrive(world);
+        if (active && !this.cinematicMix) this.voices.arrive(world);
         if (this.transitionSound) {
           this.play('door');
           this.transitionSound = false;
@@ -468,7 +481,7 @@ export class Soundscape {
           lowpass: profile.tone,
         });
       }
-      this.voices.update(dt, world);
+      if (!this.cinematicMix) this.voices.update(dt, world);
     }
     for (const [key, slot] of this.loops) {
       if (!slot.target) {
@@ -517,7 +530,8 @@ export class Soundscape {
         count++ > 5
       )
         continue;
-      if (previous) next.distance += Math.min(0.5, Math.hypot(np.x - previous.x, np.z - previous.z));
+      if (previous)
+        next.distance += Math.min(0.5, Math.hypot(np.x - previous.x, np.z - previous.z));
       if (next.distance > 0.8) {
         next.distance = 0;
         this.play('footstep-' + ROOMS[this.room].material, { volume: 0.18, position: np });

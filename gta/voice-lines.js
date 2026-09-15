@@ -1230,5 +1230,299 @@ export const VOICE_LINES = [
     "event": "fire.story",
     "text": "Alle raus, keiner verletzt. Wir üben den Weg zur IT noch einmal.",
     "duration": 6.866
+  },
+  {
+    "id": "v160_intro_01",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "München. Große Pläne, kleine Parklücken. Willkommen in deiner Karriere.",
+    "duration": 5.4315
+  },
+  {
+    "id": "v160_intro_02",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "BBE Handelsberatung. Brienner Straße fünfundvierzig. Drei Zahlen. Vierundzwanzig Folien.",
+    "duration": 7.0791
+  },
+  {
+    "id": "v160_intro_03",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Dein Kaffee. Dein Auftrag. Die Datei heißt final. Glaub ihr kein Wort.",
+    "duration": 5.6798
+  },
+  {
+    "id": "v160_intro_04",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Augustenstraße. Wir prüfen Märkte nach Speisekarte. Datenlage: ausgesprochen lecker.",
+    "duration": 6.3932
+  },
+  {
+    "id": "v160_intro_05",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Dogtown Burritos. Solide Portionen, explosives Zusatzgeschäft. Die BurritoBombe ist kein Mittagessen.",
+    "duration": 7.2464
+  },
+  {
+    "id": "v160_intro_06",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Brienner Bräu. Maßkrugstemmen. Endlich ein Meeting mit messbarer Belastung.",
+    "duration": 5.0996
+  },
+  {
+    "id": "v160_intro_07",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Fahren, radeln, fliegen. Nur die Spesenabrechnung holt dich immer ein.",
+    "duration": 5.213
+  },
+  {
+    "id": "v160_intro_08",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Polizei München. Dieses Feedback kannst du nicht wegmoderieren.",
+    "duration": 4.1064
+  },
+  {
+    "id": "v160_intro_09",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Königsplatz. Weiter zur Frauenkirche. Zwei Türme, eine klare Storyline.",
+    "duration": 5.7642
+  },
+  {
+    "id": "v160_intro_10",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Nachts leuchtet München. Im Büro bleibt jemand grün in Teams.",
+    "duration": 4.0189
+  },
+  {
+    "id": "v160_intro_11",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Regen. Blaulicht. Offene Aufgaben. Dein Risikoprofil entwickelt sich dynamisch.",
+    "duration": 6.298
+  },
+  {
+    "id": "v160_intro_12",
+    "actor": "Erzähler",
+    "event": "intro.tour",
+    "text": "Groß denken. Gut leben. Morgen wieder BBE. Nur noch eine kleine Änderung.",
+    "duration": 5.9555
+  },
+  {
+    "id": "v160_police_taunt_01",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Anhalten! Ihre Flucht hat mehr Lücken als Ihre Marktanalyse!",
+    "duration": 4.7957
+  },
+  {
+    "id": "v160_police_taunt_02",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Sie können Blaulicht nicht mit einer Executive Summary wegmoderieren!",
+    "duration": 4.2677
+  },
+  {
+    "id": "v160_police_taunt_03",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Rechts ran, Herr Synergie! Der Bordstein gehört nicht zur Wachstumsstrategie!",
+    "duration": 6.0147
+  },
+  {
+    "id": "v160_police_taunt_04",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Wir verfolgen Sie nicht. Wir begleiten Ihre persönliche Transformation!",
+    "duration": 5.361
+  },
+  {
+    "id": "v160_police_taunt_05",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Ihre Abkürzung ist so belastbar wie die Zahlen auf Folie sieben!",
+    "duration": 3.9057
+  },
+  {
+    "id": "v160_police_taunt_06",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Hier Polizei München. Ihr Fluchtkonzept hat leider noch Überarbeitungsbedarf!",
+    "duration": 5.6905
+  },
+  {
+    "id": "v160_police_taunt_07",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Hände sichtbar! Den Strafzettel gibt es auch ohne Lenkungsausschuss!",
+    "duration": 5.1035
+  },
+  {
+    "id": "v160_police_taunt_08",
+    "actor": "Polizei",
+    "event": "police.taunt",
+    "text": "Ihre Kernkompetenz ist offenbar: vor Verantwortung davonfahren!",
+    "duration": 4.5167
+  },
+  {
+    "id": "v160_drunk_player_01",
+    "actor": "Spieler",
+    "event": "drunk.player",
+    "text": "Ich bin nicht schief. Die Welt ist nur... nicht sauber ausgerichtet.",
+    "duration": 6.5434
+  },
+  {
+    "id": "v160_drunk_player_02",
+    "actor": "Spieler",
+    "event": "drunk.player",
+    "text": "Noch eine Folie. Äh, eine... eine Brezn. Das meinte ich.",
+    "duration": 7.6428
+  },
+  {
+    "id": "v160_drunk_player_03",
+    "actor": "Spieler",
+    "event": "drunk.player",
+    "text": "Ich hab die Lage im Griff. Also... strategisch. Operativ schwankt sie.",
+    "duration": 8.0313
+  },
+  {
+    "id": "v160_drunk_player_04",
+    "actor": "Spieler",
+    "event": "drunk.player",
+    "text": "Das ist keine Fahne. Das ist mein... persönlicher Markenauftritt.",
+    "duration": 6.761
+  },
+  {
+    "id": "v160_drunk_player_05",
+    "actor": "Spieler",
+    "event": "drunk.player",
+    "text": "Wir brauchen mehr... Syn... Synergien. Und ein Glas Wasser.",
+    "duration": 7.3653
+  },
+  {
+    "id": "v160_drunk_car_01",
+    "actor": "Jan",
+    "event": "drunk.car",
+    "text": "Du setzt dich so nicht ans Steuer. Deine Spurtreue hat gerade Feierabend.",
+    "duration": 6.1611
+  },
+  {
+    "id": "v160_drunk_car_02",
+    "actor": "Lena",
+    "event": "drunk.car",
+    "text": "Das Lenkrad ist kein Maßkrug. Lass den Wagen stehen und lauf erst mal.",
+    "duration": 5.7282
+  },
+  {
+    "id": "v160_drunk_car_03",
+    "actor": "Jan",
+    "event": "drunk.car",
+    "text": "Du riechst nach Brauerei und schlechten Entscheidungen. Das Auto bleibt bitte hier.",
+    "duration": 6.3046
+  },
+  {
+    "id": "v160_drunk_car_04",
+    "actor": "Lena",
+    "event": "drunk.car",
+    "text": "Dein Business Case fürs Fahren ist abgelehnt. Wir gehen zu Fuß.",
+    "duration": 5.1711
+  },
+  {
+    "id": "v160_drunk_office_01",
+    "actor": "Lena",
+    "event": "drunk.office",
+    "text": "Deine Folien schwanken heute weniger als du. Erst Wasser, dann Vorstand.",
+    "duration": 6.165
+  },
+  {
+    "id": "v160_drunk_office_02",
+    "actor": "Mara",
+    "event": "drunk.office",
+    "text": "War das Mittagessen flüssig? Ich trage dich kurz als nicht präsentationsfähig ein.",
+    "duration": 6.6795
+  },
+  {
+    "id": "v160_drunk_office_03",
+    "actor": "Tobias",
+    "event": "drunk.office",
+    "text": "Wir wollten mehr Spirit im Team. Das war leider nicht wörtlich gemeint.",
+    "duration": 5.7829
+  },
+  {
+    "id": "v160_drunk_office_04",
+    "actor": "Jan",
+    "event": "drunk.office",
+    "text": "Du hast Hopfen im Abgang und Risiken im Forecast. Setz dich erst mal.",
+    "duration": 6.9203
+  },
+  {
+    "id": "v160_brewery_01",
+    "actor": "Benno",
+    "event": "brewery",
+    "text": "Servus im Brienner Bräu. Bei uns ist nur der Schaum aufgeblasen, nicht die Rechnung.",
+    "duration": 7.6713
+  },
+  {
+    "id": "v160_brewery_02",
+    "actor": "Benno",
+    "event": "brewery",
+    "text": "Maßkrugstemmen? Arm gerade, Krug ruhig. Wer wackelt, muss noch mal in den Workshop.",
+    "duration": 9.5783
+  },
+  {
+    "id": "v160_brewery_03",
+    "actor": "Benno",
+    "event": "brewery",
+    "text": "Ein Helles oder erst der Wettbewerb? Beides ist anspruchsvoller als eine Statusrunde.",
+    "duration": 7.627
+  },
+  {
+    "id": "v160_brewery_contest_01",
+    "actor": "Benno",
+    "event": "brewery.contest",
+    "text": "Sauber gehalten! Das nenne ich belastbare Führungskompetenz.",
+    "duration": 5.3039
+  },
+  {
+    "id": "v160_brewery_contest_02",
+    "actor": "Benno",
+    "event": "brewery.contest",
+    "text": "Der Arm ist unten. Aber der Einsatz war managementtauglich.",
+    "duration": 5.2129
+  },
+  {
+    "id": "v160_brewery_contest_03",
+    "actor": "Spieler",
+    "event": "brewery.contest",
+    "text": "Prost. Das ist die einzige Skalierung, die bis zum Eichstrich geht.",
+    "duration": 6.1517
+  },
+  {
+    "id": "v160_crowd_react_01",
+    "actor": "Passant",
+    "event": "crowd.react",
+    "text": "Der Burrito hat gerade seinen eigenen Markt erschlossen!",
+    "duration": 3.488
+  },
+  {
+    "id": "v160_crowd_react_02",
+    "actor": "Passant",
+    "event": "crowd.react",
+    "text": "Das ist kein Feueralarm. Das ist eine sehr deutliche Kundenrückmeldung!",
+    "duration": 5.2598
+  },
+  {
+    "id": "v160_crowd_react_03",
+    "actor": "Passant",
+    "event": "crowd.react",
+    "text": "Ich wollte nur Mittagspause. Jetzt bin ich mitten im Eskalationsprozess!",
+    "duration": 5.474
   }
 ];

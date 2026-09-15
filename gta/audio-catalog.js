@@ -1463,5 +1463,292 @@ export const AUDIO_ASSETS = {
     "group": "effect",
     "duration": 0.8,
     "loop": false
+  },
+  "voice_v160_intro_01": {
+    "path": "./assets/audio/voice_v160_intro_01.mp3",
+    "group": "voice",
+    "duration": 5.4315
+  },
+  "voice_v160_intro_02": {
+    "path": "./assets/audio/voice_v160_intro_02.mp3",
+    "group": "voice",
+    "duration": 7.0791
+  },
+  "voice_v160_intro_03": {
+    "path": "./assets/audio/voice_v160_intro_03.mp3",
+    "group": "voice",
+    "duration": 5.6798
+  },
+  "voice_v160_intro_04": {
+    "path": "./assets/audio/voice_v160_intro_04.mp3",
+    "group": "voice",
+    "duration": 6.3932
+  },
+  "voice_v160_intro_05": {
+    "path": "./assets/audio/voice_v160_intro_05.mp3",
+    "group": "voice",
+    "duration": 7.2464
+  },
+  "voice_v160_intro_06": {
+    "path": "./assets/audio/voice_v160_intro_06.mp3",
+    "group": "voice",
+    "duration": 5.0996
+  },
+  "voice_v160_intro_07": {
+    "path": "./assets/audio/voice_v160_intro_07.mp3",
+    "group": "voice",
+    "duration": 5.213
+  },
+  "voice_v160_intro_08": {
+    "path": "./assets/audio/voice_v160_intro_08.mp3",
+    "group": "voice",
+    "duration": 4.1064
+  },
+  "voice_v160_intro_09": {
+    "path": "./assets/audio/voice_v160_intro_09.mp3",
+    "group": "voice",
+    "duration": 5.7642
+  },
+  "voice_v160_intro_10": {
+    "path": "./assets/audio/voice_v160_intro_10.mp3",
+    "group": "voice",
+    "duration": 4.0189
+  },
+  "voice_v160_intro_11": {
+    "path": "./assets/audio/voice_v160_intro_11.mp3",
+    "group": "voice",
+    "duration": 6.298
+  },
+  "voice_v160_intro_12": {
+    "path": "./assets/audio/voice_v160_intro_12.mp3",
+    "group": "voice",
+    "duration": 5.9555
+  },
+  "voice_v160_police_taunt_01": {
+    "path": "./assets/audio/voice_v160_police_taunt_01.mp3",
+    "group": "voice",
+    "duration": 4.7957
+  },
+  "voice_v160_police_taunt_02": {
+    "path": "./assets/audio/voice_v160_police_taunt_02.mp3",
+    "group": "voice",
+    "duration": 4.2677
+  },
+  "voice_v160_police_taunt_03": {
+    "path": "./assets/audio/voice_v160_police_taunt_03.mp3",
+    "group": "voice",
+    "duration": 6.0147
+  },
+  "voice_v160_police_taunt_04": {
+    "path": "./assets/audio/voice_v160_police_taunt_04.mp3",
+    "group": "voice",
+    "duration": 5.361
+  },
+  "voice_v160_police_taunt_05": {
+    "path": "./assets/audio/voice_v160_police_taunt_05.mp3",
+    "group": "voice",
+    "duration": 3.9057
+  },
+  "voice_v160_police_taunt_06": {
+    "path": "./assets/audio/voice_v160_police_taunt_06.mp3",
+    "group": "voice",
+    "duration": 5.6905
+  },
+  "voice_v160_police_taunt_07": {
+    "path": "./assets/audio/voice_v160_police_taunt_07.mp3",
+    "group": "voice",
+    "duration": 5.1035
+  },
+  "voice_v160_police_taunt_08": {
+    "path": "./assets/audio/voice_v160_police_taunt_08.mp3",
+    "group": "voice",
+    "duration": 4.5167
+  },
+  "voice_v160_drunk_player_01": {
+    "path": "./assets/audio/voice_v160_drunk_player_01.mp3",
+    "group": "voice",
+    "duration": 6.5434
+  },
+  "voice_v160_drunk_player_02": {
+    "path": "./assets/audio/voice_v160_drunk_player_02.mp3",
+    "group": "voice",
+    "duration": 7.6428
+  },
+  "voice_v160_drunk_player_03": {
+    "path": "./assets/audio/voice_v160_drunk_player_03.mp3",
+    "group": "voice",
+    "duration": 8.0313
+  },
+  "voice_v160_drunk_player_04": {
+    "path": "./assets/audio/voice_v160_drunk_player_04.mp3",
+    "group": "voice",
+    "duration": 6.761
+  },
+  "voice_v160_drunk_player_05": {
+    "path": "./assets/audio/voice_v160_drunk_player_05.mp3",
+    "group": "voice",
+    "duration": 7.3653
+  },
+  "voice_v160_drunk_car_01": {
+    "path": "./assets/audio/voice_v160_drunk_car_01.mp3",
+    "group": "voice",
+    "duration": 6.1611
+  },
+  "voice_v160_drunk_car_02": {
+    "path": "./assets/audio/voice_v160_drunk_car_02.mp3",
+    "group": "voice",
+    "duration": 5.7282
+  },
+  "voice_v160_drunk_car_03": {
+    "path": "./assets/audio/voice_v160_drunk_car_03.mp3",
+    "group": "voice",
+    "duration": 6.3046
+  },
+  "voice_v160_drunk_car_04": {
+    "path": "./assets/audio/voice_v160_drunk_car_04.mp3",
+    "group": "voice",
+    "duration": 5.1711
+  },
+  "voice_v160_drunk_office_01": {
+    "path": "./assets/audio/voice_v160_drunk_office_01.mp3",
+    "group": "voice",
+    "duration": 6.165
+  },
+  "voice_v160_drunk_office_02": {
+    "path": "./assets/audio/voice_v160_drunk_office_02.mp3",
+    "group": "voice",
+    "duration": 6.6795
+  },
+  "voice_v160_drunk_office_03": {
+    "path": "./assets/audio/voice_v160_drunk_office_03.mp3",
+    "group": "voice",
+    "duration": 5.7829
+  },
+  "voice_v160_drunk_office_04": {
+    "path": "./assets/audio/voice_v160_drunk_office_04.mp3",
+    "group": "voice",
+    "duration": 6.9203
+  },
+  "voice_v160_brewery_01": {
+    "path": "./assets/audio/voice_v160_brewery_01.mp3",
+    "group": "voice",
+    "duration": 7.6713
+  },
+  "voice_v160_brewery_02": {
+    "path": "./assets/audio/voice_v160_brewery_02.mp3",
+    "group": "voice",
+    "duration": 9.5783
+  },
+  "voice_v160_brewery_03": {
+    "path": "./assets/audio/voice_v160_brewery_03.mp3",
+    "group": "voice",
+    "duration": 7.627
+  },
+  "voice_v160_brewery_contest_01": {
+    "path": "./assets/audio/voice_v160_brewery_contest_01.mp3",
+    "group": "voice",
+    "duration": 5.3039
+  },
+  "voice_v160_brewery_contest_02": {
+    "path": "./assets/audio/voice_v160_brewery_contest_02.mp3",
+    "group": "voice",
+    "duration": 5.2129
+  },
+  "voice_v160_brewery_contest_03": {
+    "path": "./assets/audio/voice_v160_brewery_contest_03.mp3",
+    "group": "voice",
+    "duration": 6.1517
+  },
+  "voice_v160_crowd_react_01": {
+    "path": "./assets/audio/voice_v160_crowd_react_01.mp3",
+    "group": "voice",
+    "duration": 3.488
+  },
+  "voice_v160_crowd_react_02": {
+    "path": "./assets/audio/voice_v160_crowd_react_02.mp3",
+    "group": "voice",
+    "duration": 5.2598
+  },
+  "voice_v160_crowd_react_03": {
+    "path": "./assets/audio/voice_v160_crowd_react_03.mp3",
+    "group": "voice",
+    "duration": 5.474
+  },
+  "v160_explosion_01": {
+    "path": "./assets/audio/v160_explosion_01.mp3",
+    "group": "effect",
+    "duration": 3.25
+  },
+  "v160_explosion_02": {
+    "path": "./assets/audio/v160_explosion_02.mp3",
+    "group": "effect",
+    "duration": 3.5
+  },
+  "v160_explosion_03": {
+    "path": "./assets/audio/v160_explosion_03.mp3",
+    "group": "effect",
+    "duration": 3.75
+  },
+  "v160_fire_loop_01": {
+    "path": "./assets/audio/v160_fire_loop_01.mp3",
+    "group": "effect",
+    "duration": 8,
+    "loop": true
+  },
+  "v160_fire_loop_02": {
+    "path": "./assets/audio/v160_fire_loop_02.mp3",
+    "group": "effect",
+    "duration": 8,
+    "loop": true
+  },
+  "v160_beer_pour": {
+    "path": "./assets/audio/v160_beer_pour.mp3",
+    "group": "effect",
+    "duration": 3
+  },
+  "v160_beer_clink": {
+    "path": "./assets/audio/v160_beer_clink.mp3",
+    "group": "effect",
+    "duration": 1.45
+  },
+  "v160_beer_drink": {
+    "path": "./assets/audio/v160_beer_drink.mp3",
+    "group": "effect",
+    "duration": 1.7
+  },
+  "v160_impact_yell_01": {
+    "path": "./assets/audio/v160_impact_yell_01.mp3",
+    "group": "effect",
+    "duration": 0.5
+  },
+  "v160_impact_yell_02": {
+    "path": "./assets/audio/v160_impact_yell_02.mp3",
+    "group": "effect",
+    "duration": 0.7289
+  },
+  "v160_impact_yell_03": {
+    "path": "./assets/audio/v160_impact_yell_03.mp3",
+    "group": "effect",
+    "duration": 0.9899
+  },
+  "v160_impact_yell_04": {
+    "path": "./assets/audio/v160_impact_yell_04.mp3",
+    "group": "effect",
+    "duration": 0.5472
+  },
+  "v160_impact_yell_05": {
+    "path": "./assets/audio/v160_impact_yell_05.mp3",
+    "group": "effect",
+    "duration": 1.0025
+  },
+  "v160_impact_yell_06": {
+    "path": "./assets/audio/v160_impact_yell_06.mp3",
+    "group": "effect",
+    "duration": 0.84
+  },
+  "v160_intro_theme": {
+    "path": "./assets/audio/v160_intro_theme.mp3",
+    "group": "music",
+    "duration": 93.5148
   }
 };

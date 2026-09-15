@@ -1,0 +1,358 @@
+[
+  {
+    "file": "voice_v160_intro_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "1ac057b19bc8dc945603299661ec48100b93cb62e7171f4c5a629d68ee11c026"
+  },
+  {
+    "file": "voice_v160_intro_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "fa01d63aa6d4fb5fd1f7dfdb75f3a78050588cb03ebadcbdaf252def0757bdac"
+  },
+  {
+    "file": "voice_v160_intro_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "1da94bca2e2391711d19a2a28fdf40822a6f4c466a77bcdca6388e26353bf7dc"
+  },
+  {
+    "file": "voice_v160_intro_04.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "55ef2bdf7dda53b212eec47ab38d07aca6953ebacec442dcd9cac70dd12be349"
+  },
+  {
+    "file": "voice_v160_intro_05.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "fe5cd59dadc6b4c163ab67a2817816f52771edf04a97b531f11adbabff5fcf5c"
+  },
+  {
+    "file": "voice_v160_intro_06.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "2ff7815ea22ec0f255611a4bb3eb355c02cbcd4d38b68dbae86a74aebcba1d96"
+  },
+  {
+    "file": "voice_v160_intro_07.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "77f882cfc954e1562afccc7c30d38a52c0585f2d39b9822d8917f055641a3116"
+  },
+  {
+    "file": "voice_v160_intro_08.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "bb52716c570ae832d57bfbf927b177a0d5b9d2352a74f98bd0207ca7ebc3ac7d"
+  },
+  {
+    "file": "voice_v160_intro_09.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "f45f61498a2655129839020ad80a15da43b658fd7ac68cf5206b8c12dc1391f8"
+  },
+  {
+    "file": "voice_v160_intro_10.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "9f6dc7f8366f610f4a2776af01d93211a262e0eec8a9e6fb14c215567120f893"
+  },
+  {
+    "file": "voice_v160_intro_11.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "3604f75f806f697f49620cdc145b547dcbd0f9913184724e6ab6b4a396e3f068"
+  },
+  {
+    "file": "voice_v160_intro_12.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding. Trailer pacing increased 8% with pitch-preserving time stretch.",
+    "synthetic": true,
+    "sha256": "f65848c7f0b96beb45b7a01a97cc880e1485c9b1002068c3f2772cad6a9559de"
+  },
+  {
+    "file": "voice_v160_police_taunt_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "c9a84a30e2a79d127418d9f7982ea0257427aa0e0f03f87d8a1099bff112b4f1"
+  },
+  {
+    "file": "voice_v160_police_taunt_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "9dc871331455f17bdafd12a482d6ae4a31264b2aede24d342c52ec8bbdd37ba7"
+  },
+  {
+    "file": "voice_v160_police_taunt_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "750d7ea5bd625716bd9e3ab71c42112072e65aba58e26980015e3f3f62149835"
+  },
+  {
+    "file": "voice_v160_police_taunt_04.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "d7efdeee1483f0a507239fa251df6d0775a6067b71c4e0f972798e94a44eb481"
+  },
+  {
+    "file": "voice_v160_police_taunt_05.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "2de387e510ce117033e48c1f537a689716adffa5b10b59580153a845c85fee53"
+  },
+  {
+    "file": "voice_v160_police_taunt_06.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "668dbada9afa1dccb0f982e60bc793fdfd452433deffd7cbdec57fba30ae6e9d"
+  },
+  {
+    "file": "voice_v160_police_taunt_07.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "2ab48af62a684e5704bfab5a2fb65a7d1e43511c0b50d54778709399d729869b"
+  },
+  {
+    "file": "voice_v160_police_taunt_08.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Radio band-pass and presence EQ; speech compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "4e3bb94e36c5853f41ec3d4496ecd348123cd320d537dc9d06deffb485c054af"
+  },
+  {
+    "file": "voice_v160_drunk_player_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "4f403734281c36e22c5cccceb10251eddaeaf855b71edd9e36d9168afe7f563d"
+  },
+  {
+    "file": "voice_v160_drunk_player_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "6ece9077831cedffab0e9c47aac4834a79d39e4e65bf357f83d0afb0a58ea00e"
+  },
+  {
+    "file": "voice_v160_drunk_player_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "6ee06c7d5aa8e17c3d5a307d09a5dcc50b9311f39125fb18533ffafa0b420a59"
+  },
+  {
+    "file": "voice_v160_drunk_player_04.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "b3ce743610be9e3058ec98a54db15587a82938a2cbad8ae160e0d465dd77e9d6"
+  },
+  {
+    "file": "voice_v160_drunk_player_05.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "46e5a9a6fec7ccaf1ba95591e8f272590f333f633b4417d02a12e9e8b3e37734"
+  },
+  {
+    "file": "voice_v160_drunk_car_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "ed65fcf16241581d06589f1aed5691b0f38b224599fb9ddc73a8a0343a98492c"
+  },
+  {
+    "file": "voice_v160_drunk_car_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "2e95a9fac9113f3c3023cc752b0f9c667e79fab92cdcff678199aea5d4004834"
+  },
+  {
+    "file": "voice_v160_drunk_car_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "33db86baa8f4f70daabdf6a0cd6ef18819479c422dc4f7d23a65d1ec2551db12"
+  },
+  {
+    "file": "voice_v160_drunk_car_04.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "acda9be86d21edff71a98d65b791ad12f02f5bb40d0467bb565dd2c5a3cd7f33"
+  },
+  {
+    "file": "voice_v160_drunk_office_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "8dd2baf9f08da9879fa45b973067e7873fb4e97f0e417693f00233881f5778b9"
+  },
+  {
+    "file": "voice_v160_drunk_office_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "e66fafc31d7c76f6a8e12b2fc4a153f990a158f9df8208f1ca24ca8c986b6990"
+  },
+  {
+    "file": "voice_v160_drunk_office_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "b2d62f38d8d96ea9cdf2eb06e5f66c5a08aa417de3cd6b2fdbbc80491265d32d"
+  },
+  {
+    "file": "voice_v160_drunk_office_04.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "52f4ae7a13e793d5cb23d5d124b1b464ea3c531d5e95b00fff0fe57c2a9fdf5e"
+  },
+  {
+    "file": "voice_v160_brewery_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "63fc44d4336206332b2c96d60122f851baf32e7843cb6292ac868582f82c4193"
+  },
+  {
+    "file": "voice_v160_brewery_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "b629bb17543b0f14e9b10b855c69e2eb310c5fc40fb88dbc50c950d7c88ba7aa"
+  },
+  {
+    "file": "voice_v160_brewery_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "c7cae3b60514729c633b1a5dc76b8a6f5387cdd105fd606ef45717bdabe1b14a"
+  },
+  {
+    "file": "voice_v160_brewery_contest_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "1438cd1e381a8714b70b1cbdda5d604417a89af2b96ada3aff1de01b569a3680"
+  },
+  {
+    "file": "voice_v160_brewery_contest_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "cababd980df91f138e71f7a5fb98e35ed9b9577dd10a23045d223711f2368338"
+  },
+  {
+    "file": "voice_v160_brewery_contest_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "0c2e77cd64a7797b60e58cbb555ac8ba1edc1c2dfb43df658966bd0ebd772c98"
+  },
+  {
+    "file": "voice_v160_crowd_react_01.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "eb1081f47904dc0ddc4d6e456f126d88892c4a079f17d3db17252572c833b230"
+  },
+  {
+    "file": "voice_v160_crowd_react_02.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "f02446b3b8d2e75f0fc4939f5b960668773546a07847f4264e79e5f746a377c4"
+  },
+  {
+    "file": "voice_v160_crowd_react_03.mp3",
+    "source": "Locally rendered Microsoft Windows German speech synthesis. Original fictional dialogue, no real-person imitation.",
+    "modifications": "Speech filtering, gentle compression, loudness normalization, peak limiting, onset fade, MP3 encoding.",
+    "synthetic": true,
+    "sha256": "a5c00897576636cf957d1d40b0ae5a204b465946b1e31ed97fba440f5749ae27"
+  },
+  {
+    "file": "v160_explosion_01.mp3",
+    "sha256": "e5ffa42ccc5a0fcaed60fd222552db673b7bc8d1d70b770e22ecdd78409a595c"
+  },
+  {
+    "file": "v160_explosion_02.mp3",
+    "sha256": "66421d5446599c4b5a2a017eab0576f156b69a41bf990941444f70b9426ed79e"
+  },
+  {
+    "file": "v160_explosion_03.mp3",
+    "sha256": "dd2006e7b7f750aac9e855cfe5a5c34ae7e3e5fa0e813768b03769ae9c2c5d82"
+  },
+  {
+    "file": "v160_fire_loop_01.mp3",
+    "sha256": "4a8a49277dc6f53497397fcd6f689ae186d3b570e0d526deeb145c50aba3d29b"
+  },
+  {
+    "file": "v160_fire_loop_02.mp3",
+    "sha256": "9be98f25a933f5de69c886511268dcfe43fa785a9316043c79fdcc1085c9a207"
+  },
+  {
+    "file": "v160_beer_pour.mp3",
+    "sha256": "9b23ac6f9b49809181464560f33193e408fb7b35d96f6acacdf78dd647e44d32"
+  },
+  {
+    "file": "v160_beer_clink.mp3",
+    "sha256": "19a4686fbe1a0c0fbb81871193f1c9c3fd07d3db3f1ce30c501c312c6f2ac9a6"
+  },
+  {
+    "file": "v160_beer_drink.mp3",
+    "sha256": "dfae09f3d66e2b3fb3bc2083536a0066aab129c0f03faf732a57d6f6da046ce6"
+  },
+  {
+    "file": "v160_impact_yell_01.mp3",
+    "sha256": "bf64a89bce0d9baf600e1fb2141d115c64a2c8699f8e62cb92cfb22a49c63419"
+  },
+  {
+    "file": "v160_impact_yell_02.mp3",
+    "sha256": "e53f493939784cbd6453613523562b064c346f71acd2620ba5f240dcd3caad25"
+  },
+  {
+    "file": "v160_impact_yell_03.mp3",
+    "sha256": "ec2b1aecd208c1f749f12d2ec80d483a319885b1bed3a26a7d43905f899a94a3"
+  },
+  {
+    "file": "v160_impact_yell_04.mp3",
+    "sha256": "2ea4e7a11b69d521922f2c9d6aa6fa275654bd19af4b0c97943ed2708e9e0152"
+  },
+  {
+    "file": "v160_impact_yell_05.mp3",
+    "sha256": "3d80320259ec133eefd0774917eb4858910c41d3062359e13c5edefa1b882d13"
+  },
+  {
+    "file": "v160_impact_yell_06.mp3",
+    "sha256": "3e35bf8b981c083751f6f965d10ef1c292ad2de982ba741efe0d36f0b5725606"
+  },
+  {
+    "file": "v160_intro_theme.mp3",
+    "source": "User-supplied MP3: YTDown.com_YouTube_GTA-San-Andreas-Theme-Song-BEST-QUALITY_Media_6VewzN781wQ_007_128k.mp3",
+    "modifications": "Removed 3.8 seconds of leading silence, reduced level by 2 dB, applied tiny onset and final fade, encoded stereo MP3. Original retained byte-for-byte outside product checkout.",
+    "sha256": "341248ff94c0b4aa158708391cff7dc2f6a8e93415598b05eadaa66e8f0ff394"
+  }
+]

@@ -124,6 +124,10 @@ export class Locomotion {
     this.w.keys.clear();
   }
   board(car) {
+    if (car.exploded) {
+      this.g.toast('Totalschaden · Dieses Auto fährt nicht mehr.');
+      return true;
+    }
     if (this.action) return true;
     const p = car.mesh.position,
       side = new THREE.Vector3(-Math.cos(car.mesh.rotation.y), 0, Math.sin(car.mesh.rotation.y)),

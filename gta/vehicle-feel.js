@@ -18,9 +18,10 @@ export class VehicleFeel {
     return openDoor.call(this, car, open, point);
   }
   damage(car, strength, notify = true) {
+    if (car.exploded) return;
     this.detail(car);
     if (!car.detailReady) return;
-    car.health = Math.max(10, car.health - strength);
+    car.health = Math.max(0, car.health - strength);
     this.g.sim.s.vehicleDamage[car.id] = { health: car.health };
     if (car.dentMesh) {
       const a = car.dentMesh.geometry.attributes.position,

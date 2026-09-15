@@ -112,7 +112,11 @@ export const ROOMS = {
   },
 };
 export function roomFor(world) {
-  if (world.zone === 'restaurant') return world.currentRestaurant?.id || 'seen';
+  if (world.zone === 'brewery') return 'wirt';
+  if (world.zone === 'restaurant')
+    return world.currentRestaurant?.id === 'dogtown'
+      ? 'mentors'
+      : world.currentRestaurant?.id || 'seen';
   if (world.zone === 'city') return 'city';
   const p = world.player.position;
   if (p.x < -13.5) return 'it';

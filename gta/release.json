@@ -1,10 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "af97c67b86d7a4788859226eb888a8fb56cc4887",
+  "sourceCommit": "03cd353b8b27ef7c632d4390b13740f5f3cb3010",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-14T15:51:21.683Z",
+  "preparedAt": "2026-09-15T10:44:22.465Z",
   "gameTestsRun": true,
-  "validation": "Vehicle lighting/preload/wheel checks, office geometry and door routes, three-minute HQ traffic simulation, actual browser entry/exit for car/van/bus, full fire mission in Chrome and offline build in Edge."
+  "browserVisualQA": false,
+  "validation": "25 logic/geometry regression suites; 49 pedestrians over50 simulated minutes; all15 camera paths;376 offline audio hash checks. No new browser/GPU visual QA or target-device FPS benchmark."
 }

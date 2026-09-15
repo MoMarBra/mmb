@@ -190,7 +190,7 @@ export class CityLife {
     );
     for (let i = 0; i < this.level; i++) {
       const u = this.units[i];
-      if (!u.active) {
+      if (!u.active && !u.car.exploded) {
         u.active = true;
         u.car.mesh.visible = true;
         u.car.mesh.position.copy(this.nodes[[3, 0, 7][i]]);
@@ -307,9 +307,8 @@ export class CityLife {
       const distance = dir.length();
       dir.normalize();
       if (distance > 1.3) {
-        const p = n.mesh.position.clone().addScaledVector(dir, dt * 1.6);
-        if (this.d.motion.freeAt(p.x, 0, p.z, 0.25)) n.mesh.position.copy(p);
-        animateHuman(n.mesh, this.d.time, 1, 'walk');
+        const actual = this.w.pedestrianNav.move(n, r.patient.mesh.position, 1.6, dt);
+        animateHuman(n.mesh, this.d.time, actual, 'walk');
       } else {
         animateHuman(n.mesh, this.d.time, 0, 'phone');
         n.mesh.position.y = -0.3;
@@ -327,25 +326,10 @@ export class CityLife {
       delta.y = 0;
       if (delta.length() < 0.1) delta.set(1, 0, 0);
       delta.normalize();
-      const speed = r.mode === 'shelter' ? 1.5 : 3.2,
-        x = n.mesh.position.x + delta.x * dt * speed,
-        z = n.mesh.position.z + delta.z * dt * speed;
-      if (this.d.motion.freeAt(x, 0, z, 0.25)) {
-        n.mesh.position.x = x;
-        n.mesh.position.z = z;
-      } else {
-        delta.applyAxisAngle(V(0, 1, 0), Math.PI / 2);
-        const xx = n.mesh.position.x + delta.x * dt * speed,
-          zz = n.mesh.position.z + delta.z * dt * speed;
-        if (this.d.motion.freeAt(xx, 0, zz, 0.25)) {
-          n.mesh.position.x = xx;
-          n.mesh.position.z = zz;
-        }
-      }
-      n.x = n.mesh.position.x;
-      n.z = n.mesh.position.z;
-      n.mesh.rotation.y = Math.atan2(delta.x, delta.z);
-      animateHuman(n.mesh, this.d.time, speed, 'walk');
+      const speed = r.mode === 'shelter' ? 1.5 : 3.2;
+      const target = { x: n.mesh.position.x + delta.x * 5, z: n.mesh.position.z + delta.z * 5 };
+      const actual = this.w.pedestrianNav.move(n, target, speed, dt);
+      animateHuman(n.mesh, this.d.time, actual, 'walk');
     } else {
       n.mesh.rotation.y = Math.atan2(r.from.x - n.mesh.position.x, r.from.z - n.mesh.position.z);
       animateHuman(n.mesh, this.d.time, 0, 'phone');
@@ -402,6 +386,13 @@ export class CityLife {
 
     for (let i = 0; i < this.units.length; i++) {
       const u = this.units[i];
+      if (u.car.exploded) {
+        u.active = false;
+        u.car.speed = 0;
+        u.officer.visible = false;
+        syncDriver(u.car, { occupied: false });
+        continue;
+      }
       if (!u.active) continue;
       const c = u.car,
         p = c.mesh.position;

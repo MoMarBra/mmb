@@ -206,11 +206,16 @@ export class Arcade {
     return false;
   }
   enterCar(car) {
+    if (car.exploded || car.health <= 0) {
+      this.game.toast('Totalschaden · Dieses Auto fährt nicht mehr.');
+      return false;
+    }
     if (isSpecialVehicle(car)) return this.expansion.enter(car);
     if (this.vehicle || this.world.zone !== 'city') return false;
     this.vehicle = car;
     car.controlled = true;
     car.parked = true;
+    if (this.world.pedestrianNav) this.world.pedestrianNav.count = -1;
     this.speed = 0;
     car.mesh.userData.dynamic = true;
     if (car.body?.world) car.body.world.removeBody(car.body);
@@ -303,6 +308,7 @@ export class Arcade {
     this.world.zoneData.city.physics.addBody(car.body);
     car.controlled = false;
     car.parked = true;
+    if (this.world.pedestrianNav) this.world.pedestrianNav.count = -1;
     car.speed = 0;
     this.vehicle = null;
     this.speed = 0;
@@ -339,7 +345,9 @@ export class Arcade {
       this.speed = clamp(
         this.speed,
         -7,
-        (car.type === 'bus' ? 16 : 25) * (this.immersion?.weather.wet > 0.5 ? 0.86 : 1),
+        (car.type === 'bus' ? 16 : 25) *
+          (this.immersion?.weather.wet > 0.5 ? 0.86 : 1) *
+          (0.45 + (0.55 * (car.health ?? 100)) / 100),
       );
       const angle =
         car.mesh.rotation.y +
@@ -355,7 +363,7 @@ export class Arcade {
         if (this.collides(this.shape(car, x, z, angle))) {
           if (Math.abs(this.speed) > 3 && this.time > (car.lastCrash || 0) + 0.6) {
             car.lastCrash = this.time;
-            car.health = Math.max(10, car.health - Math.abs(this.speed) * 1.3);
+            // Damage is applied once through the shared deformation/fire system.
             this.burst(
               car.mesh.position
                 .clone()
@@ -364,7 +372,8 @@ export class Arcade {
               14,
             );
             this.game.audio.play('crash');
-            this.immersion?.vehicles.damage(car, Math.abs(this.speed) * 0.5);
+            if (this.immersion) this.immersion.vehicles.damage(car, Math.abs(this.speed) * 1.8);
+            else car.health = Math.max(0, (car.health ?? 100) - Math.abs(this.speed) * 1.8);
             this.heat = clamp(this.heat + 4);
           }
           this.speed = -this.speed * 0.2;
@@ -471,14 +480,16 @@ export class Arcade {
     n.hitReady = this.time + 0.25;
     n.hp -= damage;
     n.stagger = 0.25;
-    this.game.audio.play('punch', { position: n.mesh.position });
+    if (cause === 'vehicle' || cause === 'explosion') this.game.extras?.impact(n);
+    else this.game.audio.play('punch', { position: n.mesh.position });
     this.immersion?.life.emit(
       cause === 'vehicle' ? 'crash' : cause === 'shot' ? 'shot' : 'assault',
       n.mesh.position,
       damage > 1 ? 2 : 1,
     );
     if (n.umbrella) n.umbrella.visible = false;
-    this.game.audio.voices?.npc(n, n.hp <= 0 ? 'down' : 'hit', { priority: 3 });
+    if (cause !== 'vehicle' && cause !== 'explosion')
+      this.game.audio.voices?.npc(n, n.hp <= 0 ? 'down' : 'hit', { priority: 3 });
     this.burst(n.mesh.position.clone().add(new THREE.Vector3(0, 1.3, 0)), '#ffe09c', 7);
     this.heat = clamp(this.heat + (damage > 1 ? 16 : 5));
     if (n.hp <= 0) {
@@ -664,6 +675,7 @@ export class Arcade {
         .filter(
           (o) =>
             o.car.mesh.visible &&
+            !o.car.exploded &&
             Math.abs(p.y - o.car.mesh.position.y) < 2 &&
             o.d < (o.car.type === 'helicopter' ? 6.7 : 3.3) &&
             Math.abs(o.car.speed) < 3.5 &&
@@ -772,7 +784,7 @@ export class Arcade {
     if (!this.game.started) return;
     this.game.open(
       'Maxvorstadt nach Feierabend',
-      `<div class="three-col"><article class="card"><h3>Autos & Straßenchaos</h3><p>Mit E in ein stehendes Auto, Taxi, Lieferfahrzeug oder einen Bus einsteigen. W/S beschleunigt und fährt rückwärts, A/D lenkt. Leertaste bremst. E steigt aus, H hupt, L schaltet die Scheinwerfer.</p></article><article class="card"><h3>Auch im Büro: F</h3><p>In Reichweite mit F schlagen. Drei Treffer bringen eine Figur zu Boden. Passanten und Kollegen wehren sich. Cash-Drops liegen kurz auf dem Boden: einfach einsammeln. Figuren stehen wieder auf. Jede Figur gibt einmal pro Spieltag Cash.</p></article><article class="card"><h3>Mehr als Folien</h3><p>WC am Flur → Kabine → Ziel-Minispiel → Spülen → Hände waschen. Darts beim Whiteboard, Papierkorb beim Drucker, Wasser, Snackautomat und Radio im Büro. Draußen warten Fußball, Parkbank und ein Parkscheinautomat.</p></article></div><div class="three-col"><article class="card"><h3>Fahrrad & Drive-by</h3><p>E steigt auf. W/S Pedale, A/D Lenken, Shift schneller, SPACE bremsen. Maus bewegen zielt in Blickrichtung, F feuert, T lädt nach, H klingelt. E stellt das Fahrrad ab.</p></article><article class="card"><h3>BBE AIR</h3><p>Der Helikopter wartet westlich des Büros. M markiert den Landeplatz. E einsteigen, SPACE steigen, C sinken, W/S vorwärts/rückwärts, A/D drehen. Erst landen und anhalten, dann E aussteigen. Die Altstadt hat einen zweiten H-Landeplatz.</p></article><article class="card"><h3>Neue Standortqualitäten</h3><p>Frauenkirche, Marienplatz, Königsplatz, Karolinenplatz und St. Benno warten auf E. Im Büro braucht Dr. Dip Wasser, sonst hört das Nicken auf. Auto-Kollisionen verteilen Figuren kurzzeitig in einzelne animierte Teile.</p></article></div><div class="three-col"><article class="card"><h3>Bewegen & anfassen</h3><p>SPACE springt oder überwindet ein niedriges Hindernis; neben einer Motorhaube rutscht du darüber. E benutzt Leitern und Tore. G hebt Gegenstände auf und wirft sie, E legt sie ab. An der BBE-Seitenwand zum Hof beginnt der Dachweg.</p></article><article class="card"><h3>Stadt & Fahndung</h3><p>Zeugen flüchten, filmen oder rufen nach einigen Sekunden die Polizei. Blaue Fahrzeuge und der Suchradius stehen auf der Karte. Sichtkontakt abbrechen und versteckt bleiben. Beschädigte Autos behalten Beulen und kaputte Scheiben. In der BBE-Tiefgarage gibt es Deckung.</p></article><article class="card"><h3>Koffer & Seilwinde</h3><p>Am BBE-Empfang wartet der Eilauftrag. B setzt den Koffer ab, E nimmt ihn auf. Im Heli fährt Q die Winde aus/ein, X hängt den nahen Koffer an oder löst ihn. Kundenempfang und Dachterrasse sind gültige Ziele.</p></article></div><div class="hint-inline">R schaltet den Original-Soundtrack ein und aus. Lautstärke und Station stehen in der Pause. Chaos klingt mit der Zeit ab. Deine Karriere und Speicherstände bleiben erhalten.</div><button id="guide-back" class="primary">Los geht’s</button>`,
+      `<div class="three-col"><article class="card"><h3>BurritoBombe & Brienner Bräu</h3><p>B wirft draußen eine BurritoBombe. Nachschub gibt es bei Dogtown; beim aktiven Kofferauftrag bleibt B für den Koffer reserviert. In der Brauerei hältst du mit A/D die Maß ruhig. Bier macht drei Minuten beschwipst. M öffnet die große Karte.</p></article><article class="card"><h3>Autos & Straßenchaos</h3><p>Mit E in ein stehendes Auto, Taxi, Lieferfahrzeug oder einen Bus einsteigen. W/S beschleunigt und fährt rückwärts, A/D lenkt. Leertaste bremst. E steigt aus, H hupt, L schaltet die Scheinwerfer.</p></article><article class="card"><h3>Auch im Büro: F</h3><p>In Reichweite mit F schlagen. Drei Treffer bringen eine Figur zu Boden. Passanten und Kollegen wehren sich. Cash-Drops liegen kurz auf dem Boden: einfach einsammeln. Figuren stehen wieder auf. Jede Figur gibt einmal pro Spieltag Cash.</p></article><article class="card"><h3>Mehr als Folien</h3><p>WC am Flur → Kabine → Ziel-Minispiel → Spülen → Hände waschen. Darts beim Whiteboard, Papierkorb beim Drucker, Wasser, Snackautomat und Radio im Büro. Draußen warten Fußball, Parkbank und ein Parkscheinautomat.</p></article></div><div class="three-col"><article class="card"><h3>Fahrrad & Drive-by</h3><p>E steigt auf. W/S Pedale, A/D Lenken, Shift schneller, SPACE bremsen. Maus bewegen zielt in Blickrichtung, F feuert, T lädt nach, H klingelt. E stellt das Fahrrad ab.</p></article><article class="card"><h3>BBE AIR</h3><p>Der Helikopter wartet westlich des Büros. M markiert den Landeplatz. E einsteigen, SPACE steigen, C sinken, W/S vorwärts/rückwärts, A/D drehen. Erst landen und anhalten, dann E aussteigen. Die Altstadt hat einen zweiten H-Landeplatz.</p></article><article class="card"><h3>Neue Standortqualitäten</h3><p>Frauenkirche, Marienplatz, Königsplatz, Karolinenplatz und St. Benno warten auf E. Im Büro braucht Dr. Dip Wasser, sonst hört das Nicken auf. Auto-Kollisionen verteilen Figuren kurzzeitig in einzelne animierte Teile.</p></article></div><div class="three-col"><article class="card"><h3>Bewegen & anfassen</h3><p>SPACE springt oder überwindet ein niedriges Hindernis; neben einer Motorhaube rutscht du darüber. E benutzt Leitern und Tore. G hebt Gegenstände auf und wirft sie, E legt sie ab. An der BBE-Seitenwand zum Hof beginnt der Dachweg.</p></article><article class="card"><h3>Stadt & Fahndung</h3><p>Zeugen flüchten, filmen oder rufen nach einigen Sekunden die Polizei. Blaue Fahrzeuge und der Suchradius stehen auf der Karte. Sichtkontakt abbrechen und versteckt bleiben. Beschädigte Autos behalten Beulen und kaputte Scheiben. In der BBE-Tiefgarage gibt es Deckung.</p></article><article class="card"><h3>Koffer & Seilwinde</h3><p>Am BBE-Empfang wartet der Eilauftrag. B setzt den Koffer ab, E nimmt ihn auf. Im Heli fährt Q die Winde aus/ein, X hängt den nahen Koffer an oder löst ihn. Kundenempfang und Dachterrasse sind gültige Ziele.</p></article></div><div class="hint-inline">R schaltet den Original-Soundtrack ein und aus. Lautstärke und Station stehen in der Pause. Chaos klingt mit der Zeit ab. Deine Karriere und Speicherstände bleiben erhalten.</div><button id="guide-back" class="primary">Los geht’s</button>`,
       { pause: true },
     );
     document.querySelector('#guide-back').onclick = () => this.game.close();

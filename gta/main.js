@@ -1,3 +1,4 @@
+import { CityExtras } from './city-extras.js';
 import { FireStory } from './fire-story.js';
 import { STREET_ROADS, CIRCULAR_STREETS } from './city-streets.js';
 import { inIT } from './it-office.js';
@@ -56,6 +57,7 @@ export class Game {
     this.arcade = new Arcade(this);
     this.workshop = new WorkshopStory(this);
     this.fireStory = new FireStory(this);
+    this.extras = new CityExtras(this);
     this.mouseControls = new MouseControls(this);
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
@@ -80,7 +82,18 @@ export class Game {
           this.autosave = 0;
         }
       }
-      this.audio.update(dt, this.world, !paused);
+      this.extras.update(dt, rawDelta, paused);
+      this.audio.update(
+        dt,
+        this.world,
+        !paused ||
+          !!(
+            this.extras.intro.current &&
+            !this.extras.intro.current.paused &&
+            !this.extras.intro.current.loading
+          ),
+      );
+      this.extras.afterAudio();
       this.fireStory.update(rawDelta, paused);
       this.uiTimer += dt;
       this.fps = this.fps * 0.96 + (1 / Math.max(rawDelta, 0.001)) * 0.04;
@@ -108,11 +121,13 @@ export class Game {
     requestAnimationFrame(this.frame);
     window.addEventListener('beforeunload', () => this.sim.save());
     document.addEventListener('visibilitychange', () => {
+      this.lastFrame = performance.now();
       this.world.keys.clear();
       if (document.hidden) this.sim.save();
     });
   }
   get activeFilm() {
+    if (this.extras?.intro.current) return this.extras.intro;
     return this.fireStory?.cinematic
       ? this.fireStory.film
       : this.workshop?.cinematic
@@ -232,12 +247,9 @@ export class Game {
     const box = document.createElement('section');
     box.className = 'welcome';
     box.id = 'welcome';
-    box.innerHTML = `<div class="eyebrow">MÜNCHEN · MAXVORSTADT · ${this.sim.clock}</div><h1>Zwischen Folien<br>und <span>Feierabend.</span></h1><p class="greeting">Guten Morgen.<br>Neue Aufgaben verfügbar.</p><p>Dein Platz ist bei der BBE. Dein Mittagessen liegt auf der Augustenstraße. Dazwischen: eine Karriere, die mit einer einzigen Folie beginnt.</p><button class="primary" id="start-game">${this.sim.saved ? 'Aufstehen & weiterspielen' : 'Aufstehen & Arbeitstag beginnen'} <span style="float:right">↗</span></button><button class="story-welcome-button" id="start-story">BBE Stories · Zum Chef <span>↗</span></button><div class="save-note">${this.sim.saved ? `Spielstand geladen · ${this.sim.career.name} · ${euro(this.sim.s.money)}` : 'WASD bewegen · Maus bewegen · P Smartphone · E interagieren'}</div><div class="divider"></div><div class="small-print">Eine fiktive Spielwelt mit realen Münchner Ortsnamen. Innenräume und Handlung frei interpretiert. Kein offizielles BBE-Produkt.</div>`;
+    box.innerHTML = `<div class="eyebrow">MÜNCHEN · MAXVORSTADT · ${this.sim.clock}</div><h1>Zwischen Folien<br>und <span>Feierabend.</span></h1><p class="greeting">Guten Morgen.<br>Neue Aufgaben verfügbar.</p><button class="primary" id="start-game">${this.sim.saved ? 'Aufstehen & weiterspielen' : 'Aufstehen & Arbeitstag beginnen'} <span style="float:right">↗</span></button><button class="story-welcome-button" id="start-intro">Intro <span>▶</span></button><div class="save-note">${this.sim.saved ? `Spielstand geladen · ${this.sim.career.name} · ${euro(this.sim.s.money)}` : 'WASD bewegen · Maus bewegen · P Smartphone · E interagieren'}</div><div class="divider"></div><div class="small-print">Eine fiktive Spielwelt mit realen Münchner Ortsnamen. Innenräume und Handlung frei interpretiert. Kein offizielles BBE-Produkt.</div>`;
     $('#ui').append(box);
-    this.uiClick('#start-story', () => {
-      document.getElementById('start-game').click();
-      this.workshop.brief();
-    });
+    this.uiClick('#start-intro', () => this.extras.intro.play());
     this.uiClick('#start-game', () => {
       this.started = true;
       this.world.started = true;
@@ -259,7 +271,13 @@ export class Game {
   open(
     title,
     html,
-    { eyebrow = 'BBE · MUNICH LIFE', pause = false, locked = false, onClose = null, task = null } = {},
+    {
+      eyebrow = 'BBE · MUNICH LIFE',
+      pause = false,
+      locked = false,
+      onClose = null,
+      task = null,
+    } = {},
   ) {
     if (this.modal?.onClose) this.modal.onClose();
     if (!this.modal) this.focusReturn = document.activeElement;
@@ -318,7 +336,8 @@ export class Game {
     if (!element) return;
     const current = this.sim.s.active.find((entry) => entry.id === task.id) || task;
     const remaining = current.deadline - this.sim.absolute();
-    const label = remaining < 0 ? 'Frist abgelaufen' : `Noch ${Math.max(0, Math.ceil(remaining))} Spielmin.`;
+    const label =
+      remaining < 0 ? 'Frist abgelaufen' : `Noch ${Math.max(0, Math.ceil(remaining))} Spielmin.`;
     if (element.textContent !== label) element.textContent = label;
     element.classList.toggle('deadline-urgent', remaining <= 10);
   }
@@ -345,13 +364,17 @@ export class Game {
         ? 'BBE Handelsberatung'
         : z === 'city'
           ? 'München · Maxvorstadt'
-          : this.world.currentRestaurant.name;
+          : z === 'brewery'
+            ? 'Brienner Bräu'
+            : this.world.currentRestaurant.name;
     $('#zone-address').textContent =
       z === 'office'
         ? 'Brienner Straße 45'
         : z === 'city'
           ? 'Brienner Straße / Augustenstraße'
-          : this.world.currentRestaurant.address;
+          : z === 'brewery'
+            ? 'Brienner Straße · Hausbrauerei'
+            : this.world.currentRestaurant.address;
     if (z === 'city') {
       const p = this.world.player.position,
         stop = CITY_STOPS.map((q) => ({ q, d: Math.hypot(p.x - q.x, p.z - q.z) })).sort(
@@ -456,6 +479,7 @@ export class Game {
   interact() {
     if (!this.started || this.modal || this.busy) return;
     const n = this.world.nearest;
+    if (this.extras.interact(n)) return;
     if (this.fireStory.interact(n)) return;
     if (this.workshop.interact(n)) return;
     if (this.arcade.interact(n)) return;
@@ -886,15 +910,16 @@ export class Game {
     this.timedAction('Ein Moment in der Senior Lounge', '+20 Energie · +10 Zufriedenheit', 3);
   }
   partner() {
-    if (this.sim.level < 7)
-      return this.toast('Partnerbüro · ab Level 7', 'Der Weg beginnt mit einer guten Folie.');
     this.world.teleport(34, 4.5);
     this.world.target.set(34, 1.25, 4.5);
     this.world.camera.position.set(34, 2.7, 6.3);
     this.world.camera.lookAt(this.world.target);
     this.world.yaw = 0;
     this.world.distance = 4.2;
-    this.toast('Dein Partnerbüro', 'Von der ersten Marktübersicht zur eigenen Tür. Willkommen.');
+    this.toast(
+      this.sim.level < 7 ? 'Büro · Lukas Fleischmann' : 'Dein Partnerbüro',
+      'E · Mit Lukas sprechen.',
+    );
   }
   client() {
     const t = this.sim.task('meeting');
@@ -932,6 +957,7 @@ export class Game {
     );
   }
   phone(page = 'home', navigation = 'push') {
+    if (page === 'map') return this.extras.map.open();
     const activePage = showPhone(this, page, navigation);
     if (!activePage) return;
     this.phonePage = activePage;
@@ -1029,7 +1055,7 @@ export class Game {
         )
         .join(
           '',
-        )}</article><article class="card"><h3>Dein Rucksack</h3><p>${s.inventory.length} / 30 Pfandflaschen<br>Pfandwert: <strong>${euro(s.inventory.reduce((a, b) => a + b, 0) / 100)}</strong></p>${[8, 15, 25].map((v) => `<p>${s.inventory.filter((x) => x === v).length} × ${euro(v / 100)}</p>`).join('')}<div class="divider"></div><p>${s.completed} BBE-Aufträge erledigt<br>${s.returned} Flaschen abgegeben<br>${s.visits.length} / 6 Restaurants besucht<br>${s.coffeeToday} Kaffee heute</p><div class="divider"></div><p>${s.knockouts} K. o. im Arcade-Modus<br>${euro(s.chaosCash)} Cash eingesammelt<br>${Math.round(s.driven)} Meter gefahren<br>${Math.round(s.cycled)} Meter geradelt<br>${Math.round(s.flown)} Meter geflogen · ${s.heliLandings} Landungen<br>${s.cityVisits.length} / 5 Münchner Orte entdeckt<br>${s.birdRefills} Mal Dr. Dip nachgefüllt<br>${s.courierCompleted} Eilkoffer geliefert · ${s.vaults} Hindernisse überwunden<br>${s.escapes} Fahndungen entkommen · ${s.propsThrown} Gegenstände geworfen<br>${s.toiletUses} WC-Besuche · Bestwert ${s.wcBest} %</p>${this.sim.task('lunch')?.progress.includes('picked') ? '<span class="tag gold">BBE Meeting-Lunch im Gepäck</span>' : ''}</article></div><div class="divider"></div><h3>Dein Karriereweg</h3>${CAREERS.map((c, i) => `<div class="input-row" style="grid-template-columns:1fr auto"><span style="color:${i < this.sim.level ? 'var(--accent)' : 'var(--muted)'}">${i + 1} · ${c.name}</span><small>${c.xp} XP · ${c.slots} Projekte</small></div>`).join('')}`;
+        )}</article>${this.extras.inventory()}<article class="card"><h3>Dein Rucksack</h3><p>${s.inventory.length} / 30 Pfandflaschen<br>Pfandwert: <strong>${euro(s.inventory.reduce((a, b) => a + b, 0) / 100)}</strong></p>${[8, 15, 25].map((v) => `<p>${s.inventory.filter((x) => x === v).length} × ${euro(v / 100)}</p>`).join('')}<div class="divider"></div><p>${s.completed} BBE-Aufträge erledigt<br>${s.returned} Flaschen abgegeben<br>${s.visits.length} / ${RESTAURANTS.length} Restaurants besucht<br>${s.coffeeToday} Kaffee heute</p><div class="divider"></div><p>${s.knockouts} K. o. im Arcade-Modus<br>${euro(s.chaosCash)} Cash eingesammelt<br>${Math.round(s.driven)} Meter gefahren<br>${Math.round(s.cycled)} Meter geradelt<br>${Math.round(s.flown)} Meter geflogen · ${s.heliLandings} Landungen<br>${s.cityVisits.length} / 5 Münchner Orte entdeckt<br>${s.birdRefills} Mal Dr. Dip nachgefüllt<br>${s.courierCompleted} Eilkoffer geliefert · ${s.vaults} Hindernisse überwunden<br>${s.escapes} Fahndungen entkommen · ${s.propsThrown} Gegenstände geworfen<br>${s.toiletUses} WC-Besuche · Bestwert ${s.wcBest} %</p>${this.sim.task('lunch')?.progress.includes('picked') ? '<span class="tag gold">BBE Meeting-Lunch im Gepäck</span>' : ''}</article></div><div class="divider"></div><h3>Dein Karriereweg</h3>${CAREERS.map((c, i) => `<div class="input-row" style="grid-template-columns:1fr auto"><span style="color:${i < this.sim.level ? 'var(--accent)' : 'var(--muted)'}">${i + 1} · ${c.name}</span><small>${c.xp} XP · ${c.slots} Projekte</small></div>`).join('')}`;
     }
     return `<h3>Kleine Triumphe, große Geschichten</h3><div class="two-col">${ACHIEVEMENTS.map(([id, name, desc]) => `<article class="card achievement ${s.achievements.includes(id) ? 'unlocked' : ''}"><div class="badge">${s.achievements.includes(id) ? '✦' : '◇'}</div><h3>${name}</h3><p>${desc}</p><span class="tag">${s.achievements.includes(id) ? 'FREIGESCHALTET' : 'NOCH OFFEN'}</span></article>`).join('')}</div>`;
   }
@@ -1053,12 +1079,12 @@ export class Game {
     const city = this.world.zone === 'city',
       px = city
         ? this.world.player.position.x
-        : this.world.zone === 'restaurant'
+        : ['restaurant', 'brewery'].includes(this.world.zone)
           ? this.world.currentRestaurant.x
           : CITY_LAYOUT.hq.x,
       pz = city
         ? this.world.player.position.z
-        : this.world.zone === 'restaurant'
+        : ['restaurant', 'brewery'].includes(this.world.zone)
           ? this.world.currentRestaurant.z
           : CITY_LAYOUT.hq.z;
     const scale = mini ? 2.1 : Math.min(W / 720, H / 630),
@@ -1260,6 +1286,7 @@ window.bbeStatus = () => ({
   started: game.started,
   workshop: game.workshop?.status,
   fire: game.fireStory?.status,
+  extras: game.extras?.status,
   mouse: { locked: !!game.mouseControls?.locked, available: !game.mouseControls?.unavailable },
   camera: { yaw: game.world?.yaw, pitch: game.world?.pitch, distance: game.world?.distance },
   renderedFrames: game.world?.renderer.info.render.frame,

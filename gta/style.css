@@ -5056,3 +5056,508 @@ button.mission-row:focus-visible {
 .panel-header .mission-deadline.deadline-urgent {
   color: #f1c98b;
 }
+
+/* Munich After Hours · 1.6 */
+.atlas-open .modal-shade {
+  padding: 0;
+  background: #101719;
+}
+.atlas-open .panel {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  background: #101719;
+  color: #eef0ee;
+  box-shadow: none;
+}
+.atlas-open .panel-header {
+  display: none;
+}
+.atlas-open .panel-body {
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.atlas {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-rows: 78px minmax(0, 1fr) 44px;
+  font-family: Manrope, Arial, sans-serif;
+}
+.atlas-top {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-top: 5px solid #bdced3;
+  border-bottom: 1px solid #4d565a;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+}
+.atlas-top b {
+  font-size: 27px;
+  letter-spacing: 0.04em;
+}
+.atlas-view {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+.atlas canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+.atlas canvas:active {
+  cursor: grabbing;
+}
+.atlas-sidebar {
+  padding: 20px 16px;
+  background: #1a2225;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+.atlas-filters {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.atlas-filters button {
+  font-size: 10px;
+  padding: 8px;
+}
+.atlas button {
+  border-radius: 2px;
+}
+.atlas .selected {
+  background: #d5dbdc;
+  color: #132025;
+}
+#atlas-places {
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+.atlas-place {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 11px;
+  border: 0;
+  border-bottom: 1px solid #ffffff12;
+  background: transparent;
+  font-size: 12px;
+  color: #d8dddd;
+}
+.atlas-place:hover {
+  background: #e7eeee;
+  color: #101719;
+}
+.atlas-destination {
+  border-top: 1px solid #647076;
+  padding-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+.atlas-destination small {
+  font-size: 10px;
+  color: #9aaeb7;
+  letter-spacing: 0.12em;
+}
+.atlas-destination strong {
+  font-size: 14px;
+}
+.atlas footer {
+  grid-column: 1/-1;
+  display: flex;
+  gap: 35px;
+  align-items: center;
+  font-size: 11px;
+  color: #b0bbbf;
+  padding: 0 24px;
+}
+.atlas-tools {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  display: flex;
+  gap: 6px;
+}
+.atlas-tools button {
+  background: #142126ed;
+  color: #fff;
+  width: 43px;
+  height: 43px;
+  font-size: 22px;
+  padding: 0;
+}
+.atlas-north {
+  position: absolute;
+  left: 22px;
+  top: 22px;
+  color: #162527;
+  font-weight: 800;
+}
+.atlas-scale {
+  position: absolute;
+  bottom: 20px;
+  left: 22px;
+  color: #162527;
+  font-size: 12px;
+  background: #f6f5ebbb;
+  padding: 6px 10px;
+}
+.atlas .primary {
+  background: #9370cc;
+  border: 0;
+  color: #fff;
+}
+.brew-menu h3,
+.stein-brief h3 {
+  font-size: 25px;
+}
+.brew-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  text-align: left;
+  padding: 20px 16px;
+  margin-bottom: 10px;
+  background: #a76e2717;
+  border: 1px solid #d9ac6445;
+}
+.brew-item small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 6px;
+}
+.brew-item b {
+  white-space: nowrap;
+  color: #ecc68d;
+}
+.brew-menu > .primary {
+  width: 100%;
+  margin-top: 12px;
+}
+.equipment-card {
+  border-color: #b8995966 !important;
+}
+.equipment-card p {
+  font-size: 12px;
+}
+.equipment-card .toolbar button {
+  font-size: 12px;
+}
+#stein-hud {
+  position: fixed;
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(460px, 92vw);
+  padding: 22px 25px;
+  background: linear-gradient(120deg, #101e23f2, #2b302be8);
+  border: 1px solid #efcc9055;
+  border-top: 3px solid #dbb478;
+  border-radius: 9px;
+  text-align: center;
+  z-index: 42;
+  pointer-events: auto;
+  box-shadow: 0 15px 60px #0005;
+}
+#stein-hud[hidden] {
+  display: none;
+}
+.stein-title {
+  display: grid;
+  gap: 7px;
+}
+.stein-title small {
+  letter-spacing: 0.17em;
+  font-size: 10px;
+  color: #d7b77c;
+}
+.stein-title b {
+  font-size: 24px;
+  color: #fff;
+}
+.stein-balance {
+  position: relative;
+  height: 16px;
+  background: #be635e66;
+  margin: 23px 0 14px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.stein-balance i {
+  position: absolute;
+  left: 32%;
+  right: 32%;
+  height: 100%;
+  background: #9fbc97;
+}
+.stein-balance span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: #fff;
+  z-index: 2;
+  box-shadow: 0 0 8px #000;
+  left: 50%;
+}
+.stein-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #d8dacc;
+}
+.stein-numbers strong {
+  font-size: 20px;
+}
+.stein-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 10px;
+  color: #9fadb0;
+}
+.stein-controls button {
+  font-size: 11px;
+  padding: 9px 15px;
+}
+#drunk-status {
+  position: fixed;
+  right: 30px;
+  bottom: 218px;
+  padding: 7px 10px;
+  border-left: 2px solid #e4be78;
+  background: #19343bbb;
+  backdrop-filter: blur(8px);
+  font-size: 10px;
+  letter-spacing: 0.11em;
+  color: #eedbb7;
+}
+#drunk-status[hidden] {
+  display: none;
+}
+.world-intro #ui,
+.world-intro #toasts,
+.world-intro #voice-caption {
+  visibility: hidden;
+}
+.world-intro .modal-shade {
+  background: transparent;
+  padding: 0;
+}
+.world-intro .panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  box-shadow: none;
+}
+.world-intro .panel-header {
+  display: none;
+}
+.world-intro .panel-body {
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.world-intro-frame {
+  height: 100%;
+  position: relative;
+  border-block: 7vh solid #000;
+}
+.intro-logo {
+  position: absolute;
+  inset: -7vh 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  background: #000;
+  z-index: 5;
+  transition:
+    opacity 0.7s,
+    visibility 0.7s;
+}
+.intro-logo img {
+  width: 150px;
+  max-width: 28vw;
+  animation: logo-arrive 2.5s ease-out both;
+}
+.intro-logo span {
+  font-size: 12px;
+  letter-spacing: 0.34em;
+  color: #c8d2d8;
+}
+.intro-logo small {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: #7b919d;
+}
+.intro-logo.gone {
+  opacity: 0;
+  visibility: hidden;
+}
+.intro-location {
+  position: absolute;
+  left: 6vw;
+  bottom: 10vh;
+  max-width: 85vw;
+  z-index: 3;
+  text-shadow: 0 3px 25px #000;
+}
+.intro-location h1 {
+  font-size: clamp(24px, 4vw, 62px);
+  line-height: 1.06;
+  margin: 8px 0;
+  color: white;
+  letter-spacing: -0.025em;
+}
+.intro-location small {
+  color: #f2ddba;
+  font-size: clamp(11px, 1.2vw, 16px);
+}
+.intro-subtitle {
+  position: absolute;
+  bottom: 2.4vh;
+  left: 15%;
+  right: 15%;
+  text-align: center;
+  font-size: clamp(12px, 1.35vw, 18px);
+  font-weight: 600;
+  text-shadow:
+    0 2px 4px #000,
+    0 0 12px #000;
+  z-index: 4;
+  color: #fff;
+}
+.intro-toolbar {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: -6vh;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 8;
+}
+.intro-toolbar span {
+  flex: 1;
+  color: #bbc7cb;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+.intro-toolbar button {
+  font-size: 11px;
+  padding: 9px 13px;
+  border: 1px solid #5e707855;
+  background: #152128;
+  color: #eef4f4;
+}
+.intro-progress {
+  position: absolute;
+  bottom: -7vh;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #24363b;
+  z-index: 9;
+}
+.intro-progress i {
+  display: block;
+  height: 100%;
+  background: #d7b27c;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+#intro-fade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  pointer-events: none;
+  z-index: 2;
+}
+.world-intro .close {
+  display: none;
+}
+@keyframes logo-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.91);
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+@media (max-width: 700px) {
+  .atlas {
+    grid-template-columns: minmax(0, 1fr) 190px;
+    grid-template-rows: 58px minmax(0, 1fr) 34px;
+  }
+  .atlas-top {
+    padding: 0 14px;
+  }
+  .atlas-top > span:first-child {
+    display: none;
+  }
+  .atlas-sidebar {
+    padding: 12px 8px;
+  }
+  .atlas-filters button {
+    padding: 7px 5px;
+    font-size: 9px;
+  }
+  .atlas-place {
+    font-size: 10px;
+    padding: 12px 5px;
+  }
+  .atlas-destination {
+    font-size: 10px;
+  }
+  .atlas footer {
+    gap: 10px;
+    font-size: 9px;
+    padding: 0 12px;
+  }
+  .atlas footer span:last-child {
+    display: none;
+  }
+  .intro-subtitle {
+    left: 7%;
+    right: 7%;
+  }
+  .intro-toolbar span {
+    font-size: 8px;
+  }
+  .intro-toolbar button {
+    padding: 8px;
+  }
+  #drunk-status {
+    right: 12px;
+    bottom: 185px;
+  }
+}

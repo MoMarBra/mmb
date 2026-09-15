@@ -136,7 +136,7 @@ export function detail(car) {
   }
   const saved = this.g.sim.s.vehicleDamage?.[car.id];
   if (Number.isFinite(saved?.health)) {
-    car.health = THREE.MathUtils.clamp(saved.health, 10, 100);
+    car.health = THREE.MathUtils.clamp(saved.health, 0, 100);
     if (car.health < 70) {
       car.glassBroken = true;
       for (const glass of car.glazing) {

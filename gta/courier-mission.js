@@ -40,7 +40,10 @@ export class CourierMission {
     }
     window.addEventListener('keydown', (e) => {
       if (e.repeat || this.g.modal || this.g.busy || !this.g.started || !this.a.active) return;
-      if (e.code === 'KeyB' && this.state.active) this.drop();
+      if (e.code === 'KeyB' && this.state.active) {
+        e.preventDefault();
+        this.drop();
+      }
       if (e.code === 'KeyQ' && this.a.vehicle?.type === 'helicopter') {
         this.lowered = !this.lowered;
         this.g.toast(
