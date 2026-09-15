@@ -169,7 +169,7 @@ export class WeatherEffects {
       dt > 0 &&
       closeToWater &&
       !w.lowQuality &&
-      this.reflectionTime > 0.3 &&
+      this.reflectionTime > (this.g.extras?.intro.current ? 0.6 : 0.3) &&
       (!this.reflectionReady || moved || this.reflectionTime > 1.2) &&
       typeof w.renderer.getRenderTarget === 'function'
     ) {

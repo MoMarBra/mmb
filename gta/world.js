@@ -2062,6 +2062,7 @@ export class GameWorld {
     this.resize();
   }
   update(dt, blocked = false) {
+    const cinematicIntro = !!this.gameplay?.game?.extras?.intro.current;
     this.time += dt;
     this.blocked = blocked;
     const zone = this.zoneData[this.zone],
@@ -2289,7 +2290,7 @@ export class GameWorld {
     const desired = this.target.clone().add(offset);
     this.ray.set(this.target, offset.clone().normalize());
     this.ray.far = offset.length();
-    const hits = this.ray.intersectObjects(zone.obstacles, false);
+    const hits = cinematicIntro ? [] : this.ray.intersectObjects(zone.obstacles, false);
     if (hits.length && hits[0].distance > 0.1)
       desired
         .copy(this.target)
@@ -2332,7 +2333,8 @@ export class GameWorld {
       this.lastShadowPosition.copy(this.player.position);
     }
     this.gameplay?.game?.extras?.beforeRender(dt);
-    if (this.composer && !this.lowQuality) this.composer.render(dt);
+    // The film keeps antialiasing and real shadows without the extra full-scene SSAO passes.
+    if (this.composer && !this.lowQuality && !cinematicIntro) this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
   }
   dispose() {

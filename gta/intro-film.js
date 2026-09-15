@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import { createHelicopter } from './expansion-models.js';
-import { animateVehicleWheels } from './blender-vehicles.js';
-import { box } from './world.js';
+import { IntroStage } from './intro-stage.js';
 export const INTRO_DURATION = 88.38;
 export const INTRO_MUSIC = 'intro_theme_1_6_1';
 // Fifteen uninterrupted shots over the complete user-supplied ton.mp3 edit.
@@ -15,6 +13,7 @@ export const INTRO_SHOTS = [
     to: [113, 24, 51],
     look: [131, 5, 14],
     minutes: 525,
+    crowd: 'square',
     title: 'MÜNCHEN',
     sub: 'Große Pläne. Sehr kleine Zeitpuffer.',
   },
@@ -27,6 +26,7 @@ export const INTRO_SHOTS = [
     to: [28, 5, 32],
     look: [40, 7, 56],
     minutes: 590,
+    crowd: 'hq',
     title: 'BRIENNER STRASSE 45',
     sub: 'Dein Büro. Dein Business Case.',
   },
@@ -51,6 +51,7 @@ export const INTRO_SHOTS = [
     to: [4, 3, 8],
     look: [-17, 3, 27],
     minutes: 750,
+    crowd: 'augusten',
     title: 'AUGUSTENSTRASSE',
     sub: 'Benchmarks. Burritos. Budgetabweichungen.',
   },
@@ -63,9 +64,14 @@ export const INTRO_SHOTS = [
     to: [3, 2.5, 79],
     look: [17.4, 2.5, 88],
     minutes: 810,
+    crowd: 'dogtown',
     title: 'DOGTOWN',
     sub: 'Diese Schärfe steht in keinem Risikoregister.',
-    blast: [9, 0.2, 92],
+    bursts: [
+      { at: 2.2, position: [6, 0.2, 92] },
+      { at: 4.5, position: [-2, 0.2, 86] },
+      { at: 6.6, position: [3, 0.2, 99] },
+    ],
   },
   {
     at: 39.533,
@@ -88,8 +94,9 @@ export const INTRO_SHOTS = [
     to: [99, 2, 35],
     look: [72, 1, 41],
     minutes: 1020,
-    title: 'MOBILITÄT MIT MARGE',
-    sub: 'Vier Räder. Keine Folienbegrenzung.',
+    crowd: 'chase',
+    title: 'DIE DEADLINE IM RÜCKSPIEGEL',
+    sub: 'Drei Streifenwagen. Ein offener To-do-Punkt.',
     stage: 'car',
   },
   {
@@ -101,6 +108,7 @@ export const INTRO_SHOTS = [
     to: [142, 28, 58],
     look: [130, 17, 36],
     minutes: 1090,
+    crowd: 'square',
     title: 'BBE AIR',
     sub: 'Für die wirklich übergeordnete Perspektive.',
     stage: 'heli',
@@ -114,9 +122,14 @@ export const INTRO_SHOTS = [
     to: [61, 2.2, 32],
     look: [77, 1, 37],
     minutes: 1160,
+    crowd: 'chase',
     title: 'EXTERNES CONTROLLING',
-    sub: 'Blaulicht ist keine PowerPoint-Farbe.',
+    sub: 'Die Polizei bittet um eine kurze Abstimmung.',
     stage: 'police',
+    bursts: [
+      { at: 1.5, position: [99, 0.2, 40] },
+      { at: 3.7, position: [71, 0.2, 40] },
+    ],
   },
   {
     at: 57.748,
@@ -127,6 +140,7 @@ export const INTRO_SHOTS = [
     to: [140, 12, 48],
     look: [131, 4, 12],
     minutes: 1125,
+    crowd: 'square',
     title: 'KÖNIGSPLATZ',
     sub: 'Große Kulisse. Kleine Deadline.',
   },
@@ -139,6 +153,7 @@ export const INTRO_SHOTS = [
     to: [294, 32, 286],
     look: [280, 23, 240],
     minutes: 1160,
+    crowd: 'church',
     title: 'FRAUENKIRCHE',
     sub: 'Die Türme stehen. Die Deadline auch.',
   },
@@ -151,6 +166,7 @@ export const INTRO_SHOTS = [
     to: [391, 17, 298],
     look: [367, 12, 318],
     minutes: 1300,
+    crowd: 'marien',
     title: 'NACH DER LETZTEN FOLIE',
     sub: 'München schläft. Outlook arbeitet weiter.',
   },
@@ -159,13 +175,16 @@ export const INTRO_SHOTS = [
     end: 77.865,
     zone: 'city',
     anchor: [0, 40],
-    from: [-3, 2, 67],
-    to: [2, 2.3, 27],
+    from: [5, 5, 84],
+    to: [5, 3.8, 24],
     look: [-17, 5, 25],
     minutes: 1280,
     rain: true,
+    stage: 'rain-chase',
+    bursts: [{ at: 4.5, position: [0, 0.2, 51] }],
+    crowd: 'augusten',
     title: 'REGEN IM RISIKOSZENARIO',
-    sub: 'Nur die Storyline bleibt trocken.',
+    sub: 'Nasse Straße. Heiße Eskalation.',
   },
   {
     at: 77.865,
@@ -188,6 +207,7 @@ export const INTRO_SHOTS = [
     to: [49, 20, 24],
     look: [40, 6, 56],
     minutes: 570,
+    crowd: 'hq',
     title: 'BBE · MUNICH CONSULTING SIMULATOR',
     sub: 'Aufstehen. Und Geschichte schreiben.',
   },
@@ -225,20 +245,12 @@ export class IntroFilm {
     });
   }
   makeStage() {
-    if (this.stage) return;
-    this.stage = new THREE.Group();
-    this.stage.name = 'Intro · isolated film props';
-    this.stage.userData.dynamic = true;
-    this.w.groups.city.add(this.stage);
-    this.hero = this.w.car(this.stage, 'car', '#973e34');
-    this.police = this.w.car(this.stage, 'car', '#d8e0dd');
-    box(this.police, 0, 1.67, 0, 0.9, 0.1, 0.24, '#263d57');
-    this.beacons = [-0.32, 0.32].map((x) =>
-      box(this.police, x, 1.77, 0, 0.19, 0.11, 0.19, '#3b81e6', false),
-    );
-    this.heli = createHelicopter(THREE);
-    this.stage.add(this.heli);
-    this.stage.visible = false;
+    if (this.action) return;
+    this.action = new IntroStage(this.g);
+    this.stage = this.action.root;
+    this.hero = this.action.hero;
+    this.police = this.action.police[0].mesh;
+    this.heli = this.action.heli;
   }
   async play() {
     if (this.current || this.g.started) return;
@@ -261,6 +273,12 @@ export class IntroFilm {
       playerVisible: w.player.visible,
       shadowVisible: w.playerShadow.visible,
       worldTime: w.time,
+      pixelRatio: w.renderer.getPixelRatio?.() || 1,
+      exposure: w.renderer.toneMappingExposure,
+      environment: w.scene.environmentIntensity,
+      skyLightColor: w.ambient.color.clone(),
+      groundLightColor: w.ambient.groundColor.clone(),
+      fillColor: w.fill.color.clone(),
       state: structuredClone(g.sim.s),
       save: g.sim.save,
     };
@@ -283,6 +301,9 @@ export class IntroFilm {
     g.audio.cinematicMix = true;
     g.audio.cinematicVoice = false;
     this.makeStage();
+    this.action.capture();
+    // Native-resolution antialiasing; avoid rendering high-DPI pixels hidden by letterboxing.
+    w.renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
     g.open(
       'Intro',
       `<div class="world-intro-frame"><div class="intro-location"><small id="intro-sub"></small><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status">Intro wird vorbereitet …</span><button id="intro-sound" aria-label="Intro-Ton ausschalten" aria-pressed="true">Ton an</button><button id="intro-pause">Pause</button><button id="intro-exit">Überspringen ↗</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade" aria-hidden="true"></div></div>`,
@@ -295,7 +316,14 @@ export class IntroFilm {
     document.getElementById('intro-pause').onclick = () => this.pause(!this.current.paused);
     document.getElementById('intro-exit').onclick = () => this.finish();
     this.buffers = new Map();
-    const ids = [INTRO_MUSIC, 'v160_explosion_01', 'v160_explosion_02', 'v160_explosion_03'];
+    const ids = [
+      INTRO_MUSIC,
+      'v160_explosion_01',
+      'v160_explosion_02',
+      'v160_explosion_03',
+      'aaa_police_siren',
+      'engine_loop',
+    ];
     await Promise.all(
       ids.map(async (id) => {
         try {
@@ -336,8 +364,8 @@ export class IntroFilm {
     ]) {
       if (token !== this.generation) return;
       w.enter(zone);
+      this.action.warm();
       this.stage.visible = zone === 'city';
-      this.hero.visible = this.police.visible = this.heli.visible = true;
       g.sim.s.minutes = minutes;
       g.sim.s.weather = 'Sonnig';
       g.arcade.atmosphere.update(0);
@@ -398,6 +426,7 @@ export class IntroFilm {
     a.introMix.enabled = !a.introMix.enabled || retry;
     this.music?.stop(0.08);
     this.music = null;
+    this.stopActionAudio();
     if (a.introMix.enabled) this.resumeAudio();
     a.applyMix?.();
     this.updateSoundButton();
@@ -427,7 +456,28 @@ export class IntroFilm {
       offset: Math.min(offset, b.duration - 0.01),
     });
     this.soundError = !this.music;
+    this.startActionAudio();
     this.updateSoundButton();
+  }
+  stopActionAudio() {
+    for (const handle of this.actionAudio || []) handle?.stop(0.12);
+    this.actionAudio = [];
+  }
+  startActionAudio() {
+    this.stopActionAudio();
+    if (!this.current || this.current.paused || !this.g.audio.introMix?.enabled) return;
+    const shot = INTRO_SHOTS[this.current.shot];
+    if (!shot?.stage) return;
+    for (const [id, volume] of [
+      ['aaa_police_siren', 0.14],
+      ['engine_loop', 0.17],
+    ]) {
+      const buffer = this.buffers.get(id);
+      if (buffer)
+        this.actionAudio.push(
+          this.g.audio.emit(buffer, { bus: 'music', loop: true, volume, fade: 0.12 }),
+        );
+    }
   }
   time() {
     const m = this.current;
@@ -442,6 +492,7 @@ export class IntroFilm {
     m.elapsed = this.time();
     m.base = m.elapsed;
     m.paused = paused;
+    this.stopActionAudio();
     this.music?.stop(0.08);
     this.music = null;
     this.g.audio.cinematicVoice = false;
@@ -480,42 +531,25 @@ export class IntroFilm {
       this.w.shadowZone = null;
       document.getElementById('intro-title').textContent = shot.title;
       document.getElementById('intro-sub').textContent = shot.sub;
+      this.action.configure(shot);
+      this.startActionAudio();
     }
-    this.stage.visible = !!shot?.stage;
-    this.hero.visible = shot?.stage === 'car';
-    this.police.visible = shot?.stage === 'police';
-    this.heli.visible = shot?.stage === 'heli';
-    if (shot?.stage) {
-      const animationStep = m.paused || m.loading ? 0 : dt;
-      const u = (t - shot.at) / (shot.end - shot.at);
-      if (shot.stage === 'car') {
-        this.hero.position.set(65 + u * 25, 0, 41.7);
-        this.hero.rotation.y = Math.PI / 2;
-        animateVehicleWheels({ mesh: this.hero }, 8, animationStep);
+    const step = m.paused || m.loading ? 0 : Math.min(dt, 0.08);
+    this.action.update(t, step);
+    if (shot && !m.paused)
+      for (const [i, burst] of (shot.bursts || []).entries()) {
+        const key = index + ':' + i;
+        if (t >= shot.at + burst.at && !m.blasts.has(key)) {
+          m.blasts.add(key);
+          this.g.extras.fire.explode(new THREE.Vector3(...burst.position), null, true);
+          this.action.burst(burst.position, t);
+        }
       }
-      if (shot.stage === 'police') {
-        this.police.position.set(91 - u * 27, 0, 38);
-        this.police.rotation.y = -Math.PI / 2;
-        animateVehicleWheels({ mesh: this.police }, 7, animationStep);
-        this.beacons.forEach((b, i) => (b.visible = Math.sin(t * 20 + i * Math.PI) > 0));
-      }
-      if (shot.stage === 'heli') {
-        this.heli.position.set(112 + u * 37, 16 + Math.sin(u * Math.PI) * 2, 38);
-        this.heli.rotation.set(0.03, Math.PI / 2, -0.06);
-        this.heli.userData.mainRotor.rotation.y = t * 42;
-        this.heli.userData.tailRotor.rotation.x = t * 57;
-      }
-    }
-    if (shot?.blast && t > shot.at + 2.6 && !m.blasts.has(index) && !m.paused) {
-      m.blasts.add(index);
-      this.g.extras.fire.explode(new THREE.Vector3(...shot.blast), null, true);
-    }
     const fraction = shot ? (t - shot.at) / (shot.end - shot.at) : 0,
       fade = shot ? Math.max(0, 1 - fraction * 16, (fraction - 0.93) * 14) : 1;
     document.getElementById('intro-fade').style.opacity = String(Math.min(1, fade));
     document.getElementById('intro-progress').style.transform =
       'scaleX(' + Math.min(1, t / INTRO_DURATION) + ')';
-    const step = m.paused || m.loading ? 0 : Math.min(dt, 0.08);
     this.g.extras.fire.update(step, true);
     this.w.update(step, true);
     if (t >= INTRO_DURATION) this.finish();
@@ -526,9 +560,7 @@ export class IntroFilm {
     if (!s) return;
     const u = THREE.MathUtils.smoothstep(m.elapsed, s.at, s.end);
     this.w.camera.position.fromArray(s.from).lerp(this.end.fromArray(s.to), u);
-    if (s.stage === 'car') this.w.camera.lookAt(this.hero.position.x, 1.1, 41.7);
-    else if (s.stage === 'police') this.w.camera.lookAt(this.police.position.x, 1.1, 38);
-    else if (s.stage === 'heli') this.w.camera.lookAt(this.heli.position);
+    if (s.stage) this.w.camera.lookAt(this.action.focus);
     else this.w.camera.lookAt(...s.look);
     this.w.camera.updateMatrixWorld();
   }
@@ -544,16 +576,23 @@ export class IntroFilm {
   finish() {
     if (!this.current) return;
     this.generation++;
+    this.stopActionAudio();
     this.music?.stop(0.15);
     this.music = null;
     this.current = null;
-    this.stage.visible = false;
+    this.action.hide();
     this.g.audio.cinematicMix = this.g.audio.cinematicVoice = false;
     this.g.audio.introMix = null;
     this.g.audio.applyMix?.();
     const r = this.restore,
       w = this.w;
     this.restoreState();
+    w.renderer.setPixelRatio(r.pixelRatio);
+    w.renderer.toneMappingExposure = r.exposure;
+    w.scene.environmentIntensity = r.environment;
+    w.ambient.color.copy(r.skyLightColor);
+    w.ambient.groundColor.copy(r.groundLightColor);
+    w.fill.color.copy(r.fillColor);
     w.enter(r.zone, r.restaurant?.id);
     w.currentRestaurant = r.restaurant;
     w.teleport(r.position.x, r.position.z, r.position.y);

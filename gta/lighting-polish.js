@@ -75,7 +75,7 @@ export class LocalLighting {
     }
     for (const light of this.streetLights) light.visible = w.zone === 'city' && night > 0.001;
     if (w.zone !== 'city') return;
-    const p = w.player.position;
+    const p = w.cinematicFocus || w.player.position;
     const nearest = this.lamps
       .map((lamp) => ({ lamp, d: Math.hypot(lamp.x - p.x, lamp.z - p.z) }))
       .sort((a, b) => a.d - b.d);

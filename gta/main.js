@@ -113,7 +113,7 @@ export class Game {
       }
       if (this.uiTimer > 0.15) {
         this.uiTimer = 0;
-        this.updateHUD();
+        if (!this.extras.intro.current) this.updateHUD();
       }
       this.mouseControls.update();
       requestAnimationFrame(this.frame);

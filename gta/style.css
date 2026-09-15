@@ -5359,6 +5359,33 @@ button.mission-row:focus-visible {
 .world-intro #voice-caption {
   visibility: hidden;
 }
+/* Lightweight cinematic grade: compositor colour operations, no blur or extra 3D pass. */
+.world-intro #world {
+  filter: contrast(1.065) saturate(1.13) sepia(0.035);
+}
+.world-intro.intro-night #world {
+  filter: brightness(1.06) contrast(1.025) saturate(1.08);
+}
+.world-intro .cinema-vignette {
+  display: none;
+}
+.world-intro-frame::before,
+.world-intro-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.world-intro-frame::before {
+  background: linear-gradient(145deg, #ffca8510 0%, transparent 42%, #136b8012 100%);
+}
+.world-intro-frame::after {
+  background: radial-gradient(ellipse at 50% 43%, transparent 48%, #030e1b35 100%);
+}
+.world-intro.intro-night .world-intro-frame::before {
+  background: linear-gradient(155deg, #8db9d807 0%, transparent 50%, #134e6310 100%);
+}
 .world-intro .modal-shade {
   background: transparent;
   padding: 0;

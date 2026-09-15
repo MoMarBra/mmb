@@ -128,6 +128,7 @@ export class Arcade {
   }
   updateVehicleBatches() {
     if (this.world.zone !== 'city') return;
+    if (this.game.extras?.intro.current) this.game.extras.intro.action?.maskTraffic();
     for (const car of this.world.cars) {
       car.renderVisible = this.world.inRenderRange(car.mesh, car.type === 'bus' ? 7 : 4);
       if (car.renderVisible) car.mesh.updateWorldMatrix(true, true);

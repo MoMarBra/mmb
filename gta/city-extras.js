@@ -165,6 +165,7 @@ export class CityExtras {
   beforeRender() {
     if (this.intro.current) {
       this.intro.camera();
+      this.intro.action.light(this.intro.time());
       return;
     }
     if (this.brewery.session || this.brewery.drink) {
