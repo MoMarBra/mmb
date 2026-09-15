@@ -2086,7 +2086,7 @@ export class GameWorld {
       vz = ((-Math.cos(this.yaw) * forward - Math.sin(this.yaw) * side) / length) * speed;
       if (forward || side) this.pose = 'walk';
     }
-    if (!driving) {
+    if (!driving && !cinematicIntro) {
       b.velocity.x = vx;
       b.velocity.z = vz;
       zone.physics.step(1 / 60, Math.min(dt, 0.05), 3);
@@ -2125,7 +2125,7 @@ export class GameWorld {
     this.playerShadow.position.set(b.position.x, 0.022, b.position.z);
     this.nearest = null;
     let best = Infinity;
-    for (const i of zone.interactions) {
+    for (const i of cinematicIntro ? [] : zone.interactions) {
       if (i.storyAway) continue;
       if (i.kind === 'bottle' && this.sim.s.picked.includes(i.data.id)) continue;
       const d = Math.hypot(b.position.x - i.x, b.position.z - i.z);
@@ -2309,8 +2309,10 @@ export class GameWorld {
       ),
     );
     this.gameplay?.update(dt, blocked);
-    this.workshop?.updateWorld(dt, blocked);
-    this.fireStory?.updateWorld(dt, blocked);
+    if (!cinematicIntro) {
+      this.workshop?.updateWorld(dt, blocked);
+      this.fireStory?.updateWorld(dt, blocked);
+    }
     this.updateCrowd();
     // The SSAO normal pass reuses the shadow map from the first colour pass.
     this.renderer.shadowMap.autoUpdate = false;

@@ -5419,7 +5419,11 @@ button.mission-row:focus-visible {
   position: relative;
   border-block: 7vh solid #000;
 }
-.intro-loading .intro-location {
+.intro-loading .intro-location,
+.intro-loading #intro-state,
+.intro-loading #intro-sound,
+.intro-loading #intro-pause,
+.intro-loading .intro-progress {
   visibility: hidden;
 }
 .intro-loading #intro-fade {

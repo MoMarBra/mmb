@@ -621,6 +621,12 @@ export class Arcade {
     this.loot.push({ mesh, amount, zone: this.world.zone, life: 60 });
   }
   update(dt, blocked) {
+    if (this.game.extras?.intro.current) {
+      this.atmosphere.update(dt);
+      this.immersion.weather.update(dt);
+      this.updateVehicleBatches();
+      return;
+    }
     const step = this.active ? dt : 0;
     this.time += step;
     this.heat = Math.max(0, this.heat - step * 0.8);

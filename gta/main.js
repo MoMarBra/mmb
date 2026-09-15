@@ -52,7 +52,6 @@ export class Game {
       );
       return;
     }
-    document.getElementById('boot-screen')?.remove();
     this.minigames = new Minigames(this);
     this.arcade = new Arcade(this);
     this.workshop = new WorkshopStory(this);
@@ -63,6 +62,11 @@ export class Game {
     this.sim.listeners.push((e) => this.onEvent(e));
     this.intro();
     this.updateHUD();
+    const boot = window.__bbeBoot;
+    this.extras.intro.skipKeyHeld = !!boot?.spaceHeld;
+    boot?.takeOver?.();
+    if (!boot?.skipIntro) this.introReady = this.extras.intro.play({ automatic: true });
+    document.getElementById('boot-screen')?.remove();
     this.frame = (now) => {
       const rawDelta = (now - this.lastFrame) / 1000 || 0.016;
       const dt = Math.min(rawDelta, 0.08);
@@ -70,8 +74,11 @@ export class Game {
       const hidden = document.hidden;
       const paused = !this.started || hidden || this.modal?.pause === true;
       if (!hidden) {
-        if (this.cinematic) this.activeFilm.render(Math.min(rawDelta, 0.25));
-        else
+        if (this.cinematic) {
+          const film = this.activeFilm;
+          film.performance?.record(rawDelta, film.current);
+          film.render(Math.min(rawDelta, 0.25));
+        } else
           this.world.update(paused ? 0 : dt, !!this.modal || this.busy || !this.started || hidden);
       }
       if (!paused) {
@@ -247,6 +254,7 @@ export class Game {
     const box = document.createElement('section');
     box.className = 'welcome';
     box.id = 'welcome';
+    box.tabIndex = -1;
     box.innerHTML = `<div class="eyebrow">MÜNCHEN · MAXVORSTADT · ${this.sim.clock}</div><h1>Zwischen Folien<br>und <span>Feierabend.</span></h1><p class="greeting">Guten Morgen.<br>Neue Aufgaben verfügbar.</p><button class="primary" id="start-game">${this.sim.saved ? 'Aufstehen & weiterspielen' : 'Aufstehen & Arbeitstag beginnen'} <span style="float:right">↗</span></button><button class="story-welcome-button" id="start-intro">Intro <span>▶</span></button><div class="save-note">${this.sim.saved ? `Spielstand geladen · ${this.sim.career.name} · ${euro(this.sim.s.money)}` : 'WASD bewegen · Maus bewegen · P Smartphone · E interagieren'}</div><div class="divider"></div><div class="small-print">Eine fiktive Spielwelt mit realen Münchner Ortsnamen. Innenräume und Handlung frei interpretiert. Kein offizielles BBE-Produkt.</div>`;
     $('#ui').append(box);
     this.uiClick('#start-intro', () => this.extras.intro.play());

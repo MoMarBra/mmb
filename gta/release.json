@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "publishedPath": "/gta/",
-  "sourceCommit": "e16e4e6c12ec44520e9e94302b0fbd618e44598e",
+  "sourceCommit": "d7637a5018ca6e206f5c84980a8ea89a4d4bff1c",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-15T11:39:03.027Z",
+  "preparedAt": "2026-09-15T11:58:14.248Z",
   "gameTestsRun": true,
   "browserVisualQA": false,
-  "validation": "9 regression suites including16 full-Game logic checks;15 camera paths and4 convoy paths numerically collision-checked;28-55 instanced film extras per location;6 visual-only explosions;night lighting/color-grade, traffic visibility and native-resolution render restoration;376 offline media hashes and76 local asset references. No browser/GPU visual test or target-device FPS benchmark."
+  "validation": "9 regression suites including 22 full-Game logic checks: automatic 60-second intro, text-free boot, Space before and during startup, held-key/focus guards, delayed audio and blocked autoplay sync, adaptive render budget, physics/HUD bypass, restore/save and existing missions/traffic/audio. 376 offline media hashes and 77 local asset references. No browser/GPU visual test or target-device FPS guarantee."
 }

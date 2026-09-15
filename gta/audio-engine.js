@@ -37,6 +37,7 @@ export class Soundscape {
   }
   start() {
     if (this.ready) {
+      if (!this.introMix) this.preloadGame();
       this.ctx.resume().catch(() => {});
       return;
     }
@@ -119,7 +120,7 @@ export class Soundscape {
           this.play('click');
       });
       this.applyMix();
-      const first = [
+      this.gamePreloads = [
         'engine_loop',
         'engine_start',
         'car_door_close',
@@ -131,7 +132,7 @@ export class Soundscape {
           .flat()
           .filter((id) => !id.startsWith('voice_')),
       ];
-      this.bank.preload([...new Set(first)].filter((id) => AUDIO_ASSETS[id]));
+      if (!this.introMix) this.preloadGame();
       c.resume().catch(() => {});
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -143,6 +144,11 @@ export class Soundscape {
       this.enabled = false;
       this.errors.push(String(error.message));
     }
+  }
+  preloadGame() {
+    if (!this.bank || this.gamePreloaded) return;
+    this.gamePreloaded = true;
+    this.bank.preload([...new Set(this.gamePreloads || [])].filter((id) => AUDIO_ASSETS[id]));
   }
   impulse() {
     const c = this.ctx,
@@ -422,6 +428,13 @@ export class Soundscape {
     this.world = world;
     if (!this.ready) return;
     this.time += dt;
+    // The film owns its score/sirens/explosions; avoid decoding and mixing the unseen game world.
+    if (this.introMix) {
+      this.setActive(false);
+      this.applyMix();
+      this.listener(world);
+      return;
+    }
     this.setActive(active);
     this.applyMix();
     this.listener(world);

@@ -188,10 +188,11 @@ export class CityFire {
         dir,
       );
     }
-    this.g.audio.sample('v160_explosion_' + String(1 + (this.events++ % 3)).padStart(2, '0'), {
-      position,
-      volume: 0.75,
-    });
+    if (!cinematic)
+      this.g.audio.sample('v160_explosion_' + String(1 + (this.events++ % 3)).padStart(2, '0'), {
+        position,
+        volume: 0.75,
+      });
     this.shake = Math.max(
       this.shake || 0,
       Math.max(0, 1 - position.distanceTo(this.w.player.position) / 40) * 0.45,
