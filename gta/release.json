@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "publishedPath": "/gta/",
-  "sourceCommit": "8b56828e1c0e95b08651605310570b4711a215e5",
+  "sourceCommit": "0cb0a4df0569137adb6468dc99738727b0f47ef6",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-15T12:52:12.672Z",
+  "preparedAt": "2026-09-15T13:10:33.450Z",
   "gameTestsRun": true,
   "browserVisualQA": false,
-  "validation": "7 regression suites including 30 full-Game checks and 11 mission completion lifecycle checks. All BBE tasks, workshop/IT story endings and courier success queue the exact supplied passed.mp3 and fixed Pricedown artwork after a rendered gameplay frame. Menus, scene transitions and hidden tabs pause sound/visual together; duplicate rewards remain guarded. Brighter night prologue and optical zoom exactly at five seconds, short transitions across all 16 shots, reduced-motion support and complete lens/light restoration. 377 offline media hashes, exact static outlined artwork and 79 local asset references. No browser/GPU visual test or target-device FPS guarantee."
+  "validation": "6 regression suites including 35 full-Game checks, 11 title audio lifecycle checks, mission completion lifecycle, audio contracts/lifecycle and 18 fire cinematic checks. No Dogtown explosions; softer continuous lens curves, BBE shot locked to audio second nine, interrupted audio clock rebasing. Same intro source continues on the title screen to its complete end, followed by the exact supplied menu.mp3 scheduled on the audio clock at quiet gain and looping without baked end silence. Skip/replay/hidden tab/loading failure/source-cap/start-game cancellation verified. 378 embedded audio hashes and 80 local asset references. No browser/GPU visual test or target-device FPS guarantee."
 }

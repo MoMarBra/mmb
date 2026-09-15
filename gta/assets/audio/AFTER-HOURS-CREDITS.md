@@ -22,3 +22,7 @@ The game includes 57 runtime additions. See after-hours-credits.json for per-fil
 ## Intro-Update 1.6.1
 
 Die Intro-Musik wurde durch die am 15.09.2026 bereitgestellte `ton.mp3` ersetzt. `intro_theme_1_6_1.mp3` ist eine bytegleiche Kopie. Keine Nachcodierung, keine Intro-Sprecherstimmen. Prüfsumme: `777da4b639052dfb0a6bf144878c235b1de5e6924135f621fbd2c9899ac01dee`. Der frühere Intro-Musiktrack ist nicht mehr im Spielpaket enthalten.
+
+## User-supplied title music · 1.6.7
+
+The user supplied `menu.mp3` on 2026-09-15. Runtime ID `title_menu_1_6_7`. The bundled file is byte-identical; SHA-256 `1b9582ac5db8ce3a12f9acf2ce8033fbf986899873f6df6b6784d98159756658`. Decoded duration is approximately 138.182 seconds. Playback is very quiet and uses a 0.20–136.90 second loop range to omit the baked trailing silence. The complete preceding intro score is retained through the title screen, with the menu source scheduled after the score ends. No audio re-encoding or early crossfade from the intro.

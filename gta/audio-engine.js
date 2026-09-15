@@ -37,7 +37,7 @@ export class Soundscape {
   }
   start() {
     if (this.ready) {
-      if (!this.introMix) this.preloadGame();
+      if (!this.introMix && !this.titleMix) this.preloadGame();
       this.ctx.resume().catch(() => {});
       return;
     }
@@ -133,7 +133,7 @@ export class Soundscape {
           .flat()
           .filter((id) => !id.startsWith('voice_')),
       ];
-      if (!this.introMix) this.preloadGame();
+      if (!this.introMix && !this.titleMix) this.preloadGame();
       c.resume().catch(() => {});
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -171,7 +171,7 @@ export class Soundscape {
     if (!this.ready) return;
     const s = this.sim?.s || {},
       t = this.ctx.currentTime,
-      intro = this.introMix;
+      intro = this.introMix || this.titleMix;
     // Explicit film playback has its own temporary mix, independent of saved game/radio mute.
     set(
       this.output.gain,
@@ -257,6 +257,10 @@ export class Soundscape {
       follow: opts.follow,
       bus: opts.bus || 'effects',
       stopped: false,
+      ended: false,
+      startedAt: t,
+      offset: opts.offset || 0,
+      onEnded: opts.onEnded,
       stop: (fade = 0.06) => {
         if (handle.stopped) return;
         handle.stopped = true;
@@ -270,7 +274,8 @@ export class Soundscape {
       filter.disconnect();
       panner?.disconnect();
       this.sources.delete(handle);
-      opts.onEnded?.();
+      handle.ended = true;
+      handle.onEnded?.();
     };
     this.sources.add(handle);
     source.start(t, opts.offset || 0);
@@ -437,7 +442,7 @@ export class Soundscape {
     if (!this.ready) return;
     this.time += dt;
     // The film owns its score/sirens/explosions; avoid decoding and mixing the unseen game world.
-    if (this.introMix) {
+    if (this.introMix || this.titleMix) {
       this.setActive(false);
       this.applyMix();
       this.listener(world);

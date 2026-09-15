@@ -1,13 +1,16 @@
 import * as THREE from 'three';
 import { IntroStage } from './intro-stage.js';
+import { TITLE_INTRO_MUSIC } from './title-music.js';
 import { IntroPerformance } from './intro-performance.js';
 export const INTRO_DURATION = 60;
-export const INTRO_MUSIC = 'intro_theme_1_6_1';
+export const INTRO_MUSIC = TITLE_INTRO_MUSIC;
+export const INTRO_DAY_AT = 5;
+export const INTRO_BBE_AT = 9;
 // Readable night prologue, an optical impact zoom on second five, then a sixty-second montage.
 export const INTRO_SHOTS = [
   {
     at: 0,
-    end: 5,
+    end: INTRO_DAY_AT,
     zone: 'city',
     anchor: [131, 29],
     from: [80, 39, 84],
@@ -18,8 +21,8 @@ export const INTRO_SHOTS = [
     title: '',
   },
   {
-    at: 5,
-    end: 9,
+    at: INTRO_DAY_AT,
+    end: INTRO_BBE_AT,
     zone: 'city',
     anchor: [131, 29],
     from: [86, 36.272727, 78],
@@ -30,7 +33,7 @@ export const INTRO_SHOTS = [
     title: 'MÜNCHEN',
   },
   {
-    at: 9,
+    at: INTRO_BBE_AT,
     end: 12.5,
     zone: 'city',
     anchor: [31, 45],
@@ -75,11 +78,6 @@ export const INTRO_SHOTS = [
     minutes: 810,
     crowd: 'dogtown',
     title: 'DOGTOWN',
-    bursts: [
-      { at: 1.4, position: [6, 0.2, 92] },
-      { at: 3, position: [-2, 0.2, 86] },
-      { at: 4.5, position: [3, 0.2, 99] },
-    ],
   },
   {
     at: 24,
@@ -216,17 +214,17 @@ export function introTransition(t, reducedMotion = false) {
   for (let i = 1; i < INTRO_SHOTS.length; i++) {
     const cut = INTRO_SHOTS[i].at,
       hero = i === 1;
-    const before = hero ? 0.42 : 0.16,
-      after = hero ? 0.64 : 0.32;
+    const before = hero ? 0.65 : 0.38,
+      after = hero ? 0.9 : 0.62;
     if (t < cut - before || t >= cut + after) continue;
     const weight =
       t < cut
-        ? THREE.MathUtils.smoothstep(t, cut - before, cut)
-        : 1 - THREE.MathUtils.smoothstep(t, cut, cut + after);
+        ? THREE.MathUtils.smootherstep(t, cut - before, cut)
+        : 1 - THREE.MathUtils.smootherstep(t, cut, cut + after);
     const flash =
       THREE.MathUtils.smoothstep(t, cut - 0.07, cut) *
       (1 - THREE.MathUtils.smoothstep(t, cut, cut + (hero ? 0.22 : 0.13)));
-    return { fov: 53 - (hero ? 24 : 10) * weight, flash: flash * (hero ? 0.24 : 0.07) };
+    return { fov: 53 - (hero ? 24 : 7) * weight, flash: hero ? flash * 0.12 : 0 };
   }
   return { fov: 53, flash: 0 };
 }
@@ -272,6 +270,7 @@ export class IntroFilm {
         if (e.code !== 'Space' || !this.skipKeyHeld) return;
         this.skipKeyHeld = false;
         this.w.keys.delete('Space');
+        this.g.titleMusic?.unlock();
         e.preventDefault();
         e.stopImmediatePropagation();
       },
@@ -307,6 +306,7 @@ export class IntroFilm {
   }
   async play({ automatic = false } = {}) {
     if (this.current || this.g.started) return;
+    this.g.titleMusic?.stop();
     const g = this.g,
       w = this.w,
       weather = g.arcade.immersion.weather;
@@ -464,6 +464,11 @@ export class IntroFilm {
         if (this.current !== m) return;
         if (a.ctx.state === 'running') this.playMusic(this.time());
         else {
+          const position = this.scorePosition();
+          if (position !== null && !m.loading) {
+            m.elapsed = m.base = Math.min(INTRO_DURATION, position);
+            m.startedAt = performance.now();
+          }
           this.music?.stop(0.03);
           this.music = null;
           this.stopActionAudio();
@@ -517,6 +522,7 @@ export class IntroFilm {
       b = this.buffers?.get(INTRO_MUSIC);
     if (!m || m.loading || m.paused || offset >= INTRO_DURATION || !a.introMix?.enabled) return;
     if (!a.ready || a.ctx?.state !== 'running' || !b || this.music) return;
+    const contextTime = a.ctx.currentTime;
     this.music = a.emit(b, {
       bus: 'music',
       volume: 0.9,
@@ -524,7 +530,13 @@ export class IntroFilm {
       offset: Math.min(offset, b.duration - 0.01),
     });
     this.soundError = !this.music;
-    if (this.music) this.startActionAudio();
+    if (this.music) {
+      this.musicClock = {
+        contextTime: this.music.startedAt ?? contextTime,
+        offset: Math.min(offset, b.duration - 0.01),
+      };
+      this.startActionAudio();
+    }
   }
   stopEffects() {
     for (const handle of this.effects || []) handle?.stop(0.08);
@@ -557,12 +569,21 @@ export class IntroFilm {
         );
     }
   }
+  scorePosition() {
+    const clock = this.musicClock;
+    return this.music && clock
+      ? Math.max(0, clock.offset + this.g.audio.ctx.currentTime - clock.contextTime)
+      : null;
+  }
   time() {
     const m = this.current;
     if (!m) return 0;
     return m.loading || m.paused
       ? m.elapsed
-      : Math.min(INTRO_DURATION, m.base + (performance.now() - m.startedAt) / 1000);
+      : Math.min(
+          INTRO_DURATION,
+          this.scorePosition() ?? m.base + (performance.now() - m.startedAt) / 1000,
+        );
   }
   pause(paused) {
     const m = this.current;
@@ -570,6 +591,7 @@ export class IntroFilm {
     m.elapsed = this.time();
     m.base = m.elapsed;
     m.paused = paused;
+    if (!paused && !m.loading) m.startedAt = performance.now();
     document.body.classList.toggle('intro-paused', paused);
     this.stopActionAudio();
     this.stopEffects();
@@ -600,9 +622,8 @@ export class IntroFilm {
     )
       this.loadScore(m, true);
     if (!m.paused && !this.music) this.playMusic(t);
-    // Fade the supplied score into the menu rather than cutting it mid-phrase.
-    const volume = 0.7 * THREE.MathUtils.clamp((INTRO_DURATION - t) / 1.5, 0, 1);
-    if (this.g.audio.introMix) this.g.audio.introMix.volume = volume;
+    // Only the picture fades at second 60; the same score source continues into the title screen.
+    if (this.g.audio.introMix) this.g.audio.introMix.volume = 0.7;
     const index = INTRO_SHOTS.findIndex((s) => t >= s.at && t < s.end),
       shot = INTRO_SHOTS[index];
     if (shot && index !== m.shot) {
@@ -669,7 +690,7 @@ export class IntroFilm {
       this.w.camera.fov = lens.fov;
       this.w.camera.updateProjectionMatrix();
     }
-    const u = THREE.MathUtils.smoothstep(m.elapsed, s.at, s.end);
+    const u = THREE.MathUtils.smootherstep(m.elapsed, s.at, s.end);
     this.w.camera.position.fromArray(s.from).lerp(this.end.fromArray(s.to), u);
     if (s.stage) this.w.camera.lookAt(this.action.focus);
     else this.w.camera.lookAt(...s.look);
@@ -686,11 +707,17 @@ export class IntroFilm {
   }
   finish() {
     if (!this.current) return;
+    const tail = {
+      handle: this.music,
+      buffer: this.buffers?.get(INTRO_MUSIC),
+      offset: this.scorePosition() ?? this.time(),
+      clock: this.musicClock,
+    };
     this.generation++;
     this.stopActionAudio();
     this.stopEffects();
-    this.music?.stop(0.15);
     this.music = null;
+    this.musicClock = null;
     this.current = null;
     this.audioContext?.removeEventListener?.('statechange', this.audioStateChange);
     this.audioContext = null;
@@ -698,6 +725,9 @@ export class IntroFilm {
     this.action.hide();
     this.g.audio.cinematicMix = this.g.audio.cinematicVoice = false;
     this.g.audio.introMix = null;
+    if (this.g.titleMusic) this.g.titleMusic.adopt(tail);
+    else tail.handle?.stop(0.15);
+    this.buffers?.clear();
     this.g.audio.applyMix?.();
     const r = this.restore,
       w = this.w;

@@ -360,5 +360,11 @@
     "source": "User-supplied passed.mp3 (2026-09-15)",
     "modifications": "Unmodified source file, copied byte-for-byte. Synchronized non-spatial playback after mission menus and cutscenes; in-game mix and fade only.",
     "sha256": "acc59563f97b04454bad6d92760eb883e5a7e7a3d210a31c5d04ad9b97130917"
+  },
+  {
+    "file": "title_menu_1_6_7.mp3",
+    "source": "User-supplied menu.mp3 (2026-09-15)",
+    "modifications": "Unmodified source bytes. Quiet title-screen playback after the full intro theme ends; decoded loop range 0.20–136.90 seconds avoids baked trailing silence.",
+    "sha256": "1b9582ac5db8ce3a12f9acf2ce8033fbf986899873f6df6b6784d98159756658"
   }
 ]

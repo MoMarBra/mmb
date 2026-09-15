@@ -1,3 +1,4 @@
+import { TitleMusic } from './title-music.js';
 import { MissionPassed } from './mission-passed.js';
 import { CityExtras } from './city-extras.js';
 import { FireStory } from './fire-story.js';
@@ -60,6 +61,7 @@ export class Game {
     this.extras = new CityExtras(this);
     this.mouseControls = new MouseControls(this);
     this.missionPassed = new MissionPassed(this);
+    this.titleMusic = new TitleMusic(this);
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
     this.intro();
@@ -68,6 +70,7 @@ export class Game {
     this.extras.intro.skipKeyHeld = !!boot?.spaceHeld;
     boot?.takeOver?.();
     if (!boot?.skipIntro) this.introReady = this.extras.intro.play({ automatic: true });
+    else this.titleMusic.adopt();
     document.getElementById('boot-screen')?.remove();
     this.frame = (now) => {
       const rawDelta = (now - this.lastFrame) / 1000 || 0.016;
@@ -93,6 +96,7 @@ export class Game {
         }
       }
       this.extras.update(dt, rawDelta, paused);
+      this.titleMusic.update();
       this.audio.update(
         dt,
         this.world,
@@ -264,6 +268,7 @@ export class Game {
     this.uiClick('#start-intro', () => this.extras.intro.play());
     this.uiClick('#start-game', () => {
       this.started = true;
+      this.titleMusic.stop();
       this.world.started = true;
       // Stand beside the chair, with a free path to the desk and corridor.
       this.world.teleport(-9.15, 2.65);
