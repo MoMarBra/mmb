@@ -5362,8 +5362,14 @@ button.mission-row:focus-visible {
 .world-intro .modal-shade {
   background: transparent;
   padding: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .world-intro .panel {
+  animation: none;
+  transform: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -5386,38 +5392,11 @@ button.mission-row:focus-visible {
   position: relative;
   border-block: 7vh solid #000;
 }
-.intro-logo {
-  position: absolute;
-  inset: -7vh 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 20px;
-  background: #000;
-  z-index: 5;
-  transition:
-    opacity 0.7s,
-    visibility 0.7s;
-}
-.intro-logo img {
-  width: 150px;
-  max-width: 28vw;
-  animation: logo-arrive 2.5s ease-out both;
-}
-.intro-logo span {
-  font-size: 12px;
-  letter-spacing: 0.34em;
-  color: #c8d2d8;
-}
-.intro-logo small {
-  font-size: 9px;
-  letter-spacing: 0.3em;
-  color: #7b919d;
-}
-.intro-logo.gone {
-  opacity: 0;
+.intro-loading .intro-location {
   visibility: hidden;
+}
+.intro-loading #intro-fade {
+  opacity: 1;
 }
 .intro-location {
   position: absolute;
@@ -5437,20 +5416,6 @@ button.mission-row:focus-visible {
 .intro-location small {
   color: #f2ddba;
   font-size: clamp(11px, 1.2vw, 16px);
-}
-.intro-subtitle {
-  position: absolute;
-  bottom: 2.4vh;
-  left: 15%;
-  right: 15%;
-  text-align: center;
-  font-size: clamp(12px, 1.35vw, 18px);
-  font-weight: 600;
-  text-shadow:
-    0 2px 4px #000,
-    0 0 12px #000;
-  z-index: 4;
-  color: #fff;
 }
 .intro-toolbar {
   position: absolute;
@@ -5500,18 +5465,6 @@ button.mission-row:focus-visible {
 }
 .world-intro .close {
   display: none;
-}
-@keyframes logo-arrive {
-  from {
-    opacity: 0;
-    transform: scale(0.91);
-    filter: blur(12px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
-  }
 }
 @media (max-width: 700px) {
   .atlas {

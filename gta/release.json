@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "publishedPath": "/gta/",
-  "sourceCommit": "03cd353b8b27ef7c632d4390b13740f5f3cb3010",
+  "sourceCommit": "36001b2293be8572e3bd5f5aa0849b07849e3cd2",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-15T10:44:22.465Z",
+  "preparedAt": "2026-09-15T10:57:11.594Z",
   "gameTestsRun": true,
   "browserVisualQA": false,
-  "validation": "25 logic/geometry regression suites; 49 pedestrians over50 simulated minutes; all15 camera paths;376 offline audio hash checks. No new browser/GPU visual QA or target-device FPS benchmark."
+  "validation": "12 full-Game logic checks including intro startup, loading/pause, all15 shots, completion, skip and save restoration; audio contracts/lifecycle;375 retained audio assets and new unmodified ton.mp3 verified in offline package;75 local asset references;CSS blur override verified. No new browser/GPU visual test."
 }

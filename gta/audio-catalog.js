@@ -1746,9 +1746,9 @@ export const AUDIO_ASSETS = {
     "group": "effect",
     "duration": 0.84
   },
-  "v160_intro_theme": {
-    "path": "./assets/audio/v160_intro_theme.mp3",
+  "intro_theme_1_6_1": {
+    "path": "./assets/audio/intro_theme_1_6_1.mp3",
     "group": "music",
-    "duration": 93.5148
+    "duration": 88.3853
   }
 };

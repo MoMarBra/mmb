@@ -1,16 +1,14 @@
-import { INTRO_CUES } from './intro-cues.js';
 import * as THREE from 'three';
-import { BBE_LOGO } from './branding.js';
-import { VOICE_LINES } from './voice-lines.js';
 import { createHelicopter } from './expansion-models.js';
 import { animateVehicleWheels } from './blender-vehicles.js';
 import { box } from './world.js';
-export const INTRO_DURATION = 93.2;
-// Shot times follow the supplied music edit and recorded dialogue cue sheet.
+export const INTRO_DURATION = 88.38;
+export const INTRO_MUSIC = 'intro_theme_1_6_1';
+// Fifteen uninterrupted shots over the complete user-supplied ton.mp3 edit.
 export const INTRO_SHOTS = [
   {
-    at: 15.96,
-    end: 22.111,
+    at: 0,
+    end: 7.038,
     zone: 'city',
     anchor: [131, 29],
     from: [80, 39, 84],
@@ -21,8 +19,8 @@ export const INTRO_SHOTS = [
     sub: 'Große Pläne. Sehr kleine Zeitpuffer.',
   },
   {
-    at: 22.111,
-    end: 29.691,
+    at: 7.038,
+    end: 15.711,
     zone: 'city',
     anchor: [31, 45],
     from: [61, 15, 24],
@@ -33,8 +31,8 @@ export const INTRO_SHOTS = [
     sub: 'Dein Büro. Dein Business Case.',
   },
   {
-    at: 29.691,
-    end: 35.87,
+    at: 15.711,
+    end: 22.782,
     zone: 'office',
     anchor: [-7, 2],
     from: [-1, 2.7, 7],
@@ -45,8 +43,8 @@ export const INTRO_SHOTS = [
     sub: 'Hier beginnt jede große Eskalation.',
   },
   {
-    at: 35.87,
-    end: 42.764,
+    at: 22.782,
+    end: 30.67,
     zone: 'city',
     anchor: [0, 27],
     from: [-3, 5, 50],
@@ -57,8 +55,8 @@ export const INTRO_SHOTS = [
     sub: 'Benchmarks. Burritos. Budgetabweichungen.',
   },
   {
-    at: 42.764,
-    end: 50.51,
+    at: 30.67,
+    end: 39.533,
     zone: 'city',
     anchor: [8, 88],
     from: [-3, 3, 103],
@@ -70,8 +68,8 @@ export const INTRO_SHOTS = [
     blast: [9, 0.2, 92],
   },
   {
-    at: 50.51,
-    end: 56.11,
+    at: 39.533,
+    end: 45.941,
     zone: 'brewery',
     anchor: [0, 5],
     from: [0, 2.2, 7],
@@ -82,8 +80,8 @@ export const INTRO_SHOTS = [
     sub: 'Liquidität. Frisch gezapft.',
   },
   {
-    at: 56.11,
-    end: 59,
+    at: 45.941,
+    end: 49.247,
     zone: 'city',
     anchor: [68, 41],
     from: [77, 1.6, 35],
@@ -95,8 +93,8 @@ export const INTRO_SHOTS = [
     stage: 'car',
   },
   {
-    at: 59,
-    end: 61.823,
+    at: 49.247,
+    end: 52.478,
     zone: 'city',
     anchor: [131, 29],
     from: [111, 24, 58],
@@ -108,8 +106,8 @@ export const INTRO_SHOTS = [
     stage: 'heli',
   },
   {
-    at: 61.823,
-    end: 66.429,
+    at: 52.478,
+    end: 57.748,
     zone: 'city',
     anchor: [67, 37],
     from: [93, 2, 31],
@@ -121,8 +119,8 @@ export const INTRO_SHOTS = [
     stage: 'police',
   },
   {
-    at: 66.429,
-    end: 69.3,
+    at: 57.748,
+    end: 61.033,
     zone: 'city',
     anchor: [131, 29],
     from: [105, 14, 43],
@@ -133,8 +131,8 @@ export const INTRO_SHOTS = [
     sub: 'Große Kulisse. Kleine Deadline.',
   },
   {
-    at: 69.3,
-    end: 72.693,
+    at: 61.033,
+    end: 64.915,
     zone: 'city',
     anchor: [280, 249],
     from: [251, 23, 284],
@@ -145,8 +143,8 @@ export const INTRO_SHOTS = [
     sub: 'Die Türme stehen. Die Deadline auch.',
   },
   {
-    at: 72.693,
-    end: 77.212,
+    at: 64.915,
+    end: 70.086,
     zone: 'city',
     anchor: [368, 290],
     from: [337, 10, 285],
@@ -157,8 +155,8 @@ export const INTRO_SHOTS = [
     sub: 'München schläft. Outlook arbeitet weiter.',
   },
   {
-    at: 77.212,
-    end: 84.01,
+    at: 70.086,
+    end: 77.865,
     zone: 'city',
     anchor: [0, 40],
     from: [-3, 2, 67],
@@ -170,8 +168,8 @@ export const INTRO_SHOTS = [
     sub: 'Nur die Storyline bleibt trocken.',
   },
   {
-    at: 84.01,
-    end: 90.2,
+    at: 77.865,
+    end: 84.947,
     zone: 'office',
     anchor: [-7, 2],
     from: [-2, 2.2, 8],
@@ -182,7 +180,7 @@ export const INTRO_SHOTS = [
     sub: 'final_final_vielleicht_final.',
   },
   {
-    at: 90.2,
+    at: 84.947,
     end: INTRO_DURATION,
     zone: 'city',
     anchor: [31, 45],
@@ -267,8 +265,6 @@ export class IntroFilm {
       save: g.sim.save,
     };
     g.sim.save = () => true;
-    this.voiceUntil = 0;
-    this.activeVoice = null;
     const token = ++this.generation;
     this.current = {
       elapsed: 0,
@@ -277,39 +273,32 @@ export class IntroFilm {
       paused: false,
       loading: true,
       shot: -1,
-      heard: new Set(),
       blasts: new Set(),
     };
     g.audio.start();
     g.audio.voices.stop();
     g.audio.cinematicMix = true;
+    g.audio.cinematicVoice = false;
     this.makeStage();
     g.open(
       'Intro',
-      `<div class="world-intro-frame"><div class="intro-logo"><img src="${BBE_LOGO}" alt="BBE Handelsberatung"><span>HANDELSBERATUNG</span><small>PRÄSENTIERT</small></div><div class="intro-location"><small id="intro-sub"></small><h1 id="intro-title"></h1></div><div class="intro-subtitle" id="intro-voice"></div><div class="intro-toolbar"><span id="intro-state">Bild und Ton werden vorbereitet …</span><button id="intro-pause">Pause</button><button id="intro-exit">Überspringen ↗</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade"></div></div>`,
+      `<div class="world-intro-frame"><div class="intro-location"><small id="intro-sub"></small><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status">Intro wird vorbereitet …</span><button id="intro-pause">Pause</button><button id="intro-exit">Überspringen ↗</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade" aria-hidden="true"></div></div>`,
       { pause: true, locked: true },
     );
-    document.body.classList.add('world-intro');
+    document.body.classList.add('world-intro', 'intro-loading');
     w.player.visible = false;
     w.playerShadow.visible = false;
     document.getElementById('intro-pause').onclick = () => this.pause(!this.current.paused);
     document.getElementById('intro-exit').onclick = () => this.finish();
-    this.lines = INTRO_CUES.map((c) => ({ ...c, line: VOICE_LINES.find((l) => l.id === c.id) }));
     this.buffers = new Map();
-    const ids = [
-      'v160_intro_theme',
-      ...this.lines.map((c) => 'voice_' + c.id),
-      'v160_explosion_01',
-      'v160_explosion_02',
-      'v160_explosion_03',
-    ];
+    const ids = [INTRO_MUSIC, 'v160_explosion_01', 'v160_explosion_02', 'v160_explosion_03'];
     await Promise.all(
       ids.map(async (id) => {
         try {
           const b = await g.audio.bank?.get(id);
           if (token === this.generation && b) this.buffers.set(id, b);
         } catch {
-          /* Subtitles and controls also work with muted/unavailable audio. */
+          /* The film and its controls also work with muted/unavailable audio. */
         }
       }),
     );
@@ -318,8 +307,12 @@ export class IntroFilm {
       await this.warm(token);
     } catch {}
     if (token !== this.generation || !this.current) return;
+    this.current.shot = -1;
     this.current.loading = false;
     this.current.startedAt = performance.now();
+    // Set the first city camera before exposing the canvas or starting the score.
+    this.render(0);
+    document.body.classList.remove('intro-loading');
     document.getElementById('intro-state').textContent = this.current.paused
       ? 'PAUSE'
       : 'BBE · MUNICH CONSULTING SIMULATOR';
@@ -358,11 +351,12 @@ export class IntroFilm {
   }
   playMusic(offset) {
     const a = this.g.audio,
-      b = this.buffers.get('v160_intro_theme');
+      b = this.buffers.get(INTRO_MUSIC);
     if (!a.ready || !a.enabled || !this.g.sim.s.music || !b) return;
     this.music = a.emit(b, {
       bus: 'music',
       volume: 0.9,
+      fade: 0.025,
       offset: Math.min(offset, b.duration - 0.01),
     });
   }
@@ -380,24 +374,24 @@ export class IntroFilm {
     m.base = m.elapsed;
     m.paused = paused;
     this.music?.stop(0.08);
-    this.voice?.stop(0.06);
-    this.music = this.voice = null;
+    this.music = null;
     this.g.audio.cinematicVoice = false;
     if (!paused && !m.loading) {
       m.startedAt = performance.now();
       this.playMusic(m.elapsed);
-      m.heard.delete(this.activeVoice);
     }
     document.getElementById('intro-pause').textContent = paused ? 'Weiter' : 'Pause';
     document.getElementById('intro-state').textContent = paused
       ? 'PAUSE'
       : m.loading
-        ? 'Bild und Ton werden vorbereitet …'
+        ? 'Intro wird vorbereitet …'
         : 'BBE · MUNICH CONSULTING SIMULATOR';
   }
   render(dt) {
     const m = this.current;
     if (!m) return;
+    // Shader warm-up owns the scene until it completes. Do not select a shot early.
+    if (m.loading) return;
     m.elapsed = this.time();
     const t = m.elapsed;
     const index = INTRO_SHOTS.findIndex((s) => t >= s.at && t < s.end),
@@ -417,7 +411,6 @@ export class IntroFilm {
       document.getElementById('intro-title').textContent = shot.title;
       document.getElementById('intro-sub').textContent = shot.sub;
     }
-    document.querySelector('.intro-logo')?.classList.toggle('gone', t >= 15.96);
     this.stage.visible = !!shot?.stage;
     this.hero.visible = shot?.stage === 'car';
     this.police.visible = shot?.stage === 'police';
@@ -447,31 +440,9 @@ export class IntroFilm {
       m.blasts.add(index);
       this.g.extras.fire.explode(new THREE.Vector3(...shot.blast), null, true);
     }
-    if (!m.paused && !m.loading)
-      for (const cue of this.lines) {
-        if (t >= cue.start && t < cue.end && !m.heard.has(cue.id)) {
-          m.heard.add(cue.id);
-          this.activeVoice = cue.id;
-          this.voice?.stop(0.04);
-          const a = this.g.audio;
-          if (a.enabled)
-            this.voice = a.emit(this.buffers.get('voice_' + cue.id), {
-              bus: 'dialogue',
-              volume: 1,
-              offset: Math.max(0, t - cue.start),
-            });
-          document.getElementById('intro-voice').textContent =
-            this.g.sim.s.audioSubtitles === false ? '' : cue.line.text;
-          this.voiceUntil = cue.end;
-        }
-      }
-    this.g.audio.cinematicVoice = !m.paused && t < (this.voiceUntil || 0);
-    if (t > (this.voiceUntil || 0)) document.getElementById('intro-voice').textContent = '';
     const fraction = shot ? (t - shot.at) / (shot.end - shot.at) : 0,
       fade = shot ? Math.max(0, 1 - fraction * 16, (fraction - 0.93) * 14) : 1;
-    document.getElementById('intro-fade').style.opacity = String(
-      t < 15.96 ? 0 : Math.min(0.9, fade),
-    );
+    document.getElementById('intro-fade').style.opacity = String(Math.min(1, fade));
     document.getElementById('intro-progress').style.transform =
       'scaleX(' + Math.min(1, t / INTRO_DURATION) + ')';
     const step = m.paused || m.loading ? 0 : Math.min(dt, 0.08);
@@ -504,8 +475,7 @@ export class IntroFilm {
     if (!this.current) return;
     this.generation++;
     this.music?.stop(0.15);
-    this.voice?.stop(0.1);
-    this.music = this.voice = null;
+    this.music = null;
     this.current = null;
     this.stage.visible = false;
     this.g.audio.cinematicMix = this.g.audio.cinematicVoice = false;
@@ -527,7 +497,7 @@ export class IntroFilm {
     w.shadowZone = null;
     this.g.extras.fire.particles.length = 0;
     this.g.extras.fire.geometry.setDrawRange(0, 0);
-    document.body.classList.remove('world-intro');
+    document.body.classList.remove('world-intro', 'intro-loading');
     if (this.g.modal) this.g.modal.locked = false;
     this.g.close();
     w.pose = r.pose;

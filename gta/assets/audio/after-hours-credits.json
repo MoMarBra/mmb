@@ -350,9 +350,9 @@
     "sha256": "3e35bf8b981c083751f6f965d10ef1c292ad2de982ba741efe0d36f0b5725606"
   },
   {
-    "file": "v160_intro_theme.mp3",
-    "source": "User-supplied MP3: YTDown.com_YouTube_GTA-San-Andreas-Theme-Song-BEST-QUALITY_Media_6VewzN781wQ_007_128k.mp3",
-    "modifications": "Removed 3.8 seconds of leading silence, reduced level by 2 dB, applied tiny onset and final fade, encoded stereo MP3. Original retained byte-for-byte outside product checkout.",
-    "sha256": "341248ff94c0b4aa158708391cff7dc2f6a8e93415598b05eadaa66e8f0ff394"
+    "file": "intro_theme_1_6_1.mp3",
+    "source": "User-supplied ton.mp3 (2026-09-15)",
+    "modifications": "Unmodified MP3, copied byte-for-byte. Playback level and short onset fade applied in the game; no voiceover in the intro.",
+    "sha256": "777da4b639052dfb0a6bf144878c235b1de5e6924135f621fbd2c9899ac01dee"
   }
 ]
