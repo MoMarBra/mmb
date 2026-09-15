@@ -275,19 +275,23 @@ export class IntroFilm {
       shot: -1,
       blasts: new Set(),
     };
-    g.audio.start();
+    g.audio.introMix = { enabled: true, volume: 0.7 };
+    this.soundError = false;
+    this.resumeAudio();
+    g.audio.applyMix?.();
     g.audio.voices.stop();
     g.audio.cinematicMix = true;
     g.audio.cinematicVoice = false;
     this.makeStage();
     g.open(
       'Intro',
-      `<div class="world-intro-frame"><div class="intro-location"><small id="intro-sub"></small><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status">Intro wird vorbereitet …</span><button id="intro-pause">Pause</button><button id="intro-exit">Überspringen ↗</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade" aria-hidden="true"></div></div>`,
+      `<div class="world-intro-frame"><div class="intro-location"><small id="intro-sub"></small><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status">Intro wird vorbereitet …</span><button id="intro-sound" aria-label="Intro-Ton ausschalten" aria-pressed="true">Ton an</button><button id="intro-pause">Pause</button><button id="intro-exit">Überspringen ↗</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade" aria-hidden="true"></div></div>`,
       { pause: true, locked: true },
     );
     document.body.classList.add('world-intro', 'intro-loading');
     w.player.visible = false;
     w.playerShadow.visible = false;
+    document.getElementById('intro-sound').onclick = () => this.toggleSound();
     document.getElementById('intro-pause').onclick = () => this.pause(!this.current.paused);
     document.getElementById('intro-exit').onclick = () => this.finish();
     this.buffers = new Map();
@@ -317,6 +321,7 @@ export class IntroFilm {
       ? 'PAUSE'
       : 'BBE · MUNICH CONSULTING SIMULATOR';
     if (!this.current.paused) this.playMusic(0);
+    this.updateSoundButton();
   }
   async warm(token) {
     if (!this.w.renderer.compileAsync) return;
@@ -349,16 +354,80 @@ export class IntroFilm {
     w.player.visible = false;
     w.playerShadow.visible = false;
   }
+  resumeAudio() {
+    const m = this.current,
+      a = this.g.audio;
+    // Called synchronously from Intro/Weiter/Ton gestures, before loading or shader awaits.
+    a.start();
+    const resumed = a.ctx?.resume?.();
+    resumed
+      ?.then(() => {
+        if (this.current === m) this.updateSoundButton();
+      })
+      .catch(() => {
+        if (this.current === m) this.updateSoundButton();
+      });
+  }
+  updateSoundButton() {
+    const button = document.getElementById('intro-sound');
+    if (!this.current || !button) return;
+    const a = this.g.audio,
+      enabled = !!a.introMix?.enabled;
+    const blocked = !!a.ctx?.state && a.ctx.state !== 'running';
+    const retry = enabled && (this.soundError || blocked || !a.ready);
+    button.textContent = retry ? 'Ton starten' : enabled ? 'Ton an' : 'Ton aus';
+    button.setAttribute('aria-pressed', String(enabled && !retry));
+    button.setAttribute(
+      'aria-label',
+      retry
+        ? 'Intro-Ton erneut starten'
+        : enabled
+          ? 'Intro-Ton ausschalten'
+          : 'Intro-Ton einschalten',
+    );
+    button.title = retry
+      ? 'Klicken, um die Musik zu laden und den Ton freizugeben.'
+      : 'Gilt nur für dieses Intro';
+  }
+  async toggleSound() {
+    const m = this.current,
+      a = this.g.audio;
+    if (!m) return;
+    const blocked = !!a.ctx?.state && a.ctx.state !== 'running';
+    const retry = this.soundError || blocked || !a.ready;
+    a.introMix.enabled = !a.introMix.enabled || retry;
+    this.music?.stop(0.08);
+    this.music = null;
+    if (a.introMix.enabled) this.resumeAudio();
+    a.applyMix?.();
+    this.updateSoundButton();
+    if (!a.introMix.enabled || m.loading || m.paused) return;
+    if (!this.buffers.get(INTRO_MUSIC)) {
+      a.bank?.failures?.delete(INTRO_MUSIC);
+      const buffer = await a.bank?.get(INTRO_MUSIC);
+      if (this.current !== m) return;
+      if (buffer) this.buffers.set(INTRO_MUSIC, buffer);
+    }
+    if (this.current === m && !m.paused && a.introMix.enabled) this.playMusic(this.time());
+  }
   playMusic(offset) {
     const a = this.g.audio,
       b = this.buffers.get(INTRO_MUSIC);
-    if (!a.ready || !a.enabled || !this.g.sim.s.music || !b) return;
+    if (!a.introMix?.enabled) return;
+    if (!a.ready || !b) {
+      this.soundError = true;
+      this.updateSoundButton();
+      return;
+    }
+    this.music?.stop(0.04);
     this.music = a.emit(b, {
       bus: 'music',
       volume: 0.9,
       fade: 0.025,
       offset: Math.min(offset, b.duration - 0.01),
     });
+    this.soundError = !this.music;
+    this.updateSoundButton();
   }
   time() {
     const m = this.current;
@@ -376,6 +445,7 @@ export class IntroFilm {
     this.music?.stop(0.08);
     this.music = null;
     this.g.audio.cinematicVoice = false;
+    if (!paused) this.resumeAudio();
     if (!paused && !m.loading) {
       m.startedAt = performance.now();
       this.playMusic(m.elapsed);
@@ -479,6 +549,8 @@ export class IntroFilm {
     this.current = null;
     this.stage.visible = false;
     this.g.audio.cinematicMix = this.g.audio.cinematicVoice = false;
+    this.g.audio.introMix = null;
+    this.g.audio.applyMix?.();
     const r = this.restore,
       w = this.w;
     this.restoreState();

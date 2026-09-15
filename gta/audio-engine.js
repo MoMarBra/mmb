@@ -163,12 +163,18 @@ export class Soundscape {
   applyMix() {
     if (!this.ready) return;
     const s = this.sim?.s || {},
-      t = this.ctx.currentTime;
-    set(this.output.gain, this.enabled ? clamp(s.audioMaster ?? 0.8) : 0, t);
+      t = this.ctx.currentTime,
+      intro = this.introMix;
+    // Explicit film playback has its own temporary mix, independent of saved game/radio mute.
+    set(
+      this.output.gain,
+      intro ? (intro.enabled ? 0.8 : 0) : this.enabled ? clamp(s.audioMaster ?? 0.8) : 0,
+      t,
+    );
     for (const [bus, key] of Object.entries(volumeKeys))
       set(
         this.buses[bus].gain,
-        clamp(s[key] ?? (bus === 'music' ? 0.4 : 0.8)) *
+        clamp(intro && bus === 'music' ? intro.volume : (s[key] ?? (bus === 'music' ? 0.4 : 0.8))) *
           (this.voices.current || this.cinematicVoice
             ? bus === 'music'
               ? 0.35
