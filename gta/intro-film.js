@@ -3,24 +3,35 @@ import { IntroStage } from './intro-stage.js';
 import { IntroPerformance } from './intro-performance.js';
 export const INTRO_DURATION = 60;
 export const INTRO_MUSIC = 'intro_theme_1_6_1';
-// A sixty-second edit: original camera paths, tighter cuts, and retimed action cues.
+// Black-to-night prologue, a daylight match cut on second five, then a sixty-second montage.
 export const INTRO_SHOTS = [
   {
     at: 0,
-    end: 4.5,
+    end: 5,
     zone: 'city',
     anchor: [131, 29],
     from: [80, 39, 84],
+    to: [86, 36.272727, 78],
+    look: [131, 5, 14],
+    minutes: 1395,
+    prologue: true,
+    title: '',
+  },
+  {
+    at: 5,
+    end: 9,
+    zone: 'city',
+    anchor: [131, 29],
+    from: [86, 36.272727, 78],
     to: [113, 24, 51],
     look: [131, 5, 14],
     minutes: 525,
     crowd: 'square',
     title: 'MÜNCHEN',
-    sub: 'Große Pläne. Sehr kleine Zeitpuffer.',
   },
   {
-    at: 4.5,
-    end: 8.5,
+    at: 9,
+    end: 12.5,
     zone: 'city',
     anchor: [31, 45],
     from: [61, 15, 24],
@@ -29,11 +40,10 @@ export const INTRO_SHOTS = [
     minutes: 590,
     crowd: 'hq',
     title: 'BRIENNER STRASSE 45',
-    sub: 'Dein Büro. Dein Business Case.',
   },
   {
-    at: 8.5,
-    end: 12.5,
+    at: 12.5,
+    end: 15,
     zone: 'office',
     anchor: [-7, 2],
     from: [-1, 2.7, 7],
@@ -41,11 +51,10 @@ export const INTRO_SHOTS = [
     look: [-7.5, 1.1, 1],
     minutes: 497,
     title: 'BBE HANDELSBERATUNG',
-    sub: 'Hier beginnt jede große Eskalation.',
   },
   {
-    at: 12.5,
-    end: 17,
+    at: 15,
+    end: 19,
     zone: 'city',
     anchor: [0, 27],
     from: [-3, 5, 50],
@@ -54,11 +63,10 @@ export const INTRO_SHOTS = [
     minutes: 750,
     crowd: 'augusten',
     title: 'AUGUSTENSTRASSE',
-    sub: 'Benchmarks. Burritos. Budgetabweichungen.',
   },
   {
-    at: 17,
-    end: 23,
+    at: 19,
+    end: 24,
     zone: 'city',
     anchor: [8, 88],
     from: [-3, 3, 103],
@@ -67,7 +75,6 @@ export const INTRO_SHOTS = [
     minutes: 810,
     crowd: 'dogtown',
     title: 'DOGTOWN',
-    sub: 'Diese Schärfe steht in keinem Risikoregister.',
     bursts: [
       { at: 1.4, position: [6, 0.2, 92] },
       { at: 3, position: [-2, 0.2, 86] },
@@ -75,8 +82,8 @@ export const INTRO_SHOTS = [
     ],
   },
   {
-    at: 23,
-    end: 26.5,
+    at: 24,
+    end: 27.5,
     zone: 'brewery',
     anchor: [0, 5],
     from: [0, 2.2, 7],
@@ -84,11 +91,10 @@ export const INTRO_SHOTS = [
     look: [-4, 1.8, -4],
     minutes: 1020,
     title: 'BRIENNER BRÄU',
-    sub: 'Liquidität. Frisch gezapft.',
   },
   {
-    at: 26.5,
-    end: 30,
+    at: 27.5,
+    end: 31,
     zone: 'city',
     anchor: [68, 41],
     from: [77, 1.6, 35],
@@ -97,12 +103,11 @@ export const INTRO_SHOTS = [
     minutes: 1020,
     crowd: 'chase',
     title: 'DIE DEADLINE IM RÜCKSPIEGEL',
-    sub: 'Drei Streifenwagen. Ein offener To-do-Punkt.',
     stage: 'car',
   },
   {
-    at: 30,
-    end: 33.5,
+    at: 31,
+    end: 34,
     zone: 'city',
     anchor: [131, 29],
     from: [111, 24, 58],
@@ -111,12 +116,11 @@ export const INTRO_SHOTS = [
     minutes: 1090,
     crowd: 'square',
     title: 'BBE AIR',
-    sub: 'Für die wirklich übergeordnete Perspektive.',
     stage: 'heli',
   },
   {
-    at: 33.5,
-    end: 38,
+    at: 34,
+    end: 38.5,
     zone: 'city',
     anchor: [67, 37],
     from: [93, 2, 31],
@@ -125,7 +129,6 @@ export const INTRO_SHOTS = [
     minutes: 1160,
     crowd: 'chase',
     title: 'EXTERNES CONTROLLING',
-    sub: 'Die Polizei bittet um eine kurze Abstimmung.',
     stage: 'police',
     bursts: [
       { at: 1.2, position: [99, 0.2, 40] },
@@ -133,7 +136,7 @@ export const INTRO_SHOTS = [
     ],
   },
   {
-    at: 38,
+    at: 38.5,
     end: 41,
     zone: 'city',
     anchor: [131, 29],
@@ -143,7 +146,6 @@ export const INTRO_SHOTS = [
     minutes: 1125,
     crowd: 'square',
     title: 'KÖNIGSPLATZ',
-    sub: 'Große Kulisse. Kleine Deadline.',
   },
   {
     at: 41,
@@ -156,11 +158,10 @@ export const INTRO_SHOTS = [
     minutes: 1160,
     crowd: 'church',
     title: 'FRAUENKIRCHE',
-    sub: 'Die Türme stehen. Die Deadline auch.',
   },
   {
     at: 44,
-    end: 47.5,
+    end: 47,
     zone: 'city',
     anchor: [368, 290],
     from: [337, 10, 285],
@@ -169,11 +170,10 @@ export const INTRO_SHOTS = [
     minutes: 1300,
     crowd: 'marien',
     title: 'NACH DER LETZTEN FOLIE',
-    sub: 'München schläft. Outlook arbeitet weiter.',
   },
   {
-    at: 47.5,
-    end: 53.5,
+    at: 47,
+    end: 53,
     zone: 'city',
     anchor: [0, 40],
     from: [5, 5, 84],
@@ -185,11 +185,10 @@ export const INTRO_SHOTS = [
     bursts: [{ at: 3.5, position: [0, 0.2, 51] }],
     crowd: 'augusten',
     title: 'REGEN IM RISIKOSZENARIO',
-    sub: 'Nasse Straße. Heiße Eskalation.',
   },
   {
-    at: 53.5,
-    end: 56.5,
+    at: 53,
+    end: 56,
     zone: 'office',
     anchor: [-7, 2],
     from: [-2, 2.2, 8],
@@ -197,10 +196,9 @@ export const INTRO_SHOTS = [
     look: [-8, 1.3, 1.7],
     minutes: 497,
     title: 'DEIN NÄCHSTER ARBEITSTAG.',
-    sub: 'final_final_vielleicht_final.',
   },
   {
-    at: 56.5,
+    at: 56,
     end: INTRO_DURATION,
     zone: 'city',
     anchor: [31, 45],
@@ -210,7 +208,6 @@ export const INTRO_SHOTS = [
     minutes: 570,
     crowd: 'hq',
     title: 'BBE · MUNICH CONSULTING SIMULATOR',
-    sub: 'Aufstehen. Und Geschichte schreiben.',
   },
 ];
 export class IntroFilm {
@@ -237,6 +234,7 @@ export class IntroFilm {
           if (!e.repeat) this.finish();
           return;
         }
+        if (!e.repeat && e.code !== 'Escape' && e.code !== 'Enter') this.unlockAudio();
         if (e.code === 'Tab' || (e.code === 'Enter' && e.target.closest?.('button'))) return;
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -258,6 +256,14 @@ export class IntroFilm {
       },
       true,
     );
+    for (const event of ['pointerdown', 'pointerup'])
+      window.addEventListener(
+        event,
+        () => {
+          if (this.current) this.unlockAudio();
+        },
+        true,
+      );
     window.addEventListener('blur', () => {
       this.skipKeyHeld = false;
       this.w.keys.delete('Space');
@@ -305,6 +311,14 @@ export class IntroFilm {
       skyLightColor: w.ambient.color.clone(),
       groundLightColor: w.ambient.groundColor.clone(),
       fillColor: w.fill.color.clone(),
+      ambientIntensity: w.ambient.intensity,
+      fillIntensity: w.fill.intensity,
+      sunIntensity: w.sun.intensity,
+      background: w.scene.background.clone(),
+      fogColor: w.scene.fog.color.clone(),
+      fogDensity: w.scene.fog.density,
+      skyTop: g.arcade.atmosphere.sky.material.uniforms.top.value.clone(),
+      skyBottom: g.arcade.atmosphere.sky.material.uniforms.bottom.value.clone(),
       state: structuredClone(g.sim.s),
       save: g.sim.save,
     };
@@ -319,6 +333,8 @@ export class IntroFilm {
       loading: true,
       shot: -1,
       blasts: new Set(),
+      scoreAttempts: 0,
+      nextScoreRetry: 0,
     };
     g.audio.introMix = { enabled: true, volume: 0.7 };
     this.soundError = false;
@@ -334,40 +350,35 @@ export class IntroFilm {
     this.performance.begin();
     g.open(
       'Intro',
-      `<div class="world-intro-frame"><div class="intro-location"><small id="intro-sub"></small><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status"></span><button id="intro-sound" aria-label="Intro-Ton ausschalten" aria-pressed="true">Ton an</button><button id="intro-pause">Pause</button><button id="intro-exit" aria-keyshortcuts="Space" aria-label="Intro überspringen und Hauptmenü öffnen">Leertaste · Hauptmenü</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade" aria-hidden="true"></div></div>`,
+      `<div class="world-intro-frame"><div class="intro-location"><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status"></span><button id="intro-pause">Pause</button><button id="intro-exit" aria-keyshortcuts="Space" aria-label="Intro überspringen und Hauptmenü öffnen">Leertaste · Hauptmenü</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade" aria-hidden="true"></div></div>`,
       { pause: true, locked: true },
     );
-    document.body.classList.add('world-intro', 'intro-loading');
+    document.body.classList.add('world-intro', 'intro-loading', 'intro-prologue');
+    document.body.classList.toggle('intro-paused', this.current.paused);
     w.player.visible = false;
     w.playerShadow.visible = false;
-    document.getElementById('intro-sound').onclick = () => this.toggleSound();
     document.getElementById('intro-pause').onclick = () => this.pause(!this.current.paused);
     document.getElementById('intro-exit').onclick = () => this.finish();
     this.buffers = new Map();
     this.effects = [];
     const ids = [
-      INTRO_MUSIC,
       'v160_explosion_01',
       'v160_explosion_02',
       'v160_explosion_03',
       'aaa_police_siren',
       'engine_loop',
     ];
-    const audioReady = Promise.all(
-      ids.map(async (id) => {
+    const audioReady = Promise.all([
+      this.loadScore(this.current),
+      ...ids.map(async (id) => {
         try {
           const b = await g.audio.bank?.get(id);
-          if (token === this.generation && b) {
-            this.buffers.set(id, b);
-            // Slow audio must not hold the picture on a loading screen.
-            if (id === INTRO_MUSIC && this.current && !this.current.loading && !this.current.paused)
-              this.playMusic(this.time());
-          }
+          if (token === this.generation && b) this.buffers.set(id, b);
         } catch {
           /* The film and its controls also work with muted/unavailable audio. */
         }
       }),
-    );
+    ]);
     // Warm graphics and decode audio concurrently. Never await autoplay permission.
     this.audioReady = audioReady;
     if (token !== this.generation || !this.current) return;
@@ -384,7 +395,6 @@ export class IntroFilm {
     document.getElementById('intro-state').textContent = this.current.paused ? 'PAUSE' : '';
     document.getElementById('intro-pause').textContent = this.current.paused ? 'Weiter' : 'Pause';
     if (!this.current.paused) this.playMusic(0);
-    this.updateSoundButton();
   }
   async warm(token) {
     if (!this.w.renderer.compileAsync) return;
@@ -420,85 +430,70 @@ export class IntroFilm {
   resumeAudio() {
     const m = this.current,
       a = this.g.audio;
-    // Called synchronously from Intro/Weiter/Ton gestures, before loading or shader awaits.
+    if (!m) return;
+    // Attempt autoplay immediately; normal input can unlock a browser-suspended context later.
+    // Never await resume: browsers may leave that promise pending until user activation.
     a.start();
+    if (a.ctx && this.audioContext !== a.ctx) {
+      this.audioContext?.removeEventListener?.('statechange', this.audioStateChange);
+      this.audioContext = a.ctx;
+      this.audioStateChange = () => {
+        if (this.current !== m) return;
+        if (a.ctx.state === 'running') this.playMusic(this.time());
+        else {
+          this.music?.stop(0.03);
+          this.music = null;
+          this.stopActionAudio();
+          this.stopEffects();
+        }
+      };
+      a.ctx.addEventListener?.('statechange', this.audioStateChange);
+    }
     const resumed = a.ctx?.resume?.();
     resumed
       ?.then(() => {
-        if (this.current === m && m) {
-          if (
-            a.ctx?.state === 'running' &&
-            !m.loading &&
-            !m.paused &&
-            a.introMix?.enabled &&
-            !this.music
-          )
-            this.playMusic(this.time());
-          this.updateSoundButton();
-        }
+        if (this.current === m) this.playMusic(this.time());
       })
-      .catch(() => {
-        if (this.current === m) this.updateSoundButton();
-      });
+      .catch(() => {});
   }
-  updateSoundButton() {
-    const button = document.getElementById('intro-sound');
-    if (!this.current || !button) return;
-    const a = this.g.audio,
-      enabled = !!a.introMix?.enabled;
-    const blocked = !!a.ctx?.state && a.ctx.state !== 'running';
-    const retry = enabled && (this.soundError || blocked || !a.ready);
-    button.textContent = retry ? 'Ton starten' : enabled ? 'Ton an' : 'Ton aus';
-    button.setAttribute('aria-pressed', String(enabled && !retry));
-    button.setAttribute(
-      'aria-label',
-      retry
-        ? 'Intro-Ton erneut starten'
-        : enabled
-          ? 'Intro-Ton ausschalten'
-          : 'Intro-Ton einschalten',
-    );
-    button.title = retry
-      ? 'Klicken, um die Musik zu laden und den Ton freizugeben.'
-      : 'Gilt nur für dieses Intro';
-  }
-  async toggleSound() {
-    const m = this.current,
-      a = this.g.audio;
+  unlockAudio() {
+    const m = this.current;
     if (!m) return;
-    const blocked = !!a.ctx?.state && a.ctx.state !== 'running';
-    const retry = this.soundError || blocked || !a.ready;
-    a.introMix.enabled = !a.introMix.enabled || retry;
-    this.music?.stop(0.08);
-    this.music = null;
-    this.stopActionAudio();
-    this.stopEffects();
-    if (a.introMix.enabled) this.resumeAudio();
-    a.applyMix?.();
-    this.updateSoundButton();
-    if (!a.introMix.enabled || m.loading || m.paused) return;
-    if (!this.buffers.get(INTRO_MUSIC)) {
-      a.bank?.failures?.delete(INTRO_MUSIC);
-      const buffer = await a.bank?.get(INTRO_MUSIC);
-      if (this.current !== m) return;
-      if (buffer) this.buffers.set(INTRO_MUSIC, buffer);
-    }
-    if (this.current === m && !m.paused && a.introMix.enabled) this.playMusic(this.time());
+    if (this.music && this.g.audio.ctx?.state === 'running') return;
+    this.resumeAudio();
+    if (!this.buffers?.has(INTRO_MUSIC)) this.loadScore(m, true);
+    this.playMusic(this.time());
+  }
+  loadScore(m, retry = false) {
+    if (this.current !== m || !this.g.audio.bank) return Promise.resolve();
+    if (m.scoreRequest) return m.scoreRequest;
+    if (this.buffers.has(INTRO_MUSIC)) return Promise.resolve();
+    if (retry) this.g.audio.bank.failures?.delete(INTRO_MUSIC);
+    m.scoreAttempts++;
+    m.nextScoreRetry = performance.now() + 4000;
+    m.scoreRequest = (async () => {
+      try {
+        const buffer = await this.g.audio.bank.get(INTRO_MUSIC);
+        if (this.current !== m) return;
+        this.soundError = !buffer;
+        if (buffer) {
+          this.buffers.set(INTRO_MUSIC, buffer);
+          this.playMusic(this.time());
+        }
+      } catch {
+        if (this.current === m) this.soundError = true;
+      } finally {
+        m.scoreRequest = null;
+      }
+    })();
+    return m.scoreRequest;
   }
   playMusic(offset) {
-    const a = this.g.audio,
-      b = this.buffers.get(INTRO_MUSIC);
-    if (!a.introMix?.enabled) return;
-    if (a.ctx?.state && a.ctx.state !== 'running') {
-      this.updateSoundButton();
-      return;
-    }
-    if (!a.ready || !b) {
-      this.soundError = true;
-      this.updateSoundButton();
-      return;
-    }
-    this.music?.stop(0.04);
+    const m = this.current,
+      a = this.g.audio,
+      b = this.buffers?.get(INTRO_MUSIC);
+    if (!m || m.loading || m.paused || offset >= INTRO_DURATION || !a.introMix?.enabled) return;
+    if (!a.ready || a.ctx?.state !== 'running' || !b || this.music) return;
     this.music = a.emit(b, {
       bus: 'music',
       volume: 0.9,
@@ -506,8 +501,7 @@ export class IntroFilm {
       offset: Math.min(offset, b.duration - 0.01),
     });
     this.soundError = !this.music;
-    this.startActionAudio();
-    this.updateSoundButton();
+    if (this.music) this.startActionAudio();
   }
   stopEffects() {
     for (const handle of this.effects || []) handle?.stop(0.08);
@@ -519,7 +513,14 @@ export class IntroFilm {
   }
   startActionAudio() {
     this.stopActionAudio();
-    if (!this.current || this.current.paused || !this.g.audio.introMix?.enabled) return;
+    if (
+      !this.current ||
+      this.current.loading ||
+      this.current.paused ||
+      !this.g.audio.introMix?.enabled ||
+      this.g.audio.ctx?.state !== 'running'
+    )
+      return;
     const shot = INTRO_SHOTS[this.current.shot];
     if (!shot?.stage) return;
     for (const [id, volume] of [
@@ -546,6 +547,7 @@ export class IntroFilm {
     m.elapsed = this.time();
     m.base = m.elapsed;
     m.paused = paused;
+    document.body.classList.toggle('intro-paused', paused);
     this.stopActionAudio();
     this.stopEffects();
     this.music?.stop(0.08);
@@ -566,6 +568,15 @@ export class IntroFilm {
     if (m.loading) return;
     m.elapsed = this.time();
     const t = m.elapsed;
+    // A bounded, silent retry recovers a transient media failure without a sound-settings UI.
+    if (
+      !m.paused &&
+      !this.buffers.has(INTRO_MUSIC) &&
+      m.scoreAttempts < 3 &&
+      performance.now() >= m.nextScoreRetry
+    )
+      this.loadScore(m, true);
+    if (!m.paused && !this.music) this.playMusic(t);
     // Fade the supplied score into the menu rather than cutting it mid-phrase.
     const volume = 0.7 * THREE.MathUtils.clamp((INTRO_DURATION - t) / 1.5, 0, 1);
     if (this.g.audio.introMix) this.g.audio.introMix.volume = volume;
@@ -585,7 +596,6 @@ export class IntroFilm {
       weather.wet = shot.rain ? 0.85 : 0;
       this.w.shadowZone = null;
       document.getElementById('intro-title').textContent = shot.title;
-      document.getElementById('intro-sub').textContent = shot.sub;
       this.action.configure(shot);
       this.startActionAudio();
     }
@@ -603,9 +613,21 @@ export class IntroFilm {
             this.effects.push(this.g.audio.emit(sound, { bus: 'music', volume: 0.48 }));
         }
       }
-    const fraction = shot ? (t - shot.at) / (shot.end - shot.at) : 0,
-      fade = shot ? Math.max(0, 1 - fraction * 16, (fraction - 0.93) * 14) : 1;
-    document.getElementById('intro-fade').style.opacity = String(Math.min(1, fade));
+    // No repetitive fade-to-black between shots: the montage cuts on movement.
+    const fade = shot?.prologue
+      ? 1 - THREE.MathUtils.smoothstep(t, 0.85, 2.4)
+      : THREE.MathUtils.smoothstep(t, INTRO_DURATION - 1.25, INTRO_DURATION);
+    document.getElementById('intro-fade').style.opacity = String(fade);
+    const age = shot ? t - shot.at : 0,
+      duration = shot ? shot.end - shot.at : 0;
+    const titleOpacity =
+      shot?.title && !shot.prologue
+        ? THREE.MathUtils.smoothstep(age, 0.35, 0.85) *
+          (1 - THREE.MathUtils.smoothstep(age, duration - 0.7, duration - 0.25))
+        : 0;
+    const title = document.getElementById('intro-title');
+    title.style.opacity = String(titleOpacity);
+    title.style.transform = 'translateY(' + (1 - titleOpacity) * 8 + 'px)';
     document.getElementById('intro-progress').style.transform =
       'scaleX(' + Math.min(1, t / INTRO_DURATION) + ')';
     this.g.extras.fire.update(step, true);
@@ -639,6 +661,9 @@ export class IntroFilm {
     this.music?.stop(0.15);
     this.music = null;
     this.current = null;
+    this.audioContext?.removeEventListener?.('statechange', this.audioStateChange);
+    this.audioContext = null;
+    this.audioStateChange = null;
     this.action.hide();
     this.g.audio.cinematicMix = this.g.audio.cinematicVoice = false;
     this.g.audio.introMix = null;
@@ -652,6 +677,14 @@ export class IntroFilm {
     w.ambient.color.copy(r.skyLightColor);
     w.ambient.groundColor.copy(r.groundLightColor);
     w.fill.color.copy(r.fillColor);
+    w.ambient.intensity = r.ambientIntensity;
+    w.fill.intensity = r.fillIntensity;
+    w.sun.intensity = r.sunIntensity;
+    w.scene.background.copy(r.background);
+    w.scene.fog.color.copy(r.fogColor);
+    w.scene.fog.density = r.fogDensity;
+    this.g.arcade.atmosphere.sky.material.uniforms.top.value.copy(r.skyTop);
+    this.g.arcade.atmosphere.sky.material.uniforms.bottom.value.copy(r.skyBottom);
     w.enter(r.zone, r.restaurant?.id);
     w.currentRestaurant = r.restaurant;
     w.teleport(r.position.x, r.position.z, r.position.y);
@@ -667,7 +700,12 @@ export class IntroFilm {
     w.shadowZone = null;
     this.g.extras.fire.particles.length = 0;
     this.g.extras.fire.geometry.setDrawRange(0, 0);
-    document.body.classList.remove('world-intro', 'intro-loading');
+    document.body.classList.remove(
+      'world-intro',
+      'intro-loading',
+      'intro-prologue',
+      'intro-paused',
+    );
     if (this.g.modal) this.g.modal.locked = false;
     this.g.close();
     w.pose = r.pose;

@@ -279,6 +279,7 @@ export class IntroStage {
   configure(shot) {
     this.shot = shot;
     document.body.classList.toggle('intro-night', shot.zone === 'city' && shot.minutes >= 1140);
+    document.body.classList.toggle('intro-prologue', !!shot.prologue);
     this.flash.visible = true;
     for (const light of this.floods) light.visible = true;
     this.lastBurst = -100;
@@ -337,6 +338,26 @@ export class IntroStage {
     const s = this.shot,
       w = this.w;
     if (!s) return;
+    if (s.prologue) {
+      w.renderer.toneMappingExposure = 0.23;
+      w.scene.environmentIntensity = 0.035;
+      w.ambient.color.set('#3d5068');
+      w.ambient.groundColor.set('#080d16');
+      w.fill.color.set('#6a829b');
+      w.ambient.intensity = 0.07;
+      w.fill.intensity = 0.03;
+      w.sun.intensity = 0.025;
+      w.scene.background.set('#02050b');
+      const sky = this.g.arcade.atmosphere.sky.material.uniforms;
+      sky.top.value.set('#010308');
+      sky.bottom.value.set('#060b14');
+      w.scene.fog.color.copy(w.scene.background);
+      w.scene.fog.density = 0.0018;
+      for (const light of this.floods) light.intensity = 0;
+      this.flash.intensity = 0;
+      this.g.arcade.vehicleLighting?.update(null);
+      return;
+    }
     const night = s.zone === 'city' && s.minutes >= 1140;
     w.renderer.toneMappingExposure = night ? 1.2 : this.g.extras.intro.restore.exposure;
     w.scene.environmentIntensity = night ? 0.7 : this.g.extras.intro.restore.environment;

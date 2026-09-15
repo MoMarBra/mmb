@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "publishedPath": "/gta/",
-  "sourceCommit": "d7637a5018ca6e206f5c84980a8ea89a4d4bff1c",
+  "sourceCommit": "45bf5b146c1cc9db8775e0b4fff4e0287b8d4cab",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-15T11:58:14.248Z",
+  "preparedAt": "2026-09-15T12:33:05.087Z",
   "gameTestsRun": true,
   "browserVisualQA": false,
-  "validation": "9 regression suites including 22 full-Game logic checks: automatic 60-second intro, text-free boot, Space before and during startup, held-key/focus guards, delayed audio and blocked autoplay sync, adaptive render budget, physics/HUD bypass, restore/save and existing missions/traffic/audio. 376 offline media hashes and 77 local asset references. No browser/GPU visual test or target-device FPS guarantee."
+  "validation": "5 regression suites including 25 full-Game logic checks. Sixty-second automatic intro with black/underexposed Munich prologue, exact 5-second daylight match cut, 16 shots, title-only copy, no sound button, automatic score and gesture unlock, synchronized audio retry/context resume without duplicate or stale sources. Pause/Space/replay/light/save restoration checked. 376 offline media hashes and 77 local asset references. No browser/GPU visual test or target-device FPS guarantee."
 }

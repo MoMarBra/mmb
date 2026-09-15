@@ -5366,6 +5366,17 @@ button.mission-row:focus-visible {
 .world-intro.intro-night #world {
   filter: brightness(1.06) contrast(1.025) saturate(1.08);
 }
+.world-intro.intro-prologue #world {
+  filter: contrast(1.12) saturate(0.64);
+}
+.world-intro.intro-prologue .world-intro-frame::before {
+  background: none;
+}
+.intro-prologue .intro-location,
+.intro-prologue .intro-progress,
+.intro-prologue:not(.intro-paused) .intro-toolbar {
+  visibility: hidden;
+}
 .world-intro .cinema-vignette {
   display: none;
 }
@@ -5383,7 +5394,7 @@ button.mission-row:focus-visible {
 .world-intro-frame::after {
   background: radial-gradient(ellipse at 50% 43%, transparent 48%, #030e1b35 100%);
 }
-.world-intro.intro-night .world-intro-frame::before {
+.world-intro.intro-night:not(.intro-prologue) .world-intro-frame::before {
   background: linear-gradient(155deg, #8db9d807 0%, transparent 50%, #134e6310 100%);
 }
 .world-intro .modal-shade {
@@ -5421,7 +5432,6 @@ button.mission-row:focus-visible {
 }
 .intro-loading .intro-location,
 .intro-loading #intro-state,
-.intro-loading #intro-sound,
 .intro-loading #intro-pause,
 .intro-loading .intro-progress {
   visibility: hidden;
@@ -5432,21 +5442,20 @@ button.mission-row:focus-visible {
 .intro-location {
   position: absolute;
   left: 6vw;
-  bottom: 10vh;
-  max-width: 85vw;
+  bottom: 9vh;
+  max-width: min(760px, 84vw);
   z-index: 3;
   text-shadow: 0 3px 25px #000;
 }
 .intro-location h1 {
-  font-size: clamp(24px, 4vw, 62px);
+  font-size: clamp(26px, 3.3vw, 54px);
   line-height: 1.06;
   margin: 8px 0;
   color: white;
-  letter-spacing: -0.025em;
-}
-.intro-location small {
-  color: #f2ddba;
-  font-size: clamp(11px, 1.2vw, 16px);
+  letter-spacing: -0.035em;
+  font-weight: 600;
+  text-wrap: balance;
+  will-change: opacity, transform;
 }
 .intro-toolbar {
   position: absolute;
@@ -5467,9 +5476,9 @@ button.mission-row:focus-visible {
 .intro-toolbar button {
   font-size: 11px;
   padding: 9px 13px;
-  border: 1px solid #5e707855;
-  background: #152128;
-  color: #eef4f4;
+  border: 1px solid #ffffff1f;
+  background: transparent;
+  color: #eef4f4a6;
 }
 .intro-progress {
   position: absolute;
@@ -5529,10 +5538,6 @@ button.mission-row:focus-visible {
   }
   .atlas footer span:last-child {
     display: none;
-  }
-  .intro-subtitle {
-    left: 7%;
-    right: 7%;
   }
   .intro-toolbar span {
     font-size: 8px;
