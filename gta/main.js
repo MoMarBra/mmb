@@ -1,3 +1,4 @@
+import { MissionPassed } from './mission-passed.js';
 import { CityExtras } from './city-extras.js';
 import { FireStory } from './fire-story.js';
 import { STREET_ROADS, CIRCULAR_STREETS } from './city-streets.js';
@@ -58,6 +59,7 @@ export class Game {
     this.fireStory = new FireStory(this);
     this.extras = new CityExtras(this);
     this.mouseControls = new MouseControls(this);
+    this.missionPassed = new MissionPassed(this);
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
     this.intro();
@@ -73,6 +75,7 @@ export class Game {
       this.lastFrame = now;
       const hidden = document.hidden;
       const paused = !this.started || hidden || this.modal?.pause === true;
+      const renderedWorld = !hidden && !this.cinematic;
       if (!hidden) {
         if (this.cinematic) {
           const film = this.activeFilm;
@@ -102,6 +105,7 @@ export class Game {
       );
       this.extras.afterAudio();
       this.fireStory.update(rawDelta, paused);
+      this.missionPassed.update(renderedWorld);
       this.uiTimer += dt;
       this.fps = this.fps * 0.96 + (1 / Math.max(rawDelta, 0.001)) * 0.04;
       if (this.started && !paused && !this.world.lowQuality && this.world.time > 5) {
@@ -287,6 +291,7 @@ export class Game {
       task = null,
     } = {},
   ) {
+    this.missionPassed?.pause();
     if (this.modal?.onClose) this.modal.onClose();
     if (!this.modal) this.focusReturn = document.activeElement;
     this.modal = { title, pause, locked, onClose, task };
@@ -321,6 +326,10 @@ export class Game {
     setTimeout(() => el.remove(), 6200);
   }
   onEvent(e) {
+    if (e.type === 'mission-complete') {
+      this.missionPassed.enqueue(e);
+      return;
+    }
     if (e.type === 'promotion') {
       this.world.makeWorkstation();
       this.audio.play('promotion');
@@ -471,6 +480,8 @@ export class Game {
   }
   transition(zone, id) {
     if (this.fireStory?.beforeTransition() === false) return;
+    this.worldTransitionUntil = performance.now() + 700;
+    this.missionPassed?.pause();
     this.close();
     this.busy = false;
     const f = document.createElement('div');
@@ -595,7 +606,6 @@ export class Game {
       this.close();
       return;
     }
-    this.audio.play('success');
     this.world.makeWorkstation();
     const metrics = r.metrics;
     this.open(

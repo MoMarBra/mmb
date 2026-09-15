@@ -121,6 +121,7 @@ export class Soundscape {
       });
       this.applyMix();
       this.gamePreloads = [
+        'mission_passed_1_6_6',
         'engine_loop',
         'engine_start',
         'car_door_close',
@@ -181,6 +182,13 @@ export class Soundscape {
       set(
         this.buses[bus].gain,
         clamp(intro && bus === 'music' ? intro.volume : (s[key] ?? (bus === 'music' ? 0.4 : 0.8))) *
+          (!intro && this.missionPassedMix
+            ? bus === 'music'
+              ? 0.12
+              : bus === 'ambience'
+                ? 0.55
+                : 1
+            : 1) *
           (this.voices.current || this.cinematicVoice
             ? bus === 'music'
               ? 0.35

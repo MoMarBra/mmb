@@ -1,4 +1,5 @@
 export const AUDIO_ASSETS = {
+  "mission_passed_1_6_6": { "path": "./assets/audio/mission_passed_1_6_6.mp3", "group": "effect" },
   "footstep_carpet_000": {
     "path": "./assets/audio/footstep_carpet_000.mp3",
     "group": "effect"

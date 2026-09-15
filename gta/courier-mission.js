@@ -178,7 +178,9 @@ export class CourierMission {
     this.g.sim.change('rep', 4);
     this.g.sim.save();
     this.g.toast('Koffer geliefert.', '+' + earned + ' € · +45 XP · +4 REP');
-    this.g.audio.play('success');
+    this.g.sim.emit('mission-complete', 'BBE · Eilauftrag', {
+      id: 'courier:' + this.g.sim.s.courierCompleted,
+    });
     this.g.audio.voices?.say('Lena', 'mission.success');
   }
   interact(n) {

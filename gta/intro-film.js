@@ -3,7 +3,7 @@ import { IntroStage } from './intro-stage.js';
 import { IntroPerformance } from './intro-performance.js';
 export const INTRO_DURATION = 60;
 export const INTRO_MUSIC = 'intro_theme_1_6_1';
-// Black-to-night prologue, a daylight match cut on second five, then a sixty-second montage.
+// Readable night prologue, an optical impact zoom on second five, then a sixty-second montage.
 export const INTRO_SHOTS = [
   {
     at: 0,
@@ -210,6 +210,27 @@ export const INTRO_SHOTS = [
     title: 'BBE · MUNICH CONSULTING SIMULATOR',
   },
 ];
+// One timeline drives the lens and light leak: pause, replay and low frame rates stay in sync.
+export function introTransition(t, reducedMotion = false) {
+  if (reducedMotion) return { fov: 53, flash: 0 };
+  for (let i = 1; i < INTRO_SHOTS.length; i++) {
+    const cut = INTRO_SHOTS[i].at,
+      hero = i === 1;
+    const before = hero ? 0.42 : 0.16,
+      after = hero ? 0.64 : 0.32;
+    if (t < cut - before || t >= cut + after) continue;
+    const weight =
+      t < cut
+        ? THREE.MathUtils.smoothstep(t, cut - before, cut)
+        : 1 - THREE.MathUtils.smoothstep(t, cut, cut + after);
+    const flash =
+      THREE.MathUtils.smoothstep(t, cut - 0.07, cut) *
+      (1 - THREE.MathUtils.smoothstep(t, cut, cut + (hero ? 0.22 : 0.13)));
+    return { fov: 53 - (hero ? 24 : 10) * weight, flash: flash * (hero ? 0.24 : 0.07) };
+  }
+  return { fov: 53, flash: 0 };
+}
+
 export class IntroFilm {
   constructor(game) {
     this.g = game;
@@ -296,6 +317,7 @@ export class IntroFilm {
       yaw: w.yaw,
       pitch: w.pitch,
       distance: w.distance,
+      fov: w.camera.fov,
       minutes: g.sim.s.minutes,
       weather: g.sim.s.weather,
       wetness: g.sim.s.wetness,
@@ -323,6 +345,7 @@ export class IntroFilm {
       save: g.sim.save,
     };
     g.sim.save = () => true;
+    this.reducedMotion = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const token = ++this.generation;
     this.current = {
       automatic,
@@ -350,7 +373,7 @@ export class IntroFilm {
     this.performance.begin();
     g.open(
       'Intro',
-      `<div class="world-intro-frame"><div class="intro-location"><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status"></span><button id="intro-pause">Pause</button><button id="intro-exit" aria-keyshortcuts="Space" aria-label="Intro überspringen und Hauptmenü öffnen">Leertaste · Hauptmenü</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-fade" aria-hidden="true"></div></div>`,
+      `<div class="world-intro-frame"><div class="intro-location"><h1 id="intro-title"></h1></div><div class="intro-toolbar"><span id="intro-state" role="status"></span><button id="intro-pause">Pause</button><button id="intro-exit" aria-keyshortcuts="Space" aria-label="Intro überspringen und Hauptmenü öffnen">Leertaste · Hauptmenü</button></div><div class="intro-progress"><i id="intro-progress"></i></div><div id="intro-cut-light" aria-hidden="true"></div><div id="intro-fade" aria-hidden="true"></div></div>`,
       { pause: true, locked: true },
     );
     document.body.classList.add('world-intro', 'intro-loading', 'intro-prologue');
@@ -613,11 +636,14 @@ export class IntroFilm {
             this.effects.push(this.g.audio.emit(sound, { bus: 'music', volume: 0.48 }));
         }
       }
-    // No repetitive fade-to-black between shots: the montage cuts on movement.
+    // A continuous optical zoom hides each cut without blurring or resampling the canvas.
     const fade = shot?.prologue
-      ? 1 - THREE.MathUtils.smoothstep(t, 0.85, 2.4)
+      ? 1 - THREE.MathUtils.smoothstep(t, 0.45, 1.55)
       : THREE.MathUtils.smoothstep(t, INTRO_DURATION - 1.25, INTRO_DURATION);
     document.getElementById('intro-fade').style.opacity = String(fade);
+    document.getElementById('intro-cut-light').style.opacity = String(
+      introTransition(t, this.reducedMotion).flash,
+    );
     const age = shot ? t - shot.at : 0,
       duration = shot ? shot.end - shot.at : 0;
     const titleOpacity =
@@ -638,6 +664,11 @@ export class IntroFilm {
     const m = this.current,
       s = INTRO_SHOTS[m?.shot];
     if (!s) return;
+    const lens = introTransition(m.elapsed, this.reducedMotion);
+    if (Math.abs(this.w.camera.fov - lens.fov) > 0.00001) {
+      this.w.camera.fov = lens.fov;
+      this.w.camera.updateProjectionMatrix();
+    }
     const u = THREE.MathUtils.smoothstep(m.elapsed, s.at, s.end);
     this.w.camera.position.fromArray(s.from).lerp(this.end.fromArray(s.to), u);
     if (s.stage) this.w.camera.lookAt(this.action.focus);
@@ -672,6 +703,14 @@ export class IntroFilm {
       w = this.w;
     this.restoreState();
     this.performance.end(r.pixelRatio);
+    w.camera.fov = r.fov;
+    w.camera.updateProjectionMatrix();
+    if (w.ssao) {
+      w.ssao.ssaoMaterial.uniforms.cameraProjectionMatrix.value.copy(w.camera.projectionMatrix);
+      w.ssao.ssaoMaterial.uniforms.cameraInverseProjectionMatrix.value.copy(
+        w.camera.projectionMatrixInverse,
+      );
+    }
     w.renderer.toneMappingExposure = r.exposure;
     w.scene.environmentIntensity = r.environment;
     w.ambient.color.copy(r.skyLightColor);

@@ -2264,7 +2264,7 @@ export class GameWorld {
     const bathroom =
       this.zone === 'office' && b.position.x > 28 && b.position.x < 40 && b.position.z > 19;
     const wantedFov = bathroom ? 66 : 53;
-    if (Math.abs(this.camera.fov - wantedFov) > 0.03) {
+    if (!cinematicIntro && Math.abs(this.camera.fov - wantedFov) > 0.03) {
       this.camera.fov = THREE.MathUtils.damp(this.camera.fov, wantedFov, 9, dt || 0.016);
       this.camera.updateProjectionMatrix();
       if (this.ssao) {

@@ -354,5 +354,11 @@
     "source": "User-supplied ton.mp3 (2026-09-15)",
     "modifications": "Unmodified MP3, copied byte-for-byte. Playback level and short onset fade applied in the game; no voiceover in the intro.",
     "sha256": "777da4b639052dfb0a6bf144878c235b1de5e6924135f621fbd2c9899ac01dee"
+  },
+  {
+    "file": "mission_passed_1_6_6.mp3",
+    "source": "User-supplied passed.mp3 (2026-09-15)",
+    "modifications": "Unmodified source file, copied byte-for-byte. Synchronized non-spatial playback after mission menus and cutscenes; in-game mix and fade only.",
+    "sha256": "acc59563f97b04454bad6d92760eb883e5a7e7a3d210a31c5d04ad9b97130917"
   }
 ]

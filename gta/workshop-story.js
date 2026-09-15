@@ -666,6 +666,7 @@ export class WorkshopStory {
           this.detachPassenger();
           this.g.waypoint = null;
           this.g.sim.save();
+          this.g.sim.emit('mission-complete', 'Nur noch kurz', { token: result });
           this.g.toast(
             'Nur noch kurz · Abgeschlossen',
             result.paid ? '+180 € · +70 XP · +6 REP' : 'Wiederholung abgeschlossen.',

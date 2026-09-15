@@ -469,6 +469,7 @@ export class Simulation {
       );
     }
     this.save();
+    this.emit('mission-complete', t.title, { id: 'bbe:' + t.id + ':' + this.s.completed });
     return { score, pay, xp, metrics, title: t.title };
   }
   unlock(id) {

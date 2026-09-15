@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "publishedPath": "/gta/",
-  "sourceCommit": "45bf5b146c1cc9db8775e0b4fff4e0287b8d4cab",
+  "sourceCommit": "8b56828e1c0e95b08651605310570b4711a215e5",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-15T12:33:05.087Z",
+  "preparedAt": "2026-09-15T12:52:12.672Z",
   "gameTestsRun": true,
   "browserVisualQA": false,
-  "validation": "5 regression suites including 25 full-Game logic checks. Sixty-second automatic intro with black/underexposed Munich prologue, exact 5-second daylight match cut, 16 shots, title-only copy, no sound button, automatic score and gesture unlock, synchronized audio retry/context resume without duplicate or stale sources. Pause/Space/replay/light/save restoration checked. 376 offline media hashes and 77 local asset references. No browser/GPU visual test or target-device FPS guarantee."
+  "validation": "7 regression suites including 30 full-Game checks and 11 mission completion lifecycle checks. All BBE tasks, workshop/IT story endings and courier success queue the exact supplied passed.mp3 and fixed Pricedown artwork after a rendered gameplay frame. Menus, scene transitions and hidden tabs pause sound/visual together; duplicate rewards remain guarded. Brighter night prologue and optical zoom exactly at five seconds, short transitions across all 16 shots, reduced-motion support and complete lens/light restoration. 377 offline media hashes, exact static outlined artwork and 79 local asset references. No browser/GPU visual test or target-device FPS guarantee."
 }

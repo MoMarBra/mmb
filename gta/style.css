@@ -5367,7 +5367,7 @@ button.mission-row:focus-visible {
   filter: brightness(1.06) contrast(1.025) saturate(1.08);
 }
 .world-intro.intro-prologue #world {
-  filter: contrast(1.12) saturate(0.64);
+  filter: contrast(1.035) saturate(0.88);
 }
 .world-intro.intro-prologue .world-intro-frame::before {
   background: none;
@@ -5549,4 +5549,65 @@ button.mission-row:focus-visible {
     right: 12px;
     bottom: 185px;
   }
+}
+
+/* Fixed outlined artwork keeps the classic title crisp without a runtime font request. */
+.mission-passed-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+.mission-passed-overlay[hidden] {
+  display: none;
+}
+.mission-passed-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.26);
+}
+.mission-passed-copy {
+  position: relative;
+  width: min(78vw, 760px);
+  display: grid;
+  justify-items: center;
+  gap: clamp(12px, 2.4vh, 26px);
+  transform: translateY(calc(var(--mission-reveal, 0) * 8px));
+}
+.mission-passed-title {
+  width: 100%;
+}
+.mission-passed-respect {
+  width: 58%;
+}
+.mission-passed-copy svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.mission-passed-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mission-passed-copy {
+    transform: none;
+  }
+}
+
+#intro-cut-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 46%, #fff5dd 0%, #f8d6a6 48%, transparent 100%);
 }

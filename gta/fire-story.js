@@ -375,6 +375,7 @@ export class FireStory {
         this.stopRunAudio();
         arrive(this.w, { x: -30.7, z: 3.6, yaw: 0.25 });
         this.g.sim.save();
+        this.g.sim.emit('mission-complete', 'Ticket geschlossen', { token: result });
         this.g.toast(
           'Ticket geschlossen',
           result.paid ? '+90 € · +45 XP · +4 REP' : 'Wiederholung abgeschlossen.',
