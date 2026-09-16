@@ -1,24 +1,26 @@
 import {WHEEL,POINTER_OUTLINE} from './wheel-geometry.js';
-export const COLLAPSE_DURATION=2800;
+export const COLLAPSE_DURATION=3000;
 const TAU=Math.PI*2;
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const noise=(seed)=>{const n=Math.sin(seed*127.1+311.7)*43758.5453;return n-Math.floor(n)};
 const extentY=piece=>Math.abs(Math.sin(piece.angle))*piece.width/2+Math.abs(Math.cos(piece.angle))*piece.height/2;
 const extentX=piece=>Math.abs(Math.cos(piece.angle))*piece.width/2+Math.abs(Math.sin(piece.angle))*piece.height/2;
 
-// A brief outward break, then constant gravity, floor contact and damped bouncing.
+// One sector drops first. The remaining pieces release in a growing cascade.
+// Constant gravity and damped floor contact let every piece settle without snapping.
 export function makeDebris(rect,index,origin,viewport){
   const x=rect.left+rect.width/2,y=rect.top+rect.height/2,dx=x-origin.x,dy=y-origin.y,distance=Math.hypot(dx,dy)||1;
   return{width:rect.width,height:rect.height,x,y,startX:x,startY:y,angle:0,
     vx:dx/distance*(120+noise(index+1)*230)+(noise(index+2)-.5)*90,
-    vy:dy/distance*130-180-noise(index+3)*140,
+    vy:dy/distance*85-80-noise(index+3)*90,
     omega:(noise(index+4)-.5)*8,
-    release:.14+Math.min(.2,distance/Math.hypot(viewport.width,viewport.height)*.32)+noise(index+5)*.07,
-    floor:viewport.height-12-(index%4)*2,landed:false,index};
+    release:.92+Math.min(.46,distance/Math.hypot(viewport.width,viewport.height)*.8)+noise(index+5)*.06,
+    floor:viewport.height-12-(index%4)*2,landed:false,settled:false,index};
 }
 export function advanceDebris(piece,from,to,viewport){
+  if(piece.settled||to<=piece.release)return piece;
   const gravity=Math.max(2200,viewport.height*2.5);
-  for(let time=from;time<to;){
+  for(let time=Math.max(from,piece.release);time<to;){
     const next=Math.min(to,time+1/120),dt=next-Math.max(time,piece.release);time=next;
     if(dt<=0)continue;
     piece.vy+=gravity*dt;piece.x+=piece.vx*dt;piece.y+=piece.vy*dt;piece.angle+=piece.omega*dt;
@@ -31,9 +33,9 @@ export function advanceDebris(piece,from,to,viewport){
       piece.vx*=.62;piece.omega*=.46;
       if(Math.abs(piece.omega)<.025)piece.omega=0;
       if(Math.abs(piece.vx)<.4)piece.vx=0;
+      if(!piece.vy&&!piece.vx&&!piece.omega){piece.settled=true;break}
     }
   }
-  if(to>=COLLAPSE_DURATION/1000){piece.y=piece.floor-extentY(piece);piece.vx=piece.vy=piece.omega=0;piece.landed=true}
   return piece;
 }
 
@@ -84,11 +86,11 @@ export function createGravityCollapse({root,wheelCanvas,wheelRect,snacks,rotatio
   const overlay=document.createElement('div');overlay.className='gravity-overlay';overlay.setAttribute('aria-hidden','true');overlay.setAttribute('inert','');
   const floor=document.createElement('div');floor.className='gravity-floor';overlay.append(floor);
   const fragments=[];let restored=false,previous=0;
-  function addFragment(rect,content,points){
+  function addFragment(rect,content,points,kind='ui',part=0){
     if(rect.width<.5||rect.height<.5)return;
     const holder=document.createElement('div');holder.className='gravity-piece';holder.style.width=`${rect.width}px`;holder.style.height=`${rect.height}px`;
     if(points)holder.style.clipPath=`polygon(${points.map(p=>`${p[0]}px ${p[1]}px`).join(',')})`;
-    holder.append(content);overlay.append(holder);fragments.push({element:holder,...makeDebris(rect,fragments.length,origin,viewport)});
+    holder.append(content);overlay.append(holder);fragments.push({element:holder,kind,part,...makeDebris(rect,fragments.length,origin,viewport)});
   }
   function addElement(element,backgroundOnly=false){
     const bounds=visibleBounds(element,win);if(!bounds)return;
@@ -99,7 +101,7 @@ export function createGravityCollapse({root,wheelCanvas,wheelRect,snacks,rotatio
       addFragment(rect,clone,polygon.map(p=>[p[0]-cell.left,p[1]-cell.top]));
     }
   }
-  function addWheelPolygon(points,excludePointer=false){
+  function addWheelPolygon(points,excludePointer=false,kind='sector',part=0){
     if(!wheelCanvas?.width||!wheelCanvas?.height)return;
     const bounds=boundsOf(points),canvas=document.createElement('canvas'),ratio=Math.min(2,win.devicePixelRatio||1);
     canvas.width=Math.ceil(bounds.width*ratio);canvas.height=Math.ceil(bounds.height*ratio);const ctx=canvas.getContext('2d');if(!ctx)return;
@@ -111,7 +113,7 @@ export function createGravityCollapse({root,wheelCanvas,wheelRect,snacks,rotatio
       ctx.closePath();ctx.fill();ctx.globalCompositeOperation='source-over';
     }
     canvas.style.width=`${bounds.width}px`;canvas.style.height=`${bounds.height}px`;
-    addFragment({left:wheelRect.left+bounds.left,top:wheelRect.top+bounds.top,width:bounds.width,height:bounds.height},canvas);
+    addFragment({left:wheelRect.left+bounds.left,top:wheelRect.top+bounds.top,width:bounds.width,height:bounds.height},canvas,null,kind,part);
   }
   // Capture everything before applying hidden/inert or re-rendering the live UI.
   const selectors=['.wordmark','.header-actions > button','.tabs > button','.wheel-question','#spin','.restaurant-chip','footer > span:not([hidden])','footer > button:not([hidden])','#global-error'];
@@ -131,26 +133,49 @@ export function createGravityCollapse({root,wheelCanvas,wheelRect,snacks,rotatio
     };
     for(let i=0;i<count;i++){
       const angle=rotation+i*step-Math.PI/2-step/2;
-      addWheelPolygon(annulus(angle,step,WHEEL.hubRadius,WHEEL.segmentRadius,Math.max(6,Math.ceil(60/count))),true);
+      addWheelPolygon(annulus(angle,step,WHEEL.hubRadius,WHEEL.segmentRadius,Math.max(6,Math.ceil(60/count))),true,'sector',i);
     }
-    for(let i=0;i<WHEEL.bulbs;i++)addWheelPolygon(annulus(i*TAU/WHEEL.bulbs-Math.PI/2,TAU/WHEEL.bulbs,WHEEL.segmentRadius,WHEEL.frameRadius+.005,8),true);
-    addWheelPolygon(POINTER_OUTLINE.map(([x,y])=>[center[0]+x*scale,center[1]-y*scale]));
-    addWheelPolygon(Array.from({length:40},(_,i)=>[center[0]+Math.cos(i*TAU/40)*WHEEL.hubRadius*scale,center[1]+Math.sin(i*TAU/40)*WHEEL.hubRadius*scale]));
+    for(let i=0;i<WHEEL.bulbs;i++)addWheelPolygon(annulus(i*TAU/WHEEL.bulbs-Math.PI/2,TAU/WHEEL.bulbs,WHEEL.segmentRadius,WHEEL.frameRadius+.005,8),true,'rim',i);
+    addWheelPolygon(POINTER_OUTLINE.map(([x,y])=>[center[0]+x*scale,center[1]-y*scale]),false,'pointer');
+    addWheelPolygon(Array.from({length:40},(_,i)=>[center[0]+Math.cos(i*TAU/40)*WHEEL.hubRadius*scale,center[1]+Math.sin(i*TAU/40)*WHEEL.hubRadius*scale]),false,'hub');
   }catch{ /* Other page fragments still fall if a browser cannot copy its canvas. */ }
+  const sectors=fragments.filter(fragment=>fragment.kind==='sector');
+  const first=sectors.reduce((lowest,fragment)=>!lowest||fragment.startY>lowest.startY?fragment:lowest,null);
+  if(first){
+    first.release=.12;first.vx=0;first.vy=12;first.omega=.16;
+    const count=Math.max(1,snacks.length),maxDistance=Math.max(1,Math.floor(count/2)-1);
+    for(const fragment of sectors){
+      if(fragment===first)continue;
+      const clockwise=(fragment.part-first.part+count)%count,distance=Math.min(clockwise,count-clockwise);
+      fragment.release=.70+.65*(distance-1)/maxDistance;
+    }
+    for(const fragment of fragments){
+      if(fragment.kind==='rim'){
+        const angle=(fragment.part+.5)*TAU/WHEEL.bulbs-Math.PI/2,firstAngle=rotation+first.part*TAU/count-Math.PI/2;
+        const distance=Math.abs(Math.atan2(Math.sin(angle-firstAngle),Math.cos(angle-firstAngle)));
+        fragment.release=.91+.47*distance/Math.PI+noise(fragment.index)*.04;
+      }else if(fragment.kind==='hub')fragment.release=1.18;
+      else if(fragment.kind==='pointer')fragment.release=1.40;
+    }
+  }
   const oldInert=root.getAttribute('inert'),oldAria=root.getAttribute('aria-hidden'),hadClass=document.body.classList.contains('gravity-active');
   root.setAttribute('inert','');root.setAttribute('aria-hidden','true');document.body.append(overlay);document.body.classList.add('gravity-active');
   function frame(milliseconds){
     if(restored)return;
     const seconds=clamp(milliseconds,0,COLLAPSE_DURATION)/1000;
     for(const fragment of fragments){
+      if(fragment.settled&&fragment.transform)continue;
+      const shakeStart=Math.max(0,fragment.release-.11);
+      if(seconds<shakeStart&&fragment.transform)continue;
       advanceDebris(fragment,previous,Math.max(previous,seconds),viewport);
-      const shake=seconds<fragment.release?Math.sin(seconds*72+fragment.index)*Math.sin(Math.PI*seconds/fragment.release)*2.2:0;
-      fragment.element.style.transform=`translate3d(${fragment.x-fragment.width/2+shake}px,${fragment.y-fragment.height/2}px,0) rotate(${fragment.angle}rad)`;
+      const shake=seconds>shakeStart&&seconds<fragment.release?Math.sin((seconds-shakeStart)*72+fragment.index)*Math.sin(Math.PI*(seconds-shakeStart)/.11)*2.2:0;
+      const transform=`translate3d(${fragment.x-fragment.width/2+shake}px,${fragment.y-fragment.height/2}px,0) rotate(${fragment.angle}rad)`;
+      if(transform!==fragment.transform){fragment.element.style.transform=transform;fragment.transform=transform}
     }
     floor.style.opacity=String(clamp((milliseconds-250)/700,0,1));previous=Math.max(previous,seconds);
   }
   frame(0);
-  return{duration:COLLAPSE_DURATION,count:fragments.length,frame,restore(){
+  return{duration:COLLAPSE_DURATION,count:fragments.length,element:overlay,frame,restore(){
     if(restored)return;restored=true;overlay.remove();if(!hadClass)document.body.classList.remove('gravity-active');
     if(oldInert===null)root.removeAttribute('inert');else root.setAttribute('inert',oldInert);
     if(oldAria===null)root.removeAttribute('aria-hidden');else root.setAttribute('aria-hidden',oldAria);

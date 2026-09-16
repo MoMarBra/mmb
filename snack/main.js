@@ -125,7 +125,7 @@ async function explodeWheel(){
 const egg=new HubEasterEgg({canTap:()=>!ui.spinning&&!ui.exploding&&!store.loading&&store.snacks.length>0,wobble:wobbleWheel,explode:explodeWheel,
   async beforeLeave(){await store.drain();if(store.failures.length)return false;return true},
   async transit(){
-    const warp=createWarpTransit({reduced:matchMedia('(prefers-reduced-motion:reduce)').matches});ui.warp=warp;
+    const warp=createWarpTransit({reduced:matchMedia('(prefers-reduced-motion:reduce)').matches,backdrop:ui.collapse?.element});ui.warp=warp;
     await warp.play({onStart:()=>sounds.play('warp')});
     // Keep the final dark frame until navigation; restore owns cancellation and cleanup.
   },
