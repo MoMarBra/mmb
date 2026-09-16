@@ -1,6 +1,7 @@
 import {pointerCrossings} from './motion.js';
 import {WARP_DURATION} from './warp.js';
-const FILES={click:'./assets/sounds/wheel-click.wav',horn:'./assets/sounds/party-horn.wav',explosion:'./assets/sounds/explosion.wav',warp:'./assets/sounds/warp.wav'};
+import {FIRST_DROP_DURATION,COLLAPSE_DURATION,GROUP_DROP_AT} from './gravity.js';
+const FILES={click:'./assets/sounds/wheel-click.wav',horn:'./assets/sounds/party-horn.wav',spoke:'./assets/sounds/spoke-drop.wav',collapse:'./assets/sounds/collapse-fall.wav',warp:'./assets/sounds/warp.wav'};
 export class WheelSound{
   constructor({AudioContext=globalThis.AudioContext||globalThis.webkitAudioContext,fetcher=globalThis.fetch?.bind(globalThis),muted=false,clock=()=>performance.now()}={}){
     this.clock=clock;this.Context=AudioContext;this.muted=muted;this.context=null;this.buffers={};this.voices=new Set();this.visible=true;this.spin=null;this.clicksScheduled=false;
@@ -35,11 +36,13 @@ export class WheelSound{
     // Immediate fallback avoids a late result if a sound has not decoded yet.
     if(!this.synthetic)this.synthetic={};
     if(!this.synthetic[kind]){
-      const length=kind==='click'?.028:kind==='horn'?.75:kind==='warp'?WARP_DURATION/1000:.65,buffer=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*length),ctx.sampleRate),data=buffer.getChannelData(0);let phase=0,seed=41,low=0;
+      const length=kind==='click'?.028:kind==='horn'?.75:kind==='spoke'?FIRST_DROP_DURATION/1000:kind==='collapse'?(COLLAPSE_DURATION-GROUP_DROP_AT)/1000:kind==='warp'?WARP_DURATION/1000:.65,buffer=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*length),ctx.sampleRate),data=buffer.getChannelData(0);let phase=0,seed=41,low=0;
       for(let i=0;i<data.length;i++){
         const t=i/ctx.sampleRate;seed=(Math.imul(seed,1664525)+1013904223)>>>0;const noise=seed/2147483648-1;
         const attack=Math.min(1,t/.003),release=Math.min(1,(length-t)/.035);
         if(kind==='warp'){const p=t/length,envelope=Math.sin(Math.PI*p)**1.5;low+=(.035+p*.18)*(noise-low);phase+=Math.PI*2*(44+95*p*p)/ctx.sampleRate;const arrival=Math.exp(-(((t-3.12)/.12)**2));data[i]=(low*.4+Math.sin(phase)*.07)*envelope+(low*.2+Math.sin(t*Math.PI*2*52)*.08)*arrival}
+        else if(kind==='spoke'){low+=.15*(noise-low);const hit=Math.max(0,t-.54),impact=t>=.54?Math.exp(-hit*30):0;data[i]=(noise*.13*Math.exp(-t*65)+(Math.sin(hit*Math.PI*2*240)*.12+low*.10)*impact)*attack*release}
+        else if(kind==='collapse'){low+=.065*(noise-low);const fall=Math.sin(Math.PI*t/length),impact=Math.exp(-(((t-.73)/.19)**2));data[i]=(low*(.2*fall+.6*impact)+Math.sin(t*Math.PI*2*68)*(.09*Math.exp(-t*18)+.18*impact))*attack*release}
         else if(kind==='horn'){const frequency=t<.12?196:t<.25?261.625:329.625;phase+=Math.PI*2*frequency/ctx.sampleRate;data[i]=(.30*Math.sin(phase)+.12*Math.sin(phase*2)+.06*Math.sin(phase*3))*attack*release}
         else if(kind==='click'){const onset=Math.min(1,t/.0004);data[i]=(Math.sin(t*2*Math.PI*1900)*.38+Math.sin(t*2*Math.PI*3270)*.20+noise*.12)*Math.exp(-t*260)*onset*release}
         else{low+=.08*(noise-low);data[i]=(low*.9+Math.sin(t*2*Math.PI*(70-t*45))*.22)*Math.exp(-t*6)*attack*release}
@@ -66,6 +69,7 @@ export class WheelSound{
   }
   finishSpin(){this.spin=null;this.stopVoices('click');this.clicksScheduled=false;this.play('horn')}
   cancelSpin(){this.spin=null;this.quiet()}
+  setCollapsePhase(phase){this.stopVoices('spoke');this.stopVoices('collapse');if(phase==='spoke'||phase==='collapse')this.play(phase)}
   play(kind){const ctx=this.context;if(!ctx)return;if(this.buffers[kind])this.playBuffer(this.buffers[kind],ctx.currentTime,.85,kind);else this.synth(kind,ctx.currentTime,.85)}
   dispose(){this.cancelSpin();this.context?.close()?.catch(()=>{})}
 }
