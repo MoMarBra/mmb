@@ -116,8 +116,8 @@ async function explodeWheel(){
   const explosionId=++ui.explosionId,reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
   wobbleAnimation?.cancel();ui.collapse?.restore();let snapshot=$('wheel-fallback');
   if(!reduced)try{snapshot=ui.wheel3d?.snapshot()||snapshot}catch{}
-  ui.collapse=createGravityCollapse({root:document.querySelector('.app-shell'),wheelCanvas:snapshot,wheelRect:$('wheel-stage').getBoundingClientRect(),snacks:store.snacks,rotation:ui.rotation,reduced});
-  ui.exploding=true;document.body.classList.add('egg-active');renderAll();ui.wheel3d?.setInteractive(false);sounds.cancelSpin();sounds.play('explosion');
+  ui.collapse=createGravityCollapse({root:document.querySelector('.app-shell'),wheelCanvas:snapshot,wheelRect:$('wheel-stage').getBoundingClientRect(),snacks:store.snacks,rotation:ui.rotation,reduced,onPhase:phase=>sounds.setCollapsePhase(phase)});
+  ui.exploding=true;document.body.classList.add('egg-active');renderAll();ui.wheel3d?.setInteractive(false);sounds.cancelSpin();
   const collapse=ui.collapse;
   await animateSpin({start:0,target:1,duration:collapse.duration,isCurrent:()=>ui.exploding&&ui.explosionId===explosionId,onFrame(_,progress){collapse.frame(progress*collapse.duration)},onStop(){}});
 }
@@ -129,7 +129,7 @@ const egg=new HubEasterEgg({canTap:()=>!ui.spinning&&!ui.exploding&&!store.loadi
     await warp.play({onStart:()=>sounds.play('warp')});
     // Keep the final dark frame until navigation; restore owns cancellation and cleanup.
   },
-  restore(){wobbleAnimation?.cancel();ui.warp?.restore();ui.warp=null;sounds.stopVoices('warp');ui.collapse?.restore();ui.collapse=null;ui.exploding=false;ui.explosionProgress=0;document.body.classList.remove('egg-active');ui.wheel3d?.explode(0);ui.wheel3d?.setInteractive(true);ui.wheel3d?.select(ui.selectedId);drawFallback($('wheel-fallback'),store.snacks,ui.rotation,ui.selectedId);renderAll();if(store.failures.length)showError('Bitte die ungespeicherten Bewertungen zuerst erneut speichern.');$('wheel-hub').focus({preventScroll:true})}
+  restore(){wobbleAnimation?.cancel();ui.warp?.restore();ui.warp=null;sounds.stopVoices('warp');sounds.stopVoices('spoke');sounds.stopVoices('collapse');ui.collapse?.restore();ui.collapse=null;ui.exploding=false;ui.explosionProgress=0;document.body.classList.remove('egg-active');ui.wheel3d?.explode(0);ui.wheel3d?.setInteractive(true);ui.wheel3d?.select(ui.selectedId);drawFallback($('wheel-fallback'),store.snacks,ui.rotation,ui.selectedId);renderAll();if(store.failures.length)showError('Bitte die ungespeicherten Bewertungen zuerst erneut speichern.');$('wheel-hub').focus({preventScroll:true})}
 });
 $('wheel-hub').addEventListener('click',event=>{event.stopPropagation();sounds.unlock();egg.tap()});
 function renderSound(){const button=$('sound-toggle');button.setAttribute('aria-pressed',String(!sounds.muted));button.setAttribute('aria-label',sounds.muted?'Ton einschalten':'Ton ausschalten');button.title=button.getAttribute('aria-label')}

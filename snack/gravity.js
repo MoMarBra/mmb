@@ -1,38 +1,36 @@
 import {WHEEL,POINTER_OUTLINE} from './wheel-geometry.js';
-export const COLLAPSE_DURATION=3000;
+export const FIRST_DROP_DURATION=800;
+export const COLLAPSE_PAUSE=3000;
+export const GROUP_DROP_AT=FIRST_DROP_DURATION+COLLAPSE_PAUSE;
+export const COLLAPSE_DURATION=5000;
 const TAU=Math.PI*2;
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const noise=(seed)=>{const n=Math.sin(seed*127.1+311.7)*43758.5453;return n-Math.floor(n)};
 const extentY=piece=>Math.abs(Math.sin(piece.angle))*piece.width/2+Math.abs(Math.cos(piece.angle))*piece.height/2;
-const extentX=piece=>Math.abs(Math.cos(piece.angle))*piece.width/2+Math.abs(Math.sin(piece.angle))*piece.height/2;
+const fallGravity=(piece,flight)=>Math.max(600,2*Math.max(0,piece.floor-piece.startY-Math.min(piece.width,piece.height)/2)/(flight*flight));
 
-// One sector drops first. The remaining pieces release in a growing cascade.
-// Constant gravity and damped floor contact let every piece settle without snapping.
+// One sector drops, followed by three still seconds and one simultaneous gravity fall.
+// Gravity scales with the actual distance so every viewport settles within five seconds.
 export function makeDebris(rect,index,origin,viewport){
-  const x=rect.left+rect.width/2,y=rect.top+rect.height/2,dx=x-origin.x,dy=y-origin.y,distance=Math.hypot(dx,dy)||1;
-  return{width:rect.width,height:rect.height,x,y,startX:x,startY:y,angle:0,
-    vx:dx/distance*(120+noise(index+1)*230)+(noise(index+2)-.5)*90,
-    vy:dy/distance*85-80-noise(index+3)*90,
-    omega:(noise(index+4)-.5)*8,
-    release:.92+Math.min(.46,distance/Math.hypot(viewport.width,viewport.height)*.8)+noise(index+5)*.06,
+  const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+  const piece={width:rect.width,height:rect.height,x,y,startX:x,startY:y,angle:0,
+    vx:0,vy:0,omega:(noise(index+4)-.5)*1.5,
+    release:GROUP_DROP_AT/1000,
     floor:viewport.height-12-(index%4)*2,landed:false,settled:false,index};
+  piece.gravity=fallGravity(piece,.86);return piece;
 }
 export function advanceDebris(piece,from,to,viewport){
   if(piece.settled||to<=piece.release)return piece;
-  const gravity=Math.max(2200,viewport.height*2.5);
+  const gravity=piece.gravity;
   for(let time=Math.max(from,piece.release);time<to;){
     const next=Math.min(to,time+1/120),dt=next-Math.max(time,piece.release);time=next;
     if(dt<=0)continue;
     piece.vy+=gravity*dt;piece.x+=piece.vx*dt;piece.y+=piece.vy*dt;piece.angle+=piece.omega*dt;
-    const ex=extentX(piece),ey=extentY(piece),left=Math.min(ex,viewport.width/2),right=Math.max(left,viewport.width-ex);
-    if(piece.x<left){piece.x=left;piece.vx=Math.abs(piece.vx)*.35}
-    if(piece.x>right){piece.x=right;piece.vx=-Math.abs(piece.vx)*.35}
+    const ey=extentY(piece);
     if(piece.y+ey>=piece.floor){
       piece.y=piece.floor-ey;piece.landed=true;
-      piece.vy=Math.abs(piece.vy)<125?0:-Math.abs(piece.vy)*.18;
-      piece.vx*=.62;piece.omega*=.46;
-      if(Math.abs(piece.omega)<.025)piece.omega=0;
-      if(Math.abs(piece.vx)<.4)piece.vx=0;
+      piece.vy=Math.abs(piece.vy)<125?0:-Math.abs(piece.vy)*.04;
+      piece.vx=0;piece.omega=0;
       if(!piece.vy&&!piece.vx&&!piece.omega){piece.settled=true;break}
     }
   }
@@ -80,12 +78,12 @@ function rectangleTriangles(width,height,cols,rows){
 }
 function boundsOf(points){const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]),left=Math.min(...xs),top=Math.min(...ys),right=Math.max(...xs),bottom=Math.max(...ys);return{left,top,right,bottom,width:right-left,height:bottom-top}}
 
-export function createGravityCollapse({root,wheelCanvas,wheelRect,snacks,rotation=0,reduced=false,win=root.ownerDocument.defaultView}){
+export function createGravityCollapse({root,wheelCanvas,wheelRect,snacks,rotation=0,reduced=false,onPhase=()=>{},win=root.ownerDocument.defaultView}){
   if(reduced)return{duration:0,frame(){},restore(){},count:0};
   const document=root.ownerDocument,viewport={width:win.innerWidth,height:win.innerHeight},origin={x:wheelRect.left+wheelRect.width/2,y:wheelRect.top+wheelRect.height/2};
   const overlay=document.createElement('div');overlay.className='gravity-overlay';overlay.setAttribute('aria-hidden','true');overlay.setAttribute('inert','');
   const floor=document.createElement('div');floor.className='gravity-floor';overlay.append(floor);
-  const fragments=[];let restored=false,previous=0;
+  const fragments=[];let restored=false,previous=0,phase=null;
   function addFragment(rect,content,points,kind='ui',part=0){
     if(rect.width<.5||rect.height<.5)return;
     const holder=document.createElement('div');holder.className='gravity-piece';holder.style.width=`${rect.width}px`;holder.style.height=`${rect.height}px`;
@@ -142,39 +140,28 @@ export function createGravityCollapse({root,wheelCanvas,wheelRect,snacks,rotatio
   const sectors=fragments.filter(fragment=>fragment.kind==='sector');
   const first=sectors.reduce((lowest,fragment)=>!lowest||fragment.startY>lowest.startY?fragment:lowest,null);
   if(first){
-    first.release=.12;first.vx=0;first.vy=12;first.omega=.16;
-    const count=Math.max(1,snacks.length),maxDistance=Math.max(1,Math.floor(count/2)-1);
-    for(const fragment of sectors){
-      if(fragment===first)continue;
-      const clockwise=(fragment.part-first.part+count)%count,distance=Math.min(clockwise,count-clockwise);
-      fragment.release=.70+.65*(distance-1)/maxDistance;
-    }
-    for(const fragment of fragments){
-      if(fragment.kind==='rim'){
-        const angle=(fragment.part+.5)*TAU/WHEEL.bulbs-Math.PI/2,firstAngle=rotation+first.part*TAU/count-Math.PI/2;
-        const distance=Math.abs(Math.atan2(Math.sin(angle-firstAngle),Math.cos(angle-firstAngle)));
-        fragment.release=.91+.47*distance/Math.PI+noise(fragment.index)*.04;
-      }else if(fragment.kind==='hub')fragment.release=1.18;
-      else if(fragment.kind==='pointer')fragment.release=1.40;
-    }
+    first.release=.05;first.omega=.16;first.gravity=fallGravity(first,.54);
   }
   const oldInert=root.getAttribute('inert'),oldAria=root.getAttribute('aria-hidden'),hadClass=document.body.classList.contains('gravity-active');
   root.setAttribute('inert','');root.setAttribute('aria-hidden','true');document.body.append(overlay);document.body.classList.add('gravity-active');
-  function frame(milliseconds){
+  function frame(milliseconds,notify=true){
     if(restored)return;
-    const seconds=clamp(milliseconds,0,COLLAPSE_DURATION)/1000;
+    const elapsed=Math.max(previous*1000,clamp(milliseconds,0,COLLAPSE_DURATION)),seconds=elapsed/1000;
     for(const fragment of fragments){
       if(fragment.settled&&fragment.transform)continue;
-      const shakeStart=Math.max(0,fragment.release-.11);
-      if(seconds<shakeStart&&fragment.transform)continue;
+      if(seconds<=fragment.release&&fragment.transform)continue;
       advanceDebris(fragment,previous,Math.max(previous,seconds),viewport);
-      const shake=seconds>shakeStart&&seconds<fragment.release?Math.sin((seconds-shakeStart)*72+fragment.index)*Math.sin(Math.PI*(seconds-shakeStart)/.11)*2.2:0;
-      const transform=`translate3d(${fragment.x-fragment.width/2+shake}px,${fragment.y-fragment.height/2}px,0) rotate(${fragment.angle}rad)`;
+      const transform=`translate3d(${fragment.x-fragment.width/2}px,${fragment.y-fragment.height/2}px,0) rotate(${fragment.angle}rad)`;
       if(transform!==fragment.transform){fragment.element.style.transform=transform;fragment.transform=transform}
     }
-    floor.style.opacity=String(clamp((milliseconds-250)/700,0,1));previous=Math.max(previous,seconds);
+    const opacity=String(clamp((elapsed-100)/500,0,1));if(floor.style.opacity!==opacity)floor.style.opacity=opacity;
+    previous=Math.max(previous,seconds);
+    if(notify){
+      const next=elapsed>=COLLAPSE_DURATION?'done':elapsed>=GROUP_DROP_AT?'collapse':elapsed>=FIRST_DROP_DURATION?'pause':'spoke';
+      if(next!==phase){phase=next;try{onPhase(next)}catch{/* Missing sound must never interrupt the fall. */}}
+    }
   }
-  frame(0);
+  frame(0,false);
   return{duration:COLLAPSE_DURATION,count:fragments.length,element:overlay,frame,restore(){
     if(restored)return;restored=true;overlay.remove();if(!hadClass)document.body.classList.remove('gravity-active');
     if(oldInert===null)root.removeAttribute('inert');else root.setAttribute('inert',oldInert);
