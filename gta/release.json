@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "publishedPath": "/gta/",
-  "sourceCommit": "aa81dd1506a4fed1751805dcb5a6a27194a5f70c",
+  "sourceCommit": "017fab3979b1c7d7545d40015b13179b39ae0849",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T12:35:59.131Z",
+  "preparedAt": "2026-09-22T13:29:56.707Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Quizssoir portal in the office WC leads to a separate 3D studio with seated candidate and host, audience, 15 prize levels, 45 original questions and three lifelines. Original 12-second score and 57 German voice recordings. Rule, integration, audio, pause/resume and one-time payout tests pass; existing story, office and mouse regressions pass. Chrome and Edge real-browser checks cover all 15 questions, lifelines, audible mix, saved locked answer after reload, mobile layout, seated actors, return to office and original workshop-case click. No original television audio is included. Performance depends on device and resolution."
+  "validation": "18 user-provided quizshow recordings plus three seamless loop derivatives. Complete Main Theme synchronized to a 45-second seated studio intro. Milestone question, lock, reveal, million and closing cues. Bounded PCM cache; pause, mute, delayed decode and result handoffs tested. Chrome and Edge full fifteen-question runs, real music-bus output, intro camera/audio synchronization, save/load, payout, mobile UI and existing workshop portal checks. Supplied files retained byte-for-byte; provenance and derivative hashes documented. Performance varies by hardware and settings."
 }

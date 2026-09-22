@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { QuizState, QUIZ_LADDER } from './quiz-state.js';
 import { QuizStage, installQuizssoir } from './quiz-stage.js';
-import { QuizAudio } from './quiz-audio.js';
+import { QuizAudio, QUIZ_SHOW_INTRO_SHOTS } from './quiz-audio.js';
 import { QUIZ_LINES } from './quiz-lines.js';
 
 const formatter = new Intl.NumberFormat('de-DE');
@@ -68,8 +68,19 @@ export class Quizssoir {
     this.ray.setFromCamera(this.cursor, this.w.camera);
     if (this.ray.intersectObject(this.fixture.root, true).length) this.brief();
   }
+  prepareStage() {
+    this.stage ??= new QuizStage(this.w, { fixture: this.fixture });
+    if (!this.stage.warmed) {
+      this.stage.warmed = true;
+      this.stage.scene.environment = this.w.scene?.environment || null;
+      this.w.renderer.compileAsync?.(this.stage.scene, this.stage.camera)?.catch(() => {});
+    }
+  }
   brief() {
     if (!this.nearby() || this.g.busy || this.g.cinematic) return false;
+    this.g.audio.start();
+    this.audio.preloadIntro();
+    this.prepareStage();
     this.state = new QuizState(this.g.sim.s.quizssoir);
     const v = this.state.view(),
       resume = activeRound(v.phase);
@@ -86,11 +97,7 @@ export class Quizssoir {
     this.g.audio.start();
     const before = this.state.view();
     if (!activeRound(before.phase)) this.state.start();
-    this.stage ??= new QuizStage(this.w, { fixture: this.fixture });
-    if (!this.stage.warmed) {
-      this.stage.warmed = true;
-      this.w.renderer.compileAsync?.(this.stage.scene, this.stage.camera)?.catch(() => {});
-    }
+    this.prepareStage();
     const v = this.state.view();
     this.current = {
       phase: v.phase,
@@ -119,7 +126,7 @@ export class Quizssoir {
     this.w.keys.clear();
     this.audio.start();
     this.shell();
-    this.phaseEntered();
+    this.phaseEntered({ resume: activeRound(before.phase) });
     this.save();
     this.render(0);
     return true;
@@ -154,7 +161,8 @@ export class Quizssoir {
       <footer class="quiz-footer"><span>BBE QUIZ CLUB</span><span>A–D wählen · Enter einloggen · Esc Pause</span><span id="quiz-step-label">LIVE AUS DER STILLEN ABTEILUNG</span></footer>
     </section>`;
     for (let i = 0; i < 4; i++) $('quiz-answer-' + i).onclick = () => this.select(i);
-    $('quiz-lock').onclick = () => this.lock();
+    $('quiz-lock').onclick = () =>
+      this.state.view().phase === 'locked' ? this.resolveAnswer() : this.lock();
     $('quiz-next').onclick = () => this.next();
     $('quiz-walk').onclick = () => this.walkAway();
     for (const id of ['fifty', 'audience', 'phone']) $('quiz-' + id).onclick = () => this.joker(id);
@@ -176,7 +184,7 @@ export class Quizssoir {
       this.draw();
     };
   }
-  phaseEntered() {
+  phaseEntered(options = {}) {
     const m = this.current,
       v = this.state.view();
     if (!m) return;
@@ -185,15 +193,18 @@ export class Quizssoir {
     m.hint = null;
     m.confirmWalk = false;
     m.resumeVoice = null;
+    m.pendingVoice = null;
+    m.welcomeSpoken = false;
+    m.canResolve = false;
     this.stopVoice();
     const tier = Math.max(0, v.level - 1);
     if (v.phase === 'intro') {
       this.audio.cue('intro', tier);
-      this.speak('intro');
+      // Let the complete Main Theme introduce the studio before the host speaks.
     }
     if (v.phase === 'question') {
-      this.audio.cue('question', tier);
-      this.speak('question_' + v.question.id);
+      this.audio.cue('question', tier, options);
+      m.pendingVoice = 'question_' + v.question.id;
     }
     if (v.phase === 'locked') {
       this.audio.cue('lock', tier);
@@ -201,8 +212,12 @@ export class Quizssoir {
     }
     if (v.phase === 'reveal') {
       const safe = [5, 10].includes(v.level) && v.reveal.correct;
-      this.audio.cue(v.reveal.correct ? (safe ? 'safety' : 'correct') : 'wrong', tier);
-      this.speak(safe ? 'safety' : v.reveal.correct ? 'correct' : 'wrong');
+      const million = v.reveal.correct && v.level === 15;
+      this.audio.cue(
+        million ? 'million' : v.reveal.correct ? (safe ? 'safety' : 'correct') : 'wrong',
+        tier,
+      );
+      this.speak(million ? 'million' : safe ? 'safety' : v.reveal.correct ? 'correct' : 'wrong');
     }
     if (v.phase === 'finished') {
       m.paid = this.state.claimReward();
@@ -214,8 +229,8 @@ export class Quizssoir {
         });
       }
       this.g.sim.s.bladder = Math.max(0, this.g.sim.s.bladder - 25);
-      this.audio.cue(v.outcome === 'win' ? 'million' : 'exit', tier);
-      this.speak(v.outcome === 'win' ? 'million' : v.outcome === 'wrong' ? 'wrong' : 'exit');
+      this.audio.cue('finale', tier, { outcome: v.outcome });
+      if (v.outcome === 'walk-away') this.speak('exit');
     }
     this.draw();
     this.focusAction();
@@ -255,6 +270,16 @@ export class Quizssoir {
   }
   lock() {
     if (!this.current || this.current.paused || !this.state.lock()) return;
+    this.phaseEntered();
+  }
+  resolveAnswer() {
+    if (
+      !this.current ||
+      this.current.paused ||
+      this.audio.presentationTime < 3.2 ||
+      !this.state.reveal()
+    )
+      return;
     this.phaseEntered();
   }
   next() {
@@ -340,10 +365,12 @@ export class Quizssoir {
       }
     }
     $('quiz-lock').hidden = v.phase === 'reveal';
-    $('quiz-lock').disabled = !v.can.lock || m.paused;
+    $('quiz-lock').disabled = (v.phase === 'locked' ? !m.canResolve : !v.can.lock) || m.paused;
     $('quiz-lock').textContent =
       v.phase === 'locked'
-        ? 'Eingeloggt …'
+        ? m.canResolve
+          ? 'Antwort auflösen ↗'
+          : 'Eingeloggt …'
         : v.selection === null
           ? 'Antwort wählen'
           : letters[v.selection] + ' einloggen';
@@ -526,7 +553,8 @@ export class Quizssoir {
       else if (e.code === 'F1') this.joker('fifty');
       else if (e.code === 'F2') this.joker('audience');
       else if (e.code === 'F3') this.joker('phone');
-    } else if (v.phase === 'reveal' && ['Enter', 'Space'].includes(e.code)) this.next();
+    } else if (v.phase === 'locked' && e.code === 'Enter') this.resolveAnswer();
+    else if (v.phase === 'reveal' && ['Enter', 'Space'].includes(e.code)) this.next();
     else if (v.phase === 'finished' && e.code === 'Enter') this.finish();
   }
   render(dt) {
@@ -540,15 +568,39 @@ export class Quizssoir {
     m.elapsed += dt;
     m.clock += dt;
     let v = m.view || this.state.view();
-    if (v.phase === 'intro' && m.elapsed >= 12) {
+    this.audio.update(dt, { paused: m.paused, phase: v.phase, tier: Math.max(0, v.level - 1) });
+    if (v.phase === 'intro' || v.phase === 'locked') m.elapsed = this.audio.presentationTime;
+    if (v.phase === 'intro' && m.elapsed >= this.audio.introDuration) {
       this.state.begin();
       this.phaseEntered();
       v = this.state.view();
     }
-    if (v.phase === 'locked' && m.elapsed >= (v.level > 10 ? 5.4 : 4.2)) {
+    if (v.phase === 'locked' && m.elapsed >= this.audio.lockDuration) {
       this.state.reveal();
       this.phaseEntered();
       v = this.state.view();
+    }
+    if (v.phase === 'locked' && !m.canResolve && m.elapsed >= 3.2) {
+      m.canResolve = true;
+      this.draw();
+    }
+    const introShot =
+      v.phase === 'intro'
+        ? QUIZ_SHOW_INTRO_SHOTS.find((s) => m.elapsed < s.end) || QUIZ_SHOW_INTRO_SHOTS.at(-1)
+        : null;
+    if (!m.paused && introShot?.welcome && !m.welcomeSpoken) {
+      m.welcomeSpoken = true;
+      this.speak('intro');
+    }
+    if (
+      !m.paused &&
+      m.pendingVoice &&
+      this.audio.leadRemaining <= 0 &&
+      (!m.voice || m.voice.ended || m.voice.stopped)
+    ) {
+      const line = m.pendingVoice;
+      m.pendingVoice = null;
+      this.speak(line);
     }
     const speaking = !!(
       m.voice &&
@@ -562,7 +614,6 @@ export class Quizssoir {
     if ($('quiz-host'))
       $('quiz-host').hidden =
         !speaking || !this.g.sim.s.audioSubtitles || m.voiceKey?.startsWith('question_');
-    this.audio.update(dt, { paused: m.paused, phase: v.phase, tier: Math.max(0, v.level - 1) });
     const shot = this.stage.render(
       {
         phase:
@@ -577,12 +628,16 @@ export class Quizssoir {
         correct: v.reveal?.correct,
         speaking,
         paused: m.paused,
+        introShot: introShot?.shot,
+        introProgress: introShot
+          ? Math.max(0, Math.min(1, (m.elapsed - introShot.at) / (introShot.end - introShot.at)))
+          : 0,
       },
       m.elapsed,
       dt,
     );
     if ($('quiz-cut')) $('quiz-cut').style.opacity = String(shot?.fade || 0);
-    $('quiz-opening')?.classList.toggle('is-portal', v.phase === 'intro' && !shot?.studio);
+    $('quiz-opening')?.classList.toggle('is-portal', v.phase === 'intro' && !introShot?.title);
   }
   cleanup() {
     const m = this.current;

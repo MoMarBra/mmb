@@ -8,7 +8,18 @@ const ease = (t) => {
   return t * t * (3 - 2 * t);
 };
 const lerp = (a, b, t) => a + (b - a) * t;
-export const QUIZ_INTRO_DURATION = 12;
+// Camera names carry no guessed music timings: the controller follows the supplied audio markers.
+export const QUIZ_INTRO_SHOTS = Object.freeze([
+  'portal',
+  'reveal',
+  'establish',
+  'audience',
+  'host',
+  'candidate',
+  'duo',
+  'question-ready',
+]);
+export const QUIZ_INTRO_DURATION = 12; // Legacy fallback until a controller supplies shot/progress.
 export const QUIZSSOIR_ANCHOR = Object.freeze({ x: 37.65, z: 22.15, y: 0, yaw: Math.PI / 2 });
 
 // Every resource created here is owned locally. The classic human rig uses shared
@@ -246,6 +257,14 @@ export class QuizStage {
     this.look = new THREE.Vector3();
     this.goal = new THREE.Vector3();
     this.beams = [];
+    this.audienceActors = [];
+    this.audienceHands = [];
+    this.audienceArms = [];
+    this.audienceTransform = new THREE.Object3D();
+    this.audienceStart = new THREE.Vector3();
+    this.audienceEnd = new THREE.Vector3();
+    this.audienceDirection = new THREE.Vector3();
+    this.up = new THREE.Vector3(0, 1, 0);
     this.previousPhase = null;
     this.phaseTime = 0;
     this.disposed = false;
@@ -380,10 +399,10 @@ export class QuizStage {
     b.cylinder([0, 0.24, 0], 0.51, 0.025, navy);
     b.ring([0, 0.255, 0], 0.49, 0.013, gold);
     this.scene.add(new THREE.HemisphereLight('#abc9e8', '#111328', 1.6));
-    const key = new THREE.DirectionalLight('#fff0d5', 2.7);
+    const key = (this.keyLight = new THREE.DirectionalLight('#fff0d5', 2.7));
     key.position.set(3, 7, 6);
     this.scene.add(key);
-    const fill = new THREE.DirectionalLight('#93bdff', 1.8);
+    const fill = (this.fillLight = new THREE.DirectionalLight('#93bdff', 1.8));
     fill.position.set(-4, 4, -2);
     this.scene.add(fill);
     this.accent = new THREE.PointLight('#4799ff', 32, 12, 2);
@@ -396,11 +415,29 @@ export class QuizStage {
     const b = this.builder;
     const seats = [],
       skinGroups = [[], [], []],
-      jackets = [[], [], [], []];
+      jackets = [[], [], [], []],
+      hands = [[], [], []],
+      arms = [[], [], [], []],
+      hair = [[], [], []],
+      eyes = [],
+      legs = [],
+      shoes = [],
+      seatPads = [];
     const colors = ['#9b7763', '#c99b7b', '#e0b394'];
     for (let row = 0; row < 3; row++) {
       const radius = 7.45 + row * 1.12;
       b.ring([0, 0.08 + row * 0.3, 0], radius, 0.035, b.material('#14253a', 0.8));
+      const terrace = b.mesh(
+        new THREE.RingGeometry(radius - 0.57, radius + 0.57, 96),
+        b.material('#0a1528', 0.66, 0.14),
+        [0, 0.1 + row * 0.3, 0],
+      );
+      terrace.rotation.x = -Math.PI / 2;
+      b.mesh(
+        new THREE.CylinderGeometry(radius - 0.57, radius - 0.57, 0.12 + row * 0.3, 96, 1, true),
+        b.material('#081020', 0.55),
+        [0, 0.04 + row * 0.15, 0],
+      );
       for (let i = 0; i < 35; i++) {
         const angle = 0.53 + (i / 34) * (TAU - 1.06);
         const x = Math.sin(angle) * radius,
@@ -413,7 +450,7 @@ export class QuizStage {
           yaw,
         });
         skinGroups[(i + row) % 3].push({
-          position: [x, y + 1.02, z - 0.025],
+          position: [x, y + 1.02, z],
           scale: [0.14, 0.18, 0.145],
         });
         jackets[(i * 3 + row) % 4].push({
@@ -421,6 +458,62 @@ export class QuizStage {
           scale: [0.23, 0.33, 0.15],
           yaw,
         });
+        const local = (lx, ly, lz) => [
+          x + Math.cos(yaw) * lx + Math.sin(yaw) * lz,
+          y + ly,
+          z - Math.sin(yaw) * lx + Math.cos(yaw) * lz,
+        ];
+        const skin = (i + row) % 3,
+          jacket = (i * 3 + row) % 4;
+        const spectator = {
+          x,
+          y,
+          z,
+          yaw,
+          sin: Math.sin(yaw),
+          cos: Math.cos(yaw),
+          skin,
+          jacket,
+          seed: i * 0.91 + row * 2.3,
+          handIndex: hands[skin].length,
+          armIndex: arms[jacket].length,
+        };
+        this.audienceActors.push(spectator);
+        seatPads.push({ position: local(0, 0.3, 0.05), scale: [0.46, 0.055, 0.44], yaw });
+        hair[skin].push({ position: local(0, 1.12, -0.014), scale: [0.146, 0.09, 0.147], yaw });
+        skinGroups[skin].push({
+          position: local(0, 1.012, 0.15),
+          scale: [0.025, 0.033, 0.035],
+          yaw,
+        });
+        for (const side of [-1, 1]) {
+          hands[skin].push({
+            position: local(side * 0.2, 0.67, 0.23),
+            scale: [0.037, 0.052, 0.029],
+            yaw,
+          });
+          arms[jacket].push({ position: local(side * 0.22, 0.7, 0.11), scale: [1, 0.3, 1], yaw });
+          eyes.push({
+            position: local(side * 0.051, 1.057, 0.135),
+            scale: [0.01, 0.014, 0.009],
+            yaw,
+          });
+          legs.push({
+            position: local(side * 0.105, 0.33, 0.16),
+            scale: [0.085, 0.092, 0.23],
+            yaw,
+          });
+          legs.push({
+            position: local(side * 0.105, 0.145, 0.33),
+            scale: [0.065, 0.18, 0.068],
+            yaw,
+          });
+          shoes.push({
+            position: local(side * 0.105, -0.035, 0.38),
+            scale: [0.082, 0.055, 0.13],
+            yaw,
+          });
+        }
       }
     }
     b.instances(
@@ -445,6 +538,106 @@ export class QuizStage {
         'Quiz · Publikum Kleidung',
       ),
     );
+    b.instances(
+      new THREE.BoxGeometry(1, 1, 1),
+      b.material('#101c34', 0.9),
+      seatPads,
+      'Quiz · Tribünensitzflächen',
+    );
+    b.instances(
+      new THREE.SphereGeometry(1, 8, 6),
+      b.material('#111823', 0.9),
+      legs,
+      'Quiz · sitzendes Publikum Beine',
+    );
+    b.instances(
+      new THREE.SphereGeometry(1, 8, 6),
+      b.material('#080d16', 0.76),
+      shoes,
+      'Quiz · Publikum Schuhe',
+    );
+    b.instances(
+      new THREE.SphereGeometry(1, 6, 5),
+      b.material('#14232d', 0.83),
+      eyes,
+      'Quiz · Publikum Augen',
+    );
+    hair.forEach((transforms, i) =>
+      b.instances(
+        new THREE.SphereGeometry(1, 8, 6),
+        b.material(['#2c2626', '#514035', '#a0906a'][i], 0.86),
+        transforms,
+        'Quiz · Publikum Haare',
+      ),
+    );
+    hands.forEach((transforms, i) => {
+      const m = b.instances(
+        new THREE.SphereGeometry(1, 8, 6),
+        b.material(colors[i], 0.84),
+        transforms,
+        'Quiz · animierte Applaushände',
+      );
+      m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      m.frustumCulled = false;
+      this.audienceHands.push(m);
+    });
+    arms.forEach((transforms, i) => {
+      const m = b.instances(
+        new THREE.CylinderGeometry(0.041, 0.045, 1, 8),
+        b.material(['#172b43', '#343146', '#27484b', '#523b39'][i], 0.9),
+        transforms,
+        'Quiz · animierte Publikumsarme',
+      );
+      m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      m.frustumCulled = false;
+      this.audienceArms.push(m);
+    });
+  }
+  updateAudience(time, applause) {
+    // Seven cheap instance uploads only while the crowd is applauding. Idle/paused frames reuse them.
+    const tick = Math.floor(time * 24);
+    if (this.lastAudienceTick === tick && this.lastApplause === applause) return;
+    if (!applause && this.lastApplause === false) return;
+    this.lastAudienceTick = tick;
+    this.lastApplause = applause;
+    const o = this.audienceTransform,
+      a = this.audienceStart,
+      end = this.audienceEnd;
+    for (const person of this.audienceActors) {
+      const spread = applause
+        ? 0.045 + 0.16 * (0.5 + 0.5 * Math.cos(time * 7.3 + person.seed))
+        : 0.2;
+      const handY = applause ? 0.72 + Math.sin(time * 2.1 + person.seed) * 0.025 : 0.59;
+      for (let sideIndex = 0; sideIndex < 2; sideIndex++) {
+        const side = sideIndex ? 1 : -1;
+        const lx = side * spread,
+          lz = applause ? 0.27 : 0.21;
+        end.set(
+          person.x + person.cos * lx + person.sin * lz,
+          person.y + handY,
+          person.z - person.sin * lx + person.cos * lz,
+        );
+        o.position.copy(end);
+        o.rotation.set(0, person.yaw, side * (applause ? 0.12 : 0.05));
+        o.scale.set(0.037, 0.052, 0.029);
+        o.updateMatrix();
+        this.audienceHands[person.skin].setMatrixAt(person.handIndex + sideIndex, o.matrix);
+        a.set(
+          person.x + person.cos * side * 0.225,
+          person.y + 0.82,
+          person.z - person.sin * side * 0.225,
+        );
+        this.audienceDirection.subVectors(a, end);
+        o.position.copy(a).add(end).multiplyScalar(0.5);
+        const length = this.audienceDirection.length();
+        o.quaternion.setFromUnitVectors(this.up, this.audienceDirection.normalize());
+        o.scale.set(1, length, 1);
+        o.updateMatrix();
+        this.audienceArms[person.jacket].setMatrixAt(person.armIndex + sideIndex, o.matrix);
+      }
+    }
+    for (const mesh of [...this.audienceHands, ...this.audienceArms])
+      mesh.instanceMatrix.needsUpdate = true;
   }
   beam(index, b, lampMaterial) {
     const group = new THREE.Group();
@@ -510,7 +703,75 @@ export class QuizStage {
     this.camera.aspect = Math.max(0.1, this.size.x / Math.max(1, this.size.y));
     this.camera.updateProjectionMatrix();
   }
+  questionCamera(elapsed = 0) {
+    const drift = Math.sin(elapsed * 0.13) * 0.17;
+    this.camera.position.set(4.25 + drift, 2.68, 6.65);
+    this.look.set(0, 1.4, 0);
+    this.camera.fov = 40;
+  }
+  introFrame(state, elapsed = 0) {
+    const shot = state.introShot;
+    const raw = clamp(state.introProgress);
+    const p = state.reducedMotion ? 0.5 : ease(raw);
+    let scene = this.scene,
+      fade = 0;
+    if (shot === 'portal') {
+      scene = this.world.scene;
+      this.camera.position.set(lerp(36.98, 38, p), lerp(1.53, 1.415, p), lerp(22.32, 22.15, p));
+      this.look.set(38.53, lerp(1.45, 1.415, p), 22.15);
+      this.camera.fov = lerp(63, 33, p);
+      fade = Math.max(1 - ease(elapsed / 0.6), ease((raw - 0.89) / 0.11));
+    } else if (shot === 'reveal') {
+      const a = lerp(0.78, 0.43, p),
+        r = lerp(10.9, 9.2, p);
+      this.camera.position.set(Math.sin(a) * r, lerp(6.7, 4.7, p), Math.cos(a) * r);
+      this.look.set(0, lerp(0.7, 1.12, p), -0.9);
+      this.camera.fov = lerp(54, 46, p);
+      fade = 1 - ease(raw / 0.18);
+    } else if (shot === 'establish') {
+      const a = lerp(0.43, -0.31, p),
+        r = lerp(9.2, 8.1, p);
+      this.camera.position.set(Math.sin(a) * r, lerp(4.7, 3.15, p), Math.cos(a) * r);
+      this.look.set(0, lerp(1.12, 1.36, p), lerp(-0.9, -0.15, p));
+      this.camera.fov = lerp(46, 43, p);
+    } else if (shot === 'audience') {
+      const a = lerp(4.05, 4.58, p);
+      this.camera.position.set(Math.sin(a) * 4.9, lerp(1.91, 2.13, p), Math.cos(a) * 4.9);
+      this.look.set(Math.sin(a + 0.04) * 8.9, 1.44, Math.cos(a + 0.04) * 8.9);
+      this.camera.fov = 46;
+    } else if (shot === 'host') {
+      this.camera.position.set(lerp(-0.2, 0.15, p), lerp(2.31, 2.24, p), lerp(3.38, 3.05, p));
+      this.look.set(-1.36, 1.79, 0);
+      this.camera.fov = lerp(43, 39, p);
+    } else if (shot === 'candidate') {
+      this.camera.position.set(lerp(-0.28, 0.06, p), 2.23, lerp(3.6, 3.28, p));
+      this.look.set(1.36, lerp(1.62, 1.75, p), 0);
+      this.camera.fov = lerp(43, 39, p);
+    } else if (shot === 'question-ready') {
+      this.camera.position.set(lerp(4.25, 3.63, p), lerp(2.68, 2.48, p), lerp(6.65, 5.85, p));
+      this.look.set(0, lerp(1.4, 1.55, p), 0);
+      this.camera.fov = lerp(40, 37, p);
+    } else {
+      const settle = ease(raw / 0.965);
+      this.camera.position.set(
+        lerp(0.8, 4.25, settle),
+        lerp(2.93, 2.68, settle),
+        lerp(7.25, 6.65, settle),
+      );
+      this.look.set(0, lerp(1.6, 1.4, settle), 0);
+      this.camera.fov = lerp(44, 40, settle);
+      // Settle for the last few frames of either duo shot. The audio-controlled
+      // phase may end between RAFs; this guarantees the actual last rendered
+      // frame already shares the first question's exact camera anchor.
+      if (raw >= 0.965 || state.reducedMotion) this.questionCamera(0);
+    }
+    this.camera.lookAt(this.look);
+    this.camera.updateProjectionMatrix();
+    return { scene, fade, studio: scene === this.scene, shot };
+  }
   frame(phase, elapsed, state) {
+    if (phase === 'intro' && QUIZ_INTRO_SHOTS.includes(state.introShot))
+      return this.introFrame(state, elapsed);
     let scene = this.scene,
       fade = 0,
       shot = 'two-shot';
@@ -574,10 +835,7 @@ export class QuizStage {
       this.camera.fov = 41;
       shot = 'answer-reveal';
     } else {
-      const drift = Math.sin(elapsed * 0.13) * 0.17;
-      this.camera.position.set(4.25 + drift, 2.68, 6.65);
-      this.look.set(0, 1.4, 0);
-      this.camera.fov = 40;
+      this.questionCamera(elapsed);
     }
     this.camera.lookAt(this.look);
     this.camera.updateProjectionMatrix();
@@ -605,6 +863,18 @@ export class QuizStage {
     this.blue.emissiveIntensity = locked ? 0.8 + Math.sin(elapsed * 4.2) * 0.22 : 1.3;
     this.accent.color.set(color);
     this.accent.intensity = win ? 47 : locked ? 15 : 32;
+    const showOpening = phase === 'intro' && frame.studio;
+    const reveal = showOpening && state.introShot === 'reveal';
+    const revealProgress = reveal ? ease(clamp(state.introProgress) / 0.45) : 1;
+    this.keyLight.intensity = showOpening ? lerp(0.65, 2.9, revealProgress) : 2.7;
+    this.fillLight.intensity = showOpening ? lerp(0.72, 2.0, revealProgress) : 1.8;
+    if (showOpening) {
+      this.blue.emissiveIntensity =
+        (1.65 + Math.sin(elapsed * 1.8) * 0.2) * lerp(0.28, 1, revealProgress);
+      this.gold.emissiveIntensity = 1.2 + Math.sin(elapsed * 0.7) * 0.18;
+      this.accent.intensity = 38 + Math.sin(elapsed * 1.3) * 9;
+    } else this.gold.emissiveIntensity = 1.1;
+    this.updateAudience(elapsed, (showOpening && !state.speaking) || win);
     animateHuman(this.host, elapsed, 0, 'seated');
     animateHuman(this.candidate, elapsed + 0.5, 0, 'seated');
     // animateHuman uses the office chair baseline; studio bar stools have their own seat height.
@@ -622,6 +892,13 @@ export class QuizStage {
       hostRig.rightFore.rotation.x = -0.5 + Math.sin(elapsed * 2.3) * 0.13;
       hostRig.rightArm.rotation.z = -0.12;
     }
+    if (showOpening && ['host', 'candidate'].includes(state.introShot)) {
+      const actorRig = state.introShot === 'host' ? hostRig : candidateRig;
+      const greeting = Math.sin(clamp(state.introProgress) * Math.PI);
+      actorRig.rightArm.rotation.x -= greeting * 0.55;
+      actorRig.rightArm.rotation.z -= greeting * 0.22;
+      actorRig.rightFore.rotation.x -= greeting * 0.5;
+    }
     if (win) {
       candidateRig.rightArm.rotation.x = -1.45 - Math.sin(elapsed * 2) * 0.08;
       candidateRig.rightFore.rotation.x = -1.1;
@@ -631,10 +908,13 @@ export class QuizStage {
       candidateRig.leftFore.rotation.x = -1.25;
     }
     for (const beam of this.beams) {
-      beam.group.rotation.z = Math.sin(elapsed * 0.2 + beam.angle) * (locked ? 0.09 : 0.2);
-      beam.group.rotation.x = Math.cos(elapsed * 0.17 + beam.angle) * 0.18;
-      beam.mat.color.set(color);
-      beam.mat.opacity = locked ? 0.017 : 0.032;
+      const sweepSpeed = showOpening ? 0.51 : 0.2;
+      beam.group.rotation.z =
+        Math.sin(elapsed * sweepSpeed + beam.angle) * (locked ? 0.09 : showOpening ? 0.34 : 0.2);
+      beam.group.rotation.x =
+        Math.cos(elapsed * sweepSpeed * 0.83 + beam.angle) * (showOpening ? 0.31 : 0.18);
+      beam.mat.color.set(showOpening && Math.sin(beam.angle * 3) > 0 ? '#b6d9ff' : color);
+      beam.mat.opacity = locked ? 0.017 : showOpening ? lerp(0.014, 0.045, revealProgress) : 0.032;
     }
     this.confetti.visible =
       ['win', 'won'].includes(phase) ||

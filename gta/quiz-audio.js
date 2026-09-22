@@ -1,7 +1,8 @@
+import { WWM_TRACKS } from './quiz-soundtrack.js';
 /**
- * BBE Quizssoir — original, deterministic stereo score. No sampled television
- * music or recognisable show melody. Instruments and room reflections are
- * pre-rendered as local MP3s; at most one bed and one sting play.
+ * BBE Quizssoir — user-supplied show recordings with an audio-clock-driven playlist.
+ * The original procedural score authoring functions remain for small UI stings.
+ * Music uses the supplied MP3s and documented seamless question-loop derivatives.
  * Uses Soundscape.emit so all sources share its mixer, limiter and cleanup.
  */
 const RATE = 22050;
@@ -383,13 +384,99 @@ export function renderQuizScore(ctx, key) {
   return band === undefined ? composeCue(ctx, kind) : composeBed(ctx, kind, +band);
 }
 
+const CACHE_LIMIT = 64 * 1024 * 1024;
+// Three bounded 15 s bank attempts plus a small decode/startup margin.
+const INTRO_AUDIO_WAIT_LIMIT = 48;
+const trackInfo = (key) =>
+  WWM_TRACKS[key] || { id: assetId(key), duration: DURATIONS[key], gain: 0.69 };
+const cacheId = (key, loop) => key + (loop && trackInfo(key).loopAsset ? '@loop' : '');
+const sourceId = (key, loop) => (loop && trackInfo(key).loopAsset) || trackInfo(key).id;
+const segment = (key, options = {}) => {
+  const a = trackInfo(key);
+  return { key, from: 0, duration: a.duration, ...options };
+};
+const loopSegment = (key) => {
+  const a = trackInfo(key),
+    from = a.loopAsset ? a.runtimeLoopStart : a.loopStart;
+  return segment(key, {
+    from,
+    duration: a.loopAsset ? a.loopDuration : a.loopEnd - from,
+    loop: true,
+  });
+};
+const questionKey = (tier) =>
+  tier < 6 ? 'questionsEarly' : tier < 14 ? 'question2000' : 'questionMillion';
+const correctKey = (tier) =>
+  tier < 4 ? 'correctReveal' : tier < 6 ? 'win1000' : tier < 14 ? 'win2000' : 'winMillion';
+const lossKey = (tier) => (tier < 14 ? 'lose2000' : 'loseMillion');
+export const QUIZ_SHOW_INTRO_DURATION = WWM_TRACKS.theme.duration + 11;
+export const QUIZ_SHOW_INTRO_SHOTS = Object.freeze([
+  { at: 0, end: 4.74, shot: 'portal' },
+  { at: 4.74, end: 9.66, shot: 'reveal', title: true },
+  { at: 9.66, end: 12.16, shot: 'establish', title: true },
+  { at: 12.16, end: 16.66, shot: 'audience' },
+  { at: 16.66, end: 20.66, shot: 'host' },
+  { at: 20.66, end: 24.46, shot: 'candidate' },
+  { at: 24.46, end: 29.08, shot: 'duo' },
+  { at: 29.08, end: WWM_TRACKS.theme.duration, shot: 'question-ready' },
+  {
+    at: WWM_TRACKS.theme.duration,
+    end: WWM_TRACKS.theme.duration + 5,
+    shot: 'host',
+    welcome: true,
+  },
+  { at: WWM_TRACKS.theme.duration + 5, end: QUIZ_SHOW_INTRO_DURATION, shot: 'duo', welcome: true },
+]);
+/** Explicit editorial routing. Missing middle-tier recordings reuse the supplied 2,000 bed. */
+export function quizTrackPlan(name, tier = 0, options = {}) {
+  tier = clamp(tier, 0, 14);
+  name = ALIASES[name] || name;
+  if (name === 'intro')
+    return [
+      segment('theme'),
+      segment('opening', {
+        from: 0.18,
+        duration: 11,
+        gain: WWM_TRACKS.opening.gain * 0.72,
+        fadeIn: 0.3,
+        fadeOut: 0.7,
+      }),
+    ];
+  if (name === 'question') {
+    const lead =
+      tier < 6
+        ? null
+        : tier === 6
+          ? 'play2000'
+          : tier < 11
+            ? 'play4000'
+            : tier < 14
+              ? 'play64000'
+              : 'playMillion';
+    return [...(lead && !options.resume ? [segment(lead)] : []), loopSegment(questionKey(tier))];
+  }
+  if (name === 'lock' || name === 'heartbeat')
+    return tier < 6
+      ? [loopSegment('questionsEarly')]
+      : [segment(tier < 14 ? 'final2000' : 'finalMillion')];
+  if (name === 'correct' || name === 'safety' || name === 'million')
+    return [segment(name === 'million' ? 'winMillion' : correctKey(tier))];
+  if (name === 'wrong') return [segment(lossKey(tier))];
+  if (name === 'exit') return [segment('closing')];
+  if (name === 'finale')
+    return options.outcome === 'walk-away' || options.outcome === 'abort'
+      ? [segment('closing')]
+      : [segment(options.outcome === 'win' ? 'winMillion' : lossKey(tier)), segment('closing')];
+  return [];
+}
+
+/** One score playlist and one short UI sting, on the game's existing audio mixer. */
 export class QuizAudio {
   constructor(audio) {
     this.audio = audio;
     this.active = false;
     this.disposed = false;
-    this.manualPause = false;
-    this.framePause = false;
+    this.manualPause = this.framePause = false;
     this.phase = 'idle';
     this.tier = 0;
     this.buffers = new Map();
@@ -398,7 +485,14 @@ export class QuizAudio {
     this.retryAt = new Map();
     this.tracks = new Map();
     this.retired = new Set();
+    this.plan = [];
+    this.clock = 0;
+    this.lastContextTime = null;
+    this.waited = 0;
+    this.silentIntroTheme = false;
+    this.epoch = 0;
     this.visibility = () => {
+      this.lastContextTime = null;
       if (hidden()) this.haltAll();
       else if (this.active) this.update(0);
     };
@@ -408,14 +502,20 @@ export class QuizAudio {
     if (this.active) return true;
     this.active = true;
     this.manualPause = this.framePause = false;
-    // Starting a controller is not starting a new show: resumed question and
-    // locked checkpoints must not replay the introduction. The caller cues it.
     this.phase = 'idle';
+    this.clock = 0;
+    this.plan = [];
+    this.lastContextTime = null;
+    this.lastResult = null;
     this.attempts.clear();
     this.retryAt.clear();
     globalThis.document?.addEventListener?.('visibilitychange', this.visibility);
     if (!this.audio.ready) this.audio.start?.();
     return true;
+  }
+  preloadIntro() {
+    this.request('theme');
+    this.request('opening');
   }
   get playable() {
     return (
@@ -428,144 +528,294 @@ export class QuizAudio {
       this.audio.ctx?.state === 'running'
     );
   }
-  request(key) {
+  get presentationTime() {
+    return this.clock;
+  }
+  get introDuration() {
+    return QUIZ_SHOW_INTRO_DURATION;
+  }
+  get lockDuration() {
+    return this.tier < 6 ? 4.2 : trackInfo(this.tier < 14 ? 'final2000' : 'finalMillion').duration;
+  }
+  get leadRemaining() {
+    return this.phase === 'question' && this.plan[0] && !this.plan[0].loop
+      ? Math.max(0, this.plan[0].duration - this.clock)
+      : 0;
+  }
+  touch(key) {
+    const value = this.buffers.get(key);
+    if (value) {
+      this.buffers.delete(key);
+      this.buffers.set(key, value);
+    }
+    return value;
+  }
+  trim() {
+    let bytes = [...this.buffers.values()].reduce(
+      (n, b) => n + b.length * b.numberOfChannels * 4,
+      0,
+    );
+    const pinned = new Set([...this.tracks.values()].map((t) => cacheId(t.key, t.loop)));
+    for (const [key, b] of this.buffers) {
+      if (bytes <= CACHE_LIMIT) break;
+      if (!pinned.has(key)) {
+        this.buffers.delete(key);
+        bytes -= b.length * b.numberOfChannels * 4;
+      }
+    }
+  }
+  request(key, loop = false) {
+    const cache = cacheId(key, loop),
+      id = sourceId(key, loop),
+      now = this.audio.ctx?.currentTime || 0;
     if (
-      this.buffers.has(key) ||
-      this.pending.has(key) ||
+      this.buffers.has(cache) ||
+      this.pending.has(cache) ||
       !this.audio.bank ||
-      (this.attempts.get(key) || 0) >= 3 ||
-      (this.audio.ctx?.currentTime || 0) < (this.retryAt.get(key) || 0)
+      (this.attempts.get(cache) || 0) >= 3 ||
+      now < (this.retryAt.get(cache) || 0)
     )
       return;
-    this.attempts.set(key, (this.attempts.get(key) || 0) + 1);
-    this.retryAt.set(key, (this.audio.ctx?.currentTime || 0) + 2);
-    this.audio.bank.failures?.delete(assetId(key));
+    const epoch = this.epoch;
+    this.attempts.set(cache, (this.attempts.get(cache) || 0) + 1);
+    this.retryAt.set(cache, now + 2);
+    this.audio.bank.failures?.delete(id);
     const promise = Promise.resolve()
-      .then(() => (this.disposed ? null : this.audio.bank.get(assetId(key))))
+      .then(() => (this.disposed || epoch !== this.epoch ? null : this.audio.bank.get(id)))
       .then((buffer) => {
-        if (buffer && !this.disposed) this.buffers.set(key, buffer);
+        if (!buffer || this.disposed || epoch !== this.epoch) return;
+        this.buffers.set(cache, buffer);
+        this.trim();
+        if (this.clock === 0) this.lastContextTime = this.audio.ctx?.currentTime ?? null;
       })
       .catch(() => {})
       .finally(() => {
-        if (this.pending.get(key) === promise) this.pending.delete(key);
-        if (this.active && !this.disposed) this.update(0);
+        if (this.pending.get(cache) === promise) this.pending.delete(cache);
+        if (this.active && !this.disposed && epoch === this.epoch) this.update(0);
       });
-    this.pending.set(key, promise);
+    this.pending.set(cache, promise);
   }
   halt(track, fade = 0) {
     const h = track.handle;
     if (!h) return;
-    const t = this.audio.ctx?.currentTime || 0;
-    track.offset += Math.max(0, t - track.startedAt);
-    if (track.loop && track.buffer)
-      track.offset %= Math.min(scoreDuration(track.key), track.buffer.duration);
+    if (track.slot === 'sting')
+      track.offset += Math.max(0, (this.audio.ctx?.currentTime || 0) - track.startedAt);
+    if (track.slot === 'bed')
+      track.offset =
+        track.from +
+        (track.loop
+          ? (this.clock - track.at + (track.clockOffset || 0)) % track.duration
+          : Math.max(0, this.clock - track.at));
     h.stop(fade);
     track.handle = null;
+    if (fade > 0 && !h.ended) this.retired.add(h);
   }
   haltAll() {
-    for (const track of this.tracks.values()) this.halt(track);
-    // Soundscape handles already fading out have stopped=true, so a second
-    // handle.stop() is intentionally ignored there. End their sources directly
-    // when the quiz closes/hides instead of letting a suspended tail resume.
-    for (const handle of this.retired) {
-      if (!handle.ended) {
+    for (const t of this.tracks.values()) this.halt(t);
+    for (const h of this.retired)
+      if (!h.ended) {
         try {
-          handle.source.stop(this.audio.ctx.currentTime);
+          h.source.stop(this.audio.ctx.currentTime);
         } catch {}
       }
-    }
     this.retired.clear();
   }
-  remove(slot, fade = 0.06) {
-    const track = this.tracks.get(slot);
-    if (track) {
-      const handle = track.handle;
-      this.halt(track, fade);
-      if (fade > 0 && handle && !handle.ended) this.retired.add(handle);
-    }
+  remove(slot, fade = 0.08) {
+    const t = this.tracks.get(slot);
+    if (t) this.halt(t, fade);
     this.tracks.delete(slot);
   }
+  choose() {
+    let at = 0;
+    for (const s of this.plan) {
+      if (s.loop || this.clock < at + s.duration) return { ...s, at };
+      at += s.duration;
+    }
+    return null;
+  }
+  setPlan(plan, preserve = false) {
+    const previous = this.tracks.get('bed');
+    if (!preserve) {
+      this.clock = 0;
+      this.waited = 0;
+      this.silentIntroTheme = false;
+      this.remove('bed', 0.3);
+    }
+    this.plan = plan;
+    this.lastContextTime = this.audio.ctx?.currentTime ?? null;
+    const chosen = this.choose();
+    if (
+      preserve &&
+      (!chosen || !previous || chosen.key !== previous.key || !!chosen.loop !== !!previous.loop)
+    )
+      this.remove('bed', 0.22);
+  }
   play(track) {
+    // A failed opening may continue visually; never join its music halfway through.
+    if (this.silentIntroTheme && track.slot === 'bed' && track.key === 'theme') return;
     if (!this.playable || (track.bus === 'music' && this.audio.sim?.s.music === false)) return;
-    track.buffer ||= this.buffers.get(track.key);
-    if (!track.buffer) {
-      this.request(track.key);
+    const buffer = this.touch(cacheId(track.key, track.loop));
+    if (!buffer) {
+      this.request(track.key, track.loop);
       return;
     }
-    if (!track.loop && track.offset >= track.buffer.duration - 0.015) return;
     if (track.handle && !track.handle.ended && !track.handle.stopped) return;
-    track.handle = this.audio.emit(track.buffer, {
-      loop: track.loop,
+    const local =
+      track.slot === 'sting'
+        ? track.offset
+        : Math.max(0, this.clock - track.at + (track.clockOffset || 0));
+    const offset =
+      track.slot === 'sting' ? local : track.from + (track.loop ? local % track.duration : local);
+    if (!track.loop && offset >= Math.min(buffer.duration, track.from + track.duration) - 0.015)
+      return;
+    const h = this.audio.emit(buffer, {
+      loop: !!track.loop,
       bus: track.bus,
       volume: track.volume,
-      offset: track.offset,
-      fade: track.loop ? 0.14 : 0.025,
+      offset,
+      fade: track.fadeIn ?? (track.loop ? 0.25 : 0.04),
     });
-    if (track.handle) {
-      track.startedAt = this.audio.ctx.currentTime;
-      if (track.loop)
-        track.handle.source.loopEnd = Math.min(scoreDuration(track.key), track.buffer.duration);
+    if (!h) return;
+    track.handle = h;
+    track.startedAt = this.audio.ctx.currentTime;
+    track.offset = offset;
+    if (track.loop) {
+      h.source.loopStart = track.from;
+      h.source.loopEnd = Math.min(buffer.duration, track.from + track.duration);
+    } else if (track.slot === 'bed') {
+      const seconds = Math.min(buffer.duration - offset, track.duration - local);
+      if (track.fadeOut) {
+        const fade = Math.min(track.fadeOut, seconds / 2);
+        h.gain.gain.setTargetAtTime(0, this.audio.ctx.currentTime + seconds - fade, fade / 4);
+      }
+      h.source.stop(this.audio.ctx.currentTime + Math.max(0.01, seconds));
     }
   }
-  cue(name, tier = this.tier) {
+  cue(name, tier = this.tier, options = {}) {
     name = ALIASES[name] || name;
-    if (!this.active || !CUES.has(name)) return false;
+    if (!this.active || (!CUES.has(name) && name !== 'finale')) return false;
     this.tier = clamp(tier, 0, 14);
-    if (name === 'question' || name === 'heartbeat') {
-      this.phase = name === 'question' ? 'question' : 'locked';
-    } else {
-      if (name === 'intro') this.phase = 'intro';
-      if (name === 'lock') this.phase = 'locked';
-      if (['correct', 'wrong', 'safety', 'million', 'exit'].includes(name)) this.phase = 'reveal';
-      this.remove('sting', 0.035);
+    if (name === 'select' || name === 'joker') {
+      this.remove('sting', 0.04);
       this.tracks.set('sting', {
+        slot: 'sting',
         key: name,
         loop: false,
+        from: 0,
+        duration: DURATIONS[name],
         offset: 0,
         handle: null,
-        bus: MUSIC.has(name) ? 'music' : 'ui',
-        volume: name === 'million' ? 0.83 : 0.69,
+        bus: 'ui',
+        volume: 0.6,
       });
+    } else {
+      this.remove('sting');
+      const next = quizTrackPlan(name, this.tier, options);
+      let preserve = name === 'finale' && this.lastResult && next[0]?.key === this.lastResult;
+      if (preserve) this.clock = Math.min(this.clock, next[0].duration);
+      if (name === 'lock' && this.tier < 6 && this.tracks.get('bed')?.key === 'questionsEarly') {
+        // Low-stake confirmations keep the continuous question bed playing.
+        preserve = true;
+        const bed = this.tracks.get('bed');
+        bed.clockOffset = (this.clock - bed.at + (bed.clockOffset || 0)) % bed.duration;
+        this.clock = 0;
+      }
+      this.setPlan(next, preserve);
+      this.phase =
+        name === 'intro'
+          ? 'intro'
+          : name === 'question'
+            ? 'question'
+            : ['lock', 'heartbeat'].includes(name)
+              ? 'locked'
+              : ['exit', 'finale'].includes(name)
+                ? 'finished'
+                : 'reveal';
+      if (['wrong', 'correct', 'safety', 'million'].includes(name)) this.lastResult = next[0]?.key;
+      else if (name !== 'finale') this.lastResult = null;
     }
     this.update(0);
     return true;
   }
-  /** Only quiz pause state belongs here; its enclosing game modal may pause the world. */
   update(dt = 0, options = {}) {
     if (!this.active) return;
     for (const h of this.retired) if (h.ended) this.retired.delete(h);
     if ('paused' in options) this.framePause = !!options.paused;
-    if ('phase' in options) this.phase = options.phase;
-    if ('tier' in options) this.tier = clamp(options.tier, 0, 14);
-    if (this.phase !== 'intro' && this.tracks.get('sting')?.key === 'intro')
-      this.remove('sting', 0.12);
-    const kind = ['locked', 'suspense', 'checking'].includes(this.phase)
-      ? 'suspense'
-      : ['question', 'answering', 'playing'].includes(this.phase)
-        ? 'question'
-        : null;
-    const key = kind ? kind + ':' + bandFor(this.tier) : null;
-    if (this.tracks.get('bed')?.key !== key) {
-      this.remove('bed', 0.16);
-      if (key)
+    const tier = 'tier' in options ? clamp(options.tier, 0, 14) : this.tier;
+    if (options.phase && (options.phase !== this.phase || tier !== this.tier)) {
+      const cue =
+        options.phase === 'locked'
+          ? 'lock'
+          : options.phase === 'question'
+            ? 'question'
+            : options.phase === 'intro'
+              ? 'intro'
+              : null;
+      this.phase = options.phase;
+      this.tier = tier;
+      if (cue) this.setPlan(quizTrackPlan(cue, tier, { resume: true }));
+    }
+    const now = this.audio.ctx?.currentTime;
+    let delta =
+      Number.isFinite(now) && this.lastContextTime !== null
+        ? Math.max(0, now - this.lastContextTime)
+        : Math.max(0, Number.isFinite(dt) ? dt : 0);
+    this.lastContextTime = Number.isFinite(now) ? now : null;
+    if (this.manualPause || this.framePause || hidden()) {
+      this.haltAll();
+      return;
+    }
+    const first = this.plan[0];
+    if (this.clock === 0 && first && this.playable && this.audio.sim?.s.music !== false) {
+      const cache = cacheId(first.key, first.loop);
+      const loaded = this.buffers.has(cache);
+      if (this.phase === 'intro' && first.key === 'theme' && !this.silentIntroTheme) {
+        const playing = this.tracks.get('bed')?.handle;
+        if (!playing || playing.stopped || playing.ended) {
+          if (!loaded) this.request(first.key, first.loop);
+          this.waited += delta;
+          const failed =
+            !loaded && !this.pending.has(cache) && (this.attempts.get(cache) || 0) >= 3;
+          if (!failed && this.waited < INTRO_AUDIO_WAIT_LIMIT) delta = 0;
+          else this.silentIntroTheme = true;
+        }
+      } else if (!loaded && !this.silentIntroTheme) {
+        this.request(first.key, first.loop);
+        this.waited += delta;
+        if (this.waited < 4 && (this.attempts.get(cache) || 0) < 3) delta = 0;
+      }
+    }
+    this.clock += delta;
+    const chosen = this.choose(),
+      old = this.tracks.get('bed');
+    if (!chosen) this.remove('bed', 0.25);
+    else {
+      if (!old || old.key !== chosen.key || old.at !== chosen.at || !!old.loop !== !!chosen.loop) {
+        this.remove('bed', 0.3);
         this.tracks.set('bed', {
-          key,
-          loop: true,
-          offset: 0,
+          ...chosen,
+          slot: 'bed',
           handle: null,
+          offset: chosen.from,
           bus: 'music',
-          volume: 0.59,
+          volume:
+            chosen.gain ??
+            (chosen.loop ? trackInfo(chosen.key).loopGain : undefined) ??
+            trackInfo(chosen.key).gain,
         });
+      }
+      // Decode only the next required cue, never the entire 19 MB soundtrack.
+      const index = this.plan.findIndex((p) => p.key === chosen.key);
+      const next = this.plan[index + 1];
+      if (next && !chosen.loop && this.clock - chosen.at > Math.max(0, chosen.duration - 3))
+        this.request(next.key, next.loop);
     }
     if (!this.playable) {
       this.haltAll();
       return;
     }
     for (const [slot, track] of this.tracks) {
-      if (
-        track.handle?.ended ||
-        (!track.loop && track.buffer && track.offset >= track.buffer.duration - 0.015)
-      ) {
+      if (slot === 'sting' && (track.handle?.ended || track.offset >= track.duration - 0.015)) {
         this.remove(slot, 0);
         continue;
       }
@@ -575,30 +825,28 @@ export class QuizAudio {
       }
       this.play(track);
     }
-    const bed = this.tracks.get('bed')?.handle;
-    const sting = this.tracks.get('sting')?.handle;
-    bed?.gain?.gain?.setTargetAtTime(
-      sting && !sting.ended ? 0.2 : 0.59,
-      this.audio.ctx.currentTime,
-      0.16,
-    );
+    this.trim();
   }
   pause(value = true) {
     this.manualPause = !!value;
-    if (this.manualPause) this.haltAll();
+    this.lastContextTime = null;
+    if (value) this.haltAll();
     else this.update(0);
   }
   stop() {
     this.active = false;
     this.haltAll();
     this.tracks.clear();
+    this.plan = [];
     this.phase = 'idle';
+    ++this.epoch;
+    this.pending.clear();
+    this.buffers.clear();
+    this.lastContextTime = null;
     globalThis.document?.removeEventListener?.('visibilitychange', this.visibility);
   }
   dispose() {
     this.stop();
-    this.buffers.clear();
-    this.pending.clear();
     this.attempts.clear();
     this.retryAt.clear();
     this.disposed = true;
@@ -609,11 +857,14 @@ export class QuizAudio {
       paused: this.manualPause || this.framePause || hidden(),
       phase: this.phase,
       tier: this.tier,
+      time: this.clock,
+      track: this.tracks.get('bed')?.key || null,
       sources: [...this.tracks.values()].filter(
         (t) => t.handle && !t.handle.stopped && !t.handle.ended,
       ).length,
       buffers: this.buffers.size,
       bytes: [...this.buffers.values()].reduce((n, b) => n + b.length * b.numberOfChannels * 4, 0),
+      limit: CACHE_LIMIT,
     };
   }
 }
