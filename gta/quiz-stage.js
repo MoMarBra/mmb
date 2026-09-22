@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { human, animateHuman, label } from './world.js';
+import { QUIZ_ART } from './quiz-art.js';
 
 const TAU = Math.PI * 2;
 const clamp = (n, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, Number.isFinite(n) ? n : lo));
@@ -95,6 +96,36 @@ class SetBuilder {
     this.materials.add(m.material);
     return m;
   }
+  art(key, position, width, parent = this.root) {
+    const asset = QUIZ_ART[key];
+    const cacheKey = 'art:' + key;
+    if (!this.cache.has(cacheKey)) {
+      const texture = new THREE.TextureLoader().load(asset.url, (loaded) => {
+        if (this.disposed) loaded.dispose();
+        else loaded.userData.quizArtReady = true;
+      });
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = 4;
+      this.textures.add(texture);
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: asset.transparent,
+        toneMapped: false,
+        depthWrite: !asset.transparent,
+        side: THREE.DoubleSide,
+      });
+      this.cache.set(cacheKey, material);
+    }
+    const mesh = this.mesh(
+      new THREE.PlaneGeometry(width, (width * asset.height) / asset.width),
+      this.cache.get(cacheKey),
+      position,
+      parent,
+    );
+    mesh.name = 'Quiz artwork · ' + key;
+    mesh.receiveShadow = false;
+    return mesh;
+  }
   instances(geometry, material, transforms, name) {
     this.geometries.add(geometry);
     this.materials.add(material);
@@ -114,6 +145,7 @@ class SetBuilder {
     return m;
   }
   dispose() {
+    this.disposed = true;
     for (const t of this.textures) t?.dispose();
     for (const g of this.geometries) g.dispose();
     for (const m of this.materials) m.dispose();
@@ -194,13 +226,13 @@ export function installQuizssoir(world) {
     new THREE.MeshBasicMaterial({ map: glyphTexture, transparent: true, toneMapped: false }),
     [0, 1.409, 0.188],
   );
-  b.box([0, 2.27, 0.02], [1.04, 0.4, 0.07], charcoal);
-  b.text('QUIZSSOIR', [0, 2.3, 0.061], 0.95, 0.18, { bg: '#081823', fg: '#f2d69a' });
-  b.text('15 FRAGEN. EINE MILLION.', [0, 2.15, 0.061], 0.92, 0.09, {
+  b.box([0, 2.4, 0.02], [1.1, 0.79, 0.07], charcoal);
+  b.art('logo', [0, 2.45, 0.061], 1.02);
+  b.text('15 FRAGEN. EINE MILLION.', [0, 2.07, 0.061], 0.92, 0.08, {
     bg: '#081823',
     fg: '#a6c9df',
   });
-  for (const x of [-0.52, 0.52]) b.box([x, 2.27, 0.048], [0.014, 0.36, 0.012], gold);
+  for (const x of [-0.55, 0.55]) b.box([x, 2.4, 0.048], [0.014, 0.79, 0.012], gold);
   // Slim privacy wings stay inside the previously unused right-wall strip.
   for (const x of [-0.57, 0.57]) {
     b.box([x, 1.12, 0.23], [0.034, 1.04, 0.56], b.material('#b6c8c4', 0.42, 0.12));
@@ -341,18 +373,10 @@ export class QuizStage {
     const back = new THREE.Group();
     back.position.set(0, 3.14, -9.7);
     this.scene.add(back);
-    b.mesh(new THREE.CircleGeometry(2.12, 96), black, [0, 0, 0], back);
-    b.ring([0, 0, 0.04], 1.92, 0.031, gold, back, false);
-    b.ring([0, 0, 0.04], 1.7, 0.012, blue, back, false);
-    b.text('QUIZSSOIR', [0, 0.12, 0.075], 3.07, 0.58, { bg: '#020710', fg: '#f5d298' }, back);
-    b.text(
-      'BBE · DIE MILLIONENFRAGE',
-      [0, -0.43, 0.075],
-      2.74,
-      0.22,
-      { bg: '#020710', fg: '#a5cce4' },
-      back,
-    );
+    b.box([0, 0, -0.05], [6.62, 3.83, 0.16], steel, back);
+    b.art('backdrop', [0, 0, 0.045], 6.48, back);
+    b.art('logo', [0, 0.02, 0.072], 4.0, back);
+    for (const y of [-1.9, 1.9]) b.box([0, y, 0.046], [6.6, 0.016, 0.018], gold, back);
     this.audience();
     this.host = human({ jacket: '#24354b', pants: '#111927', hair: '#403326', skin: '#d6ac8d' });
     this.candidate = human({ jacket: '#3f6374', pants: '#1b2735', hair: '#382d25' });

@@ -65,7 +65,10 @@ function finish(g, data, mat, name) {
   return mesh;
 }
 // Layered masonry surrounds, recesses, glazing and cornices. Door/storefront band stays free.
-export function dressFacade(parent, { x, z, w, d, h, seed = 0, color = '#e2dace', body }) {
+export function dressFacade(
+  parent,
+  { x, z, w, d, h, seed = 0, color = '#e2dace', body, reservedPanels = [] },
+) {
   init();
   if (body?.userData.remasterFacade) return;
   if (body) {
@@ -75,6 +78,8 @@ export function dressFacade(parent, { x, z, w, d, h, seed = 0, color = '#e2dace'
   }
   const group = new THREE.Group();
   group.name = 'Remaster · Münchner Fassadendetails';
+  group.userData.reservedPanels = reservedPanels.map((panel) => ({ ...panel }));
+  group.userData.omittedWindows = [];
   parent.add(group);
   // Local coordinates keep spatial render batches attached to the actual block.
   group.position.set(x, 0, z);
@@ -99,6 +104,21 @@ export function dressFacade(parent, { x, z, w, d, h, seed = 0, color = '#e2dace'
         if (yy + 1.12 > h - 0.3) continue;
         const width = 1.22 + (seed % 3) * 0.055,
           height = 1.95;
+        // Reserve actual masonry for signage; never paste a logo over glazing or sills.
+        const reserved = reservedPanels.some((panel) => {
+          const pad = panel.clearance ?? 0.08;
+          return (
+            panel.side === side &&
+            u + (width + 0.42) / 2 > panel.u - panel.w / 2 - pad &&
+            u - (width + 0.42) / 2 < panel.u + panel.w / 2 + pad &&
+            yy + height / 2 + 0.13 > panel.y - panel.h / 2 - pad &&
+            yy - height / 2 - 0.215 < panel.y + panel.h / 2 + pad
+          );
+        });
+        if (reserved) {
+          group.userData.omittedWindows.push({ side, u, y: yy, width, height });
+          continue;
+        }
         const put = (out, ox, oy, oz, bw, bh, bd, shade = 1) =>
           append(
             out,

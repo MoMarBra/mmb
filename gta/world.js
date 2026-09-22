@@ -22,7 +22,7 @@ import { portal, INTERIOR_LAYOUT } from './doors.js';
 import { CITY_LAYOUT } from './city-layout.js';
 import { buildVerticalCity, ROOF_ROUTE } from './vertical-city.js';
 import { buildCityExpansion } from './city-expansion.js';
-import { brandTexture } from './branding.js';
+import { brandTexture, brandLogoTexture } from './branding.js';
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { EffectComposer } from './vendor/addons/postprocessing/EffectComposer.js';
@@ -958,9 +958,9 @@ export class GameWorld {
       }
     });
   }
-  building(g, x, z, w, d, h, color, seed) {
+  building(g, x, z, w, d, h, color, seed, { reservedPanels = [] } = {}) {
     const m = box(g, x, h / 2, z, w, h, d, remasterMaterial('plaster', { color }));
-    dressFacade(g, { x, z, w, d, h, color, seed, body: m });
+    dressFacade(g, { x, z, w, d, h, color, seed, body: m, reservedPanels });
     this.obstacle('city', x, z, w, d, h / 2, h, m);
     (this.cityBlocks ||= []).push({ x, z, w, d });
     box(g, x, h + 0.14, z, w + 0.6, 0.32, d + 0.6, '#d5cbbb');
@@ -1014,6 +1014,7 @@ export class GameWorld {
           z,
         );
     // Headquarters is the unmistakable navigation anchor of the neighbourhood.
+    const hqSignPlacement = { x: CITY_LAYOUT.hq.x, y: 5.26, z: 49.38, size: 3.1, artwork: 2.94 };
     const hqBuilding = this.building(
       g,
       CITY_LAYOUT.hqBuilding.x,
@@ -1023,6 +1024,18 @@ export class GameWorld {
       19,
       '#ded5bd',
       7,
+      {
+        reservedPanels: [
+          {
+            side: 1,
+            u: hqSignPlacement.x - CITY_LAYOUT.hqBuilding.x,
+            y: hqSignPlacement.y,
+            w: hqSignPlacement.size,
+            h: hqSignPlacement.size,
+            clearance: 0.08,
+          },
+        ],
+      },
     );
     // A recessed entrance cut into the facade, not a door pasted onto an opaque wall.
     const entrance = new THREE.Shape(),
@@ -1056,11 +1069,58 @@ export class GameWorld {
     box(g, 31, 0.12, 50.7, 2.3, 0.12, 2.7, '#9daba8');
     box(g, 31, 3.1, 50.7, 2.3, 0.1, 2.7, '#cbd6cc');
     label(g, 'EMPFANG · BBE', 31, 1.85, 51.96, 1.8, 0.35, { rotation: Math.PI });
-    label(g, 'BBE Handelsberatung', 40, 4.6, 49.37, 24, 2.2, {
-      rotation: Math.PI,
-      bg: '#1d5060',
-      sub: 'BRIENNER STRASSE 45 · MÜNCHEN',
+    // A dedicated square lightbox uses the original SVG at 1:1 aspect. Its own
+    // plane/UV/material are never shared with remastered plaster or window textures.
+    const signRoot = new THREE.Group();
+    signRoot.name = 'BBE HQ · square logo lightbox';
+    signRoot.position.set(hqSignPlacement.x, hqSignPlacement.y, hqSignPlacement.z);
+    signRoot.rotation.y = Math.PI;
+    signRoot.userData.brandSign = true;
+    g.add(signRoot);
+    const signMetal = new THREE.MeshStandardMaterial({
+      color: '#d5dcd9',
+      roughness: 0.32,
+      metalness: 0.68,
     });
+    signMetal.name = 'BBE HQ · brushed aluminium surround';
+    const backing = box(
+      signRoot,
+      0,
+      0,
+      0,
+      hqSignPlacement.size,
+      hqSignPlacement.size,
+      0.14,
+      signMetal,
+    );
+    backing.name = 'BBE HQ · raised aluminium lightbox';
+    backing.geometry = furnitureGeometry(hqSignPlacement.size, hqSignPlacement.size, 0.14, 0.014);
+    for (const x of [-1.28, 1.28])
+      for (const y of [-1.28, 1.28]) box(signRoot, x, y, -0.09, 0.095, 0.095, 0.06, signMetal);
+    const logoTexture = canvasTexture(1024, 1024, (c, width, height) => {
+      c.fillStyle = '#004f87';
+      c.fillRect(0, 0, width, height);
+    });
+    logoTexture.wrapS = logoTexture.wrapT = THREE.ClampToEdgeWrapping;
+    logoTexture.repeat.set(1, 1);
+    logoTexture.offset.set(0, 0);
+    const logoFace = new THREE.Mesh(
+      new THREE.PlaneGeometry(hqSignPlacement.artwork, hqSignPlacement.artwork),
+      new THREE.MeshBasicMaterial({ map: logoTexture, toneMapped: false }),
+    );
+    logoFace.name = 'BBE HQ · original square logo';
+    logoFace.material.name = 'BBE HQ · dedicated logo artwork';
+    logoFace.userData.protectedArtwork = true;
+    logoFace.position.z = 0.079;
+    signRoot.add(logoFace);
+    this.hqLogoSign = {
+      root: signRoot,
+      face: logoFace,
+      backing,
+      texture: logoTexture,
+      placement: hqSignPlacement,
+      ready: brandLogoTexture(logoTexture),
+    };
     portal(this, 'city', 'hq', CITY_LAYOUT.hq.x, 49.24, {
       width: 2.1,
       height: 2.95,

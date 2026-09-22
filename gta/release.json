@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "publishedPath": "/gta/",
-  "sourceCommit": "21fb39ac41cc97f2ea2f0a3c98b89ce8eee53f27",
+  "sourceCommit": "da4960b373f12a1681cd4a3ab2217a715a0ba97e",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T14:19:58.053Z",
+  "preparedAt": "2026-09-22T14:39:46.980Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Quiz music raised 3.8 dB with no speech ducking in the quiz only. Moderator sits behind music at 0.27 source volume; 24 additional rotating German consulting reactions, 81 voice assets total. The supplied Lets Play 2,000 recording precedes every question, including resumed question sessions; prompts, answers and actions remain hidden or blocked until its full duration ends. Pause/resume preserves audio position and the early question bed continues into lock. Audio/controller regression checks plus Chrome and Edge full-round browser tests cover the foreground mix, jingle gate, 15 tiers, saved games, lifelines and return to office."
+  "validation": "Five-second question leads with a 400ms fade; automatic next question after actual moderator playback ends. Original generated QUIZSSOIR logo and studio backdrop integrated into portal, intro, HUD and 3D LED wall, with offline embedding. Standalone original BBE logo on square facade sign clear of windows and cornices. Verified audio and controller tests, full-round Chrome and Edge browser tests, offline layouts and day/night facade views."
 }

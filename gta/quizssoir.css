@@ -141,3 +141,14 @@ body.quiz-open #voice-caption,body.quiz-open .mission-passed-overlay { display:n
 
 .quiz-question-lead:focus { outline:none; }
 .quiz-show[data-phase="question-lead"] .quiz-footer span:nth-child(2) { visibility:hidden; }
+
+/* Shared generated artwork keeps the portal, HUD and physical LED wall consistent. */
+.quiz-logo { display:block; object-fit:contain; height:auto; }
+.quiz-header-logo { width:118px; max-height:79px; }
+.quiz-opening h1 { margin:9px 0 0; line-height:1; }
+.quiz-title-logo { width:min(550px,65vw); max-height:43vh; }
+.quiz-brief { position:relative; isolation:isolate; overflow:hidden; border-radius:12px; }
+.quiz-brief::before { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(#030b15aa,#030b15f7),var(--quiz-backdrop) center top / cover; }
+.quiz-brief-logo { width:min(270px,65vw); margin:0 auto 18px; }
+@media(max-width:650px) { .quiz-header-logo{width:76px;max-height:51px}.quiz-title-logo{width:83vw;max-height:36vh}.quiz-header{gap:8px}.quiz-brief-logo{width:210px} }
+@media(max-height:540px) { .quiz-header-logo{width:70px;max-height:47px}.quiz-title-logo{max-height:35vh} }

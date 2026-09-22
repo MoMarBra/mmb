@@ -385,6 +385,7 @@ export function renderQuizScore(ctx, key) {
 }
 
 export const QUIZ_MUSIC_GAIN = 1.55;
+export const QUIZ_QUESTION_LEAD_DURATION = 5;
 const CACHE_LIMIT = 64 * 1024 * 1024;
 // Three bounded 15 s bank attempts plus a small decode/startup margin.
 const INTRO_AUDIO_WAIT_LIMIT = 48;
@@ -444,7 +445,10 @@ export function quizTrackPlan(name, tier = 0, options = {}) {
       }),
     ];
   if (name === 'question') {
-    return [segment('play2000'), loopSegment(questionKey(tier))];
+    return [
+      segment('play2000', { duration: QUIZ_QUESTION_LEAD_DURATION, fadeOut: 0.4 }),
+      loopSegment(questionKey(tier)),
+    ];
   }
   if (name === 'lock' || name === 'heartbeat')
     return tier < 6

@@ -1,0 +1,64 @@
+{
+  "title": "QUIZSSOIR — original generated broadcast artwork",
+  "method": "OpenAI built-in image_gen",
+  "provenance": "Generated specifically for this game from original prompts. No reference images or existing television-show logos were supplied.",
+  "originalAssets": [
+    {
+      "id": "quizssoir-logo",
+      "sourceGeneratedFile": "exec-4ab666ba-956c-4b03-8643-f5729615612d.png",
+      "prompt": "Use case: logo-brand\nAsset type: production-ready transparent raster logo for a premium original 3D quiz game, to overlay on a dark navy studio and intro.\nPrimary request: Design an elegant, distinctive, highly legible broadcast-quality QUIZSSOIR logo. This is an original identity, not a version of any existing television show logo.\nSubject and composition: a striking original circular medallion above one large centered wordmark. The medallion is a sophisticated sculptural Q with a discreet question-mark idea integrated into its negative space. A simple strong silhouette, restrained detail, custom polished champagne-gold metal with a narrow ice-blue accent, not a complex radial rosette. Below, the wordmark is broad, confident geometric uppercase typography, carefully spaced, extremely clean and readable even small. The medallion occupies the upper half and the wide wordmark the lower half, compact coherent lockup. Generous transparent padding, nothing cropped. Large landscape canvas about 1536x1024.\nText (verbatim, the only word): \"QUIZSSOIR\"\nSpelling is exactly nine uppercase letters: Q U I Z S S O I R. Two consecutive S letters. No other words, subtitles, numbers, captions or watermarks.\nColor palette and materials: warm champagne gold, soft pale gold highlights, subtle ice-blue edge accents; beautiful controlled metallic finish without blown highlights. Works clearly against navy #071529.\nConstraints: genuine transparent alpha background throughout the outside of the medallion and letters. No solid rectangle, no checkerboard painted into the image, no colored background, no environment, no mockup screen. Keep all shadows/glow local and subtle. No reference to existing quiz show logos, no banknotes, no crowns, no laurels. Deliver just the final transparent logo art.",
+      "original": "originals/quizssoir-logo-original.png",
+      "runtime": "quizssoir-logo.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceMode": "RGBA",
+      "runtimeMode": "RGBA",
+      "originalBytes": 1847833,
+      "runtimeBytes": 244896,
+      "originalSHA256": "6eb3ce6f5d46f0fbe17d6dc8b0dc1b9ee0ce6fcd09915a72b5a3bb28a098467b",
+      "runtimeSHA256": "e7f7866156840078c30016989c44bccf2082e29b0d75f84dcb0e90e76e40e98b",
+      "originalByteIdentical": true,
+      "optimization": "WebP quality 92, method 6, original dimensions retained; alpha retained exactly where present. No cropping, color edit or rescaling.",
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "transparentPixels": 1018175,
+      "alphaPreservedExactly": true,
+      "alphaBounds": {
+        "x": 60,
+        "y": 21,
+        "width": 1422,
+        "height": 947
+      },
+      "solidAlphaBounds": {
+        "x": 65,
+        "y": 30,
+        "width": 1404,
+        "height": 931,
+        "threshold": 128
+      }
+    },
+    {
+      "id": "quizssoir-backdrop",
+      "sourceGeneratedFile": "exec-26a8810e-0ca9-48a8-b8a3-1a7bc140f24d.png",
+      "prompt": "Use case: stylized-concept\nAsset type: final panoramic studio LED artwork and full-screen game intro backdrop, not a presentation or monitor mockup.\nPrimary request: Create an extraordinarily polished abstract premium quiz-studio backdrop that belongs to an original QUIZSSOIR identity. NO TEXT anywhere.\nComposition: wide 16:9 landscape artwork, ideally 2048x1152. A deep midnight-navy field with elegant thin radial light filaments and restrained concentric arcs in champagne gold and ice blue. The radial forms sweep outward from behind a broad, quiet, very dark central oval; they concentrate mostly along the outer thirds and the lower corners. The middle 50% stays calm and low contrast, spacious enough to carry a large separate logo or game question. A finely controlled luminous horizon below the center, sophisticated depth without a literal room.\nLighting and materials: premium broadcast motion-design still; finely brushed warm gold highlights, translucent ice-blue light traces, subtle atmospheric diffusion, tiny tasteful soft star glints, restrained dark navy gradients. Rich and cinematic but clean, no overexposure, no muddy black, no aggressive bloom. Match polished champagne-gold and ice-blue branding on #071529 navy.\nConstraints: entire canvas is finished background artwork, edge-to-edge, opaque. Absolutely no letters, words, numbers, logo, emblem, question marks, currency, people, furniture, camera, physical LED screen, frame, stage mockup or watermark. No recognizable layout or symbol from any existing TV show. Avoid a busy starburst, sun icon, loud lens flare, chaotic confetti and flat blank areas. Keep the center intentionally quiet, maintain elegant continuous light rhythms around the perimeter.",
+      "original": "originals/quizssoir-backdrop-original.png",
+      "runtime": "quizssoir-backdrop.webp",
+      "width": 1672,
+      "height": 941,
+      "sourceMode": "RGB",
+      "runtimeMode": "RGB",
+      "originalBytes": 2009171,
+      "runtimeBytes": 197644,
+      "originalSHA256": "8175c12712771c2c08c9fb099b22d4f034c964eb443eeab055b77265d83d6c81",
+      "runtimeSHA256": "b83010793e4a03d1fc0c342f4c0e554e217a5c0f9173d91e7b7b15c83c971cf4",
+      "originalByteIdentical": true,
+      "optimization": "WebP quality 92, method 6, original dimensions retained; alpha retained exactly where present. No cropping, color edit or rescaling."
+    }
+  ],
+  "visualReview": {
+    "logo": "Exact spelling QUIZSSOIR, nine letters including consecutive SS; no extra words, no cropped forms; own Q/question-mark medallion. Genuine transparent alpha verified.",
+    "backdrop": "No words, letters or logos. Clear central negative space; gold and ice-blue arcs around navy center; no screen mockup."
+  }
+}

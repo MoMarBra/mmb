@@ -3,6 +3,7 @@ import { QuizState, QUIZ_LADDER } from './quiz-state.js';
 import { QuizStage, installQuizssoir } from './quiz-stage.js';
 import { QuizAudio, QUIZ_SHOW_INTRO_SHOTS } from './quiz-audio.js';
 import { QUIZ_LINES, QUIZ_HOST_VARIANTS } from './quiz-lines.js';
+import { QUIZ_ART } from './quiz-art.js';
 
 export const QUIZ_HOST_VOLUME = 0.27;
 const formatter = new Intl.NumberFormat('de-DE');
@@ -88,7 +89,7 @@ export class Quizssoir {
       resume = activeRound(v.phase);
     this.g.open(
       'Quizssoir',
-      `<div class="quiz-brief"><div class="quiz-emblem" aria-hidden="true">Q</div><span class="quiz-kicker">DIE BBE QUIZNACHT</span><h3>Eine stille Minute.<br>Eine große Million.</h3><p>15 Fragen. Drei Joker. Du und dein Halbwissen.</p><div class="quiz-brief-stats"><span>500 € / 16.000 €<small>Sicherheitsstufen</small></span><span>${money(v.bestWin)}<small>Dein Bestgewinn</small></span></div><button class="primary" id="quiz-start">${resume ? 'Runde fortsetzen' : 'Platz nehmen'} <span>↗</span></button><small>Quizgewinne sind Spielgeld. Wiederholungen zahlen nur einen höheren Bestgewinn aus.</small></div>`,
+      `<div class="quiz-brief" style="--quiz-backdrop:url('${QUIZ_ART.backdrop.url}')"><img class="quiz-logo quiz-brief-logo" src="${QUIZ_ART.logo.url}" alt="QUIZSSOIR" width="1536" height="1024"><span class="quiz-kicker">DIE BBE QUIZNACHT</span><h3>Eine stille Minute.<br>Eine große Million.</h3><p>15 Fragen. Drei Joker. Du und dein Halbwissen.</p><div class="quiz-brief-stats"><span>500 € / 16.000 €<small>Sicherheitsstufen</small></span><span>${money(v.bestWin)}<small>Dein Bestgewinn</small></span></div><button class="primary" id="quiz-start">${resume ? 'Runde fortsetzen' : 'Platz nehmen'} <span>↗</span></button><small>Quizgewinne sind Spielgeld. Wiederholungen zahlen nur einen höheren Bestgewinn aus.</small></div>`,
       { pause: true, eyebrow: 'BBE · WC · QUIZSSOIR' },
     );
     $('quiz-start').onclick = () => this.start();
@@ -141,8 +142,8 @@ export class Quizssoir {
     $('modal-root').innerHTML =
       `<section class="quiz-show" role="dialog" aria-modal="true" aria-label="Quizssoir">
       <div class="quiz-film-shade"></div><div class="quiz-cut" id="quiz-cut"></div>
-      <header class="quiz-header"><div class="quiz-wordmark"><div class="quiz-emblem" aria-hidden="true">Q</div><div><b>QUIZSSOIR</b><small>BBE · DIE MILLIONENFRAGE</small></div></div><div class="quiz-top-actions"><button id="quiz-ladder-toggle" aria-expanded="false">Gewinnleiter</button><button id="quiz-sound" aria-label="Quiz-Ton umschalten"></button><button id="quiz-pause">Pause <kbd>Esc</kbd></button></div></header>
-      <div class="quiz-opening" id="quiz-opening"><span class="quiz-kicker">PRÄSENTIERT VON DER STILLEN ABTEILUNG</span><h1>QUIZSSOIR</h1><p>Hier zählt, was im Kopf bleibt.</p><button id="quiz-skip">An die Frage <span>↗</span></button></div>
+      <header class="quiz-header"><div class="quiz-wordmark"><img class="quiz-logo quiz-header-logo" src="${QUIZ_ART.logo.url}" alt="QUIZSSOIR" width="1536" height="1024"></div><div class="quiz-top-actions"><button id="quiz-ladder-toggle" aria-expanded="false">Gewinnleiter</button><button id="quiz-sound" aria-label="Quiz-Ton umschalten"></button><button id="quiz-pause">Pause <kbd>Esc</kbd></button></div></header>
+      <div class="quiz-opening" id="quiz-opening"><span class="quiz-kicker">PRÄSENTIERT VON DER STILLEN ABTEILUNG</span><h1><img class="quiz-logo quiz-title-logo" src="${QUIZ_ART.logo.url}" alt="QUIZSSOIR" width="1536" height="1024"></h1><p>Hier zählt, was im Kopf bleibt.</p><button id="quiz-skip">An die Frage <span>↗</span></button></div>
       <aside class="quiz-ladder" id="quiz-ladder" aria-label="Gewinnleiter"><div class="quiz-ladder-head">DEIN WEG ZUR MILLION</div><ol>${[
         ...QUIZ_LADDER,
       ]
@@ -198,6 +199,8 @@ export class Quizssoir {
     m.pendingVoice = null;
     m.welcomeSpoken = false;
     m.canResolve = false;
+    m.reactionCompleteAt = null;
+    m.reactionDuration = 3.5;
     m.questionReady = v.phase !== 'question';
     this.stopVoice();
     const tier = Math.max(0, v.level - 1);
@@ -221,6 +224,7 @@ export class Quizssoir {
         tier,
       );
       this.speak(million ? 'million' : safe ? 'safety' : v.reveal.correct ? 'correct' : 'wrong');
+      m.reactionDuration = m.voiceLine?.duration || 3.5;
     }
     if (v.phase === 'finished') {
       m.paid = this.state.claimReward();
@@ -468,28 +472,30 @@ export class Quizssoir {
     session.voiceKey = key;
     session.voiceOffset = offset;
     session.voiceStartedAt = null;
+    session.voiceStatus = 'loading';
+    session.voiceRequestedAt = session.clock;
     $('quiz-host-line').textContent = line.text;
     $('quiz-host').hidden = !this.g.sim.s.audioSubtitles;
     this.g.audio.bank
       ?.get(line.asset)
       .then((buffer) => {
-        if (
-          token !== this.voiceToken ||
-          this.current !== session ||
-          session.paused ||
-          !buffer ||
-          !this.g.audio.enabled
-        )
+        if (token !== this.voiceToken || this.current !== session || session.paused) return;
+        if (!buffer || !this.g.audio.enabled) {
+          session.voiceStatus = 'silent';
           return;
+        }
         session.voice = this.g.audio.emit(buffer, {
           bus: 'dialogue',
           volume: QUIZ_HOST_VOLUME,
           offset,
         });
-        session.voiceStartedAt = this.g.audio.ctx.currentTime;
+        session.voiceStatus = session.voice ? 'playing' : 'silent';
+        session.voiceStartedAt = session.voice ? this.g.audio.ctx.currentTime : null;
         session.voiceUntil = session.clock + Math.max(0, buffer.duration - offset);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (token === this.voiceToken && this.current === session) session.voiceStatus = 'silent';
+      });
   }
   stopVoice() {
     ++this.voiceToken;
@@ -501,6 +507,7 @@ export class Quizssoir {
       this.current.voiceKey = null;
       this.current.voiceStartedAt = null;
       this.current.voiceOffset = 0;
+      this.current.voiceStatus = 'idle';
     }
     this.g.audio.cinematicVoice = false;
     if ($('quiz-host')) $('quiz-host').hidden = true;
@@ -616,6 +623,20 @@ export class Quizssoir {
       this.state.reveal();
       this.phaseEntered();
       v = this.state.view();
+    }
+    if (v.phase === 'reveal' && !m.paused) {
+      const ended = m.voice?.ended && !m.voice.stopped;
+      const fallback =
+        (!m.voice || m.voice.stopped) &&
+        m.elapsed >= m.reactionDuration &&
+        (m.voiceStatus !== 'loading' || m.clock - m.voiceRequestedAt >= 3);
+      if (ended || fallback) {
+        m.reactionCompleteAt ??= m.clock + 0.2;
+        if (m.clock >= m.reactionCompleteAt) {
+          this.next();
+          v = this.state.view();
+        }
+      } else m.reactionCompleteAt = null;
     }
     if (v.phase === 'locked' && !m.canResolve && m.elapsed >= 3.2) {
       m.canResolve = true;
