@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "6937f84b127deab9199e69de0868c0c80ea12715",
+  "sourceCommit": "aa81dd1506a4fed1751805dcb5a6a27194a5f70c",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T11:39:57.362Z",
+  "preparedAt": "2026-09-22T12:35:59.131Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Classic 1.7.1 character rigs restored; photographic remaster environment retained. Regression coverage for pursuit, hit recovery, fragment limits, zone transitions, office, vehicle wheels and damage, adaptive rendering, story and audio lifecycles. Real Chrome and Edge browser tests include HDR/textures, movement, menus, city interiors, night/rain, police pursuit and vehicle entry/exit. Live files are independently verified after deployment. Performance is device- and scene-dependent."
+  "validation": "Quizssoir portal in the office WC leads to a separate 3D studio with seated candidate and host, audience, 15 prize levels, 45 original questions and three lifelines. Original 12-second score and 57 German voice recordings. Rule, integration, audio, pause/resume and one-time payout tests pass; existing story, office and mouse regressions pass. Chrome and Edge real-browser checks cover all 15 questions, lifelines, audible mix, saved locked answer after reload, mobile layout, seated actors, return to office and original workshop-case click. No original television audio is included. Performance depends on device and resolution."
 }

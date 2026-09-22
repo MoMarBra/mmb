@@ -1,3 +1,4 @@
+import { QuizState } from './quiz-state.js';
 import { freshOriginStory, normalizeOriginStory } from './origin-state.js';
 import { freshExtras, normalizeExtras } from './extras-state.js';
 import { freshFireStory, normalizeFireStory } from './fire-state.js';
@@ -6,6 +7,7 @@ import { CAREERS, RESTAURANTS, TASKS, ACHIEVEMENTS, clamp } from './data.js';
 export const SAVE_KEY = 'bbe-munich-life-v1';
 export const freshState = () => ({
   version: 1,
+  quizssoir: new QuizState().serialize(),
   originStory: freshOriginStory(),
   extras: freshExtras(),
   vaults: 0,
@@ -222,6 +224,7 @@ export class Simulation {
           .slice(0, 80)
           .map(([id, v]) => [id, { health: clamp(v.health, 0, 100) }]),
       );
+      base.quizssoir = new QuizState(base.quizssoir).serialize();
       base.extras = normalizeExtras(base.extras);
       base.originStory = normalizeOriginStory(base.originStory);
       base.workshopStory = normalizeWorkshopStory(base.workshopStory);

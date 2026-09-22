@@ -1,0 +1,169 @@
+{
+  "title": "Between certainty and coffee",
+  "composer": "Original procedural composition for BBE Quizssoir",
+  "source": "Deterministic additive/FM synthesis; no recordings, borrowed melodies or external samples.",
+  "sampleRate": 22050,
+  "channels": 2,
+  "encoding": "Stereo MP3, 24 kHz, 128 kbps",
+  "reproducibleSource": "work/quiz-audio/build-score.mjs and dist/quiz-audio.js renderQuizScore()",
+  "verification": "Each final MP3 independently decoded and measured; all samples finite, no clipping.",
+  "totalBytes": 1272084,
+  "assets": [
+    {
+      "id": "quiz_score_select",
+      "key": "select",
+      "authoredDuration": 0.22,
+      "decodedDuration": 0.22,
+      "peak": 0.14740601181983948,
+      "rms": 0.04735140749626864,
+      "bytes": 5036,
+      "sha256": "87082f561fd4048a616c750682a41855e0b95db9976943a5179908af57f66867"
+    },
+    {
+      "id": "quiz_score_intro",
+      "key": "intro",
+      "authoredDuration": 12,
+      "decodedDuration": 12,
+      "timeline": {
+        "studioReveal": 4.35,
+        "openingRMS": 0.02327110875782078,
+        "revealRMS": 0.14649371886413734,
+        "finalRMS": 0.09720764430816338
+      },
+      "peak": 0.4879850745201111,
+      "rms": 0.08667066441298324,
+      "bytes": 193196,
+      "sha256": "d2694a27f9df7ba962e5c6081f21b2fe1f320bc2a47e0d8419eaa7e71ad5e53b"
+    },
+    {
+      "id": "quiz_score_lock",
+      "key": "lock",
+      "authoredDuration": 1.1000453514739228,
+      "decodedDuration": 1.1000833333333333,
+      "peak": 0.3234995901584625,
+      "rms": 0.04924453684513355,
+      "bytes": 18860,
+      "sha256": "1e0d0c0014f8dc0b2a2c21cd773f5610e0bdcdbe46c7f65c1da21689b91a13b2"
+    },
+    {
+      "id": "quiz_score_correct",
+      "key": "correct",
+      "authoredDuration": 2.700045351473923,
+      "decodedDuration": 2.700083333333333,
+      "peak": 0.45008769631385803,
+      "rms": 0.0806653458254045,
+      "bytes": 44588,
+      "sha256": "6ccd7a76a0658bcefabb484b26bbb305fa9c0ae9b4cf6809a7b7c32191dd4ecb"
+    },
+    {
+      "id": "quiz_score_wrong",
+      "key": "wrong",
+      "authoredDuration": 3.3,
+      "decodedDuration": 3.3,
+      "peak": 0.39231666922569275,
+      "rms": 0.09020590300568349,
+      "bytes": 54188,
+      "sha256": "6a9e0d84ef979188571827097a76bbfdbfc7c9fbe34cb78c17c26149a8ab6deb"
+    },
+    {
+      "id": "quiz_score_safety",
+      "key": "safety",
+      "authoredDuration": 4.3,
+      "decodedDuration": 4.3,
+      "peak": 0.4852582812309265,
+      "rms": 0.09643283449230092,
+      "bytes": 70316,
+      "sha256": "b9937618cf91aae550a11b567f09b5d0ad83746530bea924cda1e45e2dc7ea34"
+    },
+    {
+      "id": "quiz_score_million",
+      "key": "million",
+      "authoredDuration": 8.4,
+      "decodedDuration": 8.4,
+      "peak": 0.515783429145813,
+      "rms": 0.10833675115148637,
+      "bytes": 135596,
+      "sha256": "58b3aece163b156762f06153cd6ea0ff315db6d16f463b8458c373d093bf854d"
+    },
+    {
+      "id": "quiz_score_joker",
+      "key": "joker",
+      "authoredDuration": 1.5,
+      "decodedDuration": 1.5,
+      "peak": 0.31326809525489807,
+      "rms": 0.05779902741135709,
+      "bytes": 25388,
+      "sha256": "ad4abee2b6443f98d1e8a4db657b54c4f7ba9c16d00de49a7344fecb40b5de11"
+    },
+    {
+      "id": "quiz_score_exit",
+      "key": "exit",
+      "authoredDuration": 2.8,
+      "decodedDuration": 2.8,
+      "peak": 0.16106769442558289,
+      "rms": 0.03996952301057784,
+      "bytes": 46124,
+      "sha256": "4ff9c73eb184c56add689c6b3b21ba1489af10c5a4dacc754c09e7fe2407ad42"
+    },
+    {
+      "id": "quiz_score_question_0",
+      "key": "question:0",
+      "authoredDuration": 10.434784580498865,
+      "decodedDuration": 10.434791666666667,
+      "peak": 0.31007400155067444,
+      "rms": 0.06350855728922179,
+      "bytes": 168236,
+      "sha256": "699b52bcc99cf5ce453deb6870cb33d212cf51612d10e2bd83c8f5851d0c3517"
+    },
+    {
+      "id": "quiz_score_question_1",
+      "key": "question:1",
+      "authoredDuration": 9.23079365079365,
+      "decodedDuration": 9.230833333333333,
+      "peak": 0.33432307839393616,
+      "rms": 0.06787504087340097,
+      "bytes": 149036,
+      "sha256": "0098f304ae396e2931822df10401c7e4f211ec828943013d0a2f5b7a93c62846"
+    },
+    {
+      "id": "quiz_score_question_2",
+      "key": "question:2",
+      "authoredDuration": 8.275873015873016,
+      "decodedDuration": 8.275875,
+      "peak": 0.35864993929862976,
+      "rms": 0.07300053411580554,
+      "bytes": 133676,
+      "sha256": "1f26676ed8ea12b8e110cd6092da0647ad19ef2df09a0b4ccdfe168e6512d8a1"
+    },
+    {
+      "id": "quiz_score_suspense_0",
+      "key": "suspense:0",
+      "authoredDuration": 5.217414965986395,
+      "decodedDuration": 5.217416666666667,
+      "peak": 0.29115450382232666,
+      "rms": 0.053395220335199126,
+      "bytes": 84908,
+      "sha256": "db1230767bb6af950506c3284276f4fe49be152a075d511c262e5d759b0d0586"
+    },
+    {
+      "id": "quiz_score_suspense_1",
+      "key": "suspense:1",
+      "authoredDuration": 4.615419501133787,
+      "decodedDuration": 4.615458333333334,
+      "peak": 0.3169262111186981,
+      "rms": 0.0560832960189908,
+      "bytes": 75308,
+      "sha256": "9e2865e1a9df351023fb54ad5d7c615631922890cc786262230d149abc6b4634"
+    },
+    {
+      "id": "quiz_score_suspense_2",
+      "key": "suspense:2",
+      "authoredDuration": 4.13795918367347,
+      "decodedDuration": 4.138,
+      "peak": 0.2906067967414856,
+      "rms": 0.057178062491076986,
+      "bytes": 67628,
+      "sha256": "9d14a4aea92194869842328039d7af7df18cfce4218d1500663c332f7123e38b"
+    }
+  ]
+}

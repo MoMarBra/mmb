@@ -1,3 +1,4 @@
+import { Quizssoir } from './quizssoir.js';
 import { OriginStory } from './origin-story.js';
 import { TitleMusic } from './title-music.js';
 import { MissionPassed } from './mission-passed.js';
@@ -61,6 +62,7 @@ export class Game {
     this.fireStory = new FireStory(this);
     this.extras = new CityExtras(this);
     this.origin = new OriginStory(this);
+    this.quizssoir = new Quizssoir(this);
     this.mouseControls = new MouseControls(this);
     this.missionPassed = new MissionPassed(this);
     this.titleMusic = new TitleMusic(this);
@@ -157,6 +159,7 @@ export class Game {
     });
   }
   get activeFilm() {
+    if (this.quizssoir?.active) return this.quizssoir;
     if (this.extras?.intro.current) return this.extras.intro;
     if (this.origin?.activeFilm) return this.origin.activeFilm;
     return this.fireStory?.cinematic
@@ -502,6 +505,7 @@ export class Game {
     }
   }
   transition(zone, id) {
+    if (this.quizssoir?.active) return;
     if (this.origin?.beforeTransition(zone) === false) return;
     if (this.fireStory?.beforeTransition() === false) return;
     this.worldTransitionUntil = performance.now() + 700;
@@ -522,6 +526,7 @@ export class Game {
   interact() {
     if (!this.started || this.modal || this.busy) return;
     const n = this.world.nearest;
+    if (this.quizssoir.interact(n)) return;
     if (this.origin.interact(n)) return;
     if (this.extras.interact(n)) return;
     if (this.fireStory.interact(n)) return;
