@@ -1,3 +1,4 @@
+import { installInteriorDetails, selectRestaurantDetail } from './interior-detail.js';
 import { PedestrianNavigation } from './pedestrian-navigation.js';
 import { buildITOffice } from './it-office.js';
 import { buildOfficeDetail } from './office-detail.js';
@@ -443,6 +444,7 @@ export class GameWorld {
       for (const body of data.physics.bodies) body.updateAABB();
       data.physics.broadphase.dirty = true;
     }
+    installInteriorDetails(this);
     this.batchScenes();
     this.makeRain();
     this.enter('office');
@@ -1922,6 +1924,7 @@ export class GameWorld {
       this.pitch = 0.16;
     } else {
       this.currentRestaurant = RESTAURANTS.find((a) => a.id === restaurantId) || RESTAURANTS[0];
+      selectRestaurantDetail(this, this.currentRestaurant.id);
       this.restaurantWall.material = material(this.currentRestaurant.color);
       this.restaurantSign.material.map.dispose();
       const temp = new THREE.Group();

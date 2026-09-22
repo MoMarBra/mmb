@@ -106,93 +106,79 @@ export const RECIPES = Object.freeze([
     reward: 38,
   },
 ]);
-/** Deterministic, framerate-independent kitchen simulation; rendering never owns scoring. */
+/** Short drag-and-stir rounds. Progress belongs to the simulation, never to animation frames. */
 export class CookingRound {
   constructor(level) {
-    this.level = Math.max(0, Math.min(3, level));
+    this.level = Math.max(0, Math.min(3, Math.floor(Number(level) || 0)));
     this.recipe = RECIPES[this.level];
     this.phase = 'prep';
+    this.added = [];
     this.step = 0;
-    this.heat = 35;
-    this.power = 55;
-    this.cooked = 0;
-    this.burn = 0;
     this.elapsed = 0;
     this.stirred = 0;
+    this.cooked = 0;
+    this.burn = 0;
     this.dry = 0;
-    this.mistakes = 0;
     this.plate = 0;
-    this.qualityTime = 0;
-    this.searTime = 0;
-    this.feedback = 'Zutaten in der angegebenen Reihenfolge vorbereiten.';
+    this.serveTime = 0;
+    this.deadline = 25 - this.level;
+    this.stirSeconds = 9 + this.level;
   }
   select(value) {
-    if (this.phase !== 'prep' && this.phase !== 'plate') return false;
-    const list = this.phase === 'prep' ? this.recipe.ingredients : this.recipe.garnish;
-    const index = this.phase === 'prep' ? this.step : this.plate;
-    if (value !== list[index]) {
-      this.mistakes++;
-      this.feedback = 'Fast. Jetzt: ' + list[index];
+    if (
+      !['prep', 'sear'].includes(this.phase) ||
+      !this.recipe.ingredients.includes(value) ||
+      this.added.includes(value)
+    )
       return false;
-    }
-    this.feedback = value + ' · sitzt.';
-    if (this.phase === 'prep') {
-      if (++this.step === list.length) {
-        this.phase = 'sear';
-        this.feedback = 'Hitze im grünen Bereich halten. Leertaste zum Rühren.';
-      }
-    } else if (++this.plate === list.length) {
-      this.phase = 'done';
-      this.feedback = 'Service!';
-    }
+    this.added.push(value);
+    this.step = this.added.length;
+    if (this.step === this.recipe.ingredients.length) this.phase = 'sear';
     return true;
   }
   tick(dt, stir = false) {
-    if (this.phase !== 'sear') return;
-    dt = Math.max(0, Math.min(dt, 0.1));
-    this.elapsed += dt;
-    this.searTime += dt;
-    this.heat += (this.power - this.heat) * (1 - Math.exp(-dt * 1.4));
-    const good = this.heat >= this.recipe.ideal[0] && this.heat <= this.recipe.ideal[1];
-    this.qualityTime += good ? dt : 0;
-    this.stirred += stir ? dt : 0;
-    this.dry = Math.max(0, this.dry + dt * (stir ? -3 : 1));
-    this.cooked += dt * this.recipe.speed * Math.max(0, (this.heat - 25) / 45) * (stir ? 0.88 : 1);
-    this.burn +=
-      dt *
-      (Math.max(0, this.heat - this.recipe.ideal[1]) * 0.18 +
-        Math.max(0, this.dry - 3.5) * 0.7 +
-        Math.max(0, this.cooked - 100) * 0.13);
-    if (this.burn >= 26 || this.elapsed >= this.recipe.deadline) {
+    dt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
+    if (this.phase === 'serve') {
+      this.serveTime += dt;
+      if (this.serveTime >= 1.1) {
+        this.phase = 'done';
+        this.plate = 3;
+      }
+      return;
+    }
+    if (!['prep', 'sear'].includes(this.phase)) return;
+    if (this.step) this.elapsed += dt;
+    if (this.elapsed >= this.deadline) {
       this.phase = 'failed';
-      this.feedback =
-        this.burn >= 26
-          ? 'Zu dunkel. Neue Pfanne, neuer Versuch.'
-          : 'Service verpasst. Wir versuchen es noch einmal.';
+      return;
+    }
+    if (this.phase === 'sear') {
+      this.dry = Math.max(0, this.dry + dt * (stir ? -4 : 1));
+      if (stir) {
+        this.stirred += dt;
+        this.cooked = Math.min(100, (this.stirred / this.stirSeconds) * 100);
+      }
+      this.burn += dt * Math.max(0, this.dry - 1.5) * (2 + this.level * 0.25);
+      if (this.burn >= 28) {
+        this.phase = 'failed';
+        return;
+      }
+      if (this.cooked >= 100) {
+        this.phase = 'serve';
+        this.serveTime = 0;
+        return;
+      }
     }
   }
   finishSear() {
-    if (this.phase !== 'sear') return false;
-    if (this.cooked < this.recipe.target - 8) {
-      this.feedback = 'Noch nicht gar. Etwas länger braten.';
-      return false;
-    }
-    this.phase = 'plate';
-    this.feedback = this.recipe.sauce + ' · anrichten';
-    return true;
+    return this.phase === 'serve' || this.phase === 'done';
   }
   get score() {
     return Math.max(
       0,
       Math.min(
         100,
-        Math.round(
-          100 -
-            Math.abs(this.cooked - this.recipe.target) * 0.85 -
-            this.burn * 1.7 -
-            this.mistakes * 4 -
-            (1 - this.qualityTime / Math.max(1, this.searTime)) * 10,
-        ),
+        Math.round(100 - this.burn * 1.25 - Math.max(0, this.elapsed - this.stirSeconds - 4) * 0.8),
       ),
     );
   }

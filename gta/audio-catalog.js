@@ -1,4 +1,5 @@
 export const AUDIO_ASSETS = {
+  "origin_kitchen_03_1_7_1": {"path":"./assets/audio/origin_kitchen_03_1_7_1.mp3","group":"voice","duration":11.0266},
   "origin_sauce_pour_1_7_0": {"path":"./assets/audio/origin_sauce_pour_1_7_0.mp3","group":"effect"},
   "origin_wok_toss_1_7_0": {"path":"./assets/audio/origin_wok_toss_1_7_0.mp3","group":"effect"},
   "origin_wok_sizzle_1_7_0": {"path":"./assets/audio/origin_wok_sizzle_1_7_0.mp3","group":"effect"},

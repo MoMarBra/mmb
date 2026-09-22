@@ -274,11 +274,7 @@ export class OriginStory {
     }
     const result = completeShift(this.g.sim, round);
     if (!result) return;
-    this.g.toast(
-      'Service ' + result.level + ' geschafft',
-      result.score + ' Punkte · +' + result.reward + ' €',
-      true,
-    );
+    // The quick round already shows the score and reward; keep the next service unobstructed.
     if (this.state.phase === 'offer') this.atKitchen();
     else this.cooking.start(this.state.level);
   }

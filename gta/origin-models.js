@@ -1,3 +1,4 @@
+import { decorateOriginHome, decorateOriginKitchen } from './interior-detail.js';
 import { mergeStaticGeometry } from './render-batches.js';
 import * as THREE from 'three';
 import { box, label, chair } from './world.js';
@@ -68,16 +69,16 @@ export function buildOriginHome() {
   box(g, -4, 0.67, -3, 2.9, 0.25, 4.4, '#d2d0bc');
   box(g, -4, 0.84, -4.5, 2.5, 0.18, 0.8, '#eee6d5');
   box(g, -4, 0.83, -2.45, 2.93, 0.09, 2.9, '#548a83');
-  solid(4, 0.77, -4.9, 4, 1.54, 1.4, '#898170');
-  box(g, 4, 1.57, -4.9, 4.1, 0.08, 1.5, '#d6d6c9');
-  round(g, 4, 1.68, -4.7, 0.3, 0.14, black);
-  box(g, 5.5, 1.75, -4.8, 0.4, 0.37, 0.5, '#222f33');
-  solid(1.9, 0.67, 1.2, 2.4, 1.34, 1.2, '#9e7956');
+  solid(4, 0.47, -4.9, 4, 0.94, 1.4, '#898170');
+  box(g, 4, 0.975, -4.9, 4.1, 0.08, 1.5, '#d6d6c9');
+  round(g, 4, 1.085, -4.7, 0.3, 0.14, black);
+  box(g, 5.5, 1.2, -4.8, 0.4, 0.37, 0.5, '#222f33');
+  solid(1.9, 0.405, 1.2, 2.4, 0.81, 1.2, '#9e7956');
   chair(g, 1.9, 2.25, 0, '#526566');
-  box(g, 1.7, 1.39, 1.2, 0.9, 0.035, 0.6, '#293d47');
-  const screen = box(g, 1.7, 1.68, 0.94, 0.92, 0.54, 0.035, '#92abb0');
+  box(g, 1.7, 0.828, 1.2, 0.9, 0.035, 0.6, '#293d47');
+  const screen = box(g, 1.7, 1.1, 0.94, 0.92, 0.54, 0.035, '#92abb0');
   screen.rotation.x = -0.16;
-  label(g, 'SCHICHT 11:30', 2.65, 1.42, 1.15, 0.55, 0.3, {
+  label(g, 'SCHICHT 11:30', 2.65, 0.816, 1.15, 0.55, 0.3, {
     bg: '#eee7d1',
     fg: '#344d48',
   }).rotation.x = -Math.PI / 2;
@@ -86,7 +87,8 @@ export function buildOriginHome() {
   plant(g, -6.6, 6.1);
   plant(g, 6.5, -7);
   for (let i = 0; i < 5; i++)
-    box(g, 1.8 + i * 0.12, 1.45, 1.5, 0.07, 0.15, 0.24, ['#b76e4b', '#d7c97c', '#42756b'][i % 3]);
+    box(g, 1.8 + i * 0.12, 0.885, 1.5, 0.07, 0.15, 0.24, ['#b76e4b', '#d7c97c', '#42756b'][i % 3]);
+  decorateOriginHome(set);
   return set;
 }
 export function buildOriginKitchen() {
@@ -135,7 +137,7 @@ export function buildOriginKitchen() {
     );
   }
   for (let i = 0; i < 5; i++) {
-    box(g, -5.8 + i * 0.22, 1.51, -6.1, 0.16, 0.82, 0.6, ['#536b55', '#aeaa83', '#b69056'][i % 3]);
+    box(g, -4.9 + i * 0.22, 1.51, -6.1, 0.16, 0.82, 0.6, ['#536b55', '#aeaa83', '#b69056'][i % 3]);
   }
   for (const [x, z] of [
     [-4, 3.4],
@@ -259,6 +261,7 @@ export function buildOriginKitchen() {
     g.add(batch);
     for (const m of meshes) g.remove(m);
   }
+  decorateOriginKitchen(set);
   return set;
 }
 const shrimpGeometry = new THREE.TorusGeometry(1, 0.34, 8, 16, Math.PI * 1.65);

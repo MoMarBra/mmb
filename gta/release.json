@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "publishedPath": "/gta/",
-  "sourceCommit": "966f650362235c680e0a630690621a380a629d4a",
+  "sourceCommit": "1d2a815aa722cc9aa7bf1e042f69d71ded8dbe9e",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T07:54:16.985Z",
+  "preparedAt": "2026-09-22T08:39:58.227Z",
   "gameTestsRun": true,
   "browserVisualQA": false,
-  "validation": "11 regression suites: 40 full-Game checks including the complete origin chapter, four cooking levels, real obstacle-aware escort, checkpoint and reward guards; 8 courier routes; workshop and fire cinematic controllers; audio contracts/lifecycle; mission completion/title audio; office/map routes and origin state. 417 embedded audio hashes, 36 new normalized synthetic dialogue recordings and 3 original culinary effects. No browser/GPU visual test or target-device FPS guarantee."
+  "validation": "11 regression suites: 44 full-Game checks including 2D ingredient drag/drop, Space input, pause/retry/exit, all four timed cooking levels, rewards/checkpoints and navigation; instanced interior budgets, shared portrait textures, seven exclusive restaurant variants; 8 courier routes, 11 office checks, 17 map checks; fire and workshop controllers, audio contracts/lifecycle, title and mission-passed audio. 418 embedded audio hashes. Native Canvas artwork rendered and inspected. DOM/GPU/audio devices mocked in integration checks; no browser/GPU visual test or device FPS guarantee."
 }

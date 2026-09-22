@@ -1,8 +1,18 @@
-import { ORIGIN_LINES } from './origin-lines.js';
-import * as THREE from 'three';
 import { CookingRound } from './origin-state.js';
-import { cinematicSet, animateKitchen } from './origin-models.js';
+import { FOOD_ART } from './food-art.js';
+import { QuickWokView, insideWok } from './quick-wok-view.js';
 const $ = (id) => document.getElementById(id);
+const INGREDIENT_ART = {
+  Huhn: 'chicken',
+  Gemüse: 'vegetables',
+  Currypaste: 'curry',
+  Garnelen: 'shrimp',
+  Reisbandnudeln: 'noodles',
+  Tofu: 'tofu',
+  'Bambus + Morcheln': 'mushrooms',
+  Paprika: 'pepper',
+  Ente: 'duck',
+};
 export class OriginCooking {
   constructor(story) {
     this.story = story;
@@ -11,26 +21,33 @@ export class OriginCooking {
     this.current = null;
     this.token = 0;
     this.keys = new Set();
-    this.camera = new THREE.PerspectiveCamera(43, 1, 0.08, 80);
-    this.size = new THREE.Vector2();
-    this.target = new THREE.Vector3();
     window.addEventListener(
       'keydown',
       (e) => {
         if (!this.current) return;
+        if (this.current.paused && e.code === 'Tab') {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          $('cook-resume').focus?.();
+          return;
+        }
         if (e.code === 'Tab') return;
         if (
-          ['Enter', 'Space'].includes(e.code) &&
+          e.code === 'Space' &&
           e.target?.tagName === 'BUTTON' &&
-          e.target.id !== 'cook-stir'
-        )
+          (this.current.paused || this.current.round.phase === 'failed')
+        ) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          if (!e.repeat && !e.target.disabled) e.target.click?.();
           return;
+        }
+        if (e.code === 'Enter' && e.target?.tagName === 'BUTTON') return;
         e.preventDefault();
         e.stopImmediatePropagation();
         if (e.code === 'Escape' && !e.repeat) this.pause(!this.current.paused);
-        if (e.code === 'Enter' && !e.repeat) this.serve();
-        if (['Space', 'KeyA', 'KeyD', 'ArrowLeft', 'ArrowRight'].includes(e.code))
-          this.keys.add(e.code);
+        if (this.current.paused) return;
+        if (e.code === 'Space') this.keys.add('Space');
         if (!e.repeat && /^Digit[123]$/.test(e.code)) this.choose(Number(e.code.at(-1)) - 1);
       },
       true,
@@ -44,67 +61,51 @@ export class OriginCooking {
   async start(level) {
     if (this.current || this.loading) return;
     this.loading = true;
-    const token = (this.token = (this.token || 0) + 1);
+    const token = ++this.token;
     this.pendingPaused = document.hidden;
     try {
       this.g.open(
         'Zitronengras',
-        '<div class="origin-preparing">Die Küche wird vorbereitet …</div>',
+        '<div class="wok-loading" aria-label="Küche wird vorbereitet"></div>',
         { pause: true, locked: true },
       );
       this.g.audio.update(0, this.w, false);
       await this.g.audio.bank?.preload([
-        ...ORIGIN_LINES.filter((l) => l.key.startsWith('shift' + (level + 1) + '_')).map(
-          (l) => l.asset,
-        ),
         'origin_wok_sizzle_1_7_0',
         'origin_wok_toss_1_7_0',
         'origin_sauce_pour_1_7_0',
         'chop',
         'pot_01',
-        'story_underscore',
       ]);
       if (token !== this.token) return;
-      this.set ??= cinematicSet('kitchen');
-      await this.w.renderer.compileAsync?.(this.set.scene, this.camera);
-      if (token !== this.token) return;
-      for (const a of Object.values(this.set.actors)) a.visible = false;
       this.current = {
         round: new CookingRound(level),
         elapsed: 0,
         paused: document.hidden || this.pendingPaused,
         stir: false,
-        pour: 0,
-        done: false,
-        shadowAuto: this.w.renderer.shadowMap.autoUpdate,
+        drops: [],
+        resultTime: 0,
       };
       this.loading = false;
-      this.g.audio.voices.stop();
       this.keys.clear();
+      this.g.audio.voices.stop();
       this.g.arcade.music.current?.handle?.gain?.gain?.setTargetAtTime(
         0,
         this.g.audio.ctx?.currentTime || 0,
         0.08,
       );
       document.body.classList.add('story-cinematic', 'origin-cooking');
-      $('modal-root').innerHTML =
-        '<section class="cook-film" role="dialog" aria-modal="true" aria-label="Kochschicht"><header><div><small id="cook-level"></small><h1 id="cook-name"></h1><p id="cook-chapter"></p></div><div><button id="cook-pause">Pause · Esc</button><button id="cook-leave">Schicht verlassen</button></div></header><aside class="cook-order"><small>BON · <span id="cook-step"></span></small><strong id="cook-target"></strong><div class="cook-track"><i id="cook-doneness"></i></div><span id="cook-time"></span></aside><div class="cook-dashboard"><p id="cook-dialogue" hidden></p><div id="cook-feedback" role="status"></div><div id="cook-choices"></div><div id="cook-sear"><label for="cook-power">HITZE <b id="cook-temperature"></b></label><div class="cook-heat"><span id="cook-safe"></span><i id="cook-needle"></i></div><input id="cook-power" type="range" min="0" max="100" value="55" aria-label="Herdleistung"><div class="cook-tools"><button id="cook-stir">Rühren halten · Leertaste</button><button class="primary" id="cook-serve">Anrichten · Enter</button></div><small>A / D · Hitze &nbsp; | &nbsp; Regelmäßig rühren</small></div><div id="cook-result" hidden></div></div><div class="origin-paused" id="cook-paused" hidden><b>PAUSE</b><button id="cook-resume">Weiterkochen</button></div></section>';
       const r = this.current.round;
-      $('cook-level').textContent = 'SERVICE ' + (level + 1) + ' / 4';
-      $('cook-name').textContent = r.recipe.name;
-      $('cook-chapter').textContent = r.recipe.subtitle;
-      $('cook-safe').style.left = r.recipe.ideal[0] + '%';
-      $('cook-safe').style.width = r.recipe.ideal[1] - r.recipe.ideal[0] + '%';
-      $('cook-power').oninput = (e) => {
-        if (!this.current?.paused) this.current.round.power = Number(e.target.value);
-      };
+      $('modal-root').innerHTML =
+        `<section class="quick-wok" role="dialog" aria-modal="true" aria-label="Zitronengras – Kochrunde"><div class="wok-stage" id="wok-stage"><canvas id="wok-canvas" aria-hidden="true"></canvas><header class="wok-heading"><small>ZITRONENGRAS <span>• QUICK WOK</span></small><h1>${r.recipe.name}</h1><div class="wok-rounds" aria-label="Runde ${r.level + 1} von 4">${[0, 1, 2, 3].map((i) => `<i class="${i < r.level ? 'complete' : i === r.level ? 'current' : ''}">${i < r.level ? '✓' : i + 1}</i>`).join('')}</div></header><div class="wok-actions"><button id="cook-pause" aria-label="Pause">Ⅱ</button><button id="cook-leave" aria-label="Kochrunde verlassen">×</button></div><div class="wok-trays">${r.recipe.ingredients.map((name, i) => `<button class="wok-tray" id="cook-pick-${i}" aria-label="${name} in den Wok geben"><span class="wok-food">${FOOD_ART[INGREDIENT_ART[name]]}</span><span class="wok-food-name">${name === 'Huhn' ? 'Hähnchen' : name === 'Reisbandnudeln' ? 'Nudeln' : name}<kbd>${i + 1}</kbd></span><span class="wok-check" aria-hidden="true">✓</span></button>`).join('')}</div><div class="wok-hint" id="cook-hint" role="status">Zutaten in den Wok ziehen</div><div class="wok-meter"><span id="cook-time"></span><div><i id="cook-doneness"></i></div></div><button class="wok-stir" id="cook-stir" disabled><kbd>LEERTASTE</kbd><span>Rühren halten</span></button><div class="wok-result" id="cook-result" hidden><span class="wok-stars" id="cook-stars">✦ ✦ ✦</span><strong id="cook-score"></strong><small id="cook-reward"></small><button id="cook-retry" hidden>Neu versuchen</button></div><div class="origin-paused" id="cook-paused" hidden><b>PAUSE</b><button id="cook-resume">Weiterkochen</button></div></div><div id="wok-ghost" class="wok-ghost" hidden aria-hidden="true"></div></section>`;
+      this.view = new QuickWokView($('wok-canvas'));
+      for (let i = 0; i < 3; i++) this.bindIngredient($('cook-pick-' + i), i);
       const stir = $('cook-stir');
       stir.onpointerdown = (e) => {
-        if (!this.current?.paused) {
-          e.preventDefault();
-          stir.setPointerCapture?.(e.pointerId);
-          this.current.stir = true;
-        }
+        if (this.current?.paused || this.current?.round.phase !== 'sear' || e.button > 0) return;
+        e.preventDefault();
+        stir.setPointerCapture?.(e.pointerId);
+        this.current.stir = true;
       };
       for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
         stir.addEventListener(event, () => {
@@ -113,22 +114,22 @@ export class OriginCooking {
       $('cook-pause').onclick = () => this.pause(!this.current?.paused);
       $('cook-resume').onclick = () => this.pause(false);
       $('cook-leave').onclick = () => this.finish(false);
-      $('cook-serve').onclick = () => this.serve();
-      if (!this.current.paused) this.story.say('shift' + (level + 1) + '_support', true);
+      $('cook-retry').onclick = () => {
+        const level = this.current?.round.level;
+        this.finish(false);
+        this.start(level);
+      };
       this.sync();
       this.render(0);
       $('cook-paused').hidden = !this.current.paused;
     } catch (error) {
       if (token !== this.token) return;
-      const failed = this.current;
-      failed?.loop?.stop(0.1);
-      if (failed) {
-        this.w.renderer.shadowMap.autoUpdate = failed.shadowAuto;
-        this.w.renderer.shadowMap.needsUpdate = true;
-        this.w.shadowZone = null;
-      }
-      this.loading = false;
+      this.clearDrag();
+      this.current?.loop?.stop(0.1);
       this.current = null;
+      this.loading = false;
+      this.view = null;
+      this.keys.clear();
       this.story.stopVoice();
       document.body.classList.remove('story-cinematic', 'origin-cooking');
       if (this.g.modal) this.g.modal.locked = false;
@@ -137,188 +138,195 @@ export class OriginCooking {
       console.error('Cooking preparation', error);
     }
   }
+  bindIngredient(button, index) {
+    button.onpointerdown = (e) => {
+      const m = this.current;
+      if (
+        !m ||
+        m.paused ||
+        m.round.phase !== 'prep' ||
+        m.round.added.includes(this.options()[index]) ||
+        this.drag ||
+        e.button > 0
+      )
+        return;
+      e.preventDefault();
+      button.setPointerCapture?.(e.pointerId);
+      this.drag = { index, pointerId: e.pointerId, button };
+      button.classList.add('dragging');
+      const ghost = $('wok-ghost');
+      ghost.innerHTML = FOOD_ART[INGREDIENT_ART[this.options()[index]]];
+      ghost.hidden = false;
+      this.moveDrag(e);
+    };
+    button.onpointermove = (e) => this.moveDrag(e);
+    button.onpointerup = (e) => {
+      if (!this.drag || e.pointerId !== this.drag.pointerId) return;
+      const rect = $('wok-canvas').getBoundingClientRect(),
+        hit = insideWok(e.clientX, e.clientY, rect),
+        i = this.drag.index;
+      this.clearDrag();
+      if (hit) this.choose(i);
+    };
+    for (const event of ['pointercancel', 'lostpointercapture'])
+      button.addEventListener(event, (e) => {
+        if (e.pointerId === this.drag?.pointerId) this.clearDrag();
+      });
+    // Enter, assistive technology and keyboard-generated click remain usable; physical clicks must drag.
+    button.onclick = (e) => {
+      if (e.detail === 0) this.choose(index);
+    };
+  }
+  moveDrag(e) {
+    if (!this.drag || this.drag.pointerId !== e.pointerId) return;
+    $('wok-ghost').style.transform =
+      `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-60%) rotate(-8deg)`;
+    const hit = insideWok(e.clientX, e.clientY, $('wok-canvas').getBoundingClientRect());
+    if (this.current) this.current.hover = hit;
+  }
+  clearDrag() {
+    const d = this.drag;
+    this.drag = null;
+    d?.button.classList.remove('dragging');
+    if (d)
+      try {
+        d.button.releasePointerCapture?.(d.pointerId);
+      } catch {}
+    if ($('wok-ghost')) $('wok-ghost').hidden = true;
+    if (this.current) this.current.hover = false;
+  }
+  options() {
+    return this.current?.round.recipe.ingredients || [];
+  }
+  choose(index) {
+    const m = this.current;
+    if (!m || m.paused) return;
+    if (m.round.select(this.options()[index])) {
+      this.effect(index === 2 ? 'origin_sauce_pour_1_7_0' : 'chop', 0.4);
+      m.drops.push({ index, age: 0 });
+      this.sync();
+    }
+  }
+  effect(id, volume) {
+    this.g.audio.emit?.(this.g.audio.bank?.buffers?.get(id), { bus: 'ui', volume });
+  }
   pause(value) {
     if (this.loading) {
       this.pendingPaused = value;
       return;
     }
-    if (!this.current) return;
-    this.current.paused = value;
-    this.current.stir = false;
+    const m = this.current;
+    if (!m) return;
+    m.paused = value;
+    m.stir = false;
     this.keys.clear();
-    this.current.loop?.stop(0.1);
-    this.current.loop = null;
+    this.clearDrag();
+    m.loop?.stop(0.1);
+    m.loop = null;
     if (value) this.story.stopVoice();
     $('cook-paused').hidden = !value;
-    $('cook-pause').textContent = value ? 'Fortsetzen · Esc' : 'Pause · Esc';
-  }
-  options() {
-    const r = this.current?.round;
-    if (!r) return [];
-    const a = r.phase === 'prep' ? r.recipe.ingredients : r.recipe.garnish;
-    return [a[1], a[2], a[0]];
-  }
-  choose(i) {
-    const m = this.current;
-    if (!m || m.paused) return;
-    const old = m.round.phase;
-    const good = m.round.select(this.options()[i]);
-    if (good) {
-      this.effect('chop', 0.24);
-      if (old === 'plate') m.pour = 1.4;
-    }
-    this.sync();
-  }
-  effect(id, volume) {
-    const b = this.g.audio.bank?.buffers?.get(id);
-    this.g.audio.emit?.(b, { bus: 'ui', volume });
-  }
-  serve() {
-    const m = this.current;
-    if (!m || m.paused) return;
-    const before = m.round.phase;
-    if (m.round.finishSear()) {
-      m.pour = 1.8;
-      this.effect('origin_sauce_pour_1_7_0', 0.65);
-    }
-    if (before === 'sear') this.sync();
+    $('cook-pause').setAttribute('aria-label', value ? 'Fortsetzen' : 'Pause');
+    if (value) $('cook-resume').focus?.();
+    else (this.current.round.phase === 'sear' ? $('cook-stir') : $('cook-pause')).focus?.();
   }
   sync() {
     const m = this.current;
     if (!m) return;
     const r = m.round;
-    $('cook-step').textContent = {
-      prep: 'MISE EN PLACE',
-      sear: 'AM WOK',
-      plate: 'ANRICHTEN',
-      done: 'SERVICE',
-      failed: 'NEUER VERSUCH',
+    this.options().forEach((name, i) => {
+      const b = $('cook-pick-' + i);
+      b.disabled = r.added.includes(name);
+      b.classList.toggle('used', b.disabled);
+    });
+    $('cook-stir').disabled = r.phase !== 'sear';
+    $('cook-hint').textContent = {
+      prep: 'Zutaten in den Wok ziehen',
+      sear: 'Leertaste halten',
+      serve: 'Service!',
+      done: '',
+      failed: 'Neue Pfanne. Neues Glück.',
     }[r.phase];
-    $('cook-feedback').textContent = r.feedback;
-    $('cook-sear').hidden = r.phase !== 'sear';
-    const choices = $('cook-choices');
-    choices.hidden = !['prep', 'plate'].includes(r.phase);
-    choices.innerHTML = choices.hidden
-      ? ''
-      : this.options()
-          .map(
-            (item, i) =>
-              '<button id="cook-pick-' + i + '"><kbd>' + (i + 1) + '</kbd> ' + item + '</button>',
-          )
-          .join('');
-    for (let i = 0; i < 3; i++)
-      if ($('cook-pick-' + i)) $('cook-pick-' + i).onclick = () => this.choose(i);
-    $('cook-target').textContent =
-      r.phase === 'prep'
-        ? 'Als Nächstes: ' + r.recipe.ingredients[r.step]
-        : r.phase === 'plate'
-          ? 'Jetzt: ' + r.recipe.garnish[r.plate]
-          : 'Gargrad ' + Math.round(r.cooked) + ' / ' + r.recipe.target;
-    if (['done', 'failed'].includes(r.phase) && !m.done) {
-      m.done = true;
-      m.loop?.stop(0.2);
+    if (['done', 'failed'].includes(r.phase)) {
+      m.loop?.stop(0.12);
       m.loop = null;
-      this.story.say('shift' + (r.level + 1) + (r.passed ? '_success' : '_fail'), true);
-      const result = $('cook-result');
-      result.hidden = false;
-      result.innerHTML =
-        '<h2>' +
-        (r.passed ? 'Service geschafft.' : 'Neue Pfanne. Neues Glück.') +
-        '</h2><p>' +
-        Math.round(r.score) +
-        ' / 100 · ' +
-        (r.passed
-          ? this.story.active && !this.story.state.paid[r.level]
-            ? '+' + r.recipe.reward + ' €'
-            : 'Training / Wiederholung'
-          : 'Ziel: 65 Punkte') +
-        '</p><button class="primary" id="cook-next">' +
-        (r.passed ? (r.level === 3 ? 'Zum letzten Gast' : 'Nächster Service') : 'Noch einmal') +
-        '</button>';
-      $('cook-next').onclick = () => {
-        const level = r.level,
-          pass = r.passed;
-        this.finish(pass);
-        if (!pass) this.start(level);
-      };
-      $('cook-next').focus?.();
+      $('cook-result').hidden = false;
+      $('cook-score').textContent = r.passed ? Math.round(r.score) + ' / 100' : 'Knapp daneben';
+      $('cook-stars').textContent = r.passed
+        ? r.score >= 95
+          ? '✦ ✦ ✦'
+          : r.score >= 80
+            ? '✦ ✦'
+            : '✦'
+        : '↻';
+      $('cook-reward').textContent = r.passed
+        ? this.story.active && !this.story.state.paid[r.level]
+          ? '+' + r.recipe.reward + ' €'
+          : 'Training geschafft'
+        : '';
+      $('cook-retry').hidden = r.passed;
+      if (!r.passed) $('cook-retry').focus?.();
     }
   }
   render(dt) {
     const m = this.current;
     if (!m) return;
-    this.w.renderer.getSize(this.size);
-    if (m.paused && m.drawn && m.width === this.size.x && m.height === this.size.y) return;
-    const r = m.round;
+    dt = Number.isFinite(dt) ? Math.max(0, Math.min(0.1, dt)) : 0;
+    const r = m.round,
+      stir = !m.paused && (m.stir || this.keys.has('Space'));
     if (!m.paused) {
       m.elapsed += dt;
-      m.pour = Math.max(0, m.pour - dt);
-      const dir =
-        (this.keys.has('KeyD') || this.keys.has('ArrowRight') ? 1 : 0) -
-        (this.keys.has('KeyA') || this.keys.has('ArrowLeft') ? 1 : 0);
-      if (dir) {
-        r.power = Math.max(0, Math.min(100, r.power + dir * dt * 35));
-        $('cook-power').value = r.power;
-      }
-      const stirring = m.stir || this.keys.has('Space');
-      if (stirring && !m.wasStirring && m.elapsed > (m.nextToss || 0) && r.phase === 'sear') {
-        this.effect('origin_wok_toss_1_7_0', 0.65);
-        m.nextToss = m.elapsed + 0.9;
-      }
-      m.wasStirring = stirring;
+      m.drops.forEach((d) => (d.age += dt));
+      m.drops = m.drops.filter((d) => d.age < 0.6);
       const old = r.phase;
-      r.tick(dt, m.stir || this.keys.has('Space'));
-      if (old !== r.phase) this.sync();
-      if (r.phase === 'sear' && !m.loop) {
-        const b = this.g.audio.bank?.buffers?.get('origin_wok_sizzle_1_7_0');
-        m.loop = this.g.audio.emit?.(b, { bus: 'ui', volume: 0.7, loop: true, fade: 0.2 });
+      r.tick(dt, stir);
+      if (old !== r.phase) {
+        this.sync();
+        if (r.phase === 'serve') this.effect('pot_01', 0.5);
+      }
+      if (r.phase === 'sear') {
+        if (!m.loop)
+          m.loop = this.g.audio.emit?.(this.g.audio.bank?.buffers?.get('origin_wok_sizzle_1_7_0'), {
+            bus: 'ui',
+            volume: 0.4,
+            loop: true,
+            fade: 0.15,
+          });
+        if (stir && m.elapsed > (m.nextToss || 0)) {
+          this.effect('origin_wok_toss_1_7_0', 0.28);
+          m.nextToss = m.elapsed + 1.3;
+        }
+      }
+      if (r.phase === 'done' && r.passed) {
+        m.resultTime += dt;
+        if (m.resultTime >= 1.25) {
+          this.finish(true);
+          return;
+        }
       }
     }
-    animateKitchen(this.set, m.elapsed, {
-      ...r,
-      stir: !m.paused && (m.stir || this.keys.has('Space')),
-      pour: m.pour,
-    });
-    const plate = ['plate', 'done'].includes(r.phase),
-      target = this.target.set(plate ? -0.6 : -2, 1.3, -2.8);
-    this.camera.position.set(plate ? 2 : 1.4, 4.2, 1.3);
-    this.camera.lookAt(target);
-    this.w.renderer.getSize(this.size);
-    this.camera.aspect = this.size.x / Math.max(1, this.size.y);
-    this.camera.updateProjectionMatrix();
-    this.w.renderer.shadowMap.autoUpdate = true;
-    this.w.renderer.shadowMap.needsUpdate = true;
-    this.w.renderer.setRenderTarget(null);
-    this.w.renderer.render(this.set.scene, this.camera);
-    m.drawn = true;
-    m.width = this.size.x;
-    m.height = this.size.y;
-    $('cook-temperature').textContent = Math.round(r.heat) + '%';
-    $('cook-needle').style.left = r.heat + '%';
-    $('cook-doneness').style.width = Math.min(100, r.cooked) + '%';
-    $('cook-doneness').classList.toggle('danger', r.burn > 12);
-    if (r.phase === 'sear') {
-      $('cook-target').textContent = 'Gargrad ' + Math.round(r.cooked) + ' / ' + r.recipe.target;
-      $('cook-time').textContent =
-        Math.ceil(r.recipe.deadline - r.elapsed) +
-        ' s · ' +
-        (r.dry > 3 ? 'Rühren!' : r.burn > 12 ? 'Hitze reduzieren!' : 'Pfanne unter Kontrolle');
-      $('cook-feedback').textContent = r.feedback;
-    }
+    $('cook-stir').classList.toggle('stirring', stir && r.phase === 'sear');
+    $('cook-doneness').style.width = r.cooked + '%';
+    $('cook-time').textContent =
+      r.step && !['done', 'failed'].includes(r.phase)
+        ? Math.max(0, Math.ceil(r.deadline - r.elapsed)) + 's'
+        : '';
+    $('cook-hint').classList.toggle('wok-warning', r.phase === 'sear' && r.dry > 1.5);
+    if (r.phase === 'sear')
+      $('cook-hint').textContent = r.dry > 1.5 ? 'Rühren!' : 'Leertaste halten';
+    this.view.draw(m, stir);
   }
   finish(pass) {
     const m = this.current;
     if (!m) return;
+    this.clearDrag();
     this.current = null;
+    this.view = null;
     this.keys.clear();
     m.loop?.stop(0.1);
     this.story.stopVoice();
-    this.w.renderer.shadowMap.autoUpdate = m.shadowAuto;
-    this.w.renderer.shadowMap.needsUpdate = true;
-    this.w.shadowZone = null;
     document.body.classList.remove('story-cinematic', 'origin-cooking');
     if (this.g.modal) this.g.modal.locked = false;
     this.g.close();
-    if (pass) this.story.shiftComplete(m.round);
+    if (pass && m.round.passed) this.story.shiftComplete(m.round);
   }
 }

@@ -51,9 +51,9 @@ export const ORIGIN_LINES = [
     "key": "kitchen_03",
     "actor": "noi",
     "speaker": "Noi",
-    "text": "Alles. Deshalb bleiben wir ruhig. Zutaten wählen, Hitze kontrollieren, sauber anrichten.",
-    "asset": "origin_kitchen_03_1_7_0",
-    "duration": 8.3735
+    "text": "Alles. Deshalb bleiben wir ruhig. Zutaten in den Wok ziehen. Leertaste halten. Fertig. Keine Folie nötig.",
+    "asset": "origin_kitchen_03_1_7_1",
+    "duration": 11.0266
   },
   {
     "key": "kitchen_04",

@@ -186,7 +186,8 @@
     "rms": 0.088768,
     "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
     "sha256": "bc86ca6fbe54915abaa8223dd0d136216826049e4b3f54ecf16ae6338e46bc0c",
-    "source": "Original fictional German dialogue, rendered using installed Microsoft Windows speech synthesis. No human actor recording and no imitation of a real person."
+    "source": "Original fictional German dialogue, rendered using installed Microsoft Windows speech synthesis. No human actor recording and no imitation of a real person.",
+    "retiredIn": "1.7.1"
   },
   {
     "key": "kitchen_04",
@@ -970,5 +971,36 @@
     "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
     "sha256": "f8503850e28dc17398e47568bc8f891a3bcf90fb6512d26c41953b67312f277e",
     "source": "Original fictional German dialogue, rendered using installed Microsoft Windows speech synthesis. No human actor recording and no imitation of a real person."
+  },
+  {
+    "key": "kitchen_03",
+    "speaker": "Noi",
+    "text": "Alles. Deshalb bleiben wir ruhig. Zutaten in den Wok ziehen. Leertaste halten. Fertig. Keine Folie nötig.",
+    "asset": "origin_kitchen_03_1_7_1",
+    "duration": 11.0266,
+    "actor": "noi",
+    "voice": "Microsoft Katja",
+    "rate": 0,
+    "direction": "Souveräne Küchenchefin, herzlich und trocken. Neutrale synthetische Stimme ohne Akzentimitation.",
+    "event": "story.origin.kitchen_03",
+    "filename": "origin_kitchen_03_1_7_1.mp3",
+    "waveFile": "raw/kitchen_03_1_7_1.wav",
+    "synthetic": true,
+    "id": "kitchen_03",
+    "actualVoice": "Microsoft Katja",
+    "sampleRate": 24000,
+    "channels": 1,
+    "bitrateKbps": 96,
+    "bytes": 133388,
+    "peak": 0.602819,
+    "peakDbfs": -4.4,
+    "rms": 0.086069,
+    "processing": "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.1:ratio=2:attack=12:release=130:makeup=1.5,loudnorm=I=-20:TP=-4:LRA=7,alimiter=limit=0.71:level=false,afade=t=in:d=0.012",
+    "sha256": "b67b96b02f45298d151c9ea3d801cda87db3b9c31ac3867e9b4e8612f75ac5fd",
+    "source": "Original fictional German dialogue, rendered using installed Microsoft Windows speech synthesis. No human actor recording and no imitation of a real person.",
+    "replacesAsset": "origin_kitchen_03_1_7_0",
+    "originalSha256": "bc86ca6fbe54915abaa8223dd0d136216826049e4b3f54ecf16ae6338e46bc0c",
+    "integratedLufs": -19.83,
+    "truePeakDbtp": -4.38
   }
 ]
