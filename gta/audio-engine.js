@@ -191,7 +191,7 @@ export class Soundscape {
             : 1) *
           (this.voices.current || this.cinematicVoice
             ? bus === 'music'
-              ? 0.35
+              ? clamp(this.cinematicMix?.musicDuck ?? 0.35)
               : bus === 'ambience'
                 ? 0.72
                 : 1

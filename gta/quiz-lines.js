@@ -285,6 +285,126 @@ export const QUIZ_LINES = Object.freeze({
     text: 'Ein Test zeigt mehr Umsatz nach einem Umbau. Was stärkt die Aussage, dass der Umbau die Ursache war?',
     duration: 8.1928,
   },
+  lock_02: {
+    asset: 'quiz_host_lock_02',
+    text: 'Eingeloggt. Jetzt zählen Fakten.',
+    duration: 2.5405,
+  },
+  lock_03: {
+    asset: 'quiz_host_lock_03',
+    text: 'Die Antwort steht. Keine neue Version.',
+    duration: 2.8515,
+  },
+  lock_04: {
+    asset: 'quiz_host_lock_04',
+    text: 'Entschieden. Jetzt wird geprüft.',
+    duration: 2.4636,
+  },
+  correct_02: {
+    asset: 'quiz_host_correct_02',
+    text: 'Richtig! Dafür braucht es keine zweite Meinung.',
+    duration: 3.8942,
+  },
+  correct_03: {
+    asset: 'quiz_host_correct_03',
+    text: 'Genau! Die Folie können wir so lassen.',
+    duration: 3.2319,
+  },
+  correct_04: {
+    asset: 'quiz_host_correct_04',
+    text: 'Volltreffer. Sogar der Kunde hätte nichts zu ändern.',
+    duration: 4.0648,
+  },
+  correct_05: {
+    asset: 'quiz_host_correct_05',
+    text: 'Das stimmt. Ein Ergebnis ohne drei Abstimmungsrunden.',
+    duration: 4.2297,
+  },
+  correct_06: {
+    asset: 'quiz_host_correct_06',
+    text: 'Richtig! Ihr Bauchgefühl hat offenbar Quellen.',
+    duration: 3.7338,
+  },
+  correct_07: {
+    asset: 'quiz_host_correct_07',
+    text: 'Sehr gut. Diese Antwort ist wirklich final.',
+    duration: 3.775,
+  },
+  wrong_02: {
+    asset: 'quiz_host_wrong_02',
+    text: 'Leider falsch. Das kommt auf die Lernkurve.',
+    duration: 3.4293,
+  },
+  wrong_03: {
+    asset: 'quiz_host_wrong_03',
+    text: 'Das war es nicht. Auch ein schöner Titel rettet keine falsche Zahl.',
+    duration: 4.898,
+  },
+  wrong_04: {
+    asset: 'quiz_host_wrong_04',
+    text: 'Leider daneben. Beim nächsten Mal prüfen wir die Annahme zuerst.',
+    duration: 5.0293,
+  },
+  safety_02: {
+    asset: 'quiz_host_safety_02',
+    text: 'Die Sicherheitsstufe steht. Dieses Budget ist freigegeben.',
+    duration: 4.4901,
+  },
+  safety_03: {
+    asset: 'quiz_host_safety_03',
+    text: 'Geschafft! Ein Polster, das keine Nachkalkulation mehr schrumpft.',
+    duration: 5.4237,
+  },
+  million_02: {
+    asset: 'quiz_host_million_02',
+    text: 'Eine Million! Das nennen wir ein belastbares Ergebnis.',
+    duration: 4.2407,
+  },
+  million_03: {
+    asset: 'quiz_host_million_03',
+    text: 'Sie haben die Million! Dafür gibt es ausnahmsweise Standing Ovations statt Feedback.',
+    duration: 6.1142,
+  },
+  exit_02: {
+    asset: 'quiz_host_exit_02',
+    text: 'Gewinn gesichert. Eine Entscheidung mit positiver Bilanz.',
+    duration: 4.2395,
+  },
+  exit_03: {
+    asset: 'quiz_host_exit_03',
+    text: 'Sie nehmen das Geld mit. Endlich mal ein sauberer Projektabschluss.',
+    duration: 4.7909,
+  },
+  telephone_02: {
+    asset: 'quiz_host_telephone_02',
+    text: 'Benjamin ist dran. Hoffentlich hat er diesmal mehr als einen Neustart im Angebot.',
+    duration: 6.0194,
+  },
+  telephone_03: {
+    asset: 'quiz_host_telephone_03',
+    text: 'Wir rufen Benjamin an. Kurze Frage, großer Unterstützungsbedarf.',
+    duration: 5.7285,
+  },
+  fifty_02: {
+    asset: 'quiz_host_fifty_02',
+    text: 'Zwei Antworten fallen weg. So sieht eine echte Priorisierung aus.',
+    duration: 4.9383,
+  },
+  fifty_03: {
+    asset: 'quiz_host_fifty_03',
+    text: 'Wir halbieren die Auswahl. Der Schwierigkeitsgrad bleibt Verhandlungssache.',
+    duration: 5.3207,
+  },
+  audience_02: {
+    asset: 'quiz_host_audience_02',
+    text: 'Das Publikum stimmt ab. Heute bekommen wir die Marktforschung sofort.',
+    duration: 5.0837,
+  },
+  audience_03: {
+    asset: 'quiz_host_audience_03',
+    text: 'Eine kurze Umfrage im Saal. Mal sehen, ob die Mehrheit eine Quelle hat.',
+    duration: 5.8879,
+  },
 });
 
 export const QUIZ_VOICE_ASSETS = Object.freeze({
@@ -573,4 +693,149 @@ export const QUIZ_VOICE_ASSETS = Object.freeze({
     group: 'voice',
     duration: 8.1928,
   },
+  quiz_host_lock_02: {
+    path: './assets/audio/quiz_host_lock_02.mp3',
+    group: 'voice',
+    duration: 2.5405,
+  },
+  quiz_host_lock_03: {
+    path: './assets/audio/quiz_host_lock_03.mp3',
+    group: 'voice',
+    duration: 2.8515,
+  },
+  quiz_host_lock_04: {
+    path: './assets/audio/quiz_host_lock_04.mp3',
+    group: 'voice',
+    duration: 2.4636,
+  },
+  quiz_host_correct_02: {
+    path: './assets/audio/quiz_host_correct_02.mp3',
+    group: 'voice',
+    duration: 3.8942,
+  },
+  quiz_host_correct_03: {
+    path: './assets/audio/quiz_host_correct_03.mp3',
+    group: 'voice',
+    duration: 3.2319,
+  },
+  quiz_host_correct_04: {
+    path: './assets/audio/quiz_host_correct_04.mp3',
+    group: 'voice',
+    duration: 4.0648,
+  },
+  quiz_host_correct_05: {
+    path: './assets/audio/quiz_host_correct_05.mp3',
+    group: 'voice',
+    duration: 4.2297,
+  },
+  quiz_host_correct_06: {
+    path: './assets/audio/quiz_host_correct_06.mp3',
+    group: 'voice',
+    duration: 3.7338,
+  },
+  quiz_host_correct_07: {
+    path: './assets/audio/quiz_host_correct_07.mp3',
+    group: 'voice',
+    duration: 3.775,
+  },
+  quiz_host_wrong_02: {
+    path: './assets/audio/quiz_host_wrong_02.mp3',
+    group: 'voice',
+    duration: 3.4293,
+  },
+  quiz_host_wrong_03: {
+    path: './assets/audio/quiz_host_wrong_03.mp3',
+    group: 'voice',
+    duration: 4.898,
+  },
+  quiz_host_wrong_04: {
+    path: './assets/audio/quiz_host_wrong_04.mp3',
+    group: 'voice',
+    duration: 5.0293,
+  },
+  quiz_host_safety_02: {
+    path: './assets/audio/quiz_host_safety_02.mp3',
+    group: 'voice',
+    duration: 4.4901,
+  },
+  quiz_host_safety_03: {
+    path: './assets/audio/quiz_host_safety_03.mp3',
+    group: 'voice',
+    duration: 5.4237,
+  },
+  quiz_host_million_02: {
+    path: './assets/audio/quiz_host_million_02.mp3',
+    group: 'voice',
+    duration: 4.2407,
+  },
+  quiz_host_million_03: {
+    path: './assets/audio/quiz_host_million_03.mp3',
+    group: 'voice',
+    duration: 6.1142,
+  },
+  quiz_host_exit_02: {
+    path: './assets/audio/quiz_host_exit_02.mp3',
+    group: 'voice',
+    duration: 4.2395,
+  },
+  quiz_host_exit_03: {
+    path: './assets/audio/quiz_host_exit_03.mp3',
+    group: 'voice',
+    duration: 4.7909,
+  },
+  quiz_host_telephone_02: {
+    path: './assets/audio/quiz_host_telephone_02.mp3',
+    group: 'voice',
+    duration: 6.0194,
+  },
+  quiz_host_telephone_03: {
+    path: './assets/audio/quiz_host_telephone_03.mp3',
+    group: 'voice',
+    duration: 5.7285,
+  },
+  quiz_host_fifty_02: {
+    path: './assets/audio/quiz_host_fifty_02.mp3',
+    group: 'voice',
+    duration: 4.9383,
+  },
+  quiz_host_fifty_03: {
+    path: './assets/audio/quiz_host_fifty_03.mp3',
+    group: 'voice',
+    duration: 5.3207,
+  },
+  quiz_host_audience_02: {
+    path: './assets/audio/quiz_host_audience_02.mp3',
+    group: 'voice',
+    duration: 5.0837,
+  },
+  quiz_host_audience_03: {
+    path: './assets/audio/quiz_host_audience_03.mp3',
+    group: 'voice',
+    duration: 5.8879,
+  },
 });
+
+// Each category keeps its original key first. Host selection is owned by the quiz controller.
+export const QUIZ_HOST_VARIANTS = Object.freeze(
+  Object.fromEntries(
+    Object.entries({
+      lock: ['lock', 'lock_02', 'lock_03', 'lock_04'],
+      correct: [
+        'correct',
+        'correct_02',
+        'correct_03',
+        'correct_04',
+        'correct_05',
+        'correct_06',
+        'correct_07',
+      ],
+      wrong: ['wrong', 'wrong_02', 'wrong_03', 'wrong_04'],
+      safety: ['safety', 'safety_02', 'safety_03'],
+      million: ['million', 'million_02', 'million_03'],
+      exit: ['exit', 'exit_02', 'exit_03'],
+      telephone: ['telephone', 'telephone_02', 'telephone_03'],
+      fifty: ['fifty', 'fifty_02', 'fifty_03'],
+      audience: ['audience', 'audience_02', 'audience_03'],
+    }).map(([key, values]) => [key, Object.freeze(values)]),
+  ),
+);

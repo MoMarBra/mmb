@@ -384,6 +384,7 @@ export function renderQuizScore(ctx, key) {
   return band === undefined ? composeCue(ctx, kind) : composeBed(ctx, kind, +band);
 }
 
+export const QUIZ_MUSIC_GAIN = 1.55;
 const CACHE_LIMIT = 64 * 1024 * 1024;
 // Three bounded 15 s bank attempts plus a small decode/startup margin.
 const INTRO_AUDIO_WAIT_LIMIT = 48;
@@ -443,17 +444,7 @@ export function quizTrackPlan(name, tier = 0, options = {}) {
       }),
     ];
   if (name === 'question') {
-    const lead =
-      tier < 6
-        ? null
-        : tier === 6
-          ? 'play2000'
-          : tier < 11
-            ? 'play4000'
-            : tier < 14
-              ? 'play64000'
-              : 'playMillion';
-    return [...(lead && !options.resume ? [segment(lead)] : []), loopSegment(questionKey(tier))];
+    return [segment('play2000'), loopSegment(questionKey(tier))];
   }
   if (name === 'lock' || name === 'heartbeat')
     return tier < 6
@@ -514,6 +505,7 @@ export class QuizAudio {
     return true;
   }
   preloadIntro() {
+    this.request('play2000');
     this.request('theme');
     this.request('opening');
   }
@@ -652,7 +644,8 @@ export class QuizAudio {
   }
   play(track) {
     // A failed opening may continue visually; never join its music halfway through.
-    if (this.silentIntroTheme && track.slot === 'bed' && track.key === 'theme') return;
+    if (this.silentIntroTheme && track.slot === 'bed' && ['theme', 'play2000'].includes(track.key))
+      return;
     if (!this.playable || (track.bus === 'music' && this.audio.sim?.s.music === false)) return;
     const buffer = this.touch(cacheId(track.key, track.loop));
     if (!buffer) {
@@ -671,7 +664,7 @@ export class QuizAudio {
     const h = this.audio.emit(buffer, {
       loop: !!track.loop,
       bus: track.bus,
-      volume: track.volume,
+      volume: track.bus === 'music' ? track.volume * QUIZ_MUSIC_GAIN : track.volume,
       offset,
       fade: track.fadeIn ?? (track.loop ? 0.25 : 0.04),
     });
@@ -718,6 +711,7 @@ export class QuizAudio {
         preserve = true;
         const bed = this.tracks.get('bed');
         bed.clockOffset = (this.clock - bed.at + (bed.clockOffset || 0)) % bed.duration;
+        bed.at = 0;
         this.clock = 0;
       }
       this.setPlan(next, preserve);
@@ -769,7 +763,11 @@ export class QuizAudio {
     if (this.clock === 0 && first && this.playable && this.audio.sim?.s.music !== false) {
       const cache = cacheId(first.key, first.loop);
       const loaded = this.buffers.has(cache);
-      if (this.phase === 'intro' && first.key === 'theme' && !this.silentIntroTheme) {
+      if (
+        ((this.phase === 'intro' && first.key === 'theme') ||
+          (this.phase === 'question' && first.key === 'play2000')) &&
+        !this.silentIntroTheme
+      ) {
         const playing = this.tracks.get('bed')?.handle;
         if (!playing || playing.stopped || playing.ended) {
           if (!loaded) this.request(first.key, first.loop);

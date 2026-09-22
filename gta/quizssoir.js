@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { QuizState, QUIZ_LADDER } from './quiz-state.js';
 import { QuizStage, installQuizssoir } from './quiz-stage.js';
 import { QuizAudio, QUIZ_SHOW_INTRO_SHOTS } from './quiz-audio.js';
-import { QUIZ_LINES } from './quiz-lines.js';
+import { QUIZ_LINES, QUIZ_HOST_VARIANTS } from './quiz-lines.js';
 
+export const QUIZ_HOST_VOLUME = 0.27;
 const formatter = new Intl.NumberFormat('de-DE');
 const money = (n) => formatter.format(n || 0) + ' €';
 const letters = ['A', 'B', 'C', 'D'];
@@ -26,6 +27,7 @@ export class Quizssoir {
     this.stage = null;
     this.audio = new QuizAudio(game.audio);
     this.voiceToken = 0;
+    this.hostVariation = new Map();
     this.ray = new THREE.Raycaster();
     this.cursor = new THREE.Vector2();
     this.w.canvas?.addEventListener('click', (e) => this.clickFixture(e));
@@ -119,7 +121,7 @@ export class Quizssoir {
     this.g.open('Quizssoir', '', { pause: true, locked: true, onClose: () => this.cleanup() });
     document.body.classList.add('story-cinematic', 'quiz-open');
     this.g.audio.voices?.stop();
-    this.g.audio.cinematicMix = { owner: this };
+    this.g.audio.cinematicMix = { owner: this, musicDuck: 1 };
     this.g.arcade.music.current?.handle?.stop?.(0.12);
     this.g.arcade.music.current = null;
     this.g.audio.update(0, this.w, false);
@@ -137,7 +139,7 @@ export class Quizssoir {
   }
   shell() {
     $('modal-root').innerHTML =
-      `<section class="quiz-show" role="dialog" aria-modal="true" aria-labelledby="quiz-heading">
+      `<section class="quiz-show" role="dialog" aria-modal="true" aria-label="Quizssoir">
       <div class="quiz-film-shade"></div><div class="quiz-cut" id="quiz-cut"></div>
       <header class="quiz-header"><div class="quiz-wordmark"><div class="quiz-emblem" aria-hidden="true">Q</div><div><b>QUIZSSOIR</b><small>BBE · DIE MILLIONENFRAGE</small></div></div><div class="quiz-top-actions"><button id="quiz-ladder-toggle" aria-expanded="false">Gewinnleiter</button><button id="quiz-sound" aria-label="Quiz-Ton umschalten"></button><button id="quiz-pause">Pause <kbd>Esc</kbd></button></div></header>
       <div class="quiz-opening" id="quiz-opening"><span class="quiz-kicker">PRÄSENTIERT VON DER STILLEN ABTEILUNG</span><h1>QUIZSSOIR</h1><p>Hier zählt, was im Kopf bleibt.</p><button id="quiz-skip">An die Frage <span>↗</span></button></div>
@@ -154,7 +156,7 @@ export class Quizssoir {
           '',
         )}</ol><div class="quiz-secured"><small>SICHER</small><b id="quiz-secured">0 €</b></div></aside>
       <div class="quiz-host" id="quiz-host" aria-live="polite"><span>LUKAS FLEISCHMANN</span><p id="quiz-host-line"></p></div>
-      <section class="quiz-board" id="quiz-board"><div class="quiz-board-top"><span id="quiz-round"></span><span id="quiz-category"></span><strong id="quiz-prize"></strong></div><h2 id="quiz-heading"></h2><div class="quiz-answers" id="quiz-answers">${letters.map((l, i) => `<button class="quiz-answer" id="quiz-answer-${i}" data-answer="${i}"><span>${l}:</span><b></b><i></i></button>`).join('')}</div><div class="quiz-tools"><div class="quiz-jokers"><button id="quiz-fifty" aria-label="50 zu 50 Joker"><b>50:50</b><small>JOKER</small></button><button id="quiz-audience" aria-label="Publikumsjoker"><b>▂▆▃▅</b><small>PUBLIKUM</small></button><button id="quiz-phone" aria-label="Telefonjoker Benjamin"><b>☎</b><small>BENJAMIN</small></button></div><div class="quiz-decision"><button id="quiz-walk">Mitnehmen</button><button id="quiz-lock" class="quiz-primary" disabled>Antwort wählen</button><button id="quiz-next" class="quiz-primary" hidden>Weiter <span>↗</span></button></div></div><div id="quiz-reveal-copy" class="quiz-reveal-copy" role="status"></div></section>
+      <div id="quiz-question-lead" class="quiz-question-lead" role="status" tabindex="-1" hidden><span id="quiz-lead-round"></span><strong id="quiz-lead-prize"></strong><i aria-hidden="true"><b id="quiz-lead-progress"></b></i></div><section class="quiz-board" id="quiz-board"><div class="quiz-board-top"><span id="quiz-round"></span><span id="quiz-category"></span><strong id="quiz-prize"></strong></div><h2 id="quiz-heading"></h2><div class="quiz-answers" id="quiz-answers">${letters.map((l, i) => `<button class="quiz-answer" id="quiz-answer-${i}" data-answer="${i}"><span>${l}:</span><b></b><i></i></button>`).join('')}</div><div class="quiz-tools"><div class="quiz-jokers"><button id="quiz-fifty" aria-label="50 zu 50 Joker"><b>50:50</b><small>JOKER</small></button><button id="quiz-audience" aria-label="Publikumsjoker"><b>▂▆▃▅</b><small>PUBLIKUM</small></button><button id="quiz-phone" aria-label="Telefonjoker Benjamin"><b>☎</b><small>BENJAMIN</small></button></div><div class="quiz-decision"><button id="quiz-walk">Mitnehmen</button><button id="quiz-lock" class="quiz-primary" disabled>Antwort wählen</button><button id="quiz-next" class="quiz-primary" hidden>Weiter <span>↗</span></button></div></div><div id="quiz-reveal-copy" class="quiz-reveal-copy" role="status"></div></section>
       <section class="quiz-joker-card" id="quiz-joker-card" hidden aria-label="Joker-Ergebnis"><button id="quiz-dismiss-hint" aria-label="Joker-Ergebnis schließen">×</button><div id="quiz-hint"></div></section>
       <section class="quiz-finale" id="quiz-finale" hidden><span class="quiz-kicker" id="quiz-result-kicker"></span><h2 id="quiz-result-title"></h2><strong id="quiz-result-prize"></strong><p id="quiz-result-line"></p><small id="quiz-result-payment"></small><button class="quiz-primary" id="quiz-return">Zurück ins BBE-Büro <span>↗</span></button></section>
       <section class="quiz-pause-panel" id="quiz-pause-panel" hidden role="dialog" aria-label="Quiz pausiert"><span class="quiz-kicker">DEIN WISSEN LÄUFT NICHT WEG</span><h2>Kurze Denkpause.</h2><button class="quiz-primary" id="quiz-resume">Weiterspielen</button><button id="quiz-save-exit">Speichern & zurück zur Toilette</button></section>
@@ -196,6 +198,7 @@ export class Quizssoir {
     m.pendingVoice = null;
     m.welcomeSpoken = false;
     m.canResolve = false;
+    m.questionReady = v.phase !== 'question';
     this.stopVoice();
     const tier = Math.max(0, v.level - 1);
     if (v.phase === 'intro') {
@@ -258,10 +261,11 @@ export class Quizssoir {
             : v.phase === 'question'
               ? 'quiz-answer-' + (v.selection ?? [0, 1, 2, 3].find((i) => !v.hidden.includes(i)))
               : null;
-    if (id) $(id)?.focus?.();
+    if (v.phase === 'question' && !this.current?.questionReady) $('quiz-question-lead')?.focus?.();
+    else if (id) $(id)?.focus?.();
   }
   select(index) {
-    if (this.current?.paused || !this.state.select(index)) return;
+    if (!this.current?.questionReady || this.current.paused || !this.state.select(index)) return;
     this.current.hint = null;
     $('quiz-answer-' + index)?.focus?.();
     this.audio.cue('select', Math.max(0, this.state.view().level - 1));
@@ -269,7 +273,7 @@ export class Quizssoir {
     this.save();
   }
   lock() {
-    if (!this.current || this.current.paused || !this.state.lock()) return;
+    if (!this.current?.questionReady || this.current.paused || !this.state.lock()) return;
     this.phaseEntered();
   }
   resolveAnswer() {
@@ -291,7 +295,8 @@ export class Quizssoir {
     this.phaseEntered();
   }
   walkAway() {
-    if (!this.current || this.current.paused || !this.state.view().can.walkAway) return;
+    if (!this.current?.questionReady || this.current.paused || !this.state.view().can.walkAway)
+      return;
     if (!this.current.confirmWalk) {
       this.current.confirmWalk = true;
       $('quiz-walk').textContent = money(this.state.view().won) + ' wirklich mitnehmen?';
@@ -301,7 +306,7 @@ export class Quizssoir {
     if (this.state.walkAway()) this.phaseEntered();
   }
   joker(kind) {
-    if (!this.current || this.current.paused) return;
+    if (!this.current?.questionReady || this.current.paused) return;
     const result = this.state.useJoker(kind);
     if (!result) return;
     this.current.hint = kind;
@@ -314,13 +319,17 @@ export class Quizssoir {
     const m = this.current;
     if (!m) return;
     const v = this.state.view(),
-      question = v.question;
+      lead = v.phase === 'question' && !m.questionReady,
+      question = lead ? null : v.question;
     m.view = v;
     queueMicrotask(() => this.layoutUI());
     const show = document.querySelector('.quiz-show');
-    if (show) show.dataset.phase = v.phase;
+    if (show) show.dataset.phase = lead ? 'question-lead' : v.phase;
     $('quiz-opening').hidden = v.phase !== 'intro';
-    $('quiz-board').hidden = !['question', 'locked', 'reveal'].includes(v.phase);
+    $('quiz-board').hidden = lead || !['question', 'locked', 'reveal'].includes(v.phase);
+    $('quiz-question-lead').hidden = !lead;
+    $('quiz-lead-round').textContent = 'FRAGE ' + String(v.level).padStart(2, '0');
+    $('quiz-lead-prize').textContent = money(QUIZ_LADDER[v.level - 1]);
     $('quiz-ladder').hidden = v.phase === 'intro' || v.phase === 'finished';
     $('quiz-finale').hidden = v.phase !== 'finished';
     $('quiz-pause-panel').hidden = !m.paused;
@@ -330,14 +339,27 @@ export class Quizssoir {
     $('quiz-sound').textContent = this.g.audio.enabled ? 'Ton an' : 'Ton aus';
     $('quiz-sound').setAttribute('aria-pressed', String(this.g.audio.enabled));
     $('quiz-secured').textContent = money(v.safe);
-    $('quiz-step-label').textContent =
-      v.phase === 'locked' ? 'ANTWORT EINGELOGGT' : 'LIVE AUS DER STILLEN ABTEILUNG';
+    $('quiz-step-label').textContent = lead
+      ? 'DIE NÄCHSTE FRAGE'
+      : v.phase === 'locked'
+        ? 'ANTWORT EINGELOGGT'
+        : 'LIVE AUS DER STILLEN ABTEILUNG';
     for (let i = 1; i <= 15; i++) {
       const rung = $('quiz-rung-' + i);
       rung.classList.toggle('is-current', i === v.level);
       rung.classList.toggle('is-earned', QUIZ_LADDER[i - 1] <= v.won);
       if (i === v.level) rung.setAttribute('aria-current', 'step');
       else rung.removeAttribute('aria-current');
+    }
+    if (!question) {
+      for (const id of ['quiz-heading', 'quiz-round', 'quiz-category', 'quiz-prize'])
+        $(id).textContent = '';
+      for (let i = 0; i < 4; i++) {
+        const button = $('quiz-answer-' + i);
+        button.querySelector('b').textContent = '';
+        button.querySelector('i').textContent = '';
+        button.disabled = true;
+      }
     }
     if (question) {
       $('quiz-round').textContent = 'FRAGE ' + String(v.level).padStart(2, '0') + ' / 15';
@@ -365,7 +387,8 @@ export class Quizssoir {
       }
     }
     $('quiz-lock').hidden = v.phase === 'reveal';
-    $('quiz-lock').disabled = (v.phase === 'locked' ? !m.canResolve : !v.can.lock) || m.paused;
+    $('quiz-lock').disabled =
+      lead || (v.phase === 'locked' ? !m.canResolve : !v.can.lock) || m.paused;
     $('quiz-lock').textContent =
       v.phase === 'locked'
         ? m.canResolve
@@ -378,10 +401,10 @@ export class Quizssoir {
     $('quiz-next').textContent =
       v.reveal?.correct && v.level < 15 ? 'Nächste Frage ↗' : 'Zum Ergebnis ↗';
     $('quiz-next').disabled = m.paused;
-    $('quiz-walk').disabled = !v.can.walkAway || m.paused;
+    $('quiz-walk').disabled = lead || !v.can.walkAway || m.paused;
     if (!m.confirmWalk) $('quiz-walk').textContent = money(v.won) + ' mitnehmen';
     for (const kind of ['fifty', 'audience', 'phone']) {
-      $('quiz-' + kind).disabled = !v.jokers[kind] || !v.can.select || m.paused;
+      $('quiz-' + kind).disabled = lead || !v.jokers[kind] || !v.can.select || m.paused;
       $('quiz-' + kind).classList.toggle('is-used', !v.jokers[kind]);
     }
     $('quiz-reveal-copy').textContent =
@@ -429,8 +452,14 @@ export class Quizssoir {
         'Neu aufs Konto: ' + money(m.paid) + ' · Bestgewinn: ' + money(this.state.view().bestWin);
     }
   }
-  speak(key, offset = 0) {
+  speak(key, offset = 0, resolved = false) {
     this.stopVoice();
+    const variants = QUIZ_HOST_VARIANTS[key];
+    if (variants && !resolved) {
+      const index = this.hostVariation.get(key) ?? Math.floor(Math.random() * variants.length);
+      this.hostVariation.set(key, (index + 1) % variants.length);
+      key = variants[index];
+    }
     const line = QUIZ_LINES[key];
     if (!line || !this.current) return;
     const token = this.voiceToken,
@@ -452,7 +481,11 @@ export class Quizssoir {
           !this.g.audio.enabled
         )
           return;
-        session.voice = this.g.audio.emit(buffer, { bus: 'dialogue', volume: 0.93, offset });
+        session.voice = this.g.audio.emit(buffer, {
+          bus: 'dialogue',
+          volume: QUIZ_HOST_VOLUME,
+          offset,
+        });
         session.voiceStartedAt = this.g.audio.ctx.currentTime;
         session.voiceUntil = session.clock + Math.max(0, buffer.duration - offset);
       })
@@ -464,6 +497,10 @@ export class Quizssoir {
     if (this.current) {
       this.current.voice = null;
       this.current.voiceUntil = 0;
+      this.current.voiceLine = null;
+      this.current.voiceKey = null;
+      this.current.voiceStartedAt = null;
+      this.current.voiceOffset = 0;
     }
     this.g.audio.cinematicVoice = false;
     if ($('quiz-host')) $('quiz-host').hidden = true;
@@ -492,7 +529,7 @@ export class Quizssoir {
     if (!value && m.resumeVoice) {
       const voice = m.resumeVoice;
       m.resumeVoice = null;
-      this.speak(voice.key, voice.offset);
+      this.speak(voice.key, voice.offset, true);
     }
     this.w.keys.clear();
     this.draw();
@@ -592,6 +629,17 @@ export class Quizssoir {
       m.welcomeSpoken = true;
       this.speak('intro');
     }
+    if (!m.paused && v.phase === 'question' && !m.questionReady && this.audio.leadRemaining <= 0) {
+      m.questionReady = true;
+      m.elapsed = 0;
+      this.draw();
+      this.focusAction();
+    }
+    if (v.phase === 'question' && !m.questionReady) {
+      const total = this.audio.plan[0]?.duration || 1;
+      $('quiz-lead-progress').style.transform =
+        'scaleX(' + Math.min(1, this.audio.presentationTime / total) + ')';
+    }
     if (
       !m.paused &&
       m.pendingVoice &&
@@ -617,13 +665,19 @@ export class Quizssoir {
     const shot = this.stage.render(
       {
         phase:
-          v.phase === 'finished'
-            ? v.outcome === 'win'
-              ? 'win'
-              : v.outcome === 'wrong'
-                ? 'lose'
-                : 'result'
-            : v.phase,
+          v.phase === 'question' && !m.questionReady
+            ? 'question-lead'
+            : v.phase === 'finished'
+              ? v.outcome === 'win'
+                ? 'win'
+                : v.outcome === 'wrong'
+                  ? 'lose'
+                  : 'result'
+              : v.phase,
+        leadProgress:
+          v.phase === 'question' && !m.questionReady
+            ? this.audio.presentationTime / (this.audio.plan[0]?.duration || 1)
+            : 0,
         level: Math.max(0, v.level - 1),
         correct: v.reveal?.correct,
         speaking,

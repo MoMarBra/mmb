@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "publishedPath": "/gta/",
-  "sourceCommit": "017fab3979b1c7d7545d40015b13179b39ae0849",
+  "sourceCommit": "21fb39ac41cc97f2ea2f0a3c98b89ce8eee53f27",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T13:29:56.707Z",
+  "preparedAt": "2026-09-22T14:19:58.053Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "18 user-provided quizshow recordings plus three seamless loop derivatives. Complete Main Theme synchronized to a 45-second seated studio intro. Milestone question, lock, reveal, million and closing cues. Bounded PCM cache; pause, mute, delayed decode and result handoffs tested. Chrome and Edge full fifteen-question runs, real music-bus output, intro camera/audio synchronization, save/load, payout, mobile UI and existing workshop portal checks. Supplied files retained byte-for-byte; provenance and derivative hashes documented. Performance varies by hardware and settings."
+  "validation": "Quiz music raised 3.8 dB with no speech ducking in the quiz only. Moderator sits behind music at 0.27 source volume; 24 additional rotating German consulting reactions, 81 voice assets total. The supplied Lets Play 2,000 recording precedes every question, including resumed question sessions; prompts, answers and actions remain hidden or blocked until its full duration ends. Pause/resume preserves audio position and the early question bed continues into lock. Audio/controller regression checks plus Chrome and Edge full-round browser tests cover the foreground mix, jingle gate, 15 tiers, saved games, lifelines and return to office."
 }

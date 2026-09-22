@@ -802,6 +802,12 @@ export class QuizStage {
         this.camera.fov = lerp(43, 40, settle);
       }
       shot = 'studio-crane';
+    } else if (phase === 'question-lead') {
+      const pulse = Math.sin(Math.PI * clamp(state.leadProgress));
+      this.questionCamera(0);
+      this.camera.position.add(this.goal.set(pulse * 0.2, pulse * 0.22, pulse * 0.6));
+      this.camera.fov += pulse * 1.5;
+      shot = 'question-overture';
     } else if (phase === 'locked' || phase === 'lock' || phase === 'tension') {
       const t = ease(this.phaseTime / 3.5);
       this.camera.position.set(lerp(0.08, 0.42, t), 2.2, lerp(3.02, 2.54, t));
