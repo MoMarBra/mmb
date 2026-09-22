@@ -57,3 +57,71 @@ export function setHTML(node, html) {
     node._renderedHTML = html;
   }
 }
+// Safe color-only consolidation: original meshes/materials remain intact for
+// raycasts and gameplay. Only the rendered static copy receives vertex colors.
+export function staticColorKey(mesh) {
+  const m = mesh.material;
+  if (
+    !m.isMeshStandardMaterial ||
+    m.isMeshPhysicalMaterial ||
+    m.transparent ||
+    !m.visible ||
+    m.vertexColors ||
+    mesh.geometry.attributes.color ||
+    m.wireframe ||
+    m.alphaTest ||
+    m.polygonOffset ||
+    m.emissive?.getHex() ||
+    m.onBeforeCompile !== THREE.Material.prototype.onBeforeCompile
+  )
+    return null;
+  if (
+    [
+      'map',
+      'normalMap',
+      'roughnessMap',
+      'metalnessMap',
+      'aoMap',
+      'lightMap',
+      'bumpMap',
+      'alphaMap',
+      'displacementMap',
+      'envMap',
+    ].some((k) => m[k])
+  )
+    return null;
+  return [
+    m.type,
+    m.roughness,
+    m.metalness,
+    m.side,
+    m.flatShading,
+    m.depthTest,
+    m.depthWrite,
+    m.toneMapped,
+  ].join('/');
+}
+export function mergeColoredStatics(meshes, materialCache) {
+  const key = staticColorKey(meshes[0]);
+  if (!key) return { geometry: mergeStaticGeometry(meshes), material: meshes[0].material };
+  let mat = materialCache.get(key);
+  if (!mat) {
+    mat = meshes[0].material.clone();
+    mat.color.set('#ffffff');
+    mat.vertexColors = true;
+    mat.name = 'Static vertex-color surfaces';
+    materialCache.set(key, mat);
+  }
+  const copies = meshes.map((mesh) => {
+    const geometry = mesh.geometry.clone(),
+      count = geometry.attributes.position.count,
+      color = new Float32Array(count * 3),
+      c = mesh.material.color;
+    for (let i = 0; i < count; i++) color.set([c.r, c.g, c.b], i * 3);
+    geometry.setAttribute('color', new THREE.BufferAttribute(color, 3));
+    return { geometry, matrixWorld: mesh.matrixWorld };
+  });
+  const geometry = mergeStaticGeometry(copies);
+  for (const copy of copies) copy.geometry.dispose();
+  return { geometry, material: mat };
+}

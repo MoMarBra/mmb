@@ -641,6 +641,7 @@ export function buildCityExpansion(world, h) {
     for (let i = 0; i < 5; i++) {
       const p = route[i % route.length];
       const mesh = human({
+        crowd: true,
         jacket: ['#576f69', '#a38161', '#3b596d', '#a9977c', '#716386'][i],
         hair: i % 2 ? '#654932' : '#b39b72',
         scale: 0.94 + i * 0.024,

@@ -1,9 +1,10 @@
 import * as THREE from 'three';
-import { BLENDER_VEHICLES } from './assets/models/munich-vehicles.js';
+import { BLENDER_VEHICLES } from './assets/remaster/vehicles/models.js';
 
 // Authored in Blender 4.5 LTS. Shared buffers allow all background traffic to be instanced.
 const ROAD_LIFT = 0.076; // Authoring ground is y=0; the asphalt surface is y=0.086.
 const geometryCache = new Map();
+const geometrySources = new Map();
 const materialCache = new Map();
 function decode(encoded, Type) {
   const raw = atob(encoded);
@@ -12,7 +13,27 @@ function decode(encoded, Type) {
   return new Type(bytes.buffer);
 }
 function geometry(model, index, data) {
-  const key = model + ':' + index;
+  // Blender exported the same wheel once per corner. Reuse the front-left
+  // buffers for those manufactured parts; local proper rotations below preserve
+  // handedness without negative scales or changing the steering/spin pivots.
+  let sources = geometrySources.get(model);
+  if (!sources) {
+    const distant = model.endsWith(':lod');
+    const definition = BLENDER_VEHICLES.models[distant ? model.slice(0, -4) : model];
+    const meshes = distant ? definition.lod.meshes : definition.meshes;
+    const indices = new Map(meshes.map((mesh, i) => [mesh.part + ':' + mesh.material, i]));
+    sources = meshes.map((mesh, i) => {
+      const kind = definition.pivots[mesh.part]?.kind;
+      const part =
+        kind === 'wheel' ? 'frontLeftWheel' : kind === 'caliper' ? 'frontLeftCaliper' : mesh.part;
+      const canonical = indices.get(part + ':' + mesh.material) ?? i;
+      return { index: canonical, data: meshes[canonical] };
+    });
+    geometrySources.set(model, sources);
+  }
+  const source = sources[index];
+  data = source.data;
+  const key = model + ':' + source.index;
   if (!geometryCache.has(key)) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(decode(data.positions, Float32Array), 3));
@@ -44,8 +65,21 @@ function material(name, paint) {
     };
     const mat =
       name === 'paint'
-        ? new THREE.MeshPhysicalMaterial({ ...params, clearcoat: 0.65, clearcoatRoughness: 0.19 })
-        : new THREE.MeshStandardMaterial(params);
+        ? new THREE.MeshPhysicalMaterial({
+            ...params,
+            clearcoat: 1,
+            clearcoatRoughness: 0.13,
+            envMapIntensity: 1.05,
+          })
+        : ['glass', 'darkglass'].includes(name)
+          ? new THREE.MeshPhysicalMaterial({
+              ...params,
+              clearcoat: 1,
+              clearcoatRoughness: 0.06,
+              envMapIntensity: 1.15,
+              ior: 1.52,
+            })
+          : new THREE.MeshStandardMaterial(params);
     mat.name = 'Blender · ' + key;
     materialCache.set(key, mat);
   }
@@ -56,12 +90,14 @@ export function blenderVehicle(parent, type, paint, kit) {
   const model = type === 'bus' ? 'bus' : type === 'van' ? 'van' : 'car';
   const data = BLENDER_VEHICLES.models[model];
   const root = new THREE.Group();
-  root.name = 'München ' + type + ' · Blender 4.5';
+  root.name = 'München ' + type + ' · Blender Remaster';
+  root.userData.remastered = true;
   root.rotation.order = 'YXZ';
   root.userData.dynamic = true;
   root.userData.blenderModel = model;
   root.userData.doors = {};
   root.userData.wheels = [];
+  root.userData.calipers = [];
   const parts = { static: root };
   for (const [name, p] of Object.entries(data.pivots)) {
     if (p.kind === 'socket') {
@@ -78,6 +114,11 @@ export function blenderVehicle(parent, type, paint, kit) {
     Object.assign(group.userData, p);
     root.add(group);
     parts[name] = group;
+    if (p.kind === 'caliper') {
+      group.rotation.order = 'YXZ';
+      group.userData.restPosition = group.position.clone();
+      root.userData.calipers.push(group);
+    }
     if (p.kind === 'door') root.userData.doors[name] = group;
     if (p.kind === 'wheel') {
       // Steering rotates the axle first; spin must never rotate the steering axis.
@@ -99,10 +140,26 @@ export function blenderVehicle(parent, type, paint, kit) {
   data.meshes.forEach((data, i) => {
     const mesh = new THREE.Mesh(geometry(model, i, data), material(data.material, paint));
     mesh.name = `${model} ${data.part} ${data.material}`;
+    const pivot = BLENDER_VEHICLES.models[model].pivots[data.part];
+    if (
+      pivot?.side > 0 &&
+      ['wheel', 'caliper'].includes(pivot.kind) &&
+      data.material !== 'rubber'
+    ) {
+      // The right casting is the same geometry seen from the other side. A
+      // half-turn has positive determinant, so normals and instancing stay valid.
+      mesh.rotation.y = Math.PI;
+      if (pivot.kind === 'caliper') {
+        mesh.position.z = BLENDER_VEHICLES.models[model].pivots.frontLeftWheel.radius * 0.81;
+      }
+    }
     mesh.userData.lodGeometry = lods.get(data.part + ':' + data.material);
     mesh.castShadow = data.material !== 'glass';
     mesh.receiveShadow = true;
-    if (data.material === 'glass') mesh.userData.vehicleGlass = true;
+    if (['glass', 'darkglass'].includes(data.material)) {
+      mesh.userData.vehicleGlass = true;
+      mesh.castShadow = false;
+    }
     if (data.material === 'paint' && data.part === 'static') root.userData.dentMesh = mesh;
     (parts[data.part] || root).add(mesh);
   });
@@ -162,6 +219,12 @@ export function animateVehicleWheels(car, speed, dt, steering = 0) {
       wheel.rotation.set(angle, steer, 0, 'YXZ');
     } else wheel.rotation[axis] = angle;
   }
+  for (const caliper of rig.calipers || []) {
+    caliper.userData.steerAngle = caliper.userData.front
+      ? THREE.MathUtils.damp(caliper.userData.steerAngle || 0, turn, 10, dt)
+      : 0;
+    caliper.rotation.set(0, caliper.userData.steerAngle, 0, 'YXZ');
+  }
   for (const axle of nativeAxles || []) {
     axle.userData.steerAngle = THREE.MathUtils.damp(axle.userData.steerAngle || 0, turn, 10, dt);
     axle.rotation.set(0, axle.userData.steerAngle, 0, 'YXZ');
@@ -181,8 +244,12 @@ export function alignVehicleWheelsToRoad(car) {
     wheelSpin.setFromAxisAngle(xAxis, -Math.PI / 2);
     shadow.quaternion.copy(levelWheel).multiply(wheelSpin);
   }
-  for (const wheel of rig.wheels || []) {
-    const mount = rig.frontAxles ? wheel.parent : wheel;
+  const wheels = rig.wheels || [],
+    calipers = rig.calipers || [];
+  for (let index = 0; index < wheels.length + calipers.length; index++) {
+    const wheel = index < wheels.length ? wheels[index] : calipers[index - wheels.length];
+    const isCaliper = wheel.userData.kind === 'caliper';
+    const mount = rig.frontAxles && !isCaliper ? wheel.parent : wheel;
     const rest = mount.userData.restPosition;
     if (!rest) continue;
     // Convert a level axle centre back into the tilted chassis coordinate system.
@@ -191,7 +258,7 @@ export function alignVehicleWheelsToRoad(car) {
     mount.position.applyQuaternion(chassisInverse);
     wheelSteer.setFromAxisAngle(yAxis, mount.userData.steerAngle || 0);
     mount.quaternion.copy(levelWheel).multiply(wheelSteer);
-    if (mount === wheel) {
+    if (mount === wheel && !isCaliper) {
       wheelSpin.setFromAxisAngle(xAxis, wheel.userData.rollAngle || 0);
       wheel.quaternion.multiply(wheelSpin);
     }

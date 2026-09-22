@@ -25,7 +25,8 @@ export function storyActor(role) {
       face.add(part);
     }
   actor.userData.face = face;
-  const mouth = box(face, 0, 0.135, 0.159, 0.048, 0.009, 0.009, '#795047', false);
+  const mouth =
+    actor.userData.mouth || box(face, 0, 0.135, 0.159, 0.048, 0.009, 0.009, '#795047', false);
   actor.userData.mouth = mouth;
   return actor;
 }

@@ -1,4 +1,5 @@
-// Original procedural assets. +Y up; +Z forward. No imports, DOM or external assets.
+import { remasterPoliceCar } from './remaster-vehicles.js';
+// Original procedural props and shared remaster vehicle meshes. +Y up; +Z forward.
 const cache = new WeakMap();
 function kit(T) {
   if (cache.has(T)) return cache.get(T);
@@ -662,7 +663,7 @@ export function createPoliceCar(THREE) {
     colliderCenter: new T.Vector3(0, 0.78 + roadLift, 0),
     colliderHalfExtents: new T.Vector3(1.0, 0.76, 2.4),
   };
-  return g;
+  return remasterPoliceCar(g);
 }
 
 function smallWheel(K, parent, p, radius, key) {

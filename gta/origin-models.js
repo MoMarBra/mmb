@@ -1,3 +1,6 @@
+import { remasterInteriorGroup } from './remaster-interiors.js';
+import { remasterMaterial, upgradeInteriorSurfaces } from './remaster-materials.js';
+import { realisticPlant } from './remaster-vegetation.js';
 import { decorateOriginHome, decorateOriginKitchen } from './interior-detail.js';
 import { mergeStaticGeometry } from './render-batches.js';
 import * as THREE from 'three';
@@ -22,22 +25,9 @@ export function round(g, x, y, z, r, h, mat = ceramic) {
   return m;
 }
 function plant(g, x, z) {
-  round(g, x, 0.25, z, 0.25, 0.5, new THREE.MeshStandardMaterial({ color: '#d6aa77' }));
-  for (let i = 0; i < 5; i++) {
-    const m = new THREE.Mesh(
-      sphere,
-      new THREE.MeshStandardMaterial({ color: i % 2 ? '#597d48' : '#365e49' }),
-    );
-    m.scale.set(0.18, 0.5, 0.12);
-    m.position.set(
-      x + Math.sin(i * 2) * 0.17,
-      0.65 + Math.cos(i) * 0.12,
-      z + Math.cos(i * 2) * 0.17,
-    );
-    m.rotation.z = Math.sin(i) * 0.35;
-    g.add(m);
-  }
+  return realisticPlant(g, x, z);
 }
+
 function room(kind) {
   const group = new THREE.Group(),
     collisions = [];
@@ -66,9 +56,9 @@ export function buildOriginHome() {
   const set = room('home'),
     { group: g, solid } = set;
   solid(-4, 0.3, -3, 3, 0.6, 4.5, '#75634f');
-  box(g, -4, 0.67, -3, 2.9, 0.25, 4.4, '#d2d0bc');
-  box(g, -4, 0.84, -4.5, 2.5, 0.18, 0.8, '#eee6d5');
-  box(g, -4, 0.83, -2.45, 2.93, 0.09, 2.9, '#548a83');
+  box(g, -4, 0.67, -3, 2.9, 0.25, 4.4, remasterMaterial('fabric', { color: '#e3dfcd' }));
+  box(g, -4, 0.84, -4.5, 2.5, 0.18, 0.8, remasterMaterial('fabric', { color: '#f5ecdc' }));
+  box(g, -4, 0.83, -2.45, 2.93, 0.09, 2.9, remasterMaterial('fabric', { color: '#73958e' }));
   solid(4, 0.47, -4.9, 4, 0.94, 1.4, '#898170');
   box(g, 4, 0.975, -4.9, 4.1, 0.08, 1.5, '#d6d6c9');
   round(g, 4, 1.085, -4.7, 0.3, 0.14, black);
@@ -89,6 +79,8 @@ export function buildOriginHome() {
   for (let i = 0; i < 5; i++)
     box(g, 1.8 + i * 0.12, 0.885, 1.5, 0.07, 0.15, 0.24, ['#b76e4b', '#d7c97c', '#42756b'][i % 3]);
   decorateOriginHome(set);
+  upgradeInteriorSurfaces(set.group, 'home');
+  remasterInteriorGroup(set.group);
   return set;
 }
 export function buildOriginKitchen() {
@@ -262,6 +254,8 @@ export function buildOriginKitchen() {
     for (const m of meshes) g.remove(m);
   }
   decorateOriginKitchen(set);
+  upgradeInteriorSurfaces(set.group, 'zitronengras');
+  remasterInteriorGroup(set.group);
   return set;
 }
 const shrimpGeometry = new THREE.TorusGeometry(1, 0.34, 8, 16, Math.PI * 1.65);

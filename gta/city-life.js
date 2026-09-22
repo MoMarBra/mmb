@@ -4,6 +4,8 @@ import { human, animateHuman } from './world.js';
 import { createPoliceCar, createUmbrella } from './aaa-props.js';
 import { rayBoxDistance } from './expansion.js';
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+const finitePoint = (p) =>
+  p && Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z);
 export class CityLife {
   constructor(d) {
     this.d = d;
@@ -79,6 +81,7 @@ export class CityLife {
     ];
   }
   canSee(from, to, max = 45) {
+    if (!finitePoint(from) || !finitePoint(to)) return false;
     if (from.distanceTo(to) > max) return false;
     const a = from.clone().add(V(0, 1.45, 0)),
       b = to.clone().add(V(0, 1.1, 0)),
@@ -91,6 +94,9 @@ export class CityLife {
     return true;
   }
   emit(type, position, severity = 1) {
+    // One malformed event must never spread invalid positions through the crowd
+    // or the police routes: distance comparisons against NaN cannot reject it.
+    if (!finitePoint(position)) return;
     if (
       this.lastEvent &&
       this.lastEvent.type === type &&
@@ -178,6 +184,7 @@ export class CityLife {
     }
   }
   report(p, severity) {
+    if (!finitePoint(p)) return;
     this.level = Math.min(3, Math.max(1, this.level + (severity >= 2 || this.level === 0 ? 1 : 0)));
     this.phase = 'pursuit';
     this.lastSeen.copy(p);

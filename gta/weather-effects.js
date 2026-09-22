@@ -92,6 +92,12 @@ export class WeatherEffects {
     this.g.sim.s.wetness = this.wet;
     this.cloud = THREE.MathUtils.damp(this.cloud, rainy ? 1 : 0, 0.16, dt);
     this.material.uniforms.wet.value = this.wet;
+    const street = w.streetNetwork;
+    if (street?.roadMesh?.material.userData.remasterSurface) {
+      street.roadMesh.material.roughness = THREE.MathUtils.lerp(0.96, 0.32, this.wet);
+      street.roadMesh.material.color.setScalar(1 - this.wet * 0.2);
+      street.pavementMesh.material.roughness = THREE.MathUtils.lerp(0.93, 0.48, this.wet);
+    }
     this.rainStreaks.visible = w.zone === 'city' && this.cloud > 0.02;
     this.rainStreaks.material.opacity = this.cloud * 0.48;
     this.rainStreaks.position.copy(w.player.position);

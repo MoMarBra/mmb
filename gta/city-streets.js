@@ -1,3 +1,5 @@
+import { dressFacade } from './remaster-architecture.js';
+import { remasterMaterial } from './remaster-materials.js';
 import * as THREE from 'three';
 import { CITY_WALKS, CITY_FOOTWAYS } from './city-layout.js';
 import { buildStreetSigns } from './street-signs.js';
@@ -61,8 +63,12 @@ export function isRoadPoint(x, z, roads = STREET_ROADS, margin = 0) {
  * including T-junctions, overlaps and the spaces around solid architecture. */
 function arrangement(areas, holes) {
   const relevant = holes.filter((h) => areas.some((a) => overlaps(a, h)));
-  const xs = [...new Set([...areas, ...relevant].flatMap((r) => [r.x0, r.x1]))].sort((a, b) => a - b);
-  const zs = [...new Set([...areas, ...relevant].flatMap((r) => [r.z0, r.z1]))].sort((a, b) => a - b);
+  const xs = [...new Set([...areas, ...relevant].flatMap((r) => [r.x0, r.x1]))].sort(
+    (a, b) => a - b,
+  );
+  const zs = [...new Set([...areas, ...relevant].flatMap((r) => [r.z0, r.z1]))].sort(
+    (a, b) => a - b,
+  );
   const cells = [],
     occupancy = [];
   for (let zi = 0; zi + 1 < zs.length; zi++) {
@@ -71,7 +77,8 @@ function arrangement(areas, holes) {
     let start = -1;
     for (let xi = 0; xi + 1 < xs.length; xi++) {
       const x = (xs[xi] + xs[xi + 1]) / 2;
-      const inside = areas.some((r) => contains(r, x, z)) && !relevant.some((r) => contains(r, x, z));
+      const inside =
+        areas.some((r) => contains(r, x, z)) && !relevant.some((r) => contains(r, x, z));
       row.push(inside);
       if (inside && start < 0) start = xi;
       if (start >= 0 && (!inside || xi === xs.length - 2)) {
@@ -252,7 +259,9 @@ function nearPaths(x, z, paths, padding = 1) {
         dx = b.x - a.x,
         dz = b.z - a.z;
       const denominator = dx * dx + dz * dz;
-      const t = denominator ? Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / denominator)) : 0;
+      const t = denominator
+        ? Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / denominator))
+        : 0;
       if (Math.hypot(x - a.x - dx * t, z - a.z - dz * t) < padding) return true;
     }
   }
@@ -275,39 +284,11 @@ function texture(draw, size = 512) {
 }
 
 function streetMaterials() {
-  // Seeded microtexture avoids a fresh material appearance after every reload.
-  let seed = 62719;
-  const random = () => (seed = (1664525 * seed + 1013904223) >>> 0) / 4294967296;
-  const asphalt = texture((c, n) => {
-    c.fillStyle = '#535b5d';
-    c.fillRect(0, 0, n, n);
-    for (let i = 0; i < 76000; i++) {
-      const v = 57 + Math.floor(random() * 58);
-      c.fillStyle = `rgba(${v},${v + 3},${v + 4},${0.18 + random() * 0.32})`;
-      c.fillRect(random() * n, random() * n, 1 + random() * 1.2, 1 + random() * 1.2);
-    }
-  });
-  const paving = texture((c, n) => {
-    c.fillStyle = '#969c97';
-    c.fillRect(0, 0, n, n);
-    for (let z = 0; z < n; z += 64)
-      for (let x = 0; x < n; x += 64) {
-        const v = 174 + Math.floor(random() * 20);
-        c.fillStyle = `rgb(${v + 4},${v + 5},${v})`;
-        c.fillRect(x + 1.5, z + 1.5, 61, 61);
-        c.fillStyle = 'rgba(255,255,245,.13)';
-        c.fillRect(x + 2, z + 2, 60, 1);
-      }
-    for (let i = 0; i < 12000; i++) {
-      c.fillStyle = 'rgba(47,52,48,.065)';
-      c.fillRect(random() * n, random() * n, 1, 1);
-    }
-  });
   return {
-    asphalt: new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.96, metalness: 0.015 }),
-    paving: new THREE.MeshStandardMaterial({ map: paving, roughness: 0.93 }),
-    curb: new THREE.MeshStandardMaterial({ color: '#c6c5b7', roughness: 0.94 }),
-    paint: new THREE.MeshStandardMaterial({ color: '#d8d6c6', roughness: 0.93 }),
+    asphalt: remasterMaterial('asphalt'),
+    paving: remasterMaterial('pavement'),
+    curb: remasterMaterial('stone', { color: '#c6c5bf' }),
+    paint: new THREE.MeshStandardMaterial({ color: '#e1ded1', roughness: 0.94 }),
   };
 }
 
@@ -316,13 +297,7 @@ function architecture(world, kit, initialBlocks) {
     blocks = initialBlocks.slice(),
     additions = [];
   const palettes = ['#d5c7ad', '#dfd6bf', '#b9c5c1', '#c8b6a3', '#d7c9b9', '#c0c6b4'];
-  const facades = palettes.map(
-    (color, i) =>
-      new THREE.MeshStandardMaterial({
-        map: world.facadeTexture(color, i + 140),
-        roughness: 0.91,
-      }),
-  );
+  const facades = palettes.map((color) => remasterMaterial('plaster', { color }));
   const roofMaterial = new THREE.MeshStandardMaterial({ color: '#5d6262', roughness: 0.86 });
   // Shared low-poly pitched roof, a silhouette change without expensive tiny geometry.
   const roofShape = new THREE.Shape();
@@ -337,7 +312,8 @@ function architecture(world, kit, initialBlocks) {
   const interactions = world.zoneData.city.interactions;
   const blocked = (candidate) => {
     const bounds = rect(candidate, 0.35);
-    if ([...roads, ...OPEN_SPACES, ...staticArchitecture].some((b) => overlaps(bounds, b))) return true;
+    if ([...roads, ...OPEN_SPACES, ...staticArchitecture].some((b) => overlaps(bounds, b)))
+      return true;
     if (additions.some((b) => overlaps(bounds, rect(b, 0.85)))) return true;
     if (interactions.some((p) => contains(rect(candidate, 3.3), p.x, p.z))) return true;
     // Shared pedestrian axes remain wide enough for both the player and companions.
@@ -366,6 +342,18 @@ function architecture(world, kit, initialBlocks) {
         ? new THREE.MeshStandardMaterial({ color: '#d5c7aa', roughness: 0.91 })
         : facades[index % facades.length],
     );
+    if (!museum)
+      dressFacade(g, {
+        x: r.x,
+        z: r.z,
+        w: r.w,
+        d: r.d,
+        h,
+        color: palettes[index % palettes.length],
+        seed: index,
+        body,
+      });
+    else body.material = remasterMaterial('stone', { color: '#e6dfcf' });
     body.name = 'Münchner Blockrand · ' + index;
     world.obstacle('city', r.x, r.z, r.w, r.d, h / 2, h, body);
     (world.cityBlocks ||= []).push({ ...r });
@@ -384,8 +372,26 @@ function architecture(world, kit, initialBlocks) {
     const sign = facing === 'north' || facing === 'west' ? -1 : 1;
     const dx = horizontal ? 0 : sign * (r.w / 2 + 0.06);
     const dz = horizontal ? sign * (r.d / 2 + 0.06) : 0;
-    kit.box(g, r.x + dx, 1.44, r.z + dz, horizontal ? 1.6 : 0.09, 2.88, horizontal ? 0.09 : 1.6, '#36494b');
-    kit.box(g, r.x + dx, 2.69, r.z + dz, horizontal ? 1.25 : 0.12, 0.36, horizontal ? 0.12 : 1.25, '#b4b5a0');
+    kit.box(
+      g,
+      r.x + dx,
+      1.44,
+      r.z + dz,
+      horizontal ? 1.6 : 0.09,
+      2.88,
+      horizontal ? 0.09 : 1.6,
+      '#36494b',
+    );
+    kit.box(
+      g,
+      r.x + dx,
+      2.69,
+      r.z + dz,
+      horizontal ? 1.25 : 0.12,
+      0.36,
+      horizontal ? 0.12 : 1.25,
+      '#b4b5a0',
+    );
     if (museum) {
       // South-facing museum counterpart to the Glyptothek across Königsplatz.
       const stone = new THREE.MeshStandardMaterial({ color: '#dcd0b8', roughness: 0.86 });
@@ -475,9 +481,11 @@ function curbSegments(grid) {
     for (let x = 0; x < occupancy[z].length; x++) {
       if (!occupancy[z][x]) continue;
       if (!occupancy[z - 1]?.[x]) raw.push({ horizontal: true, at: zs[z], a: xs[x], b: xs[x + 1] });
-      if (!occupancy[z + 1]?.[x]) raw.push({ horizontal: true, at: zs[z + 1], a: xs[x], b: xs[x + 1] });
+      if (!occupancy[z + 1]?.[x])
+        raw.push({ horizontal: true, at: zs[z + 1], a: xs[x], b: xs[x + 1] });
       if (!occupancy[z][x - 1]) raw.push({ horizontal: false, at: xs[x], a: zs[z], b: zs[z + 1] });
-      if (!occupancy[z][x + 1]) raw.push({ horizontal: false, at: xs[x + 1], a: zs[z], b: zs[z + 1] });
+      if (!occupancy[z][x + 1])
+        raw.push({ horizontal: false, at: xs[x + 1], a: zs[z], b: zs[z + 1] });
     }
   raw.sort((a, b) => Number(a.horizontal) - Number(b.horizontal) || a.at - b.at || a.a - b.a);
   const merged = [];
@@ -529,8 +537,10 @@ function avenueTrees(world, kit, blocks) {
       )
     )
       return false;
-    if (tree && [...existingTrees, ...placed].some((p) => Math.hypot(p.x - x, p.z - z) < 9.5)) return false;
-    if (tree && (world.streetLamps || []).some((p) => Math.hypot(p.x - 0.67 - x, p.z - z) < 2)) return false;
+    if (tree && [...existingTrees, ...placed].some((p) => Math.hypot(p.x - x, p.z - z) < 9.5))
+      return false;
+    if (tree && (world.streetLamps || []).some((p) => Math.hypot(p.x - 0.67 - x, p.z - z) < 2))
+      return false;
     return true;
   };
   for (const road of STREET_ROADS) {
@@ -577,7 +587,7 @@ export function buildCityStreets(world, kit) {
   const grid = arrangement(roads, holes);
   const materials = streetMaterials();
   const carriagewayCells = withRings(grid.cells, holes);
-  const roadMesh = new THREE.Mesh(surface(carriagewayCells, 0.086, 1 / 9), materials.asphalt);
+  const roadMesh = new THREE.Mesh(surface(carriagewayCells, 0.086, 1), materials.asphalt);
   roadMesh.name = 'Continuous Munich asphalt · no overlapping intersections';
   roadMesh.receiveShadow = true;
   g.add(roadMesh);
@@ -591,7 +601,7 @@ export function buildCityStreets(world, kit) {
     'sidewalkRadius',
     roads,
   );
-  const pavementMesh = new THREE.Mesh(surface(pavementCells, 0.101, 1 / 4), materials.paving);
+  const pavementMesh = new THREE.Mesh(surface(pavementCells, 0.101, 1), materials.paving);
   pavementMesh.name = 'Continuous granite sidewalks · exterior road edges';
   pavementMesh.receiveShadow = true;
   g.add(pavementMesh);
@@ -625,7 +635,8 @@ export function buildCityStreets(world, kit) {
         z = road.z + (horizontal ? 0 : t);
       if (
         STREET_ROADS.some(
-          (other) => other !== road && other.w > other.d !== horizontal && contains(rect(other, 3.5), x, z),
+          (other) =>
+            other !== road && other.w > other.d !== horizontal && contains(rect(other, 3.5), x, z),
         )
       )
         continue;
@@ -644,7 +655,10 @@ export function buildCityStreets(world, kit) {
       STREET_ROADS.map((r) => rect(r, 0.16)),
     );
     const innerKerb = annulus(ring, ring.innerRadius - 0.12, ring.innerRadius + 0.1);
-    const kerbMesh = new THREE.Mesh(surface([...outerKerb, ...innerKerb], 0.118, 1 / 4), materials.curb);
+    const kerbMesh = new THREE.Mesh(
+      surface([...outerKerb, ...innerKerb], 0.118, 1),
+      materials.curb,
+    );
     kerbMesh.receiveShadow = true;
     kerbMesh.name = 'Karolinenplatz · rounded kerbs';
     g.add(kerbMesh);

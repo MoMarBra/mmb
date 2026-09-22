@@ -17,7 +17,7 @@ function kit(T) {
     return geometries.get(key);
   };
   const M = {
-    petrol: material('petrol', '#204a55', 0.34, 0.28, { clearcoat: 0.5, clearcoatRoughness: 0.25 }),
+    petrol: material('petrol', '#204a55', 0.34, 0.28, { clearcoat: 1, clearcoatRoughness: 0.15 }),
     cream: material('cream', '#e9dfc7', 0.34, 0.2, { clearcoat: 0.4 }),
     orange: material('orange', '#f29b66', 0.35, 0.05),
     black: material('black', '#17242c', 0.49, 0.1),
@@ -25,11 +25,12 @@ function kit(T) {
     chrome: material('chrome', '#c8d3d3', 0.25, 0.87),
     steel: material('steel', '#71858a', 0.42, 0.75),
     leather: material('leather', '#794e38', 0.79, 0.0),
-    glass: material('aircraft-glass', '#15343f', 0.13, 0.42, {
+    glass: material('aircraft-glass', '#a4bac1', 0.075, 0.03, {
       clearcoat: 1,
       clearcoatRoughness: 0.09,
       transparent: true,
-      opacity: 0.94,
+      opacity: 0.28,
+      depthWrite: false,
       side: T.DoubleSide,
     }),
     redLight: material('red-light', '#f33f2d', 0.2, 0.1, {
@@ -131,7 +132,12 @@ function kit(T) {
   };
   const curvedTube = (g, points, radius, mat, segments = 28) => {
     const curve = new T.CatmullRomCurve3(points.map((p) => new T.Vector3(...p)));
-    return mesh(g, new T.TubeGeometry(curve, segments, radius, 7, false), mat);
+    const key = 'curve:' + radius + ':' + segments + ':' + points.map((p) => p.join(',')).join(';');
+    return mesh(
+      g,
+      geo(key, () => new T.TubeGeometry(curve, segments, radius, 7, false)),
+      mat,
+    );
   };
   const roundedBox = (g, p, size, mat) => {
     const geometry = geo('rounded-box', () => {
@@ -162,7 +168,20 @@ function kit(T) {
     m.scale.set(...size);
     return m;
   };
-  const K = { T, M, geo, mesh, box, sphere, tube, cylinder, torus, curvedTube, roundedBox, unitTube };
+  const K = {
+    T,
+    M,
+    geo,
+    mesh,
+    box,
+    sphere,
+    tube,
+    cylinder,
+    torus,
+    curvedTube,
+    roundedBox,
+    unitTube,
+  };
   resources.set(T, K);
   return K;
 }
@@ -203,7 +222,13 @@ function curvedPanel(K, g, az1, az2, el1, el2, mat, frame = false) {
   geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
-  const panel = mesh(g, geometry, mat);
+  const shared = K.geo(
+    'curved-panel:' + [az1, az2, el1, el2, mat === M.glass].join(':'),
+    () => geometry,
+  );
+  if (shared !== geometry) geometry.dispose();
+  const panel = mesh(g, shared, mat);
+  if (mat.transparent) panel.castShadow = false;
   if (frame) {
     for (const edge of [
       [az1, el1, az2, el1],
@@ -283,19 +308,180 @@ function bakeStatic(K, group, key, excluded = []) {
   }
 }
 
+// A true cabin shell: glazing apertures contain no hidden opaque ellipsoid.
+// Each patch is shared and baked; the additional cockpit does not add draw calls
+// per gauge or per fuselage rivet to repeated aircraft instances.
+function aircraftHull(K, g) {
+  const { T, M, mesh, geo } = K;
+  const az = [
+    -Math.PI,
+    -2.35,
+    -1.78,
+    -1.68,
+    -1.625,
+    -0.965,
+    -0.91,
+    -0.76,
+    -0.02,
+    0.02,
+    0.76,
+    0.91,
+    0.965,
+    1.625,
+    1.68,
+    1.78,
+    2.35,
+    Math.PI,
+  ];
+  const el = [
+    -Math.PI / 2 + 0.002,
+    -0.49,
+    -0.3,
+    0.06,
+    0.1,
+    0.12,
+    0.57,
+    0.65,
+    0.8,
+    Math.PI / 2 - 0.002,
+  ];
+  const windows = (a, e) => {
+    a = Math.abs(a);
+    return (
+      (a > 0.02 && a < 0.76 && e > 0.06 && e < 0.8) ||
+      (a > 0.965 && a < 1.625 && e > 0.12 && e < 0.57) ||
+      (a > 1.78 && a < 2.35 && e > 0.1 && e < 0.57)
+    );
+  };
+  for (const finish of ['cream', 'petrol']) {
+    const geometry = geo('remaster-aircraft-shell-' + finish, () => {
+      const positions = [],
+        indices = [],
+        normals = [];
+      for (let y = 0; y < el.length - 1; y++)
+        for (let x = 0; x < az.length - 1; x++) {
+          const a = (az[x] + az[x + 1]) / 2,
+            e = (el[y] + el[y + 1]) / 2;
+          if (windows(a, e)) continue;
+          const color =
+            e < -0.3 || (Math.abs(a) > 0.91 && Math.abs(a) < 1.68 && e < 0.65) ? 'petrol' : 'cream';
+          if (color !== finish) continue;
+          const base = positions.length / 3,
+            nu = 4,
+            nv = 3;
+          for (let v = 0; v <= nv; v++)
+            for (let u = 0; u <= nu; u++) {
+              const p = ellipsoidPoint(
+                T,
+                az[x] + ((az[x + 1] - az[x]) * u) / nu,
+                el[y] + ((el[y + 1] - el[y]) * v) / nv,
+                1.008,
+              );
+              positions.push(p.x, p.y, p.z);
+              const normal = new T.Vector3(
+                p.x / (1.24 * 1.24),
+                (p.y - 2.1) / (1.08 * 1.08),
+                (p.z - 0.7) / (3.5 * 3.5),
+              ).normalize();
+              normals.push(normal.x, normal.y, normal.z);
+            }
+          for (let v = 0; v < nv; v++)
+            for (let u = 0; u < nu; u++) {
+              const i = base + v * (nu + 1) + u;
+              indices.push(i, i + 1, i + nu + 2, i, i + nu + 2, i + nu + 1);
+            }
+        }
+      const result = new T.BufferGeometry();
+      result.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+      result.setIndex(indices);
+      result.setAttribute('normal', new T.Float32BufferAttribute(normals, 3));
+      return result;
+    });
+    const shell = mesh(g, geometry, M[finish]);
+    shell.name = 'Open aircraft cabin shell ' + finish;
+  }
+}
+function aircraftDoorOutline(K, g, az1, az2) {
+  for (const [a1, e1, a2, e2] of [
+    [az1, -0.49, az2, -0.49],
+    [az2, -0.49, az2, 0.65],
+    [az2, 0.65, az1, 0.65],
+    [az1, 0.65, az1, -0.49],
+  ]) {
+    const p = Array.from({ length: 9 }, (_, i) =>
+      ellipsoidPoint(K.T, a1 + ((a2 - a1) * i) / 8, e1 + ((e2 - e1) * i) / 8, 1.014).toArray(),
+    );
+    K.curvedTube(g, p, 0.012, K.M.black, 16);
+  }
+}
+function aircraftInterior(K, g) {
+  const { M, roundedBox, tube, cylinder, sphere, box } = K;
+  roundedBox(g, [0, 1.38, 0.45], [1.72, 0.07, 3.75], M.black);
+  for (const z of [2.16, 0.2])
+    for (const side of [-1, 1]) {
+      const x = side * 0.43;
+      roundedBox(g, [x, 1.7, z], [0.57, 0.11, 0.61], M.leather);
+      const back = roundedBox(g, [x, 2.01, z - 0.27], [0.56, 0.59, 0.12], M.leather);
+      back.rotation.x = -0.11;
+      roundedBox(g, [x, 2.38, z - 0.3], [0.34, 0.18, 0.14], M.black);
+      tube(g, [x - 0.19, 2.26, z - 0.18], [x + 0.19, 1.76, z + 0.03], 0.013, M.black);
+      box(g, [x + 0.16, 1.77, z + 0.035], [0.035, 0.045, 0.016], M.chrome);
+      if (z > 1) {
+        tube(g, [x, 1.46, z + 0.05], [x, 1.98, z + 0.24], 0.023, M.black);
+        const grip = cylinder(g, [x, 2.02, z + 0.25], 0.034, 0.12, M.rubber);
+        grip.rotation.x = -0.25;
+        tube(g, [x - side * 0.29, 1.65, z], [x - side * 0.29, 1.76, z + 0.34], 0.025, M.black);
+      }
+    }
+  const panel = roundedBox(g, [0, 2.0, 2.91], [1.5, 0.54, 0.16], M.black);
+  panel.rotation.x = 0.15;
+  for (const x of [-0.43, 0, 0.43]) {
+    roundedBox(g, [x, 2.04, 2.805], [0.34, 0.25, 0.019], M.chrome);
+    roundedBox(g, [x, 2.04, 2.79], [0.3, 0.21, 0.01], M.petrol);
+    for (let row = 0; row < 3; row++)
+      box(g, [x - 0.06, 2.08 - row * 0.048, 2.78], [0.11 + row * 0.025, 0.006, 0.005], M.cream);
+  }
+  for (const side of [-1, 1])
+    for (let i = 0; i < 5; i++) {
+      const knob = cylinder(
+        g,
+        [side * (0.09 + i * 0.12), 1.81, 2.79],
+        0.014,
+        0.02,
+        i % 2 ? M.chrome : M.black,
+        0.014,
+        8,
+      );
+      knob.rotation.x = Math.PI / 2;
+    }
+  roundedBox(g, [0, 1.68, 1.82], [0.2, 0.44, 1.2], M.black);
+  tube(g, [0, 1.98, 1.97], [0, 2.11, 2.13], 0.02, M.chrome);
+  sphere(g, [0, 2.115, 2.13], [0.034, 0.034, 0.034], M.black);
+  for (const side of [-1, 1]) {
+    // Cabin handles, window seals and external maintenance rivets.
+    tube(g, [side * 0.92, 2.65, 0.8], [side * 0.92, 2.65, 1.15], 0.023, M.chrome);
+    for (let i = 0; i < 10; i++) {
+      const p = ellipsoidPoint(K.T, side * (0.95 + i * 0.14), -0.38, 1.017);
+      sphere(g, p.toArray(), [0.012, 0.012, 0.012], M.chrome);
+    }
+  }
+}
+
 export function createHelicopter(THREE) {
   const K = kit(THREE),
     { T, M, geo, mesh, sphere, tube, cylinder, box, roundedBox, curvedTube } = K;
   const g = new T.Group();
-  g.name = 'BBE executive utility helicopter';
-  sphere(g, [0, 2.1, 0.7], [1.24, 1.08, 3.5], M.cream);
-  curvedPanel(K, g, -Math.PI, Math.PI, -Math.PI / 2 + 0.02, -0.3, M.petrol);
+  g.name = 'BBE executive utility helicopter · Remaster';
+  aircraftHull(K, g);
+  aircraftInterior(K, g);
   // The curved windshield follows the fuselage instead of floating as flat cubes.
   curvedPanel(K, g, -0.76, -0.02, 0.06, 0.8, M.glass, true);
   curvedPanel(K, g, 0.02, 0.76, 0.06, 0.8, M.glass, true);
   for (const side of [-1, 1]) {
     const az = side === 1 ? [0.91, 1.68] : [-1.68, -0.91];
-    curvedPanel(K, g, az[0], az[1], -0.49, 0.65, M.petrol, true);
+    aircraftDoorOutline(K, g, az[0], az[1]);
+    const rearAz = side === 1 ? [1.78, 2.35] : [-2.35, -1.78];
+    curvedPanel(K, g, rearAz[0], rearAz[1], 0.1, 0.57, M.glass, true);
     curvedPanel(K, g, az[0] + 0.055, az[1] - 0.055, 0.12, 0.57, M.glass, true);
     const handle = ellipsoidPoint(T, side * 1.3, -0.04, 1.05);
     tube(
@@ -327,6 +513,15 @@ export function createHelicopter(THREE) {
       box(g, [side * 0.794, 3.1, -0.95 + i * 0.18], [0.022, 0.17, 0.065], M.black);
   }
   cylinder(g, [0, 3.57, -0.07], 0.13, 0.62, M.chrome);
+  for (let i = 0; i < 3; i++)
+    cylinder(g, [0, 3.32 + i * 0.12, -0.07], 0.2 - i * 0.016, 0.045, M.steel);
+  for (const side of [-1, 1]) {
+    tube(g, [side * 0.24, 3.25, -0.16], [side * 0.34, 3.69, 0.04], 0.019, M.chrome);
+    tube(g, [side * 0.36, 3.15, 0.11], [side * 0.24, 3.65, -0.2], 0.02, M.steel);
+    roundedBox(g, [side * 0.51, 3.27, 0.37], [0.39, 0.2, 0.32], M.black);
+    for (let i = 0; i < 6; i++)
+      box(g, [side * 0.51, 3.3, 0.24 + i * 0.045], [0.33, 0.028, 0.012], M.steel);
+  }
   cylinder(g, [0, 3.42, -0.07], 0.25, 0.12, M.black);
   const mainRotor = new T.Group();
   mainRotor.name = 'Main rotor — rotate Y';
@@ -443,6 +638,8 @@ export function createHelicopter(THREE) {
   bakeStatic(K, tailRotor, 'helicopter-tail-rotor');
   bakeStatic(K, g, 'helicopter-body', [mainRotor, tailRotor, red, green, beacon]);
   g.userData = {
+    remastered: true,
+    cabinShell: true,
     mainRotor,
     tailRotor,
     navigationLights: [red, green, beacon],
@@ -463,7 +660,7 @@ export function createRideableBike(THREE) {
   const K = kit(THREE),
     { T, M, geo, mesh, tube, box, cylinder, torus, roundedBox, curvedTube, unitTube } = K;
   const g = new T.Group();
-  g.name = 'Augusten city bicycle';
+  g.name = 'Augusten city bicycle · Remaster';
   const rear = [0, 0.37, -0.72],
     front = [0, 0.37, 0.8],
     bb = [0, 0.36, -0.1],
@@ -476,7 +673,13 @@ export function createRideableBike(THREE) {
   tube(g, headBottom, headTop, 0.035, M.petrol);
   for (const side of [-1, 1]) {
     tube(g, [side * 0.035, ...bb.slice(1)], [side * 0.057, ...rear.slice(1)], 0.013, M.petrol);
-    tube(g, [side * 0.027, seat[1] - 0.02, seat[2]], [side * 0.057, ...rear.slice(1)], 0.012, M.petrol);
+    tube(
+      g,
+      [side * 0.027, seat[1] - 0.02, seat[2]],
+      [side * 0.057, ...rear.slice(1)],
+      0.012,
+      M.petrol,
+    );
   }
   tube(g, seat, [0, 1.14, -0.355], 0.018, M.chrome);
   const saddleGeometry = geo('bike-saddle', () => {
@@ -506,6 +709,20 @@ export function createRideableBike(THREE) {
   saddle.rotation.x = -0.035;
   tube(g, [-0.045, 1.11, -0.49], [-0.045, 1.105, -0.22], 0.009, M.chrome);
   tube(g, [0.045, 1.11, -0.49], [0.045, 1.105, -0.22], 0.009, M.chrome);
+  for (const side of [-1, 1])
+    curvedTube(
+      g,
+      [
+        [side * 0.025, 1.177, -0.23],
+        [side * 0.044, 1.181, -0.35],
+        [side * 0.092, 1.175, -0.45],
+        [side * 0.074, 1.172, -0.5],
+      ],
+      0.0017,
+      M.cream,
+      14,
+    );
+  cylinder(g, [0, 1.055, -0.332], 0.027, 0.032, M.black);
 
   function wheel(parent, position) {
     const w = new T.Group();
@@ -543,6 +760,21 @@ export function createRideableBike(THREE) {
     spokes.instanceMatrix.needsUpdate = true;
     const reflector = roundedBox(w, [0.016, 0.02, 0.19], [0.018, 0.026, 0.067], M.orange);
     reflector.rotation.x = -0.2;
+
+    const rotor = torus(w, [-0.047, 0, 0], 0.069, 0.01, M.steel, Math.PI * 2, 5, 32);
+    rotor.rotation.y = Math.PI / 2;
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3;
+      tube(
+        w,
+        [-0.047, Math.sin(a) * 0.018, Math.cos(a) * 0.018],
+        [-0.047, Math.sin(a + 0.25) * 0.065, Math.cos(a + 0.25) * 0.065],
+        0.0035,
+        M.steel,
+      );
+    }
+    for (const side of [-1, 1])
+      cylinder(w, [side * 0.072, 0, 0], 0.022, 0.012, M.black, 0.022, 8).rotation.z = Math.PI / 2;
     return w;
   }
   const rearWheel = wheel(g, rear);
@@ -564,6 +796,44 @@ export function createRideableBike(THREE) {
       14,
     );
   const frontWheel = wheel(handlebar, localFront);
+  roundedBox(
+    handlebar,
+    [-0.052, localFront[1] + 0.057, localFront[2] - 0.043],
+    [0.038, 0.05, 0.058],
+    M.black,
+  );
+  roundedBox(g, [-0.052, rear[1] + 0.057, rear[2] - 0.043], [0.038, 0.05, 0.058], M.black);
+  for (const side of [-1, 1]) {
+    const axleCap = cylinder(
+      handlebar,
+      [side * 0.072, localFront[1], localFront[2]],
+      0.024,
+      0.012,
+      M.chrome,
+      0.024,
+      8,
+    );
+    axleCap.rotation.z = Math.PI / 2;
+    tube(g, [side * 0.085, 0.39, -0.7], [side * 0.085, 0.31, -0.62], 0.013, M.steel);
+  }
+  curvedTube(
+    g,
+    [
+      [0.018, 0.65, 0.14],
+      [0.052, 0.57, 0.09],
+      [0.046, 0.49, 0.04],
+      [-0.046, 0.49, 0.04],
+      [-0.052, 0.57, 0.09],
+      [-0.018, 0.65, 0.14],
+    ],
+    0.005,
+    M.chrome,
+    18,
+  );
+  tube(g, [0.073, 0.31, -0.64], [0.074, 0.18, -0.68], 0.012, M.black);
+  for (const z of [-0.61, -0.72])
+    torus(g, [0.08, 0.21, z], 0.025, 0.006, M.steel, Math.PI * 2, 5, 16).rotation.y = Math.PI / 2;
+
   tube(handlebar, [0, 0.02, 0], [0, 0.305, -0.095], 0.022, M.chrome);
   curvedTube(
     handlebar,
@@ -654,8 +924,14 @@ export function createRideableBike(THREE) {
   }
   chainPoints.push(chainPoints[0]);
   curvedTube(g, chainPoints, 0.0045, M.steel, 52);
-  for (let i = 0; i < 3; i++) {
-    const cog = cylinder(g, [0.068 + i * 0.01, rear[1], rear[2]], 0.05 - i * 0.007, 0.006, M.steel);
+  for (let i = 0; i < 7; i++) {
+    const cog = cylinder(
+      g,
+      [0.064 + i * 0.005, rear[1], rear[2]],
+      0.061 - i * 0.0055,
+      0.006,
+      M.steel,
+    );
     cog.rotation.z = Math.PI / 2;
   }
   tube(g, [-0.08, 0.34, -0.18], [-0.19, 0.055, -0.35], 0.008, M.steel);
@@ -670,6 +946,8 @@ export function createRideableBike(THREE) {
   bakeStatic(K, handlebar, 'bike-handlebar', [frontWheel]);
   bakeStatic(K, g, 'bike-frame', [rearWheel, handlebar, crank]);
   g.userData = {
+    remastered: true,
+    discBrakes: true,
     wheels: [rearWheel, frontWheel],
     crank,
     handlebar,

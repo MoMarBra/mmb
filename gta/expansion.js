@@ -572,7 +572,6 @@ export class Expansion {
   }
   scatter(n, angle, force) {
     if (n.scattered) return;
-    while (this.pieces.length > 45) this.removePiece(this.pieces[0]);
     const actor = n.mesh,
       r = actor.userData.rig;
     actor.updateMatrixWorld(true);
@@ -614,6 +613,7 @@ export class Expansion {
       this.w.groups.city.add(group);
       this.pieces.push({
         mesh: group,
+        owner: n,
         life: 7,
         baseScale: group.scale.clone(),
         v: new THREE.Vector3(
@@ -632,18 +632,31 @@ export class Expansion {
     n.scattered = true;
     n.down = 8.5;
     actor.visible = false;
+    // Keep the effect bounded without deleting a pedestrian's only visible body.
+    // Retire one complete effect, then show that actor lying on the pavement.
+    while (this.pieces.length > 50) this.restore(this.pieces[0].owner);
     this.sim.s.scatterCount++;
     this.game.audio.play('crash', { volume: 0.25 });
   }
   restore(n) {
     n.scattered = false;
-    n.mesh.visible = true;
-    n.mesh.rotation.set(0, n.mesh.rotation.y, 0);
-    if (n.bike) n.bike.visible = true;
+    for (const piece of [...this.pieces]) if (piece.owner === n) this.removePiece(piece);
+    n.mesh.visible = !n.storyAway && !n.departed;
+    const down = n.down > 0;
+    n.mesh.rotation.set(0, n.mesh.rotation.y, down ? -1.45 : 0);
+    n.mesh.position.y = down ? 0.25 : 0;
+    if (down) n.fall = 1;
+    if (n.bike) n.bike.visible = n.mesh.visible && !down;
   }
   removePiece(piece) {
+    const index = this.pieces.indexOf(piece);
+    if (index < 0) return;
     piece.mesh.removeFromParent();
-    this.pieces.splice(this.pieces.indexOf(piece), 1);
+    this.pieces.splice(index, 1);
+    const owner = piece.owner;
+    // Effect lifetime also advances indoors, while city NPC recovery pauses.
+    // Rejoin the instanced crowd as a prone actor as soon as its last part ends.
+    if (owner?.scattered && !this.pieces.some((p) => p.owner === owner)) this.restore(owner);
   }
   recall() {
     const heli = this.w.expansionVehicles.find((v) => v.type === 'helicopter');

@@ -9,8 +9,8 @@ export class Atmosphere {
     this.overcastTop = new THREE.Color('#688793');
     this.overcastBottom = new THREE.Color('#b2c0c4');
     this.sunDirection = new THREE.Vector3();
-    world.renderer.toneMappingExposure = 1.03;
-    world.scene.environmentIntensity = 0.42;
+    world.renderer.toneMappingExposure = 1.08;
+    world.scene.environmentIntensity = 0.58;
     world.sun.shadow.mapSize.set(2048, 2048);
     Object.assign(world.sun.shadow.camera, { left: -28, right: 28, top: 28, bottom: -28 });
     world.sun.shadow.camera.updateProjectionMatrix();
@@ -22,15 +22,26 @@ export class Atmosphere {
         depthWrite: false,
         uniforms: {
           top: { value: new THREE.Color('#368dd0') },
-          bottom: { value: new THREE.Color('#ffdfab') },
+          bottom: { value: new THREE.Color('#d9e5eb') },
+          photo: { value: null },
+          photoReady: { value: 0 },
+          photoBlend: { value: 0 },
         },
         vertexShader:
-          'varying vec3 vDirection; void main(){vDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-        fragmentShader:
-          'uniform vec3 top;uniform vec3 bottom;varying vec3 vDirection;void main(){float h=pow(clamp(vDirection.y*.8+.12,0.,1.),.55);gl_FragColor=vec4(mix(bottom,top,h),1.);}',
+          'varying vec3 vDirection; void main(){vDirection=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);gl_Position.z=gl_Position.w;}',
+        fragmentShader: `uniform vec3 top;uniform vec3 bottom;uniform sampler2D photo;uniform float photoReady;uniform float photoBlend;varying vec3 vDirection;void main(){
+vec3 dir=normalize(vDirection);float h=pow(clamp(dir.y*.8+.12,0.,1.),.55);vec3 color=mix(bottom,top,h);
+vec2 uv=vec2(atan(dir.z,dir.x)*0.159154943+0.5,asin(clamp(dir.y,-1.,1.))*0.318309886+0.5);
+float lightGate=smoothstep(.02,.13,dot(top,vec3(.2126,.7152,.0722)));
+vec3 hdr=texture2D(photo,uv).rgb*.68;
+color=mix(color,hdr,photoReady*photoBlend*lightGate);gl_FragColor=vec4(color,1.);
+#include <tonemapping_fragment>
+#include <colorspace_fragment>
+}`,
       }),
     );
     this.sky.frustumCulled = false;
+    this.sky.renderOrder = -1000;
     world.scene.add(this.sky);
     const c = document.createElement('canvas');
     c.width = c.height = 128;
@@ -108,9 +119,10 @@ export class Atmosphere {
     const day = clamp(Math.sin(((w.sim.s.minutes - 360) / 1440) * Math.PI * 2) * 1.4, 0.06, 1);
     const warm = day < 0.8;
     this.localLights.update(day);
-    w.sun.color.set(warm ? '#ffc984' : '#fff0cf');
-    w.sun.intensity = (city ? 4.1 * day : 3.8) * (1 - cloud * 0.57);
-    w.ambient.intensity = city ? 0.3 + day * 0.75 : 0.8;
+    w.sun.color.set(warm ? '#ffe0b8' : '#fff6e9');
+    w.sun.intensity = (city ? 3.15 * day : 2.9) * (1 - cloud * 0.57);
+    w.ambient.intensity = city ? 0.28 + day * 0.55 : 0.9;
+    w.scene.environmentIntensity = city ? 0.08 + day * 0.53 : 0.48;
     w.fill.intensity = city ? 0.32 : 0.48;
     w.scene.fog.density = city ? 0.0018 + cloud * 0.0042 : 0.004;
     if (city) {
@@ -158,7 +170,7 @@ export class Atmosphere {
         w.sun.shadow.camera.updateProjectionMatrix();
         this.shadowSpan = -1;
       }
-      const annex = w.player.position.x > 22;
+      const annex = Math.abs(w.player.position.x) > 22;
       w.sun.position.set(
         (annex ? w.player.position.x : 0) - 16,
         20,
@@ -170,20 +182,26 @@ export class Atmosphere {
         annex ? w.player.position.z : 0,
       );
     }
+    const uniforms = this.sky.material.uniforms;
+    if (w.remaster?.skyTexture && !uniforms.photoReady.value) {
+      uniforms.photo.value = w.remaster.skyTexture;
+      uniforms.photoReady.value = 1;
+    }
+    uniforms.photoBlend.value = THREE.MathUtils.smoothstep(day, 0.25, 0.82) * (1 - cloud * 0.84);
     this.sky.position.copy(w.camera.position);
     this.sky.visible = city;
     this.sky.material.uniforms.top.value
-      .set(day < 0.25 ? '#122b49' : '#388ece')
+      .set(day < 0.25 ? '#122b49' : '#7da8c4')
       .lerp(this.overcastTop, cloud);
     this.sky.material.uniforms.bottom.value.set(
-      day < 0.25 ? '#7b687a' : warm ? '#ffdeb2' : '#c5e4ed',
+      day < 0.25 ? '#514e5f' : warm ? '#e7d6be' : '#c9dce5',
     );
     this.sky.material.uniforms.bottom.value.lerp(this.overcastBottom, cloud);
     const direction = this.sunDirection.copy(w.sun.position).sub(w.sun.target.position).normalize();
     this.sunDisc.position.copy(w.camera.position).addScaledVector(direction, 210);
     this.glow.position.copy(this.sunDisc.position);
     this.sunDisc.visible = this.glow.visible = city && cloud < 0.82 && day > 0.12;
-    this.clouds.visible = city;
+    this.clouds.visible = city && (!uniforms.photoReady.value || cloud > 0.55);
     this.clouds.position.set(w.camera.position.x, 0, w.camera.position.z);
     this.clouds.rotation.y += dt * 0.002;
     for (const c of this.clouds.children) c.material.opacity = day * (0.55 + cloud * 0.25);

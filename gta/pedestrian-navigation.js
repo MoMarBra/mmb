@@ -59,7 +59,18 @@ export class PedestrianNavigation {
     return null;
   }
   move(n, target, speed, dt) {
-    if (dt <= 0 || speed <= 0) return 0;
+    if (
+      !Number.isFinite(dt) ||
+      dt <= 0 ||
+      !Number.isFinite(speed) ||
+      speed <= 0 ||
+      !Number.isFinite(target?.x) ||
+      !Number.isFinite(target?.z)
+    )
+      return 0;
+    if (!Number.isFinite(n.mesh.position.x) || !Number.isFinite(n.mesh.position.z)) return 0;
+    if (n.navTarget && (!Number.isFinite(n.navTarget.x) || !Number.isFinite(n.navTarget.z)))
+      n.navTarget = null;
     const p = n.mesh.position,
       start = { x: p.x, z: p.z };
     // Initial authorship/save recovery may place a pedestrian inside a tree clearance.
@@ -92,7 +103,13 @@ export class PedestrianNavigation {
         candidates = [];
       for (const x of [block.x - block.hx - margin, block.x + block.hx + margin])
         for (const z of [block.z - block.hz - margin, block.z + block.hz + margin]) {
-          if (this.free(x, z) && !this.segment(p.x, p.z, x, z)) {
+          // At an exact corner, selecting that same corner again normalizes a
+          // zero-length vector. During flight this poisoned positions with NaN.
+          if (
+            Math.hypot(x - p.x, z - p.z) > 0.01 &&
+            this.free(x, z) &&
+            !this.segment(p.x, p.z, x, z)
+          ) {
             const cross = dx * (z - p.z) - dz * (x - p.x);
             candidates.push({
               x,
@@ -113,6 +130,7 @@ export class PedestrianNavigation {
         d = Math.hypot(dx, dz);
       } else return 0;
     }
+    if (!Number.isFinite(d) || d < 0.01) return 0;
     const step = Math.min(d, dt * speed),
       x = p.x + (dx / d) * step,
       z = p.z + (dz / d) * step;

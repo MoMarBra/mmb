@@ -115,19 +115,31 @@ export class Game {
       this.missionPassed.update(renderedWorld);
       this.uiTimer += dt;
       this.fps = this.fps * 0.96 + (1 / Math.max(rawDelta, 0.001)) * 0.04;
-      if (this.started && !paused && !this.world.lowQuality && this.world.time > 5) {
-        this.slowTime =
-          this.fps < 30
-            ? (this.slowTime || 0) + Math.min(rawDelta, 0.25)
-            : Math.max(0, (this.slowTime || 0) - dt);
-        if (this.slowTime > 4) {
-          this.world.setQuality(true);
-          this.toast(
-            'Grafik für flüssiges Spielen angepasst.',
-            'Hohe Qualität lässt sich jederzeit in der Pause wieder aktivieren.',
-          );
-          this.slowTime = 0;
-        }
+      this.world.remasterPerformance.record(rawDelta, {
+        active: !paused,
+        hidden,
+        cinematic: !!this.cinematic || !!this.extras.intro.current,
+      });
+      // Resolution alone cannot solve a draw-call bottleneck on integrated GPUs.
+      const adaptive = this.world.remasterPerformance;
+      const sustainedFloorLoad =
+        !paused &&
+        !this.cinematic &&
+        !this.extras.intro.current &&
+        !this.world.lowQuality &&
+        adaptive.scale <= adaptive.floor + 0.001 &&
+        this.fps < 28 &&
+        rawDelta < 0.2;
+      this.remasterSlowSeconds = sustainedFloorLoad
+        ? (this.remasterSlowSeconds || 0) + rawDelta
+        : 0;
+      if (this.remasterSlowSeconds > 6) {
+        this.world.setQuality(true);
+        this.remasterSlowSeconds = 0;
+        this.toast(
+          'Grafik für flüssigeres Spielen angepasst.',
+          'Fototexturen bleiben aktiv. Grafikqualität in den Einstellungen.',
+        );
       }
       if (this.uiTimer > 0.15) {
         this.uiTimer = 0;
@@ -1248,7 +1260,7 @@ export class Game {
   settings() {
     this.open(
       'Eine kurze Pause',
-      `<div class="settings-list"><div class="setting-row"><div><strong>Dein Spielstand</strong><p>Automatisch alle 20 Sekunden. Gespeichert in diesem Browser.</p></div><button id="settings-save">Jetzt speichern</button></div><div class="setting-row"><div><strong>Atmosphäre & Geräusche</strong><p>Tastaturen, Schritte, Straße und viel zu viel Kaffee.</p></div><button id="audio-toggle">${this.audio.enabled ? 'Ton an' : 'Ton aus'}</button></div><div class="setting-row"><div><strong>Grafikqualität</strong><p>Hohe Qualität mit Ambient Occlusion und weichen Schatten. Sparmodus für langsamere Geräte.</p></div><button id="quality-toggle">${this.world.lowQuality ? 'Sparmodus' : 'Hohe Qualität'}</button></div><div class="setting-row"><div><strong>Steuerung</strong><p>WASD bewegen · Shift sprinten · Maus bewegen: frei umsehen · Alt halten: HUD bedienen<br>E interagieren · Tab Stats · M Karte · J Aufgaben · P Smartphone<br>Scrollen: Kameraabstand · Esc: Schließen / Pause</p></div></div><div class="toolbar"><button class="primary" id="resume">Weiterspielen</button><button id="export-save">Spielstand exportieren</button><button id="import-save">Spielstand importieren</button><button id="sources">Orte & Mitwirkende</button><button id="reset-game" class="danger ghost">Neues Spiel</button><input type="file" id="save-file" accept="application/json" hidden></div></div>`,
+      `<div class="settings-list"><div class="setting-row"><div><strong>Dein Spielstand</strong><p>Automatisch alle 20 Sekunden. Gespeichert in diesem Browser.</p></div><button id="settings-save">Jetzt speichern</button></div><div class="setting-row"><div><strong>Atmosphäre & Geräusche</strong><p>Tastaturen, Schritte, Straße und viel zu viel Kaffee.</p></div><button id="audio-toggle">${this.audio.enabled ? 'Ton an' : 'Ton aus'}</button></div><div class="setting-row"><div><strong>Grafikqualität</strong><p>Fotografische Materialien, weiche Schatten und adaptive Auflösung. Innenräume mit Ambient Occlusion.</p></div><button id="quality-toggle">${this.world.lowQuality ? 'Sparmodus' : 'Hohe Qualität'}</button></div><div class="setting-row"><div><strong>Steuerung</strong><p>WASD bewegen · Shift sprinten · Maus bewegen: frei umsehen · Alt halten: HUD bedienen<br>E interagieren · Tab Stats · M Karte · J Aufgaben · P Smartphone<br>Scrollen: Kameraabstand · Esc: Schließen / Pause</p></div></div><div class="toolbar"><button class="primary" id="resume">Weiterspielen</button><button id="export-save">Spielstand exportieren</button><button id="import-save">Spielstand importieren</button><button id="sources">Orte & Mitwirkende</button><button id="reset-game" class="danger ghost">Neues Spiel</button><input type="file" id="save-file" accept="application/json" hidden></div></div>`,
       { pause: true },
     );
     this.uiClick('#resume', () => this.close());

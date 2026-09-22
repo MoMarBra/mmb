@@ -1,3 +1,5 @@
+import { remasterInteriorGroup } from './remaster-interiors.js';
+import { upgradeInteriorSurfaces } from './remaster-materials.js';
 import { decorateBrewery } from './interior-detail.js';
 import * as THREE from 'three';
 import { box, label, human, animateHuman } from './world.js';
@@ -17,6 +19,8 @@ export class Brewery {
     this.w.zoneData.brewery.bounds = 10.8;
     this.set = buildBrewerySet(THREE);
     decorateBrewery(this.set.group);
+    upgradeInteriorSurfaces(this.set.group, 'brewery');
+    remasterInteriorGroup(this.set.group);
     root.add(this.set.group);
     for (const b of this.set.collisionBoxes) {
       const body = this.w.obstacle('brewery', b.x, b.z, b.w, b.d, b.y, b.h);

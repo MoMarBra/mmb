@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.7.1",
+  "version": "2.0.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "1d2a815aa722cc9aa7bf1e042f69d71ded8dbe9e",
+  "sourceCommit": "6937f84b127deab9199e69de0868c0c80ea12715",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T08:39:58.227Z",
+  "preparedAt": "2026-09-22T11:39:57.362Z",
   "gameTestsRun": true,
-  "browserVisualQA": false,
-  "validation": "11 regression suites: 44 full-Game checks including 2D ingredient drag/drop, Space input, pause/retry/exit, all four timed cooking levels, rewards/checkpoints and navigation; instanced interior budgets, shared portrait textures, seven exclusive restaurant variants; 8 courier routes, 11 office checks, 17 map checks; fire and workshop controllers, audio contracts/lifecycle, title and mission-passed audio. 418 embedded audio hashes. Native Canvas artwork rendered and inspected. DOM/GPU/audio devices mocked in integration checks; no browser/GPU visual test or device FPS guarantee."
+  "browserVisualQA": true,
+  "validation": "Classic 1.7.1 character rigs restored; photographic remaster environment retained. Regression coverage for pursuit, hit recovery, fragment limits, zone transitions, office, vehicle wheels and damage, adaptive rendering, story and audio lifecycles. Real Chrome and Edge browser tests include HDR/textures, movement, menus, city interiors, night/rain, police pursuit and vehicle entry/exit. Live files are independently verified after deployment. Performance is device- and scene-dependent."
 }

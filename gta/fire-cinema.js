@@ -470,6 +470,8 @@ export class FireCinema {
     renderer.setRenderTarget(null);
     renderer.shadowMap.autoUpdate = true;
     renderer.shadowMap.needsUpdate = true;
+    movie.set.scene.environment = this.w.scene?.environment || null;
+    movie.set.scene.environmentIntensity = 0.46;
     renderer.render(movie.set.scene, this.camera);
     this.ui.subtitles.hidden = this.g.sim.s.audioSubtitles === false || !segment;
     this.ui.progress.style.transform = `scaleX(${movie.elapsed / movie.duration})`;

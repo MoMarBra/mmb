@@ -1,3 +1,14 @@
+import { RemasterPerformance, shouldUseRemasterAO } from './remaster-performance.js';
+import { installInteriorRemaster } from './remaster-interiors.js';
+import { dressFacade } from './remaster-architecture.js';
+import { realisticTree, realisticPlant } from './remaster-vegetation.js';
+import {
+  remasterMaterial,
+  furnitureGeometry,
+  metricBoxGeometry,
+  upgradeInteriorSurfaces,
+  installPhotographicLighting,
+} from './remaster-materials.js';
 import { installInteriorDetails, selectRestaurantDetail } from './interior-detail.js';
 import { PedestrianNavigation } from './pedestrian-navigation.js';
 import { buildITOffice } from './it-office.js';
@@ -6,7 +17,7 @@ import { updateStreetSignals } from './street-signs.js';
 import { blenderVehicle } from './blender-vehicles.js';
 import { buildCityStreets } from './city-streets.js';
 import { installCityTraffic, updateCityTraffic } from './city-traffic.js';
-import { mergeStaticGeometry } from './render-batches.js';
+import { mergeStaticGeometry, staticColorKey, mergeColoredStatics } from './render-batches.js';
 import { portal, INTERIOR_LAYOUT } from './doors.js';
 import { CITY_LAYOUT } from './city-layout.js';
 import { buildVerticalCity, ROOF_ROUTE } from './vertical-city.js';
@@ -47,7 +58,8 @@ const carBodyGeo = new THREE.ExtrudeGeometry(carShape, {
 });
 carBodyGeo.translate(0, 0, -0.42);
 export function box(g, x, y, z, w, h, d, color, cast = true) {
-  const m = new THREE.Mesh(boxGeo, typeof color === 'object' ? color : material(color));
+  const mat = typeof color === 'object' ? color : material(color);
+  const m = new THREE.Mesh(mat.userData.remasterSurface ? metricBoxGeometry(w, h, d) : boxGeo, mat);
   m.position.set(x, y, z);
   m.scale.set(w, h, d);
   m.castShadow = cast;
@@ -144,23 +156,10 @@ function contactShadow(g, x, z, w = 1.5, d = 1.2) {
   return m;
 }
 function plant(g, x, z, s = 1) {
-  cylinder(g, x, 0.25 * s, z, 0.22 * s, 0.5 * s, '#d7c5a6', 0.28 * s);
-  cylinder(g, x, 0.5 * s, z, 0.22 * s, 0.035 * s, '#382c20');
-  for (let i = 0; i < 7; i++) {
-    const a = i * 2.4;
-    sphere(
-      g,
-      x + Math.cos(a) * 0.23 * s,
-      (0.8 + i * 0.065) * s,
-      z + Math.sin(a) * 0.23 * s,
-      0.13 * s,
-      0.36 * s,
-      0.12 * s,
-      i % 2 ? '#416b45' : '#789652',
-    );
-  }
+  realisticPlant(g, x, z, s);
   contactShadow(g, x, z, 0.9 * s, 0.9 * s);
 }
+
 function mug(g, x, y, z, color = '#f2ece0') {
   cylinder(g, x, y, z, 0.07, 0.13, color);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.012, 7, 12), material(color));
@@ -184,9 +183,20 @@ export function chair(g, x, z, rot = 0, color = '#344c58', seatHeight = 0.62) {
   g.add(root);
   const stemHeight = seatHeight - 0.06;
   cylinder(root, 0, 0.05 + stemHeight / 2, 0, 0.04, stemHeight, '#8e989a');
-  const seat = box(root, 0, seatHeight, 0, 0.58, 0.11, 0.55, color);
+  const seat = box(root, 0, seatHeight, 0, 0.58, 0.11, 0.55, remasterMaterial('fabric', { color }));
+  seat.geometry = furnitureGeometry(0.58, 0.11, 0.55, 0.025);
   seat.name = 'Office chair cushion';
-  const back = box(root, 0, seatHeight + 0.32, -0.24, 0.55, 0.58, 0.09, color);
+  const back = box(
+    root,
+    0,
+    seatHeight + 0.32,
+    -0.24,
+    0.55,
+    0.58,
+    0.09,
+    remasterMaterial('fabric', { color }),
+  );
+  back.geometry = furnitureGeometry(0.55, 0.58, 0.09, 0.024);
   back.rotation.x = -0.08;
   for (let i = 0; i < 5; i++) {
     const a = (i * Math.PI * 2) / 5;
@@ -210,7 +220,17 @@ export function chair(g, x, z, rot = 0, color = '#344c58', seatHeight = 0.62) {
   return root;
 }
 function desk(g, x, z, { width = 2.3, dual = false } = {}) {
-  box(g, x, 0.78, z, width, 0.075, 1.12, '#b39873');
+  const tabletop = box(
+    g,
+    x,
+    0.78,
+    z,
+    width,
+    0.075,
+    1.12,
+    remasterMaterial('oak', { color: '#e9ddc8' }),
+  );
+  tabletop.geometry = furnitureGeometry(width, 0.075, 1.12, 0.015);
   for (const sx of [-1, 1]) {
     box(g, x + sx * (width / 2 - 0.14), 0.39, z, 0.07, 0.78, 0.75, '#d4d6d1');
   }
@@ -360,7 +380,7 @@ export class GameWorld {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMapping = THREE.AgXToneMapping;
     this.renderer.toneMappingExposure = 1.15;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.camera = new THREE.PerspectiveCamera(53, innerWidth / innerHeight, 0.08, 330);
@@ -399,7 +419,7 @@ export class GameWorld {
     ])
       box(envScene, x, y, z, 8, 8, 8, new THREE.MeshBasicMaterial({ color: c }));
     const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.scene.environment = pmrem.fromScene(envScene, 0.1).texture;
+    this.scene.environment = pmrem.fromScene(envScene, 0.02).texture;
     pmrem.dispose();
     this.zone = 'office';
     this.groups = {};
@@ -445,7 +465,10 @@ export class GameWorld {
       data.physics.broadphase.dirty = true;
     }
     installInteriorDetails(this);
+    installInteriorRemaster(this);
+    for (const [zone, root] of Object.entries(this.groups)) upgradeInteriorSurfaces(root, zone);
     this.batchScenes();
+    installPhotographicLighting(this);
     this.makeRain();
     this.enter('office');
     this.teleport(-8, 2.2);
@@ -478,7 +501,11 @@ export class GameWorld {
         this.setQuality(true);
       }
     }
-    window.addEventListener('resize', () => this.resize());
+    this.remasterPerformance = new RemasterPerformance(this);
+    window.addEventListener('resize', () => {
+      this.remasterPerformance.sync();
+      this.resize();
+    });
     this.bindInput();
   }
   group(name) {
@@ -551,16 +578,7 @@ export class GameWorld {
     });
     floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
     floorTex.repeat.set(6, 5);
-    box(
-      g,
-      0,
-      -0.07,
-      0,
-      27,
-      0.14,
-      22,
-      new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.7 }),
-    );
+    box(g, 0, -0.07, 0, 27, 0.14, 22, remasterMaterial('oak', { color: '#e4d8c6' }));
     // Glazing and masonry meet exactly; no invisible wall or open slits.
     for (const [a, b] of [
       [-13.5, 7.25],
@@ -837,7 +855,7 @@ export class GameWorld {
       { name: 'Jan · Partner', x: 10.5, z: -8, pose: 'walk', jacket: '#303f50' },
     ];
     for (const c of colleagues) {
-      const npc = human({ jacket: c.jacket, scale: 0.98 });
+      const npc = human({ jacket: c.jacket, scale: 0.98, crowd: true });
       npc.position.set(c.x, 0, c.z);
       npc.rotation.y = Math.PI;
       g.add(npc);
@@ -941,17 +959,8 @@ export class GameWorld {
     });
   }
   building(g, x, z, w, d, h, color, seed) {
-    const tex = this.facadeTexture(color, seed);
-    const m = box(
-      g,
-      x,
-      h / 2,
-      z,
-      w,
-      h,
-      d,
-      new THREE.MeshStandardMaterial({ map: tex, roughness: 0.91 }),
-    );
+    const m = box(g, x, h / 2, z, w, h, d, remasterMaterial('plaster', { color }));
+    dressFacade(g, { x, z, w, d, h, color, seed, body: m });
     this.obstacle('city', x, z, w, d, h / 2, h, m);
     (this.cityBlocks ||= []).push({ x, z, w, d });
     box(g, x, h + 0.14, z, w + 0.6, 0.32, d + 0.6, '#d5cbbb');
@@ -1033,7 +1042,8 @@ export class GameWorld {
     facade.translate(0, 0, -0.5);
     const uv = facade.attributes.uv,
       pos = facade.attributes.position;
-    for (let i = 0; i < uv.count; i++) uv.setXY(i, pos.getX(i) + 0.5, pos.getY(i) + 0.5);
+    for (let i = 0; i < uv.count; i++)
+      uv.setXY(i, (pos.getX(i) + 0.5) * 36, (pos.getY(i) + 0.5) * 19);
     hqBuilding.geometry = facade;
     hqBuilding.userData.plinth.visible = false;
     for (const [a, b] of [
@@ -1222,6 +1232,7 @@ export class GameWorld {
         x = side * (10.8 + (i % 3) * 1.1),
         z = -142 + i * 9.3;
       const npc = human({
+        crowd: true,
         jacket: ['#476b76', '#9c6c4f', '#737b68', '#4c526c', '#beaa86'][i % 5],
         hair: i % 3 ? '#44362c' : '#bf9c68',
         skin: i % 4 === 0 ? '#865a44' : '#d7af8c',
@@ -1276,19 +1287,16 @@ export class GameWorld {
       (this.treeObstacles ||= []).push({ x, z, radius: 0.3 });
       this.obstacle('city', x, z, 0.55, 0.55, 1.1, 2.2);
     }
-    cylinder(g, x, 2.25, z, 0.19, 4.5, '#71664e', 0.13);
-    for (let i = 0; i < 7; i++) {
-      const a = i * 2.4;
-      sphere(
-        g,
-        x + Math.sin(a) * 0.95,
-        4.6 + (i % 3) * 0.5,
-        z + Math.cos(a) * 0.85,
-        1.1,
-        1.35,
-        1.1,
-        ['#6d844e', '#829558', '#4f744b'][i % 3],
-      );
+    realisticTree(g, x, z);
+    if (g === this.groups.city) {
+      // A cheap camera-only proxy keeps the chase view out of the new solid trunks.
+      const proxy = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ visible: false }));
+      proxy.name = 'Tree trunk · camera clearance';
+      proxy.position.set(x, 2.2, z);
+      proxy.scale.set(0.56, 4.4, 0.56);
+      proxy.visible = false;
+      g.add(proxy);
+      this.zoneData.city.obstacles.push(proxy);
     }
     contactShadow(g, x, z, 5, 5);
   }
@@ -1475,7 +1483,11 @@ export class GameWorld {
       const dir = i % 2 ? 1 : -1,
         x = dir * 6.6,
         z = -136 + i * 61;
-      const rider = human({ jacket: ['#9d8260', '#698a79', '#926c67', '#55768b'][i], scale: 0.96 });
+      const rider = human({
+        jacket: ['#9d8260', '#698a79', '#926c67', '#55768b'][i],
+        scale: 0.96,
+        crowd: true,
+      });
       sphere(rider, 0, 1.81, 0, 0.177, 0.09, 0.17, '#d8d5ba');
       g.add(rider);
       const bike = this.bicycle(g, x, z, 0);
@@ -1753,6 +1765,7 @@ export class GameWorld {
     buildOfficeDetail(this, { material });
   }
   batchScenes() {
+    const colorMaterials = new Map();
     this.crowdBatches = [];
     for (const [name, root] of Object.entries(this.groups)) {
       root.updateMatrixWorld(true);
@@ -1790,15 +1803,16 @@ export class GameWorld {
           .map(([k, v]) => k + v.itemSize)
           .sort()
           .join();
-        const key = attributes + '|' + o.material.uuid + '|' + o.castShadow + cell;
+        const key =
+          attributes + '|' + (staticColorKey(o) || o.material.uuid) + '|' + o.castShadow + cell;
         const list = groups.get(key) || [];
         list.push(o);
         groups.set(key, list);
       });
       for (const list of groups.values()) {
         if (list.length < 3) continue;
-        const first = list[0],
-          batch = new THREE.Mesh(mergeStaticGeometry(list), first.material);
+        const merged = mergeColoredStatics(list, colorMaterials),
+          batch = new THREE.Mesh(merged.geometry, merged.material);
         batch.name = 'Static material cell';
         batch.castShadow = list.some((o) => o.castShadow);
         batch.receiveShadow = true;
@@ -2064,7 +2078,7 @@ export class GameWorld {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(innerWidth, innerHeight);
     this.composer?.setSize(innerWidth, innerHeight);
-    const ratio = Math.min(devicePixelRatio, 1.25);
+    const ratio = Math.min(this.renderer.getPixelRatio(), 1.25);
     this.ssao?.setSize(Math.ceil(innerWidth * ratio * 0.65), Math.ceil(innerHeight * ratio * 0.65));
   }
   setQuality(low) {
@@ -2077,6 +2091,7 @@ export class GameWorld {
       this.sun.shadow.map?.dispose();
       this.sun.shadow.map = null;
     }
+    this.remasterPerformance?.sync({ reset: true });
     this.resize();
   }
   update(dt, blocked = false) {
@@ -2354,7 +2369,7 @@ export class GameWorld {
     }
     this.gameplay?.game?.extras?.beforeRender(dt);
     // The film keeps antialiasing and real shadows without the extra full-scene SSAO passes.
-    if (this.composer && !this.lowQuality && !cinematicIntro) this.composer.render(dt);
+    if (shouldUseRemasterAO(this, cinematicIntro)) this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
   }
   dispose() {

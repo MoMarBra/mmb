@@ -246,6 +246,8 @@ export class WorkshopCinema {
     renderer.setRenderTarget(null);
     renderer.shadowMap.autoUpdate = true;
     renderer.shadowMap.needsUpdate = true;
+    m.set.scene.environment = this.w.scene?.environment || null;
+    m.set.scene.environmentIntensity = 0.46;
     renderer.render(m.set.scene, this.camera);
     document.querySelector('.story-film-progress i').style.transform =
       `scaleX(${m.elapsed / m.duration})`;

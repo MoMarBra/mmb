@@ -1,3 +1,4 @@
+import { remasterMaterial } from './remaster-materials.js';
 import * as THREE from 'three';
 
 // Shared, immutable resources. All small fittings are instanced, including in
@@ -27,6 +28,12 @@ const C = {
   ink: '#183b43',
 };
 function mat(color, options = {}) {
+  const surface = { oak: 'oak', walnut: 'oak', fabric: 'fabric', steel: 'metal' }[color];
+  if (surface && !options.glow)
+    return remasterMaterial(surface, {
+      color: color === 'oak' ? '#f2e1c6' : C[color],
+      roughness: options.metal ? 0.4 : 0.82,
+    });
   color = C[color] || color;
   const key = color + JSON.stringify(options);
   if (!MATERIALS.has(key))

@@ -246,6 +246,8 @@ export class OriginCinema {
     this.w.renderer.shadowMap.autoUpdate = true;
     this.w.renderer.shadowMap.needsUpdate = true;
     this.w.renderer.setRenderTarget(null);
+    m.set.scene.environment = this.w.scene?.environment || null;
+    m.set.scene.environmentIntensity = 0.46;
     this.w.renderer.render(m.set.scene, this.camera);
     m.drawn = true;
     m.width = this.size.x;
