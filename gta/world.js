@@ -1,3 +1,5 @@
+import { installCinematicLook } from './cinematic-look.js';
+import { ShadowProjectionTracker, postprocessSamples } from './render-stability.js';
 import { RemasterPerformance, shouldUseRemasterAO } from './remaster-performance.js';
 import { installInteriorRemaster } from './remaster-interiors.js';
 import { dressFacade } from './remaster-architecture.js';
@@ -128,6 +130,11 @@ export function label(
       emissive: fg,
       emissiveIntensity: 0.07,
       side: THREE.DoubleSide,
+      // Printed signs sit millimetres in front of their backing; preserve that
+      // ordering at grazing angles without disabling normal scene occlusion.
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1,
     }),
   );
   m.position.set(x, y, z);
@@ -148,7 +155,14 @@ function contactShadow(g, x, z, w = 1.5, d = 1.2) {
   if (!shadowTex) shadowTex = aoTexture();
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(w, d),
-    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }),
+    new THREE.MeshBasicMaterial({
+      map: shadowTex,
+      transparent: true,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1,
+    }),
   );
   m.rotation.x = -Math.PI / 2;
   m.position.set(x, 0.025, z);
@@ -381,6 +395,7 @@ export class GameWorld {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.AgXToneMapping;
+    installCinematicLook(this.renderer);
     this.renderer.toneMappingExposure = 1.15;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.camera = new THREE.PerspectiveCamera(53, innerWidth / innerHeight, 0.08, 330);
@@ -478,8 +493,15 @@ export class GameWorld {
       // SSAO in r180 overlays the existing scene buffer; RenderPass must fill it first.
       let composer;
       let ssao;
+      let sceneTarget;
       try {
-        composer = new EffectComposer(this.renderer);
+        sceneTarget = new THREE.WebGLRenderTarget(innerWidth, innerHeight, {
+          type: THREE.HalfFloatType,
+          samples: postprocessSamples(this.renderer),
+        });
+        sceneTarget.texture.name = 'BBE · antialiased interior scene';
+        this.postprocessSamples = sceneTarget.samples;
+        composer = new EffectComposer(this.renderer, sceneTarget);
         composer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
         composer.addPass(new RenderPass(this.scene, this.camera));
         ssao = new SSAOPass(this.scene, this.camera, innerWidth, innerHeight, 16);
@@ -498,6 +520,7 @@ export class GameWorld {
         for (const pass of composer?.passes || []) pass.dispose();
         if (ssao && !composer?.passes.includes(ssao)) ssao.dispose();
         composer?.dispose();
+        if (!composer) sceneTarget?.dispose();
         this.setQuality(true);
       }
     }
@@ -2407,11 +2430,16 @@ export class GameWorld {
       this.fireStory?.updateWorld(dt, blocked);
     }
     this.updateCrowd();
+    this.gameplay?.game?.extras?.beforeRender(dt);
     // The SSAO normal pass reuses the shadow map from the first colour pass.
+    // Check the final light transform after atmosphere/cinematic adjustments.
+    this.shadowProjectionTracker ||= new ShadowProjectionTracker();
+    const changedShadowProjection = this.shadowProjectionTracker.changed(this.sun);
     this.renderer.shadowMap.autoUpdate = false;
     this.shadowFrame = (this.shadowFrame || 0) + 1;
     this.lastShadowPosition ||= new THREE.Vector3(Infinity, 0, 0);
     const refreshShadow =
+      changedShadowProjection ||
       !this.lowQuality ||
       this.shadowFrame % 2 === 0 ||
       (this.zone === 'city' &&
@@ -2427,7 +2455,6 @@ export class GameWorld {
       this.shadowZone = this.zone;
       this.lastShadowPosition.copy(this.player.position);
     }
-    this.gameplay?.game?.extras?.beforeRender(dt);
     // The film keeps antialiasing and real shadows without the extra full-scene SSAO passes.
     if (shouldUseRemasterAO(this, cinematicIntro)) this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);

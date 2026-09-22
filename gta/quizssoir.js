@@ -29,6 +29,8 @@ export class Quizssoir {
     this.audio = new QuizAudio(game.audio);
     this.voiceToken = 0;
     this.hostVariation = new Map();
+    this.approachElapsed = 0;
+    this.approachLatched = false;
     this.ray = new THREE.Raycaster();
     this.cursor = new THREE.Vector2();
     this.w.canvas?.addEventListener('click', (e) => this.clickFixture(e));
@@ -56,7 +58,7 @@ export class Quizssoir {
   }
   interact(item) {
     if (item?.kind !== 'quizssoir') return false;
-    if (this.nearby()) this.brief();
+    if (this.nearby()) this.start();
     return true;
   }
   clickFixture(e) {
@@ -69,7 +71,7 @@ export class Quizssoir {
         (-(e.clientY - r.top) / r.height) * 2 + 1,
       );
     this.ray.setFromCamera(this.cursor, this.w.camera);
-    if (this.ray.intersectObject(this.fixture.root, true).length) this.brief();
+    if (this.ray.intersectObject(this.fixture.root, true).length) this.start();
   }
   prepareStage() {
     this.stage ??= new QuizStage(this.w, { fixture: this.fixture });
@@ -79,29 +81,67 @@ export class Quizssoir {
       this.w.renderer.compileAsync?.(this.stage.scene, this.stage.camera)?.catch(() => {});
     }
   }
-  brief() {
-    if (!this.nearby() || this.g.busy || this.g.cinematic) return false;
-    this.g.audio.start();
-    this.audio.preloadIntro();
-    this.prepareStage();
-    this.state = new QuizState(this.g.sim.s.quizssoir);
-    const v = this.state.view(),
-      resume = activeRound(v.phase);
-    this.g.open(
-      'Quizssoir',
-      `<div class="quiz-brief" style="--quiz-backdrop:url('${QUIZ_ART.backdrop.url}')"><img class="quiz-logo quiz-brief-logo" src="${QUIZ_ART.logo.url}" alt="QUIZSSOIR" width="1536" height="1024"><span class="quiz-kicker">DIE BBE QUIZNACHT</span><h3>Eine stille Minute.<br>Eine große Million.</h3><p>15 Fragen. Drei Joker. Du und dein Halbwissen.</p><div class="quiz-brief-stats"><span>500 € / 16.000 €<small>Sicherheitsstufen</small></span><span>${money(v.bestWin)}<small>Dein Bestgewinn</small></span></div><button class="primary" id="quiz-start">${resume ? 'Runde fortsetzen' : 'Platz nehmen'} <span>↗</span></button><small>Quizgewinne sind Spielgeld. Wiederholungen zahlen nur einen höheren Bestgewinn aus.</small></div>`,
-      { pause: true, eyebrow: 'BBE · WC · QUIZSSOIR' },
+  canStart() {
+    return !(
+      this.current ||
+      this.approachLatched ||
+      !this.nearby() ||
+      document.hidden ||
+      this.g.modal ||
+      this.g.busy ||
+      this.g.cinematic ||
+      this.g.origin?.cooking?.loading ||
+      this.g.origin?.cooking?.current ||
+      this.g.arcade?.leisure?.activity
     );
-    $('quiz-start').onclick = () => this.start();
-    return true;
+  }
+  inFront() {
+    const p = this.w.player.position,
+      a = this.fixture.anchor,
+      f = this.fixture.focus;
+    const fx = f.x - a.x,
+      fz = f.z - a.z,
+      length = Math.hypot(fx, fz) || 1;
+    const dx = p.x - a.x,
+      dz = p.z - a.z;
+    const forward = (dx * fx + dz * fz) / length;
+    const lateral = (dx * fz - dz * fx) / length;
+    return (
+      Math.abs(p.y - a.y) < 0.65 && forward >= -0.65 && forward <= 0.35 && Math.abs(lateral) <= 0.55
+    );
+  }
+  /** Called once per world frame. Returning to the fixture must never restart a show. */
+  update(dt = 0) {
+    const p = this.w.player.position,
+      a = this.fixture.anchor;
+    if (this.w.zone !== 'office' || Math.hypot(p.x - a.x, p.z - a.z) > 2) {
+      this.approachLatched = false;
+      this.approachElapsed = 0;
+      return false;
+    }
+    if (!this.canStart() || !this.inFront()) {
+      this.approachElapsed = 0;
+      return false;
+    }
+    this.approachElapsed += Math.min(0.1, Math.max(0, Number.isFinite(dt) ? dt : 0));
+    if (this.approachElapsed < 0.25) return false;
+    return this.start();
+  }
+  // Preserve the old external entry point without a separate briefing screen.
+  brief() {
+    return this.start();
   }
   start() {
-    if (this.current || !this.nearby() || this.g.busy || this.g.cinematic) return false;
+    if (!this.canStart()) return false;
     this.g.audio.start();
+    this.state = new QuizState(this.g.sim.s.quizssoir);
     const before = this.state.view();
     if (!activeRound(before.phase)) this.state.start();
+    if (this.state.view().phase === 'intro') this.audio.preloadIntro();
     this.prepareStage();
     const v = this.state.view();
+    this.approachLatched = true;
+    this.approachElapsed = 0;
     this.current = {
       phase: v.phase,
       elapsed: 0,

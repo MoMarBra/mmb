@@ -73,9 +73,22 @@ export class Game {
     const boot = window.__bbeBoot;
     this.extras.intro.skipKeyHeld = !!boot?.spaceHeld;
     boot?.takeOver?.();
-    if (!boot?.skipIntro) this.introReady = this.extras.intro.play({ automatic: true });
-    else this.titleMusic.adopt();
-    document.getElementById('boot-screen')?.remove();
+    if (!boot?.skipIntro) {
+      this.introReady = this.extras.intro.play({ automatic: true }).catch((error) => {
+        this.error('Das Intro konnte nicht starten.', 'Bitte die Seite neu laden.', error);
+      });
+    } else this.titleMusic.adopt();
+    // Keep the minimal boot overlay until surfaces and a real scene frame are ready.
+    // Skipping the intro must not wait for a cancelled shader warm-up.
+    let bootAssetsReady = false;
+    Promise.resolve(this.world.remasterReady).then(
+      () => {
+        bootAssetsReady = true;
+      },
+      () => {
+        bootAssetsReady = true;
+      },
+    );
     this.frame = (now) => {
       const rawDelta = (now - this.lastFrame) / 1000 || 0.016;
       const dt = Math.min(rawDelta, 0.08);
@@ -91,6 +104,7 @@ export class Game {
         } else
           this.world.update(paused ? 0 : dt, !!this.modal || this.busy || !this.started || hidden);
       }
+      if (!hidden && bootAssetsReady && !this.extras.intro.current?.loading) boot?.complete?.();
       if (!paused) {
         this.sim.tick(dt, { sprint: this.world.sprinting, inside: this.world.zone !== 'city' });
         this.autosave += dt;
@@ -147,6 +161,7 @@ export class Game {
         this.uiTimer = 0;
         if (!this.extras.intro.current) this.updateHUD();
       }
+      if (!hidden) this.quizssoir.update(dt);
       this.mouseControls.update();
       requestAnimationFrame(this.frame);
     };
@@ -1333,6 +1348,7 @@ export class Game {
     );
   }
   error(title, body, error) {
+    window.__bbeBoot?.dismiss?.();
     console.error(error);
     document.body.insertAdjacentHTML(
       'beforeend',

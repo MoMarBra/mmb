@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "publishedPath": "/gta/",
-  "sourceCommit": "da4960b373f12a1681cd4a3ab2217a715a0ba97e",
+  "sourceCommit": "1396c5e63850413b45a3398b77d2afd1c03049fa",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T14:39:46.980Z",
+  "preparedAt": "2026-09-22T15:46:59.064Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Five-second question leads with a 400ms fade; automatic next question after actual moderator playback ends. Original generated QUIZSSOIR logo and studio backdrop integrated into portal, intro, HUD and 3D LED wall, with offline embedding. Standalone original BBE logo on square facade sign clear of windows and cornices. Verified audio and controller tests, full-round Chrome and Edge browser tests, offline layouts and day/night facade views."
+  "validation": "Minimal startup loading line remains visible until textures and first scene frame are ready; early Space and failed module loading verified. Stable light-space shadows with altitude hysteresis and projection refresh, hardware-tested four-sample interior MSAA, common AgX cinematic response without extra fullscreen pass. Quizssoir automatically starts on approach without briefing and re-arms only after walking away. Tested delayed loading, Chrome and Edge game routes, day/night/rain and interiors, vehicle entry and pursuit, full quiz round and offline layouts."
 }

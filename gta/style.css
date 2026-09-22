@@ -1611,7 +1611,7 @@ input[type='number'] {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 42%, transparent 48%, rgba(9, 26, 40, 0.17) 100%);
+  background: radial-gradient(ellipse at 50% 42%, transparent 48%, rgba(9, 26, 40, 0.12) 100%);
   z-index: 1;
 }
 #ui {
@@ -5359,16 +5359,7 @@ button.mission-row:focus-visible {
 .world-intro #voice-caption {
   visibility: hidden;
 }
-/* Lightweight cinematic grade: compositor colour operations, no blur or extra 3D pass. */
-.world-intro #world {
-  filter: contrast(1.065) saturate(1.13) sepia(0.035);
-}
-.world-intro.intro-night #world {
-  filter: brightness(1.06) contrast(1.025) saturate(1.08);
-}
-.world-intro.intro-prologue #world {
-  filter: contrast(1.035) saturate(0.88);
-}
+/* Intro and gameplay share the AgX-based camera response in cinematic-look.js. */
 .world-intro.intro-prologue .world-intro-frame::before {
   background: none;
 }

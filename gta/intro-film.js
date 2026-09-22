@@ -406,7 +406,7 @@ export class IntroFilm {
     this.audioReady = audioReady;
     if (token !== this.generation || !this.current) return;
     try {
-      await this.warm(token);
+      await Promise.all([this.warm(token), w.remasterReady]);
     } catch {}
     if (token !== this.generation || !this.current) return;
     this.current.shot = -1;

@@ -2,6 +2,15 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
+    <style>
+      #boot-screen { transition:opacity .18s ease; }
+      #boot-screen.is-ready { opacity:0; pointer-events:none; }
+      .boot-track { position:absolute; left:50%; bottom:max(48px,9vh); width:min(180px,40vw); height:2px; transform:translateX(-50%); overflow:hidden; border-radius:2px; background:#ffffff20; }
+      .boot-track i { display:block; width:34%; height:100%; border-radius:inherit; background:#e7e8e5; animation:boot-flow 1.4s cubic-bezier(.45,0,.55,1) infinite; will-change:transform; }
+      #boot-screen.is-ready .boot-track i { animation:none; width:100%; transform:none; }
+      @keyframes boot-flow { from { transform:translateX(-110%); } to { transform:translateX(410%); } }
+      @media(prefers-reduced-motion:reduce) { #boot-screen{transition:none}.boot-track i{animation:none;transform:translateX(100%);will-change:auto} }
+    </style>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#102d37" />
     <meta
@@ -10,123 +19,139 @@
     />
     <title>BBE · Munich Consulting Simulator</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyBpZD0iRWJlbmVfMSIgZGF0YS1uYW1lPSJFYmVuZSAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5MC43MSA5MC43MSI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMwMDRmODc7fS5jbHMtMntmaWxsOiNmZmY7fTwvc3R5bGU+PC9kZWZzPjxyZWN0IGNsYXNzPSJjbHMtMSIgd2lkdGg9IjkwLjcxIiBoZWlnaHQ9IjkwLjcxIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMjQuMzksNTguNjVjLTEuNCwwLTMuOC0uMTEtNy0uMTFIMTQuMVY1NmEyMS41NywyMS41NywwLDAsMSwzLjMtLjVWMzUuODlhMjAuNDMsMjAuNDMsMCwwLDEtMy4zLS40OVYzMi44OWgzLjE5YzEuOTMsMCw0Ljc1LS4xMSw3Ljg2LS4xMSw1LjUxLDAsOC4zNiwyLjI4LDguMzYsNi4yM2E2LDYsMCwwLDEtNCw1Ljg1di4wN2E1LjgzLDUuODMsMCwwLDEsNSw1Ljg2QzM0LjUsNTQuMTMsMzIuMjksNTguNjUsMjQuMzksNTguNjVabS4wOC0yMi41N2MtMS4xNCwwLTIsMC0zLC4wOHY3LjZjLjY5LDAsMS4zMywwLDIuMjEsMCwzLjg0LDAsNS40Ny0xLjU1LDUuNDctNC4xNEMyOS4xOCwzNy41NiwyOCwzNi4wOCwyNC40NywzNi4wOFptLS42NSwxMC43OWMtLjQyLDAtMS43NSwwLTIuMzIsMHY4LjE3YTIwLjQsMjAuNCwwLDAsMCwzLjA4LjE5YzMuNzYsMCw1LjUxLTEuODIsNS41MS00LjQxQzMwLjA5LDQ3Ljk0LDI3LjQzLDQ2Ljg3LDIzLjgyLDQ2Ljg3WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAwKSIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTQ3LjIzLDU4LjY1Yy0xLjQxLDAtMy44LS4xMS03LS4xMUgzNi45M1Y1NmEyMS44OSwyMS44OSwwLDAsMSwzLjMxLS41VjM1Ljg5YTIwLjcyLDIwLjcyLDAsMCwxLTMuMzEtLjQ5VjMyLjg5aDMuMTljMS45NCwwLDQuNzUtLjExLDcuODctLjExLDUuNTEsMCw4LjM2LDIuMjgsOC4zNiw2LjIzYTYsNiwwLDAsMS00LDUuODV2LjA3YTUuODMsNS44MywwLDAsMSw1LDUuODZDNTcuMzQsNTQuMTMsNTUuMTMsNTguNjUsNDcuMjMsNTguNjVabS4wNy0yMi41N2MtMS4xMywwLTIsMC0zLC4wOHY3LjZjLjY5LDAsMS4zMywwLDIuMiwwLDMuODQsMCw1LjQ4LTEuNTUsNS40OC00LjE0QzUyLDM3LjU2LDUwLjg0LDM2LjA4LDQ3LjMsMzYuMDhabS0uNjQsMTAuNzljLS40MiwwLTEuNzUsMC0yLjMyLDB2OC4xN2EyMC40LDIwLjQsMCwwLDAsMy4wOC4xOWMzLjc2LDAsNS41MS0xLjgyLDUuNTEtNC40MUM1Mi45Myw0Ny45NCw1MC4yNyw0Ni44Nyw0Ni42Niw0Ni44N1oiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMCkiLz48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik01OS43Nyw1OC41NFY1NmEyMS44OSwyMS44OSwwLDAsMSwzLjMxLS41VjM1Ljg5YTIwLjcyLDIwLjcyLDAsMCwxLTMuMzEtLjQ5VjMyLjg5aDE3djYuMTZoLTNjLS4xOS0xLjA3LS4zOC0yLjA5LS40NS0yLjg5SDY3LjE4djcuNjdoNC45YTE0Ljc3LDE0Ljc3LDAsMCwxLC40OS0yLjM1aDIuNTl2Ny43NUg3Mi41N2ExMy4zNiwxMy4zNiwwLDAsMS0uNDktMi4zNmgtNC45djguMzJoNi4xNWEyNy4zMiwyNy4zMiwwLDAsMSwuNS0zaDN2Ni4zOVoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMCkiLz48L3N2Zz4=" />
-    <link rel="stylesheet" href="./style.css?v=2.1.3" />
-    <link rel="stylesheet" href="./fire-story.css?v=2.1.3" />
-    <link rel="stylesheet" href="./quizssoir.css?v=2.1.3" />
+    <link rel="stylesheet" href="./style.css?v=2.1.4" />
+    <link rel="stylesheet" href="./fire-story.css?v=2.1.4" />
+    <link rel="stylesheet" href="./quizssoir.css?v=2.1.4" />
     <script type="importmap">
 {
   "imports": {
     "three": "./vendor/three.module.js",
     "cannon-es": "./vendor/cannon-es.js",
-    "./aaa-props.js": "./aaa-props.js?v=2.1.3",
-    "./arcade.js": "./arcade.js?v=2.1.3",
-    "./atmosphere.js": "./atmosphere.js?v=2.1.3",
-    "./audio-bank.js": "./audio-bank.js?v=2.1.3",
-    "./audio-catalog.js": "./audio-catalog.js?v=2.1.3",
-    "./audio-engine.js": "./audio-engine.js?v=2.1.3",
-    "./audio-loop-requests.js": "./audio-loop-requests.js?v=2.1.3",
-    "./audio-profiles.js": "./audio-profiles.js?v=2.1.3",
-    "./audio-settings.js": "./audio-settings.js?v=2.1.3",
-    "./audio.js": "./audio.js?v=2.1.3",
-    "./blender-vehicles.js": "./blender-vehicles.js?v=2.1.3",
-    "./branding.js": "./branding.js?v=2.1.3",
-    "./brewery-model.js": "./brewery-model.js?v=2.1.3",
-    "./brewery.js": "./brewery.js?v=2.1.3",
-    "./cinematic-hud.js": "./cinematic-hud.js?v=2.1.3",
-    "./city-expansion.js": "./city-expansion.js?v=2.1.3",
-    "./city-extras.js": "./city-extras.js?v=2.1.3",
-    "./city-fire.js": "./city-fire.js?v=2.1.3",
-    "./city-layout.js": "./city-layout.js?v=2.1.3",
-    "./city-life.js": "./city-life.js?v=2.1.3",
-    "./city-streets.js": "./city-streets.js?v=2.1.3",
-    "./city-traffic.js": "./city-traffic.js?v=2.1.3",
-    "./courier-mission.js": "./courier-mission.js?v=2.1.3",
-    "./data.js": "./data.js?v=2.1.3",
-    "./dialogue.js": "./dialogue.js?v=2.1.3",
-    "./doors.js": "./doors.js?v=2.1.3",
-    "./expansion-models.js": "./expansion-models.js?v=2.1.3",
-    "./expansion.js": "./expansion.js?v=2.1.3",
-    "./extras-state.js": "./extras-state.js?v=2.1.3",
-    "./fire-cinema.js": "./fire-cinema.js?v=2.1.3",
-    "./fire-lines.js": "./fire-lines.js?v=2.1.3",
-    "./fire-sets.js": "./fire-sets.js?v=2.1.3",
-    "./fire-state.js": "./fire-state.js?v=2.1.3",
-    "./fire-story.js": "./fire-story.js?v=2.1.3",
-    "./full-map.js": "./full-map.js?v=2.1.3",
-    "./garage-audio.js": "./garage-audio.js?v=2.1.3",
-    "./immersion.js": "./immersion.js?v=2.1.3",
-    "./intro-cues.js": "./intro-cues.js?v=2.1.3",
-    "./intro-stage.js": "./intro-stage.js?v=2.1.3",
-    "./intro-performance.js": "./intro-performance.js?v=2.1.3",
-    "./intro-film.js": "./intro-film.js?v=2.1.3",
-    "./it-office.js": "./it-office.js?v=2.1.3",
-    "./leisure.js": "./leisure.js?v=2.1.3",
-    "./lighting-polish.js": "./lighting-polish.js?v=2.1.3",
-    "./locomotion.js": "./locomotion.js?v=2.1.3",
-    "./main.js": "./main.js?v=2.1.3",
-    "./map-routing.js": "./map-routing.js?v=2.1.3",
-    "./mission-passed.js": "./mission-passed.js?v=2.1.3",
-    "./mission-passed-art.js": "./mission-passed-art.js?v=2.1.3",
-    "./mission-games.js": "./mission-games.js?v=2.1.3",
-    "./mouse-controls.js": "./mouse-controls.js?v=2.1.3",
-    "./music-player.js": "./music-player.js?v=2.1.3",
-    "./office-detail.js": "./office-detail.js?v=2.1.3",
-    "./pedestrian-navigation.js": "./pedestrian-navigation.js?v=2.1.3",
-    "./reactive-copy.js": "./reactive-copy.js?v=2.1.3",
-    "./render-batches.js": "./render-batches.js?v=2.1.3",
-    "./simulation.js": "./simulation.js?v=2.1.3",
-    "./smartphone.js": "./smartphone.js?v=2.1.3",
-    "./title-music.js": "./title-music.js?v=2.1.3",
-    "./soundtrack.js": "./soundtrack.js?v=2.1.3",
-    "./street-physics.js": "./street-physics.js?v=2.1.3",
-    "./street-signs.js": "./street-signs.js?v=2.1.3",
-    "./vehicle-detail.js": "./vehicle-detail.js?v=2.1.3",
-    "./vehicle-feel.js": "./vehicle-feel.js?v=2.1.3",
-    "./vehicle-lighting.js": "./vehicle-lighting.js?v=2.1.3",
-    "./vehicle-preload.js": "./vehicle-preload.js?v=2.1.3",
-    "./vertical-city.js": "./vertical-city.js?v=2.1.3",
-    "./voice-lines.js": "./voice-lines.js?v=2.1.3",
-    "./weather-effects.js": "./weather-effects.js?v=2.1.3",
-    "./workshop-cinema.js": "./workshop-cinema.js?v=2.1.3",
-    "./workshop-lines.js": "./workshop-lines.js?v=2.1.3",
-    "./workshop-sets.js": "./workshop-sets.js?v=2.1.3",
-    "./workshop-state.js": "./workshop-state.js?v=2.1.3",
-    "./workshop-story.js": "./workshop-story.js?v=2.1.3",
-    "./remaster-materials.js": "./remaster-materials.js?v=2.1.3",
-    "./remaster-architecture.js": "./remaster-architecture.js?v=2.1.3",
-    "./remaster-vegetation.js": "./remaster-vegetation.js?v=2.1.3",
-    "./remaster-vehicles.js": "./remaster-vehicles.js?v=2.1.3",
-    "./remaster-interiors.js": "./remaster-interiors.js?v=2.1.3",
-    "./remaster-performance.js": "./remaster-performance.js?v=2.1.3",
-    "./world.js": "./world.js?v=2.1.3",
-    "./origin-cinema.js": "./origin-cinema.js?v=2.1.3",
-    "./origin-cooking.js": "./origin-cooking.js?v=2.1.3",
-    "./origin-lines.js": "./origin-lines.js?v=2.1.3",
-    "./origin-models.js": "./origin-models.js?v=2.1.3",
-    "./origin-state.js": "./origin-state.js?v=2.1.3",
-    "./origin-story.js": "./origin-story.js?v=2.1.3",
-    "./food-art.js": "./food-art.js?v=2.1.3",
-    "./quick-wok-view.js": "./quick-wok-view.js?v=2.1.3",
-    "./interior-detail.js": "./interior-detail.js?v=2.1.3",
-    "./quizssoir.js": "./quizssoir.js?v=2.1.3",
-    "./quiz-state.js": "./quiz-state.js?v=2.1.3",
-    "./quiz-questions.js": "./quiz-questions.js?v=2.1.3",
-    "./quiz-art.js": "./quiz-art.js?v=2.1.3",
-      "./quiz-stage.js": "./quiz-stage.js?v=2.1.3",
-    "./quiz-soundtrack.js": "./quiz-soundtrack.js?v=2.1.3",
-    "./quiz-audio.js": "./quiz-audio.js?v=2.1.3",
-    "./quiz-lines.js": "./quiz-lines.js?v=2.1.3"
+    "./aaa-props.js": "./aaa-props.js?v=2.1.4",
+    "./arcade.js": "./arcade.js?v=2.1.4",
+    "./render-stability.js": "./render-stability.js?v=2.1.4",
+    "./cinematic-look.js": "./cinematic-look.js?v=2.1.4",
+    "./atmosphere.js": "./atmosphere.js?v=2.1.4",
+    "./audio-bank.js": "./audio-bank.js?v=2.1.4",
+    "./audio-catalog.js": "./audio-catalog.js?v=2.1.4",
+    "./audio-engine.js": "./audio-engine.js?v=2.1.4",
+    "./audio-loop-requests.js": "./audio-loop-requests.js?v=2.1.4",
+    "./audio-profiles.js": "./audio-profiles.js?v=2.1.4",
+    "./audio-settings.js": "./audio-settings.js?v=2.1.4",
+    "./audio.js": "./audio.js?v=2.1.4",
+    "./blender-vehicles.js": "./blender-vehicles.js?v=2.1.4",
+    "./branding.js": "./branding.js?v=2.1.4",
+    "./brewery-model.js": "./brewery-model.js?v=2.1.4",
+    "./brewery.js": "./brewery.js?v=2.1.4",
+    "./cinematic-hud.js": "./cinematic-hud.js?v=2.1.4",
+    "./city-expansion.js": "./city-expansion.js?v=2.1.4",
+    "./city-extras.js": "./city-extras.js?v=2.1.4",
+    "./city-fire.js": "./city-fire.js?v=2.1.4",
+    "./city-layout.js": "./city-layout.js?v=2.1.4",
+    "./city-life.js": "./city-life.js?v=2.1.4",
+    "./city-streets.js": "./city-streets.js?v=2.1.4",
+    "./city-traffic.js": "./city-traffic.js?v=2.1.4",
+    "./courier-mission.js": "./courier-mission.js?v=2.1.4",
+    "./data.js": "./data.js?v=2.1.4",
+    "./dialogue.js": "./dialogue.js?v=2.1.4",
+    "./doors.js": "./doors.js?v=2.1.4",
+    "./expansion-models.js": "./expansion-models.js?v=2.1.4",
+    "./expansion.js": "./expansion.js?v=2.1.4",
+    "./extras-state.js": "./extras-state.js?v=2.1.4",
+    "./fire-cinema.js": "./fire-cinema.js?v=2.1.4",
+    "./fire-lines.js": "./fire-lines.js?v=2.1.4",
+    "./fire-sets.js": "./fire-sets.js?v=2.1.4",
+    "./fire-state.js": "./fire-state.js?v=2.1.4",
+    "./fire-story.js": "./fire-story.js?v=2.1.4",
+    "./full-map.js": "./full-map.js?v=2.1.4",
+    "./garage-audio.js": "./garage-audio.js?v=2.1.4",
+    "./immersion.js": "./immersion.js?v=2.1.4",
+    "./intro-cues.js": "./intro-cues.js?v=2.1.4",
+    "./intro-stage.js": "./intro-stage.js?v=2.1.4",
+    "./intro-performance.js": "./intro-performance.js?v=2.1.4",
+    "./intro-film.js": "./intro-film.js?v=2.1.4",
+    "./it-office.js": "./it-office.js?v=2.1.4",
+    "./leisure.js": "./leisure.js?v=2.1.4",
+    "./lighting-polish.js": "./lighting-polish.js?v=2.1.4",
+    "./locomotion.js": "./locomotion.js?v=2.1.4",
+    "./main.js": "./main.js?v=2.1.4",
+    "./map-routing.js": "./map-routing.js?v=2.1.4",
+    "./mission-passed.js": "./mission-passed.js?v=2.1.4",
+    "./mission-passed-art.js": "./mission-passed-art.js?v=2.1.4",
+    "./mission-games.js": "./mission-games.js?v=2.1.4",
+    "./mouse-controls.js": "./mouse-controls.js?v=2.1.4",
+    "./music-player.js": "./music-player.js?v=2.1.4",
+    "./office-detail.js": "./office-detail.js?v=2.1.4",
+    "./pedestrian-navigation.js": "./pedestrian-navigation.js?v=2.1.4",
+    "./reactive-copy.js": "./reactive-copy.js?v=2.1.4",
+    "./render-batches.js": "./render-batches.js?v=2.1.4",
+    "./simulation.js": "./simulation.js?v=2.1.4",
+    "./smartphone.js": "./smartphone.js?v=2.1.4",
+    "./title-music.js": "./title-music.js?v=2.1.4",
+    "./soundtrack.js": "./soundtrack.js?v=2.1.4",
+    "./street-physics.js": "./street-physics.js?v=2.1.4",
+    "./street-signs.js": "./street-signs.js?v=2.1.4",
+    "./vehicle-detail.js": "./vehicle-detail.js?v=2.1.4",
+    "./vehicle-feel.js": "./vehicle-feel.js?v=2.1.4",
+    "./vehicle-lighting.js": "./vehicle-lighting.js?v=2.1.4",
+    "./vehicle-preload.js": "./vehicle-preload.js?v=2.1.4",
+    "./vertical-city.js": "./vertical-city.js?v=2.1.4",
+    "./voice-lines.js": "./voice-lines.js?v=2.1.4",
+    "./weather-effects.js": "./weather-effects.js?v=2.1.4",
+    "./workshop-cinema.js": "./workshop-cinema.js?v=2.1.4",
+    "./workshop-lines.js": "./workshop-lines.js?v=2.1.4",
+    "./workshop-sets.js": "./workshop-sets.js?v=2.1.4",
+    "./workshop-state.js": "./workshop-state.js?v=2.1.4",
+    "./workshop-story.js": "./workshop-story.js?v=2.1.4",
+    "./remaster-materials.js": "./remaster-materials.js?v=2.1.4",
+    "./remaster-architecture.js": "./remaster-architecture.js?v=2.1.4",
+    "./remaster-vegetation.js": "./remaster-vegetation.js?v=2.1.4",
+    "./remaster-vehicles.js": "./remaster-vehicles.js?v=2.1.4",
+    "./remaster-interiors.js": "./remaster-interiors.js?v=2.1.4",
+    "./remaster-performance.js": "./remaster-performance.js?v=2.1.4",
+    "./world.js": "./world.js?v=2.1.4",
+    "./origin-cinema.js": "./origin-cinema.js?v=2.1.4",
+    "./origin-cooking.js": "./origin-cooking.js?v=2.1.4",
+    "./origin-lines.js": "./origin-lines.js?v=2.1.4",
+    "./origin-models.js": "./origin-models.js?v=2.1.4",
+    "./origin-state.js": "./origin-state.js?v=2.1.4",
+    "./origin-story.js": "./origin-story.js?v=2.1.4",
+    "./food-art.js": "./food-art.js?v=2.1.4",
+    "./quick-wok-view.js": "./quick-wok-view.js?v=2.1.4",
+    "./interior-detail.js": "./interior-detail.js?v=2.1.4",
+    "./quizssoir.js": "./quizssoir.js?v=2.1.4",
+    "./quiz-state.js": "./quiz-state.js?v=2.1.4",
+    "./quiz-questions.js": "./quiz-questions.js?v=2.1.4",
+    "./quiz-art.js": "./quiz-art.js?v=2.1.4",
+      "./quiz-stage.js": "./quiz-stage.js?v=2.1.4",
+    "./quiz-soundtrack.js": "./quiz-soundtrack.js?v=2.1.4",
+    "./quiz-audio.js": "./quiz-audio.js?v=2.1.4",
+    "./quiz-lines.js": "./quiz-lines.js?v=2.1.4"
   }
 }
 </script>
-  <meta name="application-version" content="1.6.7">
+  <meta name="application-version" content="2.1.4">
 </head>
   <body>
-    <div id="boot-screen" aria-label="Spiel wird geladen" role="status" style="position:fixed;inset:0;z-index:80;background:#000"></div>
+    <div id="boot-screen" aria-label="Spiel wird geladen" role="status" aria-busy="true" style="position:fixed;inset:0;z-index:80;background:#000"><span class="boot-track" role="progressbar" aria-label="Spiel wird geladen"><i></i></span></div>
     <script>
       // Accept Space immediately, even before the game modules have finished loading.
-      window.__bbeBoot = { skipIntro: false, spaceHeld: false };
+      window.__bbeBoot = { skipIntro: false, spaceHeld: false, pending: true };
       (function () {
+        var boot = window.__bbeBoot;
+        boot.dismiss = function () {
+          boot.pending = false;
+          document.getElementById('boot-screen')?.remove();
+        };
+        boot.complete = function () {
+          if (!boot.pending) return;
+          boot.pending = false;
+          var el = document.getElementById('boot-screen');
+          if (!el) return;
+          el.setAttribute('aria-busy', 'false');
+          el.classList.add('is-ready');
+          setTimeout(boot.dismiss, 200);
+        };
         function skip(e) {
           if (e.code !== 'Space') return;
           e.preventDefault();
@@ -153,15 +178,18 @@
     <div id="modal-root"></div>
     <div id="toasts" aria-live="polite"></div>
     <script>
-      window.addEventListener('error', function () {
+      window.addEventListener('error', function (event) {
+        if (event.target !== window && event.target?.tagName !== 'SCRIPT') return;
         var el = document.getElementById('boot-screen');
         if (el) {
           el.style.cssText += ';display:grid;place-items:center;color:white;font:16px system-ui;padding:24px';
           el.textContent = 'Das Laden wurde unterbrochen. Bitte die Seite neu laden.';
+          el.setAttribute('aria-busy', 'false');
+          window.__bbeBoot.pending = false;
         }
-      });
+      }, true);
     </script>
-    <script type="module" src="./main.js?v=2.1.3"></script>
+    <script type="module" src="./main.js?v=2.1.4"></script>
     <noscript>Bitte JavaScript aktivieren, um München zu erkunden.</noscript>
   </body>
 </html>
