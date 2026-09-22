@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "1.6.7",
+  "version": "1.7.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "0cb0a4df0569137adb6468dc99738727b0f47ef6",
+  "sourceCommit": "966f650362235c680e0a630690621a380a629d4a",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-15T13:10:33.450Z",
+  "preparedAt": "2026-09-22T07:54:16.985Z",
   "gameTestsRun": true,
   "browserVisualQA": false,
-  "validation": "6 regression suites including 35 full-Game checks, 11 title audio lifecycle checks, mission completion lifecycle, audio contracts/lifecycle and 18 fire cinematic checks. No Dogtown explosions; softer continuous lens curves, BBE shot locked to audio second nine, interrupted audio clock rebasing. Same intro source continues on the title screen to its complete end, followed by the exact supplied menu.mp3 scheduled on the audio clock at quiet gain and looping without baked end silence. Skip/replay/hidden tab/loading failure/source-cap/start-game cancellation verified. 378 embedded audio hashes and 80 local asset references. No browser/GPU visual test or target-device FPS guarantee."
+  "validation": "11 regression suites: 40 full-Game checks including the complete origin chapter, four cooking levels, real obstacle-aware escort, checkpoint and reward guards; 8 courier routes; workshop and fire cinematic controllers; audio contracts/lifecycle; mission completion/title audio; office/map routes and origin state. 417 embedded audio hashes, 36 new normalized synthetic dialogue recordings and 3 original culinary effects. No browser/GPU visual test or target-device FPS guarantee."
 }

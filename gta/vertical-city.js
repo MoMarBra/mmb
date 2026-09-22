@@ -222,7 +222,7 @@ export function buildVerticalCity(w, h) {
     radius: 2.2,
     y: 1.6,
   });
-  w.interact('office', 'courier-start', 'Eilauftrag · Präsentationskoffer', -1.5, 5.8, {
+  w.interact('office', 'courier-start', 'IT · Eilauftrag übernehmen', -28.7, 2.9, {
     kind: 'courier-start',
     radius: 1.6,
     y: 1.6,

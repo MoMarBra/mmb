@@ -5611,3 +5611,395 @@ button.mission-row:focus-visible {
   opacity: 0;
   background: radial-gradient(ellipse at 50% 46%, #fff5dd 0%, #f8d6a6 48%, transparent 100%);
 }
+/* Story chapter: readable cinema, a usable kitchen, and a clear optional entry point. */
+.welcome #start-origin-story {
+  border: 1px solid #d1b57670;
+  color: #ead6a4;
+  background: linear-gradient(110deg, #79623932, #2c594a24);
+}
+.origin-cinematic #ui,
+.origin-cooking #ui {
+  visibility: hidden;
+  pointer-events: none;
+}
+.origin-film,
+.cook-film {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  color: #f4f0e5;
+  pointer-events: none;
+  text-shadow: 0 2px 12px #0009;
+  font-family: Inter, Arial, sans-serif;
+}
+.origin-film::before,
+.origin-film::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8%;
+  background: #080d0e;
+  pointer-events: none;
+}
+.origin-film::before {
+  top: 0;
+}
+.origin-film::after {
+  bottom: 0;
+}
+.origin-film header,
+.cook-film header {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  right: 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+.origin-film header > div:last-child,
+.cook-film header > div:last-child {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+.origin-film button,
+.cook-film button {
+  pointer-events: auto;
+  border: 1px solid #ffffff38;
+  background: #102c2bd9;
+  color: #f4eedf;
+  border-radius: 6px;
+  min-height: 42px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.origin-film button:hover,
+.cook-film button:hover {
+  background: #2c5e50;
+}
+.origin-film button:focus-visible,
+.cook-film button:focus-visible {
+  outline: 2px solid #e8cc89;
+  outline-offset: 3px;
+}
+.origin-title {
+  transition:
+    opacity 1.4s,
+    transform 1.4s;
+}
+.origin-title.faded {
+  opacity: 0;
+  transform: translateY(-12px);
+}
+.origin-title small,
+.cook-film header small {
+  letter-spacing: 0.21em;
+  color: #e4cd93;
+  font-size: 11px;
+  font-weight: 700;
+}
+.origin-title h1,
+.cook-film h1 {
+  font-size: clamp(24px, 3.5vw, 46px);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  margin: 9px 0;
+}
+.origin-subtitle {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(820px, 82%);
+  text-align: center;
+}
+.origin-subtitle b,
+.origin-walk-talk b {
+  color: #e6ce96;
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.origin-subtitle p {
+  font-size: clamp(16px, 1.65vw, 24px);
+  line-height: 1.45;
+  background: #0b181ed6;
+  display: table;
+  margin: 8px auto 0;
+  padding: 10px 19px;
+  border-radius: 4px;
+}
+.origin-film footer {
+  position: absolute;
+  bottom: 7.9%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 2;
+  background: #ffffff10;
+}
+.origin-film footer i {
+  display: block;
+  background: #d7b775;
+  height: 100%;
+  transform-origin: left;
+}
+.origin-paused {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+  background: #081519b8;
+  letter-spacing: 0.2em;
+  font-size: 26px;
+  pointer-events: auto;
+  z-index: 5;
+}
+.origin-paused[hidden] {
+  display: none;
+}
+.origin-walk-talk {
+  position: fixed;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(700px, 75vw);
+  background: #12242ee6;
+  border-radius: 7px;
+  padding: 13px 20px;
+  text-align: center;
+  z-index: 22;
+  color: #f4f0e5;
+}
+.origin-walk-talk span {
+  display: block;
+  font-size: 17px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.origin-walk-talk[hidden] {
+  display: none;
+}
+.cook-film header {
+  top: 4%;
+  background: linear-gradient(90deg, #112c2ae8, #142d2280);
+  padding: 18px 22px;
+  border-radius: 8px;
+}
+.cook-film h1 {
+  font-size: clamp(22px, 3vw, 37px);
+}
+.cook-film header p {
+  font-size: 13px;
+  color: #d6dcd3;
+  margin: 7px 0 0;
+}
+.cook-order {
+  position: absolute;
+  left: 5%;
+  top: 25%;
+  width: 220px;
+  padding: 17px 19px;
+  background: #f0e6ccef;
+  color: #253e34;
+  border-radius: 3px;
+  text-shadow: none;
+  box-shadow: 0 8px 30px #0002;
+  transform: rotate(-2deg);
+}
+.cook-order small {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.cook-order strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.35;
+  margin: 14px 0;
+}
+.cook-order > span {
+  font-size: 12px;
+}
+.cook-track {
+  height: 5px;
+  background: #365b4d30;
+  margin: 10px 0;
+}
+.cook-track i {
+  display: block;
+  height: 100%;
+  background: #427861;
+}
+.cook-track i.danger {
+  background: #b95630;
+}
+.cook-dashboard {
+  position: absolute;
+  bottom: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(660px, 90%);
+  padding: 18px 22px;
+  background: #112b2aee;
+  border: 1px solid #d2dbb72a;
+  border-radius: 12px;
+  box-shadow: 0 15px 60px #0006;
+  pointer-events: auto;
+  text-shadow: none;
+}
+#cook-feedback {
+  font-size: 14px;
+  text-align: center;
+  color: #dedfcc;
+  margin-bottom: 12px;
+  min-height: 21px;
+}
+#cook-choices {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+#cook-choices button {
+  flex: 1;
+  padding: 12px 8px;
+}
+#cook-choices kbd {
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 11px;
+  color: #dac795;
+}
+#cook-sear label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.13em;
+}
+.cook-heat {
+  position: relative;
+  height: 10px;
+  margin: 12px 0;
+  background: linear-gradient(90deg, #668b9c, #d99245);
+  border-radius: 4px;
+}
+.cook-heat span {
+  position: absolute;
+  height: 100%;
+  background: #80bb8b;
+}
+.cook-heat i {
+  position: absolute;
+  width: 3px;
+  height: 18px;
+  top: -4px;
+  background: #fff;
+  box-shadow: 0 0 8px #fff8;
+}
+#cook-power {
+  width: 100%;
+  accent-color: #d7bf82;
+  margin: 8px 0 15px;
+  cursor: pointer;
+}
+.cook-tools {
+  display: flex;
+  gap: 10px;
+}
+.cook-tools > * {
+  flex: 1;
+}
+#cook-sear > small {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  color: #b5c6bd;
+  font-size: 11px;
+}
+.cook-film .primary {
+  background: #c9b77f;
+  color: #19382f;
+  border-color: #c9b77f;
+}
+.cook-film .primary:hover {
+  background: #e8d497;
+}
+#cook-result {
+  text-align: center;
+}
+#cook-result h2 {
+  margin: 8px 0;
+  font-size: 26px;
+}
+#cook-result p {
+  color: #d6d5b8;
+}
+#cook-sear[hidden],
+#cook-choices[hidden],
+#cook-result[hidden] {
+  display: none;
+}
+@media (max-width: 700px) {
+  .origin-film header,
+  .cook-film header {
+    left: 3%;
+    right: 3%;
+    gap: 10px;
+  }
+  .origin-film header > div:last-child,
+  .cook-film header > div:last-child {
+    flex-direction: column;
+  }
+  .origin-film button,
+  .cook-film button {
+    font-size: 11px;
+    min-height: 36px;
+    padding: 8px 10px;
+  }
+  .cook-film header {
+    padding: 12px;
+  }
+  .cook-order {
+    top: 25%;
+    left: 3%;
+    width: 150px;
+    padding: 10px;
+  }
+  .cook-order strong {
+    font-size: 14px;
+    margin: 8px 0;
+  }
+  .cook-dashboard {
+    padding: 12px;
+    bottom: 2%;
+  }
+  .cook-film header p {
+    display: none;
+  }
+  .origin-title h1 {
+    max-width: 220px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .origin-title {
+    transition: none;
+  }
+}
+#cook-dialogue {
+  font-size: 13px;
+  color: #efe3c6;
+  text-align: center;
+  line-height: 1.5;
+  border-bottom: 1px solid #ffffff1a;
+  padding-bottom: 12px;
+  margin-top: 0;
+}
+#cook-dialogue[hidden] {
+  display: none;
+}

@@ -36,7 +36,7 @@ export class CourierMission {
     this.hooked = false;
     if (this.g.sim.s.courier.active) {
       this.g.sim.s.courier.mode = 'carry';
-      this.g.toast('Eilauftrag fortgesetzt.', 'Koffer am BBE-Arbeitsplatz.');
+      this.g.toast('Eilauftrag fortgesetzt.', 'Koffer in der IT.');
     }
     window.addEventListener('keydown', (e) => {
       if (e.repeat || this.g.modal || this.g.busy || !this.g.started || !this.a.active) return;
@@ -58,7 +58,15 @@ export class CourierMission {
     return this.g.sim.s.courier;
   }
   brief() {
-    if (this.g.workshop?.active || this.g.fireStory?.active) {
+    if (
+      !this.state.active &&
+      (this.w.zone !== 'office' ||
+        Math.hypot(this.w.player.position.x + 28.7, this.w.player.position.z - 2.9) > 3)
+    ) {
+      this.g.toast('Eilauftrag · IT', 'Den Koffer bei Benjamin im Westflügel übernehmen.');
+      return;
+    }
+    if (this.g.origin?.active || this.g.workshop?.active || this.g.fireStory?.active) {
       this.g.toast(
         this.g.fireStory?.active
           ? 'Zuerst Ticket in Flammen abschließen.'
@@ -94,7 +102,7 @@ export class CourierMission {
         active: true,
         remaining: 360,
         mode: 'carry',
-        position: [-8, 0, 2],
+        position: [-28.7, 0, 2.9],
         integrity: 100,
         air: false,
         roof: false,
@@ -146,7 +154,7 @@ export class CourierMission {
   deliver(route) {
     const s = this.state;
     if (!s.active) {
-      this.g.toast('Eilauftrag am BBE-Empfang starten.');
+      this.g.toast('Eilauftrag am BBE-IT starten.');
       return;
     }
     if (
@@ -222,7 +230,7 @@ export class CourierMission {
       (!!s.active || (this.w.zone === 'office' && this.w.player.position.x < 22));
     this.mesh.rotation.set(0, 0, 0);
     if (!s.active) {
-      this.mesh.position.set(-2.65, 0.015, 6.4);
+      this.mesh.position.set(-29.2, 0.835, 1.8);
       this.mesh.rotation.y = Math.PI / 2;
     }
     const heli = car?.type === 'helicopter' ? car : null;
@@ -254,7 +262,7 @@ export class CourierMission {
       this.hooked = false;
       this.g.sim.change('rep', -2);
       this.g.sim.save();
-      this.g.toast('Zeit abgelaufen.', 'Neustart am BBE-Empfang.');
+      this.g.toast('Zeit abgelaufen.', 'Neustart am BBE-IT.');
       return;
     }
     if (s.mode === 'carry' && car) {

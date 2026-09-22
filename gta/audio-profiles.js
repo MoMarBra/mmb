@@ -1,6 +1,27 @@
 import { GARAGE_PROFILE, GARAGE_SFX, GARAGE_SOURCES } from './garage-audio.js';
 // Each interior has its own physical sound sources, materials and room response.
 export const ROOMS = {
+  home: {
+    title: 'Zuhause · Morgenruhe',
+    material: 'wood',
+    reverb: 0.12,
+    tone: 6200,
+    loops: [['wind', 0.018]],
+    events: ['bird'],
+    interval: 18,
+  },
+  zitronengras: {
+    title: 'Zitronengras · Wok & Service',
+    material: 'tile',
+    reverb: 0.16,
+    tone: 8600,
+    loops: [
+      ['boil', 0.11],
+      ['vent', 0.04],
+    ],
+    events: ['chop', 'pot', 'dishes'],
+    interval: 4.8,
+  },
   city: {
     title: 'Augustenstraße · draußen',
     material: 'concrete',
@@ -112,6 +133,7 @@ export const ROOMS = {
   },
 };
 export function roomFor(world) {
+  if (world.zone === 'home' || world.zone === 'zitronengras') return world.zone;
   if (world.zone === 'brewery') return 'wirt';
   if (world.zone === 'restaurant')
     return world.currentRestaurant?.id === 'dogtown'

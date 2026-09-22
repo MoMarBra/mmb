@@ -1,3 +1,4 @@
+import { createStreetProp } from './aaa-props.js';
 import * as THREE from 'three';
 import { CityFire } from './city-fire.js';
 import { Brewery } from './brewery.js';
@@ -45,9 +46,46 @@ export class CityExtras {
       bg: '#254451',
       fg: '#ecc989',
     });
-    this.w.interact('office', 'boss-story', 'Lukas · Nur noch kurz zum Marienplatz', 36.6, -1.5, {
-      kind: 'boss-story',
+    this.officeCase = createStreetProp(THREE, 'suitcase');
+    this.officeCase.position.set(-2.65, 0.015, 6.4);
+    this.officeCase.rotation.y = Math.PI / 2;
+    this.officeCase.name = 'Workshop-Koffer · Marienplatz';
+    this.w.groups.office.add(this.officeCase);
+    label(this.officeCase, 'MARIENPLATZ', 0, 0.51, 0.183, 0.35, 0.1, {
+      bg: '#e4c986',
+      fg: '#25424a',
+    });
+    this.w.interact('office', 'workshop-case', 'Workshop-Koffer · Marienplatz', -1.5, 5.8, {
+      kind: 'workshop-case',
       radius: 2.3,
+    });
+    this.w.interact('office', 'boss-talk', 'Mit Lukas sprechen', 36.6, -1.5, {
+      kind: 'boss-talk',
+      radius: 2.3,
+    });
+    const pick = new THREE.Raycaster();
+    this.w.canvas.addEventListener('click', (e) => {
+      if (
+        e.button !== 0 ||
+        !game.started ||
+        game.modal ||
+        game.busy ||
+        this.w.zone !== 'office' ||
+        !this.officeCase.visible ||
+        this.w.player.position.distanceTo(this.officeCase.position) > 3
+      )
+        return;
+      const b = this.w.canvas.getBoundingClientRect();
+      const locked = document.pointerLockElement === this.w.canvas;
+      pick.setFromCamera(
+        new THREE.Vector2(
+          locked ? 0 : ((e.clientX - b.left) / b.width) * 2 - 1,
+          locked ? 0 : 1 - ((e.clientY - b.top) / b.height) * 2,
+        ),
+        this.w.camera,
+      );
+      this.officeCase.updateWorldMatrix(true, true);
+      if (pick.intersectObject(this.officeCase, true).length) game.workshop.brief();
     });
     window.addEventListener('keydown', (e) => {
       if (
@@ -91,7 +129,14 @@ export class CityExtras {
   }
   interact(n) {
     if (this.g.fireStory.running) return false;
-    if (n?.kind === 'boss-story') {
+    if (n?.kind === 'boss-talk') {
+      this.g.toast(
+        'Lukas Fleischmann',
+        'Der Workshop-Koffer wartet am Empfang. Der Eilauftrag liegt in der IT.',
+      );
+      return true;
+    }
+    if (n?.kind === 'workshop-case') {
       this.g.workshop.brief();
       return true;
     }
@@ -116,6 +161,7 @@ export class CityExtras {
     return `<article class="card equipment-card"><small>AUSRÜSTUNG</small><h3>BurritoBombe <span class="tag">${this.state.bombs}</span></h3><p>B · Werfen · Nachschub bei Dogtown</p><div class="toolbar"><button data-burrito-equip ${!this.state.bombs ? 'disabled' : ''}>Werfen</button><button data-burrito-route>Dogtown markieren</button></div></article>`;
   }
   update(dt, raw, paused) {
+    this.officeCase.visible = !this.g.workshop.enabled || !this.g.workshop.active;
     const active = this.g.started && !document.hidden && !paused && !this.g.cinematic;
     this.clock += active ? dt : 0;
     const wasDrunk = this.state.drunk > 0;

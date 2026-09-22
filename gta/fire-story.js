@@ -119,6 +119,7 @@ export class FireStory {
     if (!this.state.log.includes(key)) this.state.log.push(key);
   }
   conflict() {
+    if (this.g.origin?.active) return true;
     return this.g.workshop?.active || this.g.sim.s.courier.active;
   }
   entryCard() {

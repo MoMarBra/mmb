@@ -1893,6 +1893,21 @@ export class GameWorld {
       }
       this.distance = 5.8;
       this.pitch = 0.24;
+    } else if (zone === 'home' || zone === 'zitronengras') {
+      this.currentRestaurant =
+        zone === 'home'
+          ? {
+              id: 'home',
+              name: 'Deine Wohnung',
+              address: 'Augustenstraße · Zuhause',
+              x: -14.4,
+              z: 110,
+            }
+          : RESTAURANTS.find((r) => r.id === 'zitronengras');
+      this.teleport(zone === 'home' ? 2.8 : 0, zone === 'home' ? 4.5 : 6.3);
+      this.yaw = 0;
+      this.distance = 3.4;
+      this.pitch = 0.2;
     } else if (zone === 'brewery') {
       this.currentRestaurant = {
         id: 'brewery',

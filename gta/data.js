@@ -21,6 +21,29 @@ export const CAREERS = [
 ];
 export const RESTAURANTS = [
   {
+    id: 'zitronengras',
+    source: 'https://www.speisekarte.de/m%C3%BCnchen/restaurant/zitronengras/speisekarte',
+    name: 'ZITRONENGRAS',
+    address: 'Augustenstraße 6 · Spielstandort neben Dogtown',
+    kind: 'Thai & Vietnamese · Wok-Küche',
+    x: 17,
+    z: 70,
+    color: '#397865',
+    foods: [
+      {
+        name: 'Hühnerbrust · Thai-Rot-Curry',
+        price: 12.5,
+        hunger: 58,
+        happy: 17,
+        energy: 8,
+        focus: 6,
+      },
+      { name: 'Garnelen-Pad-Thai', price: 13.5, hunger: 60, happy: 19, energy: 7, focus: 5 },
+      { name: 'Tofu in Hoisin', price: 11.5, hunger: 54, happy: 18, energy: 10, focus: 8 },
+      { name: 'Knusperente · Thai-Curry', price: 15.5, hunger: 70, happy: 22, energy: 5, focus: 3 },
+    ],
+  },
+  {
     id: 'dogtown',
     name: 'DOGTOWN BURRITO CO.',
     address: 'Augustenstraße 16',

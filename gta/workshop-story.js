@@ -1,3 +1,4 @@
+import { CITY_LAYOUT } from './city-layout.js';
 import * as THREE from 'three';
 import { label, animateHuman } from './world.js';
 import { createStreetProp } from './aaa-props.js';
@@ -86,6 +87,19 @@ export class WorkshopStory {
     return `<button type="button" class="mission-row mission-open" data-workshop-open><span class="mission-row-title">Nur noch kurz zum Marienplatz.</span><span aria-hidden="true">↗</span></button>`;
   }
   brief() {
+    if (this.g.origin?.active) {
+      this.g.toast('Zuerst mit Lukas bei der BBE ankommen.');
+      return;
+    }
+    if (
+      !this.active &&
+      (this.w.zone !== 'office' ||
+        Math.hypot(this.w.player.position.x + 1.5, this.w.player.position.z - 5.8) > 3)
+    ) {
+      this.g.toast('Workshop-Koffer · Marienplatz', 'Am Koffer neben dem BBE-Empfang starten.');
+      this.g.waypoint = { ...CITY_LAYOUT.hq, name: 'BBE · Workshop-Koffer' };
+      return;
+    }
     if (this.g.fireStory?.active) {
       this.g.toast('Zuerst Ticket in Flammen abschließen.');
       return;
@@ -124,6 +138,7 @@ export class WorkshopStory {
   }
   start() {
     if (
+      this.g.origin?.active ||
       this.g.fireStory?.active ||
       this.g.sim.s.courier.active ||
       this.cinematic ||

@@ -1,3 +1,4 @@
+import { freshOriginStory, normalizeOriginStory } from './origin-state.js';
 import { freshExtras, normalizeExtras } from './extras-state.js';
 import { freshFireStory, normalizeFireStory } from './fire-state.js';
 import { freshWorkshopStory, normalizeWorkshopStory } from './workshop-state.js';
@@ -5,6 +6,7 @@ import { CAREERS, RESTAURANTS, TASKS, ACHIEVEMENTS, clamp } from './data.js';
 export const SAVE_KEY = 'bbe-munich-life-v1';
 export const freshState = () => ({
   version: 1,
+  originStory: freshOriginStory(),
   extras: freshExtras(),
   vaults: 0,
   propsThrown: 0,
@@ -221,6 +223,7 @@ export class Simulation {
           .map(([id, v]) => [id, { health: clamp(v.health, 0, 100) }]),
       );
       base.extras = normalizeExtras(base.extras);
+      base.originStory = normalizeOriginStory(base.originStory);
       base.workshopStory = normalizeWorkshopStory(base.workshopStory);
       base.fireStory = normalizeFireStory(base.fireStory);
       const c = base.courier;

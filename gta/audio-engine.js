@@ -469,7 +469,7 @@ export class Soundscape {
           slot.target = 0;
           this.loops.delete(key);
         }
-        if (active && !this.cinematicMix) this.voices.arrive(world);
+        if (active && !this.cinematicMix && !this.cinematicVoice) this.voices.arrive(world);
         if (this.transitionSound) {
           this.play('door');
           this.transitionSound = false;
@@ -513,7 +513,7 @@ export class Soundscape {
           lowpass: profile.tone,
         });
       }
-      if (!this.cinematicMix) this.voices.update(dt, world);
+      if (!this.cinematicMix && !this.cinematicVoice) this.voices.update(dt, world);
     }
     for (const [key, slot] of this.loops) {
       if (!slot.target) {

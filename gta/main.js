@@ -1,3 +1,4 @@
+import { OriginStory } from './origin-story.js';
 import { TitleMusic } from './title-music.js';
 import { MissionPassed } from './mission-passed.js';
 import { CityExtras } from './city-extras.js';
@@ -59,6 +60,7 @@ export class Game {
     this.workshop = new WorkshopStory(this);
     this.fireStory = new FireStory(this);
     this.extras = new CityExtras(this);
+    this.origin = new OriginStory(this);
     this.mouseControls = new MouseControls(this);
     this.missionPassed = new MissionPassed(this);
     this.titleMusic = new TitleMusic(this);
@@ -108,6 +110,7 @@ export class Game {
           ),
       );
       this.extras.afterAudio();
+      this.origin.update(dt, paused);
       this.fireStory.update(rawDelta, paused);
       this.missionPassed.update(renderedWorld);
       this.uiTimer += dt;
@@ -143,6 +146,7 @@ export class Game {
   }
   get activeFilm() {
     if (this.extras?.intro.current) return this.extras.intro;
+    if (this.origin?.activeFilm) return this.origin.activeFilm;
     return this.fireStory?.cinematic
       ? this.fireStory.film
       : this.workshop?.cinematic
@@ -263,8 +267,9 @@ export class Game {
     box.className = 'welcome';
     box.id = 'welcome';
     box.tabIndex = -1;
-    box.innerHTML = `<div class="eyebrow">MÜNCHEN · MAXVORSTADT · ${this.sim.clock}</div><h1>Zwischen Folien<br>und <span>Feierabend.</span></h1><p class="greeting">Guten Morgen.<br>Neue Aufgaben verfügbar.</p><button class="primary" id="start-game">${this.sim.saved ? 'Aufstehen & weiterspielen' : 'Aufstehen & Arbeitstag beginnen'} <span style="float:right">↗</span></button><button class="story-welcome-button" id="start-intro">Intro <span>▶</span></button><div class="save-note">${this.sim.saved ? `Spielstand geladen · ${this.sim.career.name} · ${euro(this.sim.s.money)}` : 'WASD bewegen · Maus bewegen · P Smartphone · E interagieren'}</div><div class="divider"></div><div class="small-print">Eine fiktive Spielwelt mit realen Münchner Ortsnamen. Innenräume und Handlung frei interpretiert. Kein offizielles BBE-Produkt.</div>`;
+    box.innerHTML = `<div class="eyebrow">MÜNCHEN · MAXVORSTADT · ${this.sim.clock}</div><h1>Zwischen Folien<br>und <span>Feierabend.</span></h1><p class="greeting">Guten Morgen.<br>Neue Aufgaben verfügbar.</p><button class="primary" id="start-game">${this.sim.saved ? 'Aufstehen & weiterspielen' : 'Aufstehen & Arbeitstag beginnen'} <span style="float:right">↗</span></button><button class="story-welcome-button" id="start-origin-story">${this.sim.s.originStory.phase === 'complete' ? 'Story erneut erleben' : this.sim.s.originStory.phase === 'new' ? 'Story-Modus' : 'Story fortsetzen'} <span>↗</span></button><button class="story-welcome-button" id="start-intro">Intro <span>▶</span></button><div class="save-note">${this.sim.saved ? `Spielstand geladen · ${this.sim.career.name} · ${euro(this.sim.s.money)}` : 'WASD bewegen · Maus bewegen · P Smartphone · E interagieren'}</div><div class="divider"></div><div class="small-print">Eine fiktive Spielwelt mit realen Münchner Ortsnamen. Innenräume und Handlung frei interpretiert. Kein offizielles BBE-Produkt.</div>`;
     $('#ui').append(box);
+    this.uiClick('#start-origin-story', () => this.origin.begin());
     this.uiClick('#start-intro', () => this.extras.intro.play());
     this.uiClick('#start-game', () => {
       this.started = true;
@@ -476,6 +481,7 @@ export class Game {
     } else $('#waypoint').hidden = true;
     this.workshop?.updateHUD();
     this.fireStory?.updateHUD();
+    this.origin?.updateHUD();
     if (z === 'office' && this.world.player.position.x < -13.5) {
       $('#zone-name').textContent = inIT(this.world.player.position)
         ? 'BBE · IT / Benjamin'
@@ -484,6 +490,7 @@ export class Game {
     }
   }
   transition(zone, id) {
+    if (this.origin?.beforeTransition(zone) === false) return;
     if (this.fireStory?.beforeTransition() === false) return;
     this.worldTransitionUntil = performance.now() + 700;
     this.missionPassed?.pause();
@@ -503,6 +510,7 @@ export class Game {
   interact() {
     if (!this.started || this.modal || this.busy) return;
     const n = this.world.nearest;
+    if (this.origin.interact(n)) return;
     if (this.extras.interact(n)) return;
     if (this.fireStory.interact(n)) return;
     if (this.workshop.interact(n)) return;
@@ -643,6 +651,10 @@ export class Game {
     });
   }
   desktop() {
+    if (this.origin?.active) {
+      this.toast('Zuerst deine Schicht im Zitronengras abschließen.');
+      return;
+    }
     this.world.pose = 'work';
     const s = this.sim.s;
     const active = s.active;
@@ -789,7 +801,7 @@ export class Game {
         )
         .join(
           '',
-        )}</div>${r.id === 'palm' && this.sim.task('lunch') && !this.sim.task('lunch').progress.includes('picked') ? '<div class="divider"></div><button class="primary" id="pickup-lunch">BBE Meeting-Lunch abholen · bereits bezahlt</button>' : ''}<p class="muted" style="font-size:.78rem;margin:22px 0 0">Speisen und Preise sind fiktive Spielwerte. Restaurantname und Adresse nach Betreiberangaben.</p>`,
+        )}</div>${r.id === 'palm' && this.sim.task('lunch') && !this.sim.task('lunch').progress.includes('picked') ? '<div class="divider"></div><button class="primary" id="pickup-lunch">BBE Meeting-Lunch abholen · bereits bezahlt</button>' : ''}<p class="muted" style="font-size:.78rem;margin:22px 0 0">Speisen und Preise sind fiktive Spielwerte. Restaurantnamen und Ortsangaben nach veröffentlichten Quellen.</p>`,
       { eyebrow: 'AUGUSTENSTRASSE · SPEISEKARTE' },
     );
     document
@@ -808,7 +820,15 @@ export class Game {
     const r = this.sim.buyFood(id, index);
     if (!r.ok) return this.toast(r.message);
     this.close();
-    this.world.teleport(0, 5.67);
+    if (this.world.zone === 'zitronengras') {
+      this.world.groups.zitronengras.add(this.world.foodProp);
+      this.world.foodProp.position.set(3.5, 0.87, 3.6);
+      this.world.teleport(3.5, 4.45);
+    } else {
+      this.world.groups.restaurant.add(this.world.foodProp);
+      this.world.foodProp.position.set(0, 0.87, 4.5);
+      this.world.teleport(0, 5.67);
+    }
     this.world.player.rotation.y = Math.PI;
     this.world.pose = 'eat';
     this.world.yaw = 2.4;
@@ -816,7 +836,9 @@ export class Game {
     this.world.setFood(r.food.name);
     this.audio.play('dishes');
     this.audio.voices.sequence([
-      { actor: id, event: 'serve', npc: this.world.zoneData.restaurant.npcs[0] },
+      ...(id === 'zitronengras'
+        ? []
+        : [{ actor: id, event: 'serve', npc: this.world.zoneData.restaurant.npcs[0] }]),
       { actor: 'player', event: 'eat' },
     ]);
     this.timedAction(
@@ -1038,7 +1060,7 @@ export class Game {
       if (this.world.zone !== 'office' || this.world.player.position.x > 44) {
         this.toast(
           'Der Koffer wartet bei der BBE.',
-          'Im Büro am Empfang oder Arbeitsplatz übernehmen.',
+          'In der IT bei Benjamin im Westflügel übernehmen.',
         );
         return;
       }
@@ -1102,12 +1124,12 @@ export class Game {
     const city = this.world.zone === 'city',
       px = city
         ? this.world.player.position.x
-        : ['restaurant', 'brewery'].includes(this.world.zone)
+        : ['restaurant', 'brewery', 'home', 'zitronengras'].includes(this.world.zone)
           ? this.world.currentRestaurant.x
           : CITY_LAYOUT.hq.x,
       pz = city
         ? this.world.player.position.z
-        : ['restaurant', 'brewery'].includes(this.world.zone)
+        : ['restaurant', 'brewery', 'home', 'zitronengras'].includes(this.world.zone)
           ? this.world.currentRestaurant.z
           : CITY_LAYOUT.hq.z;
     const scale = mini ? 2.1 : Math.min(W / 720, H / 630),
@@ -1263,6 +1285,7 @@ export class Game {
       const ok = this.sim.import(await f.text());
       this.toast(ok ? 'Spielstand geladen.' : 'Die Datei ist kein gültiger BBE-Spielstand.');
       if (ok) {
+        this.origin.cancel();
         this.world.makeWorkstation();
         this.transition('office');
       }
@@ -1278,6 +1301,7 @@ export class Game {
     );
     this.uiClick('#reset-cancel', () => this.settings());
     this.uiClick('#reset-confirm', () => {
+      this.origin.cancel();
       this.sim.reset();
       this.world.makeWorkstation();
       this.transition('office');
@@ -1287,7 +1311,7 @@ export class Game {
   sources() {
     this.open(
       'München, mit etwas dichterer Storyline',
-      `<p><strong>BBE Handelsberatung: Munich Consulting Simulator</strong> ist eine fiktive, unabhängige Spielinterpretation. Die BBE ist das Hauptquartier. Menschen, Dialoge, Büroräume, Marktwerte, Speisekarten und Preise wurden für das Spiel erfunden.</p><p>Reale Restaurantnamen und Adressen wurden am 10.09.2026 anhand der Betreiberseiten recherchiert. Stadtplan und Entfernungen sind verdichtet und frei interpretiert. Die Innenräume bilden keine tatsächlichen Geschäftsräume ab.</p><p>Original-Logo: <a href="https://www.bbe.de/static/images/bbe-logo.svg" target="_blank" rel="noopener noreferrer">BBE Handelsberatung GmbH</a>, unveränderte SVG vom offiziellen Webauftritt. Die Verwendung macht das Spiel nicht zu einem offiziellen BBE-Produkt. Helikopter, Landeplätze und Arcade-Ereignisse sind erfunden.</p><ul class="source-list">${CITY_STOPS.map((p) => `<li><a href="${p.source}" target="_blank" rel="noopener noreferrer">${p.name} · Ortsquelle</a></li>`).join('')}<li><a href="https://www.bbe.de/de/kontakt/" target="_blank" rel="noopener noreferrer">BBE Handelsberatung · Brienner Straße 45</a></li>${RESTAURANTS.map((r) => `<li><a href="${r.source}" target="_blank" rel="noopener noreferrer">${r.name} · ${r.address}</a></li>`).join('')}</ul><div class="divider"></div><p><a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">Three.js</a> · 3D-Darstellung · MIT-Lizenz<br><a href="https://pmndrs.github.io/cannon-es/" target="_blank" rel="noopener noreferrer">Cannon-es</a> · Kollisionen und Physik · MIT-Lizenz</p><p class="muted">Prozedurale 3D-Modelle, PBR-Materialien, Umgebungsreflexionen, Ambient Occlusion, Kontakt- und Sonnenschatten. Echte lizenzierte Geräuschaufnahmen, gestaltete Effekte, 176 deutsche Sprechzeilen, drei Radiosongs und fünf eigene Story-Kompositionen. Kein Konto, keine In-App-Käufe. Spielstände bleiben lokal.</p><p>Audioaufnahmen: Kenney, rubberduck, unicaegames, looneybits, domasx2, IgnasD und Ylmir (CC0). Kitchen Ambience, SFX: <a href="https://opengameart.org/content/kitchen-ambience-sfx" target="_blank" rel="noopener noreferrer">DavidW</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Fliesen- und Wasserschritte: swuing, ceberation, EminYILDIRIM; bearbeitet von congusbongus, <a href="https://opengameart.org/content/footsteps-on-different-surfaces" target="_blank" rel="noopener noreferrer">Quelle</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Aufnahmen gekürzt, gefiltert und komprimiert; Wasser-/Kaffeeeffekte aus DavidWs Aufnahme gestaltet. Verkehrsaufnahme dient als allgemeine Stadtatmosphäre.</p><p>Dialoge und Musik wurden eigens für das fiktive Spiel geschrieben. Stimmen: lokal erzeugte deutsche Windows-Sprachsynthese (Hedda, Katja, Stefan), keine menschlichen Studioaufnahmen oder nachgeahmten realen Personen.</p>`,
+      `<p><strong>BBE Handelsberatung: Munich Consulting Simulator</strong> ist eine fiktive, unabhängige Spielinterpretation. Die BBE ist das Hauptquartier. Menschen, Dialoge, Büroräume, Marktwerte, Preise und Abläufe wurden für das Spiel erfunden.</p><p>Restaurantnamen und Adressen basieren auf veröffentlichten Ortsangaben. Die vier Zitronengras-Gerichte orientieren sich an der veröffentlichten Speisekarte (Stand 14.10.2025); Zubereitung, Preise und der Standort neben Dogtown sind Spieladaptionen. Stadtplan und Entfernungen sind verdichtet und frei interpretiert. Die Innenräume bilden keine tatsächlichen Geschäftsräume ab.</p><p>Original-Logo: <a href="https://www.bbe.de/static/images/bbe-logo.svg" target="_blank" rel="noopener noreferrer">BBE Handelsberatung GmbH</a>, unveränderte SVG vom offiziellen Webauftritt. Die Verwendung macht das Spiel nicht zu einem offiziellen BBE-Produkt. Helikopter, Landeplätze und Arcade-Ereignisse sind erfunden.</p><ul class="source-list">${CITY_STOPS.map((p) => `<li><a href="${p.source}" target="_blank" rel="noopener noreferrer">${p.name} · Ortsquelle</a></li>`).join('')}<li><a href="https://www.bbe.de/de/kontakt/" target="_blank" rel="noopener noreferrer">BBE Handelsberatung · Brienner Straße 45</a></li>${RESTAURANTS.map((r) => `<li><a href="${r.source}" target="_blank" rel="noopener noreferrer">${r.name} · ${r.address}</a></li>`).join('')}</ul><div class="divider"></div><p><a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">Three.js</a> · 3D-Darstellung · MIT-Lizenz<br><a href="https://pmndrs.github.io/cannon-es/" target="_blank" rel="noopener noreferrer">Cannon-es</a> · Kollisionen und Physik · MIT-Lizenz</p><p class="muted">Prozedurale 3D-Modelle, PBR-Materialien, Umgebungsreflexionen, Ambient Occlusion, Kontakt- und Sonnenschatten. Echte lizenzierte Geräuschaufnahmen, gestaltete Effekte, 254 deutsche Sprechzeilen, drei Radiosongs und fünf eigene Story-Kompositionen. Kein Konto, keine In-App-Käufe. Spielstände bleiben lokal.</p><p>Audioaufnahmen: Kenney, rubberduck, unicaegames, looneybits, domasx2, IgnasD und Ylmir (CC0). Kitchen Ambience, SFX: <a href="https://opengameart.org/content/kitchen-ambience-sfx" target="_blank" rel="noopener noreferrer">DavidW</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Fliesen- und Wasserschritte: swuing, ceberation, EminYILDIRIM; bearbeitet von congusbongus, <a href="https://opengameart.org/content/footsteps-on-different-surfaces" target="_blank" rel="noopener noreferrer">Quelle</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Aufnahmen gekürzt, gefiltert und komprimiert; Wasser-/Kaffeeeffekte aus DavidWs Aufnahme gestaltet. Verkehrsaufnahme dient als allgemeine Stadtatmosphäre.</p><p>Dialoge und Musik wurden eigens für das fiktive Spiel geschrieben. Stimmen: lokal erzeugte deutsche Windows-Sprachsynthese (Hedda, Katja, Stefan), keine menschlichen Studioaufnahmen oder nachgeahmten realen Personen.</p>`,
       { pause: true },
     );
   }

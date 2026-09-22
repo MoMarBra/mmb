@@ -152,6 +152,9 @@ export function buildITOffice(w) {
       bg: '#304b51',
       fg: '#b8e0ca',
     }).rotation.x = -Math.PI / 2;
+  solid(-29.2, 0.38, 1.8, 1.6, 0.76, 0.9, '#859a93');
+  box(g, -29.2, 0.795, 1.8, 1.68, 0.07, 0.98, '#d0d5c4');
+  label(g, 'EILAUFTRAG', -29.2, 1.9, 1.8, 1.4, 0.3, { bg: '#224e55', fg: '#e8d18d' });
   w.itOffice = { entry, door, actor, deskChair, footrest };
   return w.itOffice;
 }

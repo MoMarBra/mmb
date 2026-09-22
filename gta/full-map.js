@@ -17,6 +17,7 @@ export class FullMap {
       ...new Map(
         [
           { id: 'hq', name: 'BBE Handelsberatung', type: 'work', ...CITY_LAYOUT.hq },
+          { id: 'origin-home', name: 'Zuhause', type: 'city', x: -14.4, z: 110 },
           ...RESTAURANTS.map((r) => ({ ...r, type: 'food' })),
           ...Object.values(EXTRA_PLACES).map((r) => ({ ...r, type: 'food' })),
           ...CITY_STOPS.map((p) => ({ ...p, type: 'city' })),
@@ -120,7 +121,7 @@ export class FullMap {
       ? { x: w.player.position.x, z: w.player.position.z }
       : w.zone === 'brewery'
         ? { ...EXTRA_PLACES.brewery }
-        : w.zone === 'restaurant'
+        : ['restaurant', 'home', 'zitronengras'].includes(w.zone)
           ? { x: w.currentRestaurant.x, z: w.currentRestaurant.z }
           : { ...CITY_LAYOUT.hq };
   }
