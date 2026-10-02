@@ -148,8 +148,20 @@ export class WorkshopCinema {
     m.bed?.stop(0.08);
     m.bed = null;
     if (!value) {
-      m.elapsed = m.segments[m.index]?.start ?? m.elapsed;
-      m.index = -1;
+      const segment = m.segments[m.index];
+      if (
+        segment &&
+        m.elapsed >= segment.start &&
+        m.elapsed < segment.start + segment.line.duration
+      ) {
+        this.g.audio.voices.say(segment.line.actor, 'workshop.story', {
+          id: segment.line.id,
+          preview: true,
+          force: true,
+          priority: 10,
+          offset: m.elapsed - segment.start,
+        });
+      }
       this.startBed(m);
     }
     const badge = document.getElementById('story-paused');

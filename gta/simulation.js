@@ -1,3 +1,4 @@
+import { freshBlast, normalizeBlast } from './blast-state.js';
 import { freshCampaign, normalizeCampaign } from './bbe-campaign-state.js';
 import { QuizState } from './quiz-state.js';
 import { freshOriginStory, normalizeOriginStory } from './origin-state.js';
@@ -11,6 +12,7 @@ export const freshState = () => ({
   quizssoir: new QuizState().serialize(),
   quizDiscoveries: [],
   bbeCampaign: freshCampaign(),
+  bbeBlast: freshBlast(),
   originStory: freshOriginStory(),
   extras: freshExtras(),
   vaults: 0,
@@ -229,6 +231,7 @@ export class Simulation {
       );
       base.quizssoir = new QuizState(base.quizssoir).serialize();
       base.bbeCampaign = normalizeCampaign(base.bbeCampaign);
+      base.bbeBlast = normalizeBlast(base.bbeBlast);
       base.quizDiscoveries = [
         ...new Set(
           (Array.isArray(base.quizDiscoveries) ? base.quizDiscoveries : []).filter((id) =>

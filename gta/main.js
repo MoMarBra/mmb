@@ -1,3 +1,5 @@
+import { BBEBlast } from './bbe-blast.js';
+import { installBlastPC, BLAST_PC } from './blast-office.js';
 import { BBECampaign } from './bbe-campaign.js';
 import { QuizDiscoveries } from './quiz-discoveries.js';
 import { Quizssoir } from './quizssoir.js';
@@ -67,6 +69,8 @@ export class Game {
     this.quizssoir = new Quizssoir(this);
     this.campaign = new BBECampaign(this);
     this.quizDiscoveries = new QuizDiscoveries(this);
+    this.blast = new BBEBlast(this);
+    this.blastPC = installBlastPC(this.world);
     this.mouseControls = new MouseControls(this);
     this.missionPassed = new MissionPassed(this);
     this.titleMusic = new TitleMusic(this);
@@ -99,8 +103,8 @@ export class Game {
       this.lastFrame = now;
       const hidden = document.hidden;
       const paused = !this.started || hidden || this.modal?.pause === true;
-      const renderedWorld = !hidden && !this.cinematic;
-      if (!hidden) {
+      const renderedWorld = !hidden && !this.cinematic && !this.blast.active;
+      if (!hidden && !this.blast.active) {
         if (this.cinematic) {
           const film = this.activeFilm;
           film.performance?.record(rawDelta, film.current);
@@ -132,6 +136,7 @@ export class Game {
       this.extras.afterAudio();
       this.origin.update(dt, paused);
       this.campaign.update(dt, paused);
+      this.blast.update(hidden ? 0 : dt);
       this.fireStory.update(rawDelta, paused);
       this.missionPassed.update(renderedWorld);
       this.uiTimer += dt;
@@ -550,6 +555,27 @@ export class Game {
   interact() {
     if (!this.started || this.modal || this.busy) return;
     const n = this.world.nearest;
+    if (n?.kind === 'bbe-blast') {
+      const p = this.world.player.position;
+      if (
+        this.world.zone !== 'office' ||
+        Math.hypot(p.x - BLAST_PC.x, p.z - BLAST_PC.z) > BLAST_PC.radius + 0.1
+      )
+        return;
+      if (
+        this.cinematic ||
+        this.campaign.active ||
+        this.workshop.active ||
+        this.fireStory.active ||
+        this.origin.active ||
+        this.sim.s.courier.active
+      ) {
+        this.toast('Die Arcade-Pause wartet.', 'Zuerst den laufenden Story-Auftrag abschließen.');
+        return;
+      }
+      this.blast.open();
+      return;
+    }
     if (this.campaign.interact(n)) return;
     if (this.quizDiscoveries.interact(n)) return;
     if (this.quizssoir.interact(n)) return;

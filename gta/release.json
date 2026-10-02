@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "2a88a9715b70f8d94edea893c8c430e77f4287c7",
+  "sourceCommit": "076cf24ea1e855b9810d0eadc03e12aedfc5bb48",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-02T08:35:51.197Z",
+  "preparedAt": "2026-10-02T09:03:48.225Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Quizssoir2.0:150 curated questions, versioned legacy saves, no-repeat history, five-question coffee mode, data questions, world discoveries and desk trophies. Four connected office-start campaign chapters with physical interactions, voiced cinematics, checkpoints and exactly-once rewards. Tested content rules, save migration, all campaign chapters, quiz modes, responsive layouts, rendering and offline packaging."
+  "validation": "BBE Blast: ten original office-PC arcade levels, fixed-step swept ball physics, chain bursts, catcher bonuses, stars, persistent unlocks and exactly-once rewards. Original bounded WebAudio score/effects in shared mixer. Desktop and mobile browser QA plus offline packaging. Campaign retry, quiz moderator timing and workshop voice-resume regressions corrected and tested."
 }

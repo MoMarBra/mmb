@@ -843,7 +843,12 @@ export class Quizssoir {
       this.phaseEntered();
       v = this.state.view();
     }
-    if (v.phase === 'locked' && m.elapsed >= this.audio.lockDuration) {
+    const lockVoiceDone =
+      (m.voice?.ended && !m.voice.stopped) ||
+      ['silent', 'idle'].includes(m.voiceStatus) ||
+      (m.voiceStatus === 'playing' && m.clock >= m.voiceUntil + 0.06) ||
+      (m.voiceStatus === 'loading' && m.clock - m.voiceRequestedAt >= 3);
+    if (v.phase === 'locked' && !m.paused && m.elapsed >= this.audio.lockDuration && lockVoiceDone) {
       this.state.reveal();
       this.phaseEntered();
       v = this.state.view();

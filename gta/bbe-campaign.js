@@ -815,12 +815,12 @@ export class BBECampaign {
   }
   showFailure() {
     this.stopVoice();
-    this.speak('campaign_retry');
     this.showPanel(
       'failed',
       'Noch eine kleine Generalprobe',
       '<div class="campaign-retry-art">↺</div><p class="campaign-one-line">Erledigte Aufgaben bleiben gespeichert.</p><button id="campaign-retry" class="primary">Mit frischer Zeit fortsetzen</button>',
     );
+    this.speak('campaign_retry');
     $('campaign-retry').onclick = () => {
       campaignAction(this.state, { type: 'retry' });
       this.closePanel();

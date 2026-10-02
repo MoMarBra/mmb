@@ -89,12 +89,17 @@ export class DialogueDirector {
     if (token !== this.token || !a.enabled || (!a.active && !options.preview)) return false;
     const pos = options.npc?.mesh.position || options.position;
     const duration = buffer?.duration || line.duration || Math.max(3, line.text.length / 13);
+    const offset = Math.max(
+      0,
+      Math.min(Math.max(0, duration - 0.001), Number.isFinite(options.offset) ? options.offset : 0),
+    );
     const follow = options.npc
       ? () => ({ x: options.npc.mesh.position.x, y: 1.55, z: options.npc.mesh.position.z })
       : undefined;
     const h = buffer
       ? a.emit(buffer, {
           bus: 'dialogue',
+          offset,
           volume: options.ambient ? 0.65 : 0.94,
           position: pos ? { x: pos.x ?? pos[0], y: 1.55, z: pos.z ?? pos[2] } : undefined,
           follow,
@@ -107,7 +112,7 @@ export class DialogueDirector {
       priority,
       preview: !!options.preview,
       handle: h,
-      ends: a.ctx.currentTime + duration,
+      ends: a.ctx.currentTime + duration - offset,
       loading: false,
     };
     this.cooldowns.set(cooldownKey, a.ctx.currentTime + duration + (options.ambient ? 25 : 2));
