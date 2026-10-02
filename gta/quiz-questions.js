@@ -1,4 +1,5 @@
 import { buildTriviaQuestions } from './quiz-trivia.js';
+import { buildBBEQuestions } from './quiz-bbe.js';
 
 // Original Quizssoir questions. Real BBE facts were checked against these primary sources.
 // Fictional colleagues, locations and missions are explicitly labelled as game-world material.
@@ -1873,9 +1874,11 @@ export const QUIZ_V2_QUESTIONS = Object.freeze(
   ),
 );
 
-export const QUIZ_QUESTIONS = buildTriviaQuestions(
+export const QUIZ_V3_QUESTIONS = buildTriviaQuestions(
   QUIZ_LEGACY_QUESTIONS,
   QUIZ_V2_QUESTIONS,
   q,
   freezeTree,
 );
+
+export const QUIZ_QUESTIONS = buildBBEQuestions(QUIZ_V3_QUESTIONS, q, freezeTree);

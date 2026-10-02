@@ -1,6 +1,7 @@
 import {
   QUIZ_QUESTIONS,
   QUIZ_V2_QUESTIONS,
+  QUIZ_V3_QUESTIONS,
   QUIZ_LEGACY_QUESTIONS,
   QUIZ_DISCOVERIES,
 } from './quiz-questions.js';
@@ -9,8 +10,8 @@ export const QUIZ_LADDER = Object.freeze([
   50, 100, 200, 300, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 500000, 1000000,
 ]);
 export const QUIZ_SAFE_LEVELS = Object.freeze([5, 10]);
-export const QUIZ_SAVE_VERSION = 3;
-const CURRENT_BANK_VERSION = 3;
+export const QUIZ_SAVE_VERSION = 4;
+const CURRENT_BANK_VERSION = 4;
 export const QUIZ_MODES = Object.freeze({
   classic: Object.freeze({
     title: 'Die große Show',
@@ -30,7 +31,8 @@ const LETTERS = ['A', 'B', 'C', 'D'];
 const QUESTION_BANKS = new Map([
   [1, QUIZ_LEGACY_QUESTIONS],
   [2, QUIZ_V2_QUESTIONS],
-  [3, QUIZ_QUESTIONS],
+  [3, QUIZ_V3_QUESTIONS],
+  [4, QUIZ_QUESTIONS],
 ]);
 const QUESTIONS_BY_BANK = new Map(
   [...QUESTION_BANKS].map(([version, bank]) => [version, new Map(bank.map((q) => [q.id, q]))]),
@@ -117,7 +119,7 @@ function restoreDeck(saved, mode, bankVersion) {
 }
 
 /** Local quiz rules. Saved decks contain IDs and answer order, not revealed solutions.
- * Seed/action v1 and explicit-deck v2 sessions retain their immutable banks. */
+ * Seed/action v1 and explicit-deck v2/v3 sessions retain their immutable banks. */
 export class QuizState {
   #s = null;
   #seed = 0;
@@ -147,7 +149,7 @@ export class QuizState {
 
   constructor(saved, context = {}) {
     this.#discoveries = cleanDiscoveries(context.discoveries);
-    if (!saved || typeof saved !== 'object' || ![1, 2, 3].includes(saved.version)) return;
+    if (!saved || typeof saved !== 'object' || ![1, 2, 3, 4].includes(saved.version)) return;
     const paid = prize(saved.bestPaid),
       coffeePaid = prize(saved.coffeeBestPaid, 'coffee');
     const runs = clampCount(saved.totalRuns),

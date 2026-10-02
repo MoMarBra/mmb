@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "publishedPath": "/gta/",
-  "sourceCommit": "27440818b50527dd751b8b5047d06eb26371aa37",
+  "sourceCommit": "599e34e6290e847aaf2b4b675a908d44fe471ddc",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-02T11:06:03.896Z",
+  "preparedAt": "2026-10-02T11:45:31.976Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Quizssoir trivia revision: 150 questions, easy BBE and game-world trivia at levels 1-5, wordplay at levels 6-10, advanced reasoning at levels 11-15. Original question records, saved V1/V2 rounds and voice clips preserved. New question recordings verified. Rules, save migrations, original music, full classic and coffee browser rounds, responsive question layouts and standalone offline checks passed."
+  "validation": "Quizssoir BBE correction: early rounds combine verified company facts with fair wordplay and double meanings. No game-world trivia in new rounds. Difficult reasoning remains late. V1/V2/V3 question banks and recordings remain intact for saved rounds. New voices, save migrations, classic and coffee modes, music and offline entry verified."
 }

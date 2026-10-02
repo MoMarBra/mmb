@@ -1559,6 +1559,384 @@ export const EXTRA_QUIZ_LINES = Object.freeze({
     "text": "Ein dreistelliger Code verwendet verschiedene Ziffern. Jede Tabellenzeile nennt alle Treffer; die übrigen Ziffern kommen nicht vor. Welcher Code passt?",
     "duration": 11.6849,
     "speaker": "Moderator"
+  },
+  "question_v4-01b": {
+    "asset": "quiz_question_v4-01b",
+    "text": "Welches Wort vervollständigt den Firmennamen BBE ... GmbH?",
+    "duration": 5.7827,
+    "speaker": "Moderator"
+  },
+  "question_v4-01c": {
+    "asset": "quiz_question_v4-01c",
+    "text": "Was bietet die BBE-Website für eine schriftliche Anfrage direkt im Browser an?",
+    "duration": 5.6813,
+    "speaker": "Moderator"
+  },
+  "question_v4-01d": {
+    "asset": "quiz_question_v4-01d",
+    "text": "Was vermitteln BBE-Experten in ihren öffentlichen Vorträgen und Seminaren?",
+    "duration": 5.6762,
+    "speaker": "Moderator"
+  },
+  "question_v4-01e": {
+    "asset": "quiz_question_v4-01e",
+    "text": "Was veröffentlicht BBE zu Handelsmärkten?",
+    "duration": 3.6695,
+    "speaker": "Moderator"
+  },
+  "question_v4-01f": {
+    "asset": "quiz_question_v4-01f",
+    "text": "Welche Kunden zählen zur Laufkundschaft, auch ohne Jogginghose?",
+    "duration": 5.1688,
+    "speaker": "Moderator"
+  },
+  "question_v4-01g": {
+    "asset": "quiz_question_v4-01g",
+    "text": "Welche Maus braucht im Büro kein Futter?",
+    "duration": 3.2384,
+    "speaker": "Moderator"
+  },
+  "question_v4-01h": {
+    "asset": "quiz_question_v4-01h",
+    "text": "Was ist ein Ladenhüter, obwohl er keine Nachtwache hält?",
+    "duration": 4.7139,
+    "speaker": "Moderator"
+  },
+  "question_v4-01i": {
+    "asset": "quiz_question_v4-01i",
+    "text": "Welches Wort bezeichnet sowohl einen Laden als auch eine abgeschlossene Handelstransaktion?",
+    "duration": 6.3806,
+    "speaker": "Moderator"
+  },
+  "question_v4-01j": {
+    "asset": "quiz_question_v4-01j",
+    "text": "Welches Fenster schließt man per Klick und ohne Fenstergriff?",
+    "duration": 4.2681,
+    "speaker": "Moderator"
+  },
+  "question_v4-02c": {
+    "asset": "quiz_question_v4-02c",
+    "text": "Wie heißt der BBE-Bereich für Städte und Gemeinden?",
+    "duration": 4.0961,
+    "speaker": "Moderator"
+  },
+  "question_v4-02d": {
+    "asset": "quiz_question_v4-02d",
+    "text": "In welcher Form kann man einen BBE-Fachvortrag auch online besuchen?",
+    "duration": 5.226,
+    "speaker": "Moderator"
+  },
+  "question_v4-02e": {
+    "asset": "quiz_question_v4-02e",
+    "text": "Welche dieser Hafenstädte nennt BBE als eigenen Standort?",
+    "duration": 4.666,
+    "speaker": "Moderator"
+  },
+  "question_v4-02f": {
+    "asset": "quiz_question_v4-02f",
+    "text": "Welches Wort bezeichnet einen Teil unter der Ferse und einen Abschnitt im Text?",
+    "duration": 5.4659,
+    "speaker": "Moderator"
+  },
+  "question_v4-02g": {
+    "asset": "quiz_question_v4-02g",
+    "text": "Welcher dieser Sätze wird häufig in Prozent angegeben?",
+    "duration": 4.1963,
+    "speaker": "Moderator"
+  },
+  "question_v4-02h": {
+    "asset": "quiz_question_v4-02h",
+    "text": "Welche Bank bietet im Park eine Sitzfläche statt eines Kontos?",
+    "duration": 4.6707,
+    "speaker": "Moderator"
+  },
+  "question_v4-02i": {
+    "asset": "quiz_question_v4-02i",
+    "text": "Welche Zweige eines Unternehmens haben Geschäftsräume statt Blätter?",
+    "duration": 4.7567,
+    "speaker": "Moderator"
+  },
+  "question_v4-02j": {
+    "asset": "quiz_question_v4-02j",
+    "text": "Welchen Auszug liefert die Bank, ohne dass jemand umzieht?",
+    "duration": 4.8287,
+    "speaker": "Moderator"
+  },
+  "question_v4-03c": {
+    "asset": "quiz_question_v4-03c",
+    "text": "Wen lässt BBE bei Kundenbefragungen selbst zu Wort kommen?",
+    "duration": 4.7807,
+    "speaker": "Moderator"
+  },
+  "question_v4-03d": {
+    "asset": "quiz_question_v4-03d",
+    "text": "Wessen Zufriedenheit untersucht BBE mit einem eigenen Analyseangebot neben der Kundenzufriedenheit?",
+    "duration": 7.3097,
+    "speaker": "Moderator"
+  },
+  "question_v4-03e": {
+    "asset": "quiz_question_v4-03e",
+    "text": "Wie beschreibt BBE die Reichweite ihrer Kundenbeziehungen?",
+    "duration": 4.2778,
+    "speaker": "Moderator"
+  },
+  "question_v4-03f": {
+    "asset": "quiz_question_v4-03f",
+    "text": "Welcher Umschlag wird frankiert statt als Warenbewegung erfasst?",
+    "duration": 4.6897,
+    "speaker": "Moderator"
+  },
+  "question_v4-03g": {
+    "asset": "quiz_question_v4-03g",
+    "text": "Welcher Schalter kann mit einer Person besetzt sein, statt das Licht zu schalten?",
+    "duration": 5.8155,
+    "speaker": "Moderator"
+  },
+  "question_v4-03h": {
+    "asset": "quiz_question_v4-03h",
+    "text": "Ein Redner hat viel Anhang. Wer ist gemeint, wenn es nicht um seine E-Mails geht?",
+    "duration": 6.899,
+    "speaker": "Moderator"
+  },
+  "question_v4-03i": {
+    "asset": "quiz_question_v4-03i",
+    "text": "Welchen Auftrag kann ein Maler mit dem Pinsel verteilen?",
+    "duration": 4.2107,
+    "speaker": "Moderator"
+  },
+  "question_v4-03j": {
+    "asset": "quiz_question_v4-03j",
+    "text": "Welche Führung erklärt eine Ausstellung, statt ein Team zu leiten?",
+    "duration": 5.2885,
+    "speaker": "Moderator"
+  },
+  "question_v4-04c": {
+    "asset": "quiz_question_v4-04c",
+    "text": "Wo vermitteln BBE-Experten ihr Wissen laut dem Angebot Lehrtätigkeit ebenfalls?",
+    "duration": 6.1506,
+    "speaker": "Moderator"
+  },
+  "question_v4-04d": {
+    "asset": "quiz_question_v4-04d",
+    "text": "Welche Kundengruppe nennt BBE neben Handel, Kommunen und Immobilienwirtschaft?",
+    "duration": 6.3565,
+    "speaker": "Moderator"
+  },
+  "question_v4-04e": {
+    "asset": "quiz_question_v4-04e",
+    "text": "Welche Einstiegsmöglichkeit erwähnt BBE auf ihrer Über-uns-Seite ausdrücklich?",
+    "duration": 5.8728,
+    "speaker": "Moderator"
+  },
+  "question_v4-04f": {
+    "asset": "quiz_question_v4-04f",
+    "text": "Welches Wort bezeichnet sowohl eine Handelsveranstaltung als auch einen Gottesdienst?",
+    "duration": 5.9355,
+    "speaker": "Moderator"
+  },
+  "question_v4-04g": {
+    "asset": "quiz_question_v4-04g",
+    "text": "Welches Wort bezeichnet ein Geschäft und als Verb das Füllen eines Akkus?",
+    "duration": 5.2025,
+    "speaker": "Moderator"
+  },
+  "question_v4-04h": {
+    "asset": "quiz_question_v4-04h",
+    "text": "Welcher Kurs gehört zur Preisnotierung einer Aktie statt zum Stundenplan?",
+    "duration": 5.4563,
+    "speaker": "Moderator"
+  },
+  "question_v4-04i": {
+    "asset": "quiz_question_v4-04i",
+    "text": "Im Meeting will jemand andere Saiten aufziehen. Was kündigt die Redewendung an?",
+    "duration": 6.4395,
+    "speaker": "Moderator"
+  },
+  "question_v4-04j": {
+    "asset": "quiz_question_v4-04j",
+    "text": "Wie heißt sowohl der Absenderblock unter einer E-Mail als auch ein Namenszeichen auf einem Gemälde?",
+    "duration": 6.4285,
+    "speaker": "Moderator"
+  },
+  "question_v4-05c": {
+    "asset": "quiz_question_v4-05c",
+    "text": "Was betont BBE bei ihrer Rolle als reiner Dienstleister?",
+    "duration": 4.4312,
+    "speaker": "Moderator"
+  },
+  "question_v4-05d": {
+    "asset": "quiz_question_v4-05d",
+    "text": "Welches BBE-Angebot beschäftigt sich damit, Einkäufe des Alltags in der Nähe zu ermöglichen?",
+    "duration": 7.195,
+    "speaker": "Moderator"
+  },
+  "question_v4-05e": {
+    "asset": "quiz_question_v4-05e",
+    "text": "Welches Netz optimiert BBE mit Filialnetzoptimierung?",
+    "duration": 4.4694,
+    "speaker": "Moderator"
+  },
+  "question_v4-05f": {
+    "asset": "quiz_question_v4-05f",
+    "text": "Welcher Posten steht in einer Rechnung statt bei der Wachmannschaft?",
+    "duration": 4.586,
+    "speaker": "Moderator"
+  },
+  "question_v4-05g": {
+    "asset": "quiz_question_v4-05g",
+    "text": "Welcher Druck beschreibt knappe Zeit statt Farbe auf Papier?",
+    "duration": 4.34,
+    "speaker": "Moderator"
+  },
+  "question_v4-05h": {
+    "asset": "quiz_question_v4-05h",
+    "text": "Welches Wort bezeichnet sowohl eine Aufgabe im Team als auch aufgewickeltes Papier?",
+    "duration": 5.9304,
+    "speaker": "Moderator"
+  },
+  "question_v4-05i": {
+    "asset": "quiz_question_v4-05i",
+    "text": "Welcher Sitz bezeichnet den offiziellen Ort eines Unternehmens?",
+    "duration": 4.5315,
+    "speaker": "Moderator"
+  },
+  "question_v4-05j": {
+    "asset": "quiz_question_v4-05j",
+    "text": "Was bildet ein finanzielles Polster, ohne eine Matratze zu sein?",
+    "duration": 5.2503,
+    "speaker": "Moderator"
+  },
+  "question_v4-06b": {
+    "asset": "quiz_question_v4-06b",
+    "text": "Was behält man mit dem BBE Chefplan im Blick, ohne dem Chef hinterherzulaufen?",
+    "duration": 6.362,
+    "speaker": "Moderator"
+  },
+  "question_v4-06c": {
+    "asset": "quiz_question_v4-06c",
+    "text": "Welche reale BBE-Leistung prüft den Service durch Testkäufe mit zunächst unerkannten Testkunden?",
+    "duration": 7.4294,
+    "speaker": "Moderator"
+  },
+  "question_v4-06d": {
+    "asset": "quiz_question_v4-06d",
+    "text": "Was zählt BBE bei Frequenzanalysen an einem Einkaufsstandort statt Radiowellen?",
+    "duration": 6.2035,
+    "speaker": "Moderator"
+  },
+  "question_v4-06e": {
+    "asset": "quiz_question_v4-06e",
+    "text": "Wobei begleitet BBE Unternehmen im Leistungsbereich Nachfolge?",
+    "duration": 4.9724,
+    "speaker": "Moderator"
+  },
+  "question_v4-06f": {
+    "asset": "quiz_question_v4-06f",
+    "text": "Welches Wort bezeichnet einen Geldbeutel und einen organisierten Handelsplatz?",
+    "duration": 5.4462,
+    "speaker": "Moderator"
+  },
+  "question_v4-06g": {
+    "asset": "quiz_question_v4-06g",
+    "text": "Welches Wort kann einen Zuschlag zum Preis und den ersten Schlag beim Tennis bezeichnen?",
+    "duration": 6.0213,
+    "speaker": "Moderator"
+  },
+  "question_v4-06h": {
+    "asset": "quiz_question_v4-06h",
+    "text": "Welche Blüten wären an der Ladenkasse ein Fall für die Polizei statt für den Floristen?",
+    "duration": 5.9973,
+    "speaker": "Moderator"
+  },
+  "question_v4-06i": {
+    "asset": "quiz_question_v4-06i",
+    "text": "Welche Spanne bezeichnet im Handel einen Unterschied zwischen Einkaufs- und Verkaufspreis?",
+    "duration": 6.0551,
+    "speaker": "Moderator"
+  },
+  "question_v4-06j": {
+    "asset": "quiz_question_v4-06j",
+    "text": "Wer sich mit einem Geschäftspartner gut versteht, liegt bildlich auf welcher Wellenlänge?",
+    "duration": 6.266,
+    "speaker": "Moderator"
+  },
+  "question_v4-07d": {
+    "asset": "quiz_question_v4-07d",
+    "text": "Für welche Handelsbranchen beschreibt BBE ihr Einkaufsplanungstool EKPro ausdrücklich?",
+    "duration": 6.6105,
+    "speaker": "Moderator"
+  },
+  "question_v4-07e": {
+    "asset": "quiz_question_v4-07e",
+    "text": "Was plant das von BBE angebotene pepInternet, obwohl sein Name nach einer Online-Pause klingt?",
+    "duration": 7.3818,
+    "speaker": "Moderator"
+  },
+  "question_v4-07i": {
+    "asset": "quiz_question_v4-07i",
+    "text": "Der Absatz steigt: Was nimmt im Vertriebsbericht zu, ohne dass ein Schuh höher wird?",
+    "duration": 6.3997,
+    "speaker": "Moderator"
+  },
+  "question_v4-07j": {
+    "asset": "quiz_question_v4-07j",
+    "text": "Was geschieht beim Kassensturz, wenn das Kassengehäuse dabei heil bleibt?",
+    "duration": 5.5426,
+    "speaker": "Moderator"
+  },
+  "question_v4-08c": {
+    "asset": "quiz_question_v4-08c",
+    "text": "Was soll im BBE Liquiditäts-Cockpit fließen und planbar bleiben?",
+    "duration": 4.9769,
+    "speaker": "Moderator"
+  },
+  "question_v4-08d": {
+    "asset": "quiz_question_v4-08d",
+    "text": "Wohin navigiert der BBE POS-Navigator fachlich, statt eine Straßenroute zu berechnen?",
+    "duration": 6.9073,
+    "speaker": "Moderator"
+  },
+  "question_v4-08e": {
+    "asset": "quiz_question_v4-08e",
+    "text": "Welche drei Perspektiven verbindet BBE laut ihrer Immobilienberatung?",
+    "duration": 5.4369,
+    "speaker": "Moderator"
+  },
+  "question_v4-08i": {
+    "asset": "quiz_question_v4-08i",
+    "text": "Ein Vertrag ist unter Dach und Fach. Was bedeutet das, auch ohne fertiges Bürogebäude?",
+    "duration": 7.3879,
+    "speaker": "Moderator"
+  },
+  "question_v4-08j": {
+    "asset": "quiz_question_v4-08j",
+    "text": "Ein Unternehmen schreibt rote Zahlen. Was bedeutet das ohne Angabe der Druckerfarbe?",
+    "duration": 6.693,
+    "speaker": "Moderator"
+  },
+  "question_v4-09d": {
+    "asset": "quiz_question_v4-09d",
+    "text": "Wie stellt BBE laut ERFA-Angebot vergleichbare Betriebszahlen für den Austausch bereit?",
+    "duration": 6.434,
+    "speaker": "Moderator"
+  },
+  "question_v4-09e": {
+    "asset": "quiz_question_v4-09e",
+    "text": "Welche Aufgabe übernimmt BBE SKPro im Sport- und Radhandel?",
+    "duration": 5.068,
+    "speaker": "Moderator"
+  },
+  "question_v4-09j": {
+    "asset": "quiz_question_v4-09j",
+    "text": "Jemand wurde beim Geschäft über den Tisch gezogen. Was sagt die Redewendung aus?",
+    "duration": 6.5065,
+    "speaker": "Moderator"
+  },
+  "question_v4-10e": {
+    "asset": "quiz_question_v4-10e",
+    "text": "Welchen Fachbegriff nennt BBE auf der Immobilienseite als Bezeichnung für ihre Ankaufsprüfung?",
+    "duration": 6.8358,
+    "speaker": "Moderator"
   }
 });
 export const EXPANSION_LINES = Object.freeze({
@@ -2539,156 +2917,6 @@ export const EXPANSION_VOICE_ASSETS = Object.freeze({
     "group": "voice",
     "duration": 4.25
   },
-  "campaign_meeting_intro_1": {
-    "path": "./assets/audio/campaign_meeting_intro_1.mp3",
-    "group": "voice",
-    "duration": 8.666
-  },
-  "campaign_meeting_intro_2": {
-    "path": "./assets/audio/campaign_meeting_intro_2.mp3",
-    "group": "voice",
-    "duration": 8.29
-  },
-  "campaign_meeting_intro_3": {
-    "path": "./assets/audio/campaign_meeting_intro_3.mp3",
-    "group": "voice",
-    "duration": 6.434
-  },
-  "campaign_meeting_hurry": {
-    "path": "./assets/audio/campaign_meeting_hurry.mp3",
-    "group": "voice",
-    "duration": 8.0681
-  },
-  "campaign_meeting_outro_1": {
-    "path": "./assets/audio/campaign_meeting_outro_1.mp3",
-    "group": "voice",
-    "duration": 8.8862
-  },
-  "campaign_meeting_outro_2": {
-    "path": "./assets/audio/campaign_meeting_outro_2.mp3",
-    "group": "voice",
-    "duration": 7.0391
-  },
-  "campaign_research_intro_1": {
-    "path": "./assets/audio/campaign_research_intro_1.mp3",
-    "group": "voice",
-    "duration": 10.082
-  },
-  "campaign_research_intro_2": {
-    "path": "./assets/audio/campaign_research_intro_2.mp3",
-    "group": "voice",
-    "duration": 6.8297
-  },
-  "campaign_research_intro_3": {
-    "path": "./assets/audio/campaign_research_intro_3.mp3",
-    "group": "voice",
-    "duration": 8.882
-  },
-  "campaign_research_outro_1": {
-    "path": "./assets/audio/campaign_research_outro_1.mp3",
-    "group": "voice",
-    "duration": 9.7274
-  },
-  "campaign_research_outro_2": {
-    "path": "./assets/audio/campaign_research_outro_2.mp3",
-    "group": "voice",
-    "duration": 8.0768
-  },
-  "campaign_night_intro_1": {
-    "path": "./assets/audio/campaign_night_intro_1.mp3",
-    "group": "voice",
-    "duration": 9.4492
-  },
-  "campaign_night_intro_2": {
-    "path": "./assets/audio/campaign_night_intro_2.mp3",
-    "group": "voice",
-    "duration": 8.4678
-  },
-  "campaign_night_intro_3": {
-    "path": "./assets/audio/campaign_night_intro_3.mp3",
-    "group": "voice",
-    "duration": 10.13
-  },
-  "campaign_night_outro_1": {
-    "path": "./assets/audio/campaign_night_outro_1.mp3",
-    "group": "voice",
-    "duration": 10.2998
-  },
-  "campaign_night_outro_2": {
-    "path": "./assets/audio/campaign_night_outro_2.mp3",
-    "group": "voice",
-    "duration": 7.6496
-  },
-  "campaign_pitch_intro_1": {
-    "path": "./assets/audio/campaign_pitch_intro_1.mp3",
-    "group": "voice",
-    "duration": 10.2807
-  },
-  "campaign_pitch_intro_2": {
-    "path": "./assets/audio/campaign_pitch_intro_2.mp3",
-    "group": "voice",
-    "duration": 6.8698
-  },
-  "campaign_pitch_intro_3": {
-    "path": "./assets/audio/campaign_pitch_intro_3.mp3",
-    "group": "voice",
-    "duration": 7.3303
-  },
-  "campaign_pitch_outro_1": {
-    "path": "./assets/audio/campaign_pitch_outro_1.mp3",
-    "group": "voice",
-    "duration": 8.864
-  },
-  "campaign_pitch_outro_2": {
-    "path": "./assets/audio/campaign_pitch_outro_2.mp3",
-    "group": "voice",
-    "duration": 10.7843
-  },
-  "campaign_pitch_outro_3": {
-    "path": "./assets/audio/campaign_pitch_outro_3.mp3",
-    "group": "voice",
-    "duration": 4.7078
-  },
-  "campaign_dogtown_ask": {
-    "path": "./assets/audio/campaign_dogtown_ask.mp3",
-    "group": "voice",
-    "duration": 9.3956
-  },
-  "campaign_zitronengras_ask": {
-    "path": "./assets/audio/campaign_zitronengras_ask.mp3",
-    "group": "voice",
-    "duration": 9.099
-  },
-  "campaign_research_observe": {
-    "path": "./assets/audio/campaign_research_observe.mp3",
-    "group": "voice",
-    "duration": 5.9101
-  },
-  "campaign_research_talk": {
-    "path": "./assets/audio/campaign_research_talk.mp3",
-    "group": "voice",
-    "duration": 7.252
-  },
-  "campaign_night_restored": {
-    "path": "./assets/audio/campaign_night_restored.mp3",
-    "group": "voice",
-    "duration": 10.73
-  },
-  "campaign_pitch_change": {
-    "path": "./assets/audio/campaign_pitch_change.mp3",
-    "group": "voice",
-    "duration": 8.2682
-  },
-  "campaign_retry": {
-    "path": "./assets/audio/campaign_retry.mp3",
-    "group": "voice",
-    "duration": 6.389
-  },
-  "campaign_office_greeting": {
-    "path": "./assets/audio/campaign_office_greeting.mp3",
-    "group": "voice",
-    "duration": 7.2506
-  },
   "quiz_question_v3-01d": {
     "path": "./assets/audio/quiz_question_v3-01d.mp3",
     "group": "voice",
@@ -3193,5 +3421,470 @@ export const EXPANSION_VOICE_ASSETS = Object.freeze({
     "path": "./assets/audio/quiz_question_v3-15j.mp3",
     "group": "voice",
     "duration": 11.6849
+  },
+  "campaign_meeting_intro_1": {
+    "path": "./assets/audio/campaign_meeting_intro_1.mp3",
+    "group": "voice",
+    "duration": 8.666
+  },
+  "campaign_meeting_intro_2": {
+    "path": "./assets/audio/campaign_meeting_intro_2.mp3",
+    "group": "voice",
+    "duration": 8.29
+  },
+  "campaign_meeting_intro_3": {
+    "path": "./assets/audio/campaign_meeting_intro_3.mp3",
+    "group": "voice",
+    "duration": 6.434
+  },
+  "campaign_meeting_hurry": {
+    "path": "./assets/audio/campaign_meeting_hurry.mp3",
+    "group": "voice",
+    "duration": 8.0681
+  },
+  "campaign_meeting_outro_1": {
+    "path": "./assets/audio/campaign_meeting_outro_1.mp3",
+    "group": "voice",
+    "duration": 8.8862
+  },
+  "campaign_meeting_outro_2": {
+    "path": "./assets/audio/campaign_meeting_outro_2.mp3",
+    "group": "voice",
+    "duration": 7.0391
+  },
+  "campaign_research_intro_1": {
+    "path": "./assets/audio/campaign_research_intro_1.mp3",
+    "group": "voice",
+    "duration": 10.082
+  },
+  "campaign_research_intro_2": {
+    "path": "./assets/audio/campaign_research_intro_2.mp3",
+    "group": "voice",
+    "duration": 6.8297
+  },
+  "campaign_research_intro_3": {
+    "path": "./assets/audio/campaign_research_intro_3.mp3",
+    "group": "voice",
+    "duration": 8.882
+  },
+  "campaign_research_outro_1": {
+    "path": "./assets/audio/campaign_research_outro_1.mp3",
+    "group": "voice",
+    "duration": 9.7274
+  },
+  "campaign_research_outro_2": {
+    "path": "./assets/audio/campaign_research_outro_2.mp3",
+    "group": "voice",
+    "duration": 8.0768
+  },
+  "campaign_night_intro_1": {
+    "path": "./assets/audio/campaign_night_intro_1.mp3",
+    "group": "voice",
+    "duration": 9.4492
+  },
+  "campaign_night_intro_2": {
+    "path": "./assets/audio/campaign_night_intro_2.mp3",
+    "group": "voice",
+    "duration": 8.4678
+  },
+  "campaign_night_intro_3": {
+    "path": "./assets/audio/campaign_night_intro_3.mp3",
+    "group": "voice",
+    "duration": 10.13
+  },
+  "campaign_night_outro_1": {
+    "path": "./assets/audio/campaign_night_outro_1.mp3",
+    "group": "voice",
+    "duration": 10.2998
+  },
+  "campaign_night_outro_2": {
+    "path": "./assets/audio/campaign_night_outro_2.mp3",
+    "group": "voice",
+    "duration": 7.6496
+  },
+  "campaign_pitch_intro_1": {
+    "path": "./assets/audio/campaign_pitch_intro_1.mp3",
+    "group": "voice",
+    "duration": 10.2807
+  },
+  "campaign_pitch_intro_2": {
+    "path": "./assets/audio/campaign_pitch_intro_2.mp3",
+    "group": "voice",
+    "duration": 6.8698
+  },
+  "campaign_pitch_intro_3": {
+    "path": "./assets/audio/campaign_pitch_intro_3.mp3",
+    "group": "voice",
+    "duration": 7.3303
+  },
+  "campaign_pitch_outro_1": {
+    "path": "./assets/audio/campaign_pitch_outro_1.mp3",
+    "group": "voice",
+    "duration": 8.864
+  },
+  "campaign_pitch_outro_2": {
+    "path": "./assets/audio/campaign_pitch_outro_2.mp3",
+    "group": "voice",
+    "duration": 10.7843
+  },
+  "campaign_pitch_outro_3": {
+    "path": "./assets/audio/campaign_pitch_outro_3.mp3",
+    "group": "voice",
+    "duration": 4.7078
+  },
+  "campaign_dogtown_ask": {
+    "path": "./assets/audio/campaign_dogtown_ask.mp3",
+    "group": "voice",
+    "duration": 9.3956
+  },
+  "campaign_zitronengras_ask": {
+    "path": "./assets/audio/campaign_zitronengras_ask.mp3",
+    "group": "voice",
+    "duration": 9.099
+  },
+  "campaign_research_observe": {
+    "path": "./assets/audio/campaign_research_observe.mp3",
+    "group": "voice",
+    "duration": 5.9101
+  },
+  "campaign_research_talk": {
+    "path": "./assets/audio/campaign_research_talk.mp3",
+    "group": "voice",
+    "duration": 7.252
+  },
+  "campaign_night_restored": {
+    "path": "./assets/audio/campaign_night_restored.mp3",
+    "group": "voice",
+    "duration": 10.73
+  },
+  "campaign_pitch_change": {
+    "path": "./assets/audio/campaign_pitch_change.mp3",
+    "group": "voice",
+    "duration": 8.2682
+  },
+  "campaign_retry": {
+    "path": "./assets/audio/campaign_retry.mp3",
+    "group": "voice",
+    "duration": 6.389
+  },
+  "campaign_office_greeting": {
+    "path": "./assets/audio/campaign_office_greeting.mp3",
+    "group": "voice",
+    "duration": 7.2506
+  },
+  "quiz_question_v4-01b": {
+    "path": "./assets/audio/quiz_question_v4-01b.mp3",
+    "group": "voice",
+    "duration": 5.7827
+  },
+  "quiz_question_v4-01c": {
+    "path": "./assets/audio/quiz_question_v4-01c.mp3",
+    "group": "voice",
+    "duration": 5.6813
+  },
+  "quiz_question_v4-01d": {
+    "path": "./assets/audio/quiz_question_v4-01d.mp3",
+    "group": "voice",
+    "duration": 5.6762
+  },
+  "quiz_question_v4-01e": {
+    "path": "./assets/audio/quiz_question_v4-01e.mp3",
+    "group": "voice",
+    "duration": 3.6695
+  },
+  "quiz_question_v4-01f": {
+    "path": "./assets/audio/quiz_question_v4-01f.mp3",
+    "group": "voice",
+    "duration": 5.1688
+  },
+  "quiz_question_v4-01g": {
+    "path": "./assets/audio/quiz_question_v4-01g.mp3",
+    "group": "voice",
+    "duration": 3.2384
+  },
+  "quiz_question_v4-01h": {
+    "path": "./assets/audio/quiz_question_v4-01h.mp3",
+    "group": "voice",
+    "duration": 4.7139
+  },
+  "quiz_question_v4-01i": {
+    "path": "./assets/audio/quiz_question_v4-01i.mp3",
+    "group": "voice",
+    "duration": 6.3806
+  },
+  "quiz_question_v4-01j": {
+    "path": "./assets/audio/quiz_question_v4-01j.mp3",
+    "group": "voice",
+    "duration": 4.2681
+  },
+  "quiz_question_v4-02c": {
+    "path": "./assets/audio/quiz_question_v4-02c.mp3",
+    "group": "voice",
+    "duration": 4.0961
+  },
+  "quiz_question_v4-02d": {
+    "path": "./assets/audio/quiz_question_v4-02d.mp3",
+    "group": "voice",
+    "duration": 5.226
+  },
+  "quiz_question_v4-02e": {
+    "path": "./assets/audio/quiz_question_v4-02e.mp3",
+    "group": "voice",
+    "duration": 4.666
+  },
+  "quiz_question_v4-02f": {
+    "path": "./assets/audio/quiz_question_v4-02f.mp3",
+    "group": "voice",
+    "duration": 5.4659
+  },
+  "quiz_question_v4-02g": {
+    "path": "./assets/audio/quiz_question_v4-02g.mp3",
+    "group": "voice",
+    "duration": 4.1963
+  },
+  "quiz_question_v4-02h": {
+    "path": "./assets/audio/quiz_question_v4-02h.mp3",
+    "group": "voice",
+    "duration": 4.6707
+  },
+  "quiz_question_v4-02i": {
+    "path": "./assets/audio/quiz_question_v4-02i.mp3",
+    "group": "voice",
+    "duration": 4.7567
+  },
+  "quiz_question_v4-02j": {
+    "path": "./assets/audio/quiz_question_v4-02j.mp3",
+    "group": "voice",
+    "duration": 4.8287
+  },
+  "quiz_question_v4-03c": {
+    "path": "./assets/audio/quiz_question_v4-03c.mp3",
+    "group": "voice",
+    "duration": 4.7807
+  },
+  "quiz_question_v4-03d": {
+    "path": "./assets/audio/quiz_question_v4-03d.mp3",
+    "group": "voice",
+    "duration": 7.3097
+  },
+  "quiz_question_v4-03e": {
+    "path": "./assets/audio/quiz_question_v4-03e.mp3",
+    "group": "voice",
+    "duration": 4.2778
+  },
+  "quiz_question_v4-03f": {
+    "path": "./assets/audio/quiz_question_v4-03f.mp3",
+    "group": "voice",
+    "duration": 4.6897
+  },
+  "quiz_question_v4-03g": {
+    "path": "./assets/audio/quiz_question_v4-03g.mp3",
+    "group": "voice",
+    "duration": 5.8155
+  },
+  "quiz_question_v4-03h": {
+    "path": "./assets/audio/quiz_question_v4-03h.mp3",
+    "group": "voice",
+    "duration": 6.899
+  },
+  "quiz_question_v4-03i": {
+    "path": "./assets/audio/quiz_question_v4-03i.mp3",
+    "group": "voice",
+    "duration": 4.2107
+  },
+  "quiz_question_v4-03j": {
+    "path": "./assets/audio/quiz_question_v4-03j.mp3",
+    "group": "voice",
+    "duration": 5.2885
+  },
+  "quiz_question_v4-04c": {
+    "path": "./assets/audio/quiz_question_v4-04c.mp3",
+    "group": "voice",
+    "duration": 6.1506
+  },
+  "quiz_question_v4-04d": {
+    "path": "./assets/audio/quiz_question_v4-04d.mp3",
+    "group": "voice",
+    "duration": 6.3565
+  },
+  "quiz_question_v4-04e": {
+    "path": "./assets/audio/quiz_question_v4-04e.mp3",
+    "group": "voice",
+    "duration": 5.8728
+  },
+  "quiz_question_v4-04f": {
+    "path": "./assets/audio/quiz_question_v4-04f.mp3",
+    "group": "voice",
+    "duration": 5.9355
+  },
+  "quiz_question_v4-04g": {
+    "path": "./assets/audio/quiz_question_v4-04g.mp3",
+    "group": "voice",
+    "duration": 5.2025
+  },
+  "quiz_question_v4-04h": {
+    "path": "./assets/audio/quiz_question_v4-04h.mp3",
+    "group": "voice",
+    "duration": 5.4563
+  },
+  "quiz_question_v4-04i": {
+    "path": "./assets/audio/quiz_question_v4-04i.mp3",
+    "group": "voice",
+    "duration": 6.4395
+  },
+  "quiz_question_v4-04j": {
+    "path": "./assets/audio/quiz_question_v4-04j.mp3",
+    "group": "voice",
+    "duration": 6.4285
+  },
+  "quiz_question_v4-05c": {
+    "path": "./assets/audio/quiz_question_v4-05c.mp3",
+    "group": "voice",
+    "duration": 4.4312
+  },
+  "quiz_question_v4-05d": {
+    "path": "./assets/audio/quiz_question_v4-05d.mp3",
+    "group": "voice",
+    "duration": 7.195
+  },
+  "quiz_question_v4-05e": {
+    "path": "./assets/audio/quiz_question_v4-05e.mp3",
+    "group": "voice",
+    "duration": 4.4694
+  },
+  "quiz_question_v4-05f": {
+    "path": "./assets/audio/quiz_question_v4-05f.mp3",
+    "group": "voice",
+    "duration": 4.586
+  },
+  "quiz_question_v4-05g": {
+    "path": "./assets/audio/quiz_question_v4-05g.mp3",
+    "group": "voice",
+    "duration": 4.34
+  },
+  "quiz_question_v4-05h": {
+    "path": "./assets/audio/quiz_question_v4-05h.mp3",
+    "group": "voice",
+    "duration": 5.9304
+  },
+  "quiz_question_v4-05i": {
+    "path": "./assets/audio/quiz_question_v4-05i.mp3",
+    "group": "voice",
+    "duration": 4.5315
+  },
+  "quiz_question_v4-05j": {
+    "path": "./assets/audio/quiz_question_v4-05j.mp3",
+    "group": "voice",
+    "duration": 5.2503
+  },
+  "quiz_question_v4-06b": {
+    "path": "./assets/audio/quiz_question_v4-06b.mp3",
+    "group": "voice",
+    "duration": 6.362
+  },
+  "quiz_question_v4-06c": {
+    "path": "./assets/audio/quiz_question_v4-06c.mp3",
+    "group": "voice",
+    "duration": 7.4294
+  },
+  "quiz_question_v4-06d": {
+    "path": "./assets/audio/quiz_question_v4-06d.mp3",
+    "group": "voice",
+    "duration": 6.2035
+  },
+  "quiz_question_v4-06e": {
+    "path": "./assets/audio/quiz_question_v4-06e.mp3",
+    "group": "voice",
+    "duration": 4.9724
+  },
+  "quiz_question_v4-06f": {
+    "path": "./assets/audio/quiz_question_v4-06f.mp3",
+    "group": "voice",
+    "duration": 5.4462
+  },
+  "quiz_question_v4-06g": {
+    "path": "./assets/audio/quiz_question_v4-06g.mp3",
+    "group": "voice",
+    "duration": 6.0213
+  },
+  "quiz_question_v4-06h": {
+    "path": "./assets/audio/quiz_question_v4-06h.mp3",
+    "group": "voice",
+    "duration": 5.9973
+  },
+  "quiz_question_v4-06i": {
+    "path": "./assets/audio/quiz_question_v4-06i.mp3",
+    "group": "voice",
+    "duration": 6.0551
+  },
+  "quiz_question_v4-06j": {
+    "path": "./assets/audio/quiz_question_v4-06j.mp3",
+    "group": "voice",
+    "duration": 6.266
+  },
+  "quiz_question_v4-07d": {
+    "path": "./assets/audio/quiz_question_v4-07d.mp3",
+    "group": "voice",
+    "duration": 6.6105
+  },
+  "quiz_question_v4-07e": {
+    "path": "./assets/audio/quiz_question_v4-07e.mp3",
+    "group": "voice",
+    "duration": 7.3818
+  },
+  "quiz_question_v4-07i": {
+    "path": "./assets/audio/quiz_question_v4-07i.mp3",
+    "group": "voice",
+    "duration": 6.3997
+  },
+  "quiz_question_v4-07j": {
+    "path": "./assets/audio/quiz_question_v4-07j.mp3",
+    "group": "voice",
+    "duration": 5.5426
+  },
+  "quiz_question_v4-08c": {
+    "path": "./assets/audio/quiz_question_v4-08c.mp3",
+    "group": "voice",
+    "duration": 4.9769
+  },
+  "quiz_question_v4-08d": {
+    "path": "./assets/audio/quiz_question_v4-08d.mp3",
+    "group": "voice",
+    "duration": 6.9073
+  },
+  "quiz_question_v4-08e": {
+    "path": "./assets/audio/quiz_question_v4-08e.mp3",
+    "group": "voice",
+    "duration": 5.4369
+  },
+  "quiz_question_v4-08i": {
+    "path": "./assets/audio/quiz_question_v4-08i.mp3",
+    "group": "voice",
+    "duration": 7.3879
+  },
+  "quiz_question_v4-08j": {
+    "path": "./assets/audio/quiz_question_v4-08j.mp3",
+    "group": "voice",
+    "duration": 6.693
+  },
+  "quiz_question_v4-09d": {
+    "path": "./assets/audio/quiz_question_v4-09d.mp3",
+    "group": "voice",
+    "duration": 6.434
+  },
+  "quiz_question_v4-09e": {
+    "path": "./assets/audio/quiz_question_v4-09e.mp3",
+    "group": "voice",
+    "duration": 5.068
+  },
+  "quiz_question_v4-09j": {
+    "path": "./assets/audio/quiz_question_v4-09j.mp3",
+    "group": "voice",
+    "duration": 6.5065
+  },
+  "quiz_question_v4-10e": {
+    "path": "./assets/audio/quiz_question_v4-10e.mp3",
+    "group": "voice",
+    "duration": 6.8358
   }
 });
