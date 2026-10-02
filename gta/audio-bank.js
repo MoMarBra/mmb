@@ -22,19 +22,30 @@ export class AudioBank {
       }
     }
   }
-  get(id) {
+  get(id, { priority = false } = {}) {
     if (this.buffers.has(id)) {
       const buffer = this.buffers.get(id);
       this.buffers.delete(id);
       this.buffers.set(id, buffer);
       return Promise.resolve(buffer);
     }
-    if (this.pending.has(id)) return this.pending.get(id);
+    if (this.pending.has(id)) {
+      if (priority) this.prioritize(id);
+      return this.pending.get(id);
+    }
     if (!AUDIO_ASSETS[id] || this.failures.has(id)) return Promise.resolve(null);
-    const promise = new Promise((resolve) => this.queue.push({ id, resolve }));
+    const promise = new Promise((resolve) => this.queue.push({ id, resolve, priority }));
     this.pending.set(id, promise);
+    if (priority) this.prioritize(id);
     this.pump();
     return promise;
+  }
+  prioritize(id) {
+    const job = this.queue.find((item) => item.id === id);
+    if (!job) return; // An active download keeps its slot and is never restarted.
+    job.priority = true;
+    // Stable ordering preserves foreground cue order while passing background preloads.
+    this.queue.sort((a, b) => Number(b.priority) - Number(a.priority));
   }
   pump() {
     while (this.loading < 4 && this.queue.length) {

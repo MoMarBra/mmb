@@ -206,7 +206,7 @@ export class Quizssoir {
       `<section class="quiz-show" role="dialog" aria-modal="true" aria-label="Quizssoir">
       <div class="quiz-film-shade"></div><div class="quiz-cut" id="quiz-cut"></div>
       <header class="quiz-header"><div class="quiz-wordmark"><img class="quiz-logo quiz-header-logo" src="${QUIZ_ART.logo.url}" alt="QUIZSSOIR" width="1536" height="1024"></div><div class="quiz-top-actions"><button id="quiz-ladder-toggle" aria-expanded="false">Gewinnleiter</button><button id="quiz-sound" aria-label="Quiz-Ton umschalten"></button><button id="quiz-pause">Pause <kbd>Esc</kbd></button></div></header>
-      <div class="quiz-opening" id="quiz-opening"><span class="quiz-kicker">PRÄSENTIERT VON DER STILLEN ABTEILUNG</span><h1><img class="quiz-logo quiz-title-logo" src="${QUIZ_ART.logo.url}" alt="QUIZSSOIR" width="1536" height="1024"></h1><p>Hier zählt, was im Kopf bleibt.</p><div class="quiz-mode-switch" id="quiz-mode-switch" role="group" aria-label="Quizformat"><button id="quiz-mode-classic" data-mode="classic">Die große Show <small>15 Fragen</small></button><button id="quiz-mode-coffee" data-mode="coffee">Kaffeepause <small>5 Fragen · ca. 3 Min.</small></button></div><button class="quiz-replay-intro" id="quiz-replay-intro">Ganzes Intro ↺</button><button id="quiz-skip">An die Frage <span>↗</span></button></div>
+      <div class="quiz-opening" id="quiz-opening"><h1><img class="quiz-logo quiz-title-logo" src="${QUIZ_ART.logo.url}" alt="QUIZSSOIR" width="1536" height="1024"></h1><button id="quiz-skip">Überspringen <span>↗</span></button></div>
       <aside class="quiz-ladder" id="quiz-ladder" aria-label="Gewinnleiter"><div class="quiz-ladder-head" id="quiz-ladder-title">DEIN WEG ZUR MILLION</div><ol>${[
         ...ladder,
       ]
@@ -223,7 +223,7 @@ export class Quizssoir {
       <div id="quiz-question-lead" class="quiz-question-lead" role="status" tabindex="-1" hidden><span id="quiz-lead-round"></span><strong id="quiz-lead-prize"></strong><i aria-hidden="true"><b id="quiz-lead-progress"></b></i></div><section class="quiz-board" id="quiz-board"><div class="quiz-board-top"><span id="quiz-round"></span><span id="quiz-category"></span><strong id="quiz-prize"></strong></div><h2 id="quiz-heading"></h2><div class="quiz-visual" id="quiz-visual" hidden></div><div class="quiz-discovery" id="quiz-discovery" hidden></div><div class="quiz-answers" id="quiz-answers">${letters.map((l, i) => `<button class="quiz-answer" id="quiz-answer-${i}" data-answer="${i}"><span>${l}:</span><b></b><i></i></button>`).join('')}</div><div class="quiz-tools"><div class="quiz-jokers"><button id="quiz-fifty" aria-label="50 zu 50 Joker"><b>50:50</b><small>JOKER</small></button><button id="quiz-audience" aria-label="Publikumsjoker"><b>▂▆▃▅</b><small>PUBLIKUM</small></button><button id="quiz-phone" aria-label="Telefonjoker Benjamin"><b>☎</b><small>BENJAMIN</small></button></div><div class="quiz-decision"><button id="quiz-walk">Mitnehmen</button><button id="quiz-lock" class="quiz-primary" disabled>Antwort wählen</button><button id="quiz-next" class="quiz-primary" hidden>Weiter <span>↗</span></button></div></div><div id="quiz-reveal-copy" class="quiz-reveal-copy" role="status"></div></section>
       <section class="quiz-joker-card" id="quiz-joker-card" hidden aria-label="Joker-Ergebnis"><button id="quiz-dismiss-hint" aria-label="Joker-Ergebnis schließen">×</button><div id="quiz-hint"></div></section>
       <section class="quiz-finale" id="quiz-finale" hidden><span class="quiz-kicker" id="quiz-result-kicker"></span><h2 id="quiz-result-title"></h2><strong id="quiz-result-prize"></strong><p id="quiz-result-line"></p><small id="quiz-result-payment"></small><div class="quiz-rank" id="quiz-rank"></div><button class="quiz-primary" id="quiz-return">Zurück ins BBE-Büro <span>↗</span></button></section>
-      <section class="quiz-pause-panel" id="quiz-pause-panel" hidden role="dialog" aria-label="Quiz pausiert"><span class="quiz-kicker">DEIN WISSEN LÄUFT NICHT WEG</span><h2>Kurze Denkpause.</h2><button class="quiz-primary" id="quiz-resume">Weiterspielen</button><button id="quiz-save-exit">Speichern & zurück zur Toilette</button></section>
+      <section class="quiz-pause-panel" id="quiz-pause-panel" hidden role="dialog" aria-label="Quiz pausiert"><span class="quiz-kicker">DEIN WISSEN LÄUFT NICHT WEG</span><h2>Kurze Denkpause.</h2><button class="quiz-primary" id="quiz-resume">Weiterspielen</button><div class="quiz-pause-options"><small id="quiz-mode-note">Format für diese Runde</small><div class="quiz-mode-switch" id="quiz-mode-switch" role="group" aria-label="Quizformat"><button id="quiz-mode-classic" data-mode="classic">Die große Show <small>15 Fragen</small></button><button id="quiz-mode-coffee" data-mode="coffee">Kaffeepause <small>5 Fragen</small></button></div><button class="quiz-replay-intro" id="quiz-replay-intro">Ganzes Intro ↺</button><button id="quiz-pause-sound" aria-label="Quiz-Ton umschalten"></button></div><button id="quiz-save-exit">Speichern & zurück zur Toilette</button></section>
       <footer class="quiz-footer"><span>BBE QUIZ CLUB</span><span>A–D wählen · Enter einloggen · Esc Pause</span><span id="quiz-step-label">LIVE AUS DER STILLEN ABTEILUNG</span></footer>
     </section>`;
     for (let i = 0; i < 4; i++) $('quiz-answer-' + i).onclick = () => this.select(i);
@@ -248,28 +248,37 @@ export class Quizssoir {
       const open = $('quiz-ladder').classList.toggle('is-open');
       $('quiz-ladder-toggle').setAttribute('aria-expanded', String(open));
     };
-    $('quiz-sound').onclick = () => {
-      this.g.audio.toggle();
-      this.draw();
-    };
+    for (const id of ['quiz-sound', 'quiz-pause-sound'])
+      $(id).onclick = () => {
+        this.g.audio.toggle();
+        this.draw();
+      };
   }
   changeMode(mode) {
     const m = this.current;
-    if (!m || m.paused || !m.freshIntro || this.state.view().phase !== 'intro') return false;
-    if (!this.state.restartIntro(mode)) return false;
-    const v = this.state.view();
-    m.shortIntro = !!v.shortIntro;
-    this.audio.configure({ mode: v.mode, shortIntro: m.shortIntro });
-    this.shell();
-    this.phaseEntered();
+    if (!m?.paused) return false;
+    const before = this.state.view();
+    if (m.freshIntro && before.phase === 'intro') {
+      if (!this.state.restartIntro(mode)) return false;
+      if (before.mode !== mode) {
+        m.shortIntro = !!this.state.view().shortIntro;
+        m.restartEntrance = true;
+        this.shell();
+      }
+    } else if (!this.state.setPreferredMode(mode)) return false;
+    // A live question keeps its deck, choices, jokers and reward ledger unchanged.
+    this.draw();
+    this.save();
+    $('quiz-mode-' + mode)?.focus?.();
     return true;
   }
   replayIntro() {
     const m = this.current;
-    if (!m || m.paused || this.state.view().phase !== 'intro') return false;
+    if (!m?.paused || this.state.view().phase !== 'intro') return false;
     m.shortIntro = false;
-    this.audio.configure({ shortIntro: false });
-    this.phaseEntered();
+    m.restartEntrance = true;
+    this.draw();
+    this.save();
     return true;
   }
   finishEntrance() {
@@ -459,10 +468,17 @@ export class Quizssoir {
       show.dataset.mode = v.mode || 'classic';
     }
     $('quiz-opening').hidden = v.phase !== 'intro';
-    $('quiz-mode-switch').hidden = v.phase !== 'intro' || !m.freshIntro;
-    $('quiz-replay-intro').hidden = v.phase !== 'intro' || !m.shortIntro;
+    $('quiz-mode-switch').hidden = !m.paused;
+    $('quiz-replay-intro').hidden = !m.paused || v.phase !== 'intro';
+    $('quiz-mode-note').textContent =
+      v.phase === 'intro' && m.freshIntro
+        ? 'Startet mit Weiterspielen'
+        : 'Nächste Runde · Dein Fortschritt bleibt erhalten';
     for (const mode of ['classic', 'coffee'])
-      $('quiz-mode-' + mode).setAttribute('aria-pressed', String((v.mode || 'classic') === mode));
+      $('quiz-mode-' + mode).setAttribute(
+        'aria-pressed',
+        String((v.phase === 'intro' ? v.mode : v.preferredMode || 'classic') === mode),
+      );
     $('quiz-ladder-title').textContent = coffee ? 'DEINE KAFFEEPAUSE' : 'DEIN WEG ZUR MILLION';
     $('quiz-board').hidden = lead || !['question', 'locked', 'reveal'].includes(v.phase);
     $('quiz-question-lead').hidden = !lead;
@@ -474,8 +490,12 @@ export class Quizssoir {
     for (const child of document.querySelector('.quiz-show')?.children || [])
       child.inert = m.paused && child.id !== 'quiz-pause-panel';
     $('quiz-pause').textContent = m.paused ? 'Fortsetzen · Esc' : 'Pause · Esc';
-    $('quiz-sound').textContent = this.g.audio.enabled ? 'Ton an' : 'Ton aus';
-    $('quiz-sound').setAttribute('aria-pressed', String(this.g.audio.enabled));
+    for (const id of ['quiz-sound', 'quiz-pause-sound']) {
+      const label = this.g.audio.enabled ? 'Stummschalten' : 'Ton einschalten';
+      $(id).textContent = label;
+      $(id).setAttribute('aria-label', label);
+      $(id).setAttribute('aria-pressed', String(this.g.audio.enabled));
+    }
     $('quiz-secured').textContent = money(v.safe);
     $('quiz-step-label').textContent = lead
       ? 'DIE NÄCHSTE FRAGE'
@@ -618,7 +638,7 @@ export class Quizssoir {
         .slice(0, 6)
         .map((n) => (Number.isFinite(Number(n)) ? Number(n) : 0));
       const baseline = Number.isFinite(visual.baseline) ? visual.baseline : 0;
-      const max = Math.max(1, ...values.map(n => Math.abs(n - baseline)));
+      const max = Math.max(1, ...values.map((n) => Math.abs(n - baseline)));
       host.innerHTML =
         '<figure><figcaption>' +
         title +
@@ -752,6 +772,14 @@ export class Quizssoir {
     }
     m.paused = value;
     this.stopVoice();
+    if (!value) this.g.audio.start();
+    if (!value && m.restartEntrance && this.state.view().phase === 'intro') {
+      m.restartEntrance = false;
+      m.resumeVoice = null;
+      this.audio.configure({ mode: this.state.view().mode, shortIntro: m.shortIntro });
+      // Replace the old plan while still paused; only the explicit resume starts it.
+      this.phaseEntered();
+    }
     this.audio.pause(value);
     if (!value && m.resumeVoice) {
       const voice = m.resumeVoice;
@@ -766,17 +794,24 @@ export class Quizssoir {
   }
   key(e) {
     if (!this.current) return;
+    // Quiz keyboard capture consumes these events before the shared document listener.
+    this.g.audio.unlockOnInput?.(e);
     if (e.code === 'Tab') {
       if (this.current.paused) {
-        const first = $('quiz-resume'),
-          last = $('quiz-save-exit');
-        if (e.shiftKey && e.target !== last) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && e.target !== first) {
-          e.preventDefault();
-          first.focus();
-        }
+        const controls = [
+          'quiz-resume',
+          'quiz-mode-classic',
+          'quiz-mode-coffee',
+          'quiz-replay-intro',
+          'quiz-pause-sound',
+          'quiz-save-exit',
+        ]
+          .map($)
+          .filter((node) => node && !node.hidden && !node.disabled);
+        const index = controls.indexOf(e.target);
+        const next = (index + (e.shiftKey ? -1 : 1) + controls.length) % controls.length;
+        e.preventDefault();
+        controls[next]?.focus?.();
       } else this.g.trapFocus(e);
       e.stopImmediatePropagation();
       return;
@@ -788,8 +823,11 @@ export class Quizssoir {
       e.target.offsetParent !== null &&
       !e.target.disabled &&
       !e.target.id?.startsWith('quiz-answer-')
-    )
+    ) {
+      // Preserve the native button click, but keep Space away from world movement.
+      e.stopImmediatePropagation();
       return;
+    }
     e.preventDefault();
     e.stopImmediatePropagation();
     if (e.repeat) return;
@@ -848,7 +886,12 @@ export class Quizssoir {
       ['silent', 'idle'].includes(m.voiceStatus) ||
       (m.voiceStatus === 'playing' && m.clock >= m.voiceUntil + 0.06) ||
       (m.voiceStatus === 'loading' && m.clock - m.voiceRequestedAt >= 3);
-    if (v.phase === 'locked' && !m.paused && m.elapsed >= this.audio.lockDuration && lockVoiceDone) {
+    if (
+      v.phase === 'locked' &&
+      !m.paused &&
+      m.elapsed >= this.audio.lockDuration &&
+      lockVoiceDone
+    ) {
       this.state.reveal();
       this.phaseEntered();
       v = this.state.view();

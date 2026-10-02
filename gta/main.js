@@ -354,7 +354,11 @@ export class Game {
     $('.close')?.addEventListener('click', () => this.close());
     const openedModal = this.modal;
     setTimeout(() => {
-      if (this.modal === openedModal && !openedModal.phone)
+      if (
+        this.modal === openedModal &&
+        !openedModal.phone &&
+        !$('#modal-root')?.contains(document.activeElement)
+      )
         $('#modal-root button, #modal-root input')?.focus();
     }, 30);
   }

@@ -542,16 +542,17 @@ export class QuizAudio {
     this.attempts.clear();
     this.retryAt.clear();
     globalThis.document?.addEventListener?.('visibilitychange', this.visibility);
-    if (!this.audio.ready) this.audio.start?.();
+    if (!this.audio.ready || ['suspended', 'interrupted'].includes(this.audio.ctx?.state))
+      this.audio.start?.();
     return true;
   }
   configure(options = {}) {
     this.options = { ...this.options, ...options };
   }
   preloadIntro() {
-    this.request('play2000');
+    // Warm the entrance first. Its opening follow-up is fetched just before handoff.
     this.request('theme');
-    this.request('opening');
+    this.request('play2000');
   }
   get playable() {
     return (
@@ -618,7 +619,9 @@ export class QuizAudio {
     this.retryAt.set(cache, now + 2);
     this.audio.bank.failures?.delete(id);
     const promise = Promise.resolve()
-      .then(() => (this.disposed || epoch !== this.epoch ? null : this.audio.bank.get(id)))
+      .then(() =>
+        this.disposed || epoch !== this.epoch ? null : this.audio.bank.get(id, { priority: true }),
+      )
       .then((buffer) => {
         if (!buffer || this.disposed || epoch !== this.epoch) return;
         this.buffers.set(cache, buffer);
@@ -691,7 +694,9 @@ export class QuizAudio {
     // A failed opening may continue visually; never join its music halfway through.
     if (this.silentIntroTheme && track.slot === 'bed' && ['theme', 'play2000'].includes(track.key))
       return;
-    if (!this.playable || (track.bus === 'music' && this.audio.sim?.s.music === false)) return;
+    // The radio switch controls ISAR FM, not the show's own score. Shared mixer levels
+    // and global mute still apply to every quiz source through the music bus.
+    if (!this.playable) return;
     const buffer = this.touch(cacheId(track.key, track.loop));
     if (!buffer) {
       this.request(track.key, track.loop);
@@ -805,7 +810,7 @@ export class QuizAudio {
       return;
     }
     const first = this.plan[0];
-    if (this.clock === 0 && first && this.playable && this.audio.sim?.s.music !== false) {
+    if (this.clock === 0 && first && this.playable) {
       const cache = cacheId(first.key, first.loop);
       const loaded = this.buffers.has(cache);
       if (
@@ -860,10 +865,6 @@ export class QuizAudio {
     for (const [slot, track] of this.tracks) {
       if (slot === 'sting' && (track.handle?.ended || track.offset >= track.duration - 0.015)) {
         this.remove(slot, 0);
-        continue;
-      }
-      if (track.bus === 'music' && this.audio.sim?.s.music === false) {
-        this.halt(track);
         continue;
       }
       this.play(track);

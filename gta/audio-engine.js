@@ -35,6 +35,19 @@ export class Soundscape {
     this.flow = false;
     this.errors = [];
   }
+  /** Retry only on a real interaction after the browser interrupted audio playback. */
+  unlockOnInput(event) {
+    if (
+      !event?.isTrusted ||
+      event.repeat ||
+      !this.ready ||
+      !this.enabled ||
+      globalThis.document?.hidden ||
+      !['suspended', 'interrupted'].includes(this.ctx?.state)
+    )
+      return;
+    this.ctx.resume().catch(() => {});
+  }
   start() {
     if (this.ready) {
       if (!this.introMix && !this.titleMix) this.preloadGame();
@@ -97,6 +110,10 @@ export class Soundscape {
       }
       this.bank = new AudioBank(c);
       this.ready = true;
+      // Automatic portal entry is not a browser user gesture. A later game input
+      // can unlock a suspended context without changing any saved volume or mute.
+      for (const event of ['pointerdown', 'keydown'])
+        document.addEventListener(event, (e) => this.unlockOnInput(e), true);
       document.addEventListener('keydown', (e) => {
         if (
           !this.enabled ||
@@ -208,7 +225,8 @@ export class Soundscape {
       this.sim.s.audioEnabled = this.enabled;
       this.sim.save();
     }
-    if (!this.enabled) this.voices.stop();
+    if (this.enabled) this.start();
+    else this.voices.stop();
     this.applyMix();
     return this.enabled;
   }
