@@ -63,7 +63,7 @@
         <div class="ranking-list" id="ranking-list"></div>
       </section>
     </main>
-    <footer><span id="data-mode" hidden></span><span>Speicherstatus:</span><span id="save-status" role="status" aria-live="polite">Wird geladen …</span><button id="retry-save" class="text-button" hidden>Erneut speichern</button><span id="people-count"></span></footer>
+    <footer><span id="data-mode" hidden></span><span>Speicherstatus:</span><span id="save-status" role="status" aria-live="polite">Wird geladen …</span><button id="retry-save" class="text-button" hidden>Erneut speichern</button><span id="people-count"></span><nav aria-label="Rechtliche Informationen" style="display:flex;gap:16px;flex-wrap:wrap"><a href="/impressum/">Impressum</a><a href="/datenschutz/#snack">Datenschutz</a></nav></footer>
   </div>
   <dialog id="person-dialog" aria-labelledby="person-dialog-title"><div class="dialog-heading"><div><h2 id="person-dialog-title">Person wählen</h2></div><button id="close-person-dialog" class="icon-button" aria-label="Personenauswahl schließen">×</button></div><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="person-search" type="search" placeholder="Deinen Namen suchen" autocomplete="off" aria-label="Person suchen"></label><div class="person-options" id="person-options"></div></dialog>
   <canvas id="confetti" aria-hidden="true"></canvas>
@@ -72,3 +72,4 @@
   <script type="module" src="./main.js"></script>
 </body>
 </html>
+
