@@ -1,3 +1,5 @@
+import { buildTriviaQuestions } from './quiz-trivia.js';
+
 // Original Quizssoir questions. Real BBE facts were checked against these primary sources.
 // Fictional colleagues, locations and missions are explicitly labelled as game-world material.
 export const QUIZ_SOURCES = Object.freeze({
@@ -1847,7 +1849,7 @@ function freezeTree(value) {
   }
   return value;
 }
-export const QUIZ_QUESTIONS = Object.freeze(
+export const QUIZ_V2_QUESTIONS = Object.freeze(
   TIERS.flatMap((tier, index) =>
     tier.map((entry, n) => {
       const [category, text, answer, others, explanation, meta = {}] = entry;
@@ -1869,4 +1871,11 @@ export const QUIZ_QUESTIONS = Object.freeze(
       });
     }),
   ),
+);
+
+export const QUIZ_QUESTIONS = buildTriviaQuestions(
+  QUIZ_LEGACY_QUESTIONS,
+  QUIZ_V2_QUESTIONS,
+  q,
+  freezeTree,
 );

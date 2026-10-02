@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "publishedPath": "/gta/",
-  "sourceCommit": "a069096495e850a154ad86482cafe18c0e46acf9",
+  "sourceCommit": "27440818b50527dd751b8b5047d06eb26371aa37",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-02T10:32:47.162Z",
+  "preparedAt": "2026-10-02T11:06:03.896Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Performance and Marienplatz release: rooftop terrace, distinct Altstadt facades and raised existing intro camera; sparse active-body physics, compatible-colour instancing, shared contact shadows, visible-scene matrix scheduling, cached traffic/raycast broad phases, minimal HUD/canvas invalidation and adaptive pixel budgets. Visual/browser gameplay, vehicle, crowd, cinema, original quiz audio and offline checks passed. Hardware-specific measurements are documented; no universal FPS guarantee."
+  "validation": "Quizssoir trivia revision: 150 questions, easy BBE and game-world trivia at levels 1-5, wordplay at levels 6-10, advanced reasoning at levels 11-15. Original question records, saved V1/V2 rounds and voice clips preserved. New question recordings verified. Rules, save migrations, original music, full classic and coffee browser rounds, responsive question layouts and standalone offline checks passed."
 }

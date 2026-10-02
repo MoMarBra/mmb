@@ -1,10 +1,16 @@
-import { QUIZ_QUESTIONS, QUIZ_LEGACY_QUESTIONS, QUIZ_DISCOVERIES } from './quiz-questions.js';
+import {
+  QUIZ_QUESTIONS,
+  QUIZ_V2_QUESTIONS,
+  QUIZ_LEGACY_QUESTIONS,
+  QUIZ_DISCOVERIES,
+} from './quiz-questions.js';
 
 export const QUIZ_LADDER = Object.freeze([
   50, 100, 200, 300, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 500000, 1000000,
 ]);
 export const QUIZ_SAFE_LEVELS = Object.freeze([5, 10]);
-export const QUIZ_SAVE_VERSION = 2;
+export const QUIZ_SAVE_VERSION = 3;
+const CURRENT_BANK_VERSION = 3;
 export const QUIZ_MODES = Object.freeze({
   classic: Object.freeze({
     title: 'Die große Show',
@@ -21,7 +27,18 @@ export const QUIZ_MODES = Object.freeze({
 });
 const JOKERS = ['fifty', 'audience', 'phone'];
 const LETTERS = ['A', 'B', 'C', 'D'];
-const ALL_QUESTIONS = new Map([...QUIZ_LEGACY_QUESTIONS, ...QUIZ_QUESTIONS].map((q) => [q.id, q]));
+const QUESTION_BANKS = new Map([
+  [1, QUIZ_LEGACY_QUESTIONS],
+  [2, QUIZ_V2_QUESTIONS],
+  [3, QUIZ_QUESTIONS],
+]);
+const QUESTIONS_BY_BANK = new Map(
+  [...QUESTION_BANKS].map(([version, bank]) => [version, new Map(bank.map((q) => [q.id, q]))]),
+);
+// History deliberately recognizes IDs from every release, including unchanged
+// questions reused in a new bank. Active decks resolve only inside their bank:
+// an ID reused at another tier must never change a resumed question or joker.
+const ALL_QUESTIONS = new Map([...QUESTION_BANKS.values()].flat().map((q) => [q.id, q]));
 const clampCount = (v) => (Number.isSafeInteger(v) ? Math.min(1000000, Math.max(0, v)) : 0);
 const prize = (v, mode = 'classic') => (QUIZ_MODES[mode].ladder.includes(v) ? v : 0);
 const copy = (v) => JSON.parse(JSON.stringify(v));
@@ -61,9 +78,9 @@ function freshSeed() {
     return globalThis.crypto.getRandomValues(new Uint32Array(1))[0];
   return hash(Date.now() + ':' + Math.random());
 }
-function makeDeck(seed, mode = 'classic', history = [], bankVersion = 2) {
+function makeDeck(seed, mode = 'classic', history = [], bankVersion = CURRENT_BANK_VERSION) {
   const random = rng(seed);
-  const bank = bankVersion === 1 ? QUIZ_LEGACY_QUESTIONS : QUIZ_QUESTIONS;
+  const bank = QUESTION_BANKS.get(bankVersion);
   return QUIZ_MODES[mode].levels.map((level) => {
     let pool = bank.filter((q) => q.level === level);
     if (bankVersion !== 1) {
@@ -79,17 +96,14 @@ function makeDeck(seed, mode = 'classic', history = [], bankVersion = 2) {
 function restoreDeck(saved, mode, bankVersion) {
   const levels = QUIZ_MODES[mode].levels;
   if (!Array.isArray(saved) || saved.length !== levels.length) return null;
-  const allowed = new Set(
-    (bankVersion === 1 ? QUIZ_LEGACY_QUESTIONS : QUIZ_QUESTIONS).map((q) => q.id),
-  );
+  const bank = QUESTIONS_BY_BANK.get(bankVersion);
   const deck = [];
   for (let i = 0; i < saved.length; i++) {
     const row = saved[i],
-      question = ALL_QUESTIONS.get(row?.id),
+      question = bank.get(row?.id),
       order = row?.order;
     if (
       !question ||
-      !allowed.has(question.id) ||
       question.level !== levels[i] ||
       !Array.isArray(order) ||
       order.length !== 4 ||
@@ -103,7 +117,7 @@ function restoreDeck(saved, mode, bankVersion) {
 }
 
 /** Local quiz rules. Saved decks contain IDs and answer order, not revealed solutions.
- * Legacy seed/action sessions always use the immutable original question bank. */
+ * Seed/action v1 and explicit-deck v2 sessions retain their immutable banks. */
 export class QuizState {
   #s = null;
   #seed = 0;
@@ -111,7 +125,7 @@ export class QuizState {
   #events = [];
   #replaying = false;
   #mode = 'classic';
-  #bankVersion = 2;
+  #bankVersion = CURRENT_BANK_VERSION;
   #history = [];
   #discoveries = new Set();
   #preferredMode = 'classic';
@@ -133,7 +147,7 @@ export class QuizState {
 
   constructor(saved, context = {}) {
     this.#discoveries = cleanDiscoveries(context.discoveries);
-    if (!saved || typeof saved !== 'object' || ![1, 2].includes(saved.version)) return;
+    if (!saved || typeof saved !== 'object' || ![1, 2, 3].includes(saved.version)) return;
     const paid = prize(saved.bestPaid),
       coffeePaid = prize(saved.coffeeBestPaid, 'coffee');
     const runs = clampCount(saved.totalRuns),
@@ -176,7 +190,7 @@ export class QuizState {
     const bankVersion = legacy ? 1 : session.bankVersion;
     if (
       !Object.hasOwn(QUIZ_MODES, mode) ||
-      ![1, 2].includes(bankVersion) ||
+      !QUESTION_BANKS.has(bankVersion) ||
       (bankVersion === 1 && mode !== 'classic')
     )
       return;
@@ -231,7 +245,7 @@ export class QuizState {
       this.#events = [];
     } else this.#events = accepted;
   }
-  #initialize(seed, mode, deck, bankVersion = 2) {
+  #initialize(seed, mode, deck, bankVersion = CURRENT_BANK_VERSION) {
     this.#seed = seed;
     this.#mode = mode;
     this.#deck = deck;
