@@ -170,13 +170,14 @@ export class CityExtras {
       this.g.toast('Wieder nüchtern.', 'Die Storyline steht wieder gerade.');
       this.g.sim.save();
     }
-    this.drunkHUD.hidden = !this.state.drunk || !this.g.started || this.g.cinematic;
-    if (this.state.drunk)
-      this.drunkHUD.textContent =
-        'BESCHWIPST · ' +
-        Math.floor(Math.ceil(this.state.drunk) / 60) +
-        ':' +
-        String(Math.ceil(this.state.drunk) % 60).padStart(2, '0');
+    const drunkHidden = !this.state.drunk || !this.g.started || this.g.cinematic;
+    if (this.drunkHUD.hidden !== drunkHidden) this.drunkHUD.hidden = drunkHidden;
+    if (this.state.drunk) {
+      const seconds = Math.ceil(this.state.drunk);
+      const label =
+        'BESCHWIPST · ' + Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+      if (this.drunkHUD.textContent !== label) this.drunkHUD.textContent = label;
+    }
     if (!this.g.cinematic) {
       this.brewery.update(active ? dt : 0);
       this.fire.update(active ? dt : 0);

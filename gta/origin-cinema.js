@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { renderGameScene } from './scene-matrix-scheduler.js';
 import { ORIGIN_LINES } from './origin-lines.js';
 import { cinematicSet, animateKitchen } from './origin-models.js';
 import { buildBossSet, animateStoryActor } from './workshop-sets.js';
@@ -248,7 +249,7 @@ export class OriginCinema {
     this.w.renderer.setRenderTarget(null);
     m.set.scene.environment = this.w.scene?.environment || null;
     m.set.scene.environmentIntensity = 0.46;
-    this.w.renderer.render(m.set.scene, this.camera);
+    renderGameScene(this.w, m.set.scene, this.camera);
     m.drawn = true;
     m.width = this.size.x;
     m.height = this.size.y;

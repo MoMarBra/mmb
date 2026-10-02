@@ -1,5 +1,9 @@
+import { buildMarienplatzRooftop } from './marienplatz-rooftop.js';
+import { instanceSurfaceKey, instanceSurfaceMaterial } from './instance-surfaces.js';
+import { ActiveBodyBroadphase, stepGamePhysics } from './game-physics.js';
 import { installCinematicLook } from './cinematic-look.js';
 import { ShadowProjectionTracker, postprocessSamples } from './render-stability.js';
+import { renderGameScene, optimizeSSAOVisibility } from './scene-matrix-scheduler.js';
 import { RemasterPerformance, shouldUseRemasterAO } from './remaster-performance.js';
 import { installInteriorRemaster } from './remaster-interiors.js';
 import { dressFacade } from './remaster-architecture.js';
@@ -150,25 +154,31 @@ const aoTexture = () =>
     c.fillStyle = r;
     c.fillRect(0, 0, 64, 64);
   });
-let shadowTex;
+let shadowTex, shadowMaterial;
+const contactPlane = new THREE.PlaneGeometry(1, 1);
 function contactShadow(g, x, z, w = 1.5, d = 1.2) {
-  if (!shadowTex) shadowTex = aoTexture();
-  const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(w, d),
-    new THREE.MeshBasicMaterial({
+  if (!shadowMaterial) {
+    shadowTex = aoTexture();
+    shadowMaterial = new THREE.MeshBasicMaterial({
       map: shadowTex,
       transparent: true,
       depthWrite: false,
       polygonOffset: true,
       polygonOffsetFactor: -1,
       polygonOffsetUnits: -1,
-    }),
-  );
+    });
+    shadowMaterial.name = 'Shared contact shadow';
+  }
+  const m = new THREE.Mesh(contactPlane, shadowMaterial);
+  m.scale.set(w, d, 1);
   m.rotation.x = -Math.PI / 2;
   m.position.set(x, 0.025, z);
+  // Ground decals belong below transparent glass, including after batching.
+  m.renderOrder = -1;
   g.add(m);
   return m;
 }
+
 function plant(g, x, z, s = 1) {
   realisticPlant(g, x, z, s);
   contactShadow(g, x, z, 0.9 * s, 0.9 * s);
@@ -465,6 +475,7 @@ export class GameWorld {
     buildITOffice(this);
     this.addLife();
     buildCityExpansion(this, { box, cylinder, sphere, label, material, human });
+    buildMarienplatzRooftop(this);
     this.cars.push(...this.expansionVehicles);
     buildVerticalCity(this, { box, cylinder, label, material });
     buildCityStreets(this, { box });
@@ -504,7 +515,9 @@ export class GameWorld {
         composer = new EffectComposer(this.renderer, sceneTarget);
         composer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
         composer.addPass(new RenderPass(this.scene, this.camera));
-        ssao = new SSAOPass(this.scene, this.camera, innerWidth, innerHeight, 16);
+        ssao = optimizeSSAOVisibility(
+          new SSAOPass(this.scene, this.camera, innerWidth, innerHeight, 16),
+        );
         ssao.kernelRadius = 0.65;
         ssao.minDistance = 0.001;
         ssao.maxDistance = 0.06;
@@ -536,7 +549,11 @@ export class GameWorld {
     this.scene.add(g);
     this.groups[name] = g;
     const physics = new CANNON.World({ gravity: new CANNON.Vec3(0, -20, 0) });
-    physics.broadphase = new CANNON.SAPBroadphase(physics);
+    physics.broadphase = new ActiveBodyBroadphase(physics);
+    physics.allowSleep = true;
+    // Sparse contact history scales with actual contacts, not all building pairs.
+    physics.collisionMatrix = new CANNON.ObjectCollisionMatrix();
+    physics.collisionMatrixPrevious = new CANNON.ObjectCollisionMatrix();
     const addBody = physics.addBody.bind(physics);
     physics.addBody = (body) => {
       body.updateAABB();
@@ -549,6 +566,7 @@ export class GameWorld {
     physics.addBody(ground);
     const body = new CANNON.Body({
       mass: 75,
+      allowSleep: false,
       fixedRotation: true,
       shape: new CANNON.Sphere(0.32),
       linearDamping: 0,
@@ -1849,6 +1867,7 @@ export class GameWorld {
   }
   batchScenes() {
     const colorMaterials = new Map();
+    const instanceMaterials = new Map();
     this.crowdBatches = [];
     for (const [name, root] of Object.entries(this.groups)) {
       root.updateMatrixWorld(true);
@@ -1887,16 +1906,24 @@ export class GameWorld {
           .sort()
           .join();
         const key =
-          attributes + '|' + (staticColorKey(o) || o.material.uuid) + '|' + o.castShadow + cell;
+          attributes +
+          '|' +
+          (staticColorKey(o) || o.material.uuid) +
+          '|' +
+          o.castShadow +
+          '|' +
+          o.renderOrder +
+          cell;
         const list = groups.get(key) || [];
         list.push(o);
         groups.set(key, list);
       });
       for (const list of groups.values()) {
-        if (list.length < 3) continue;
+        if (list.length < 2) continue;
         const merged = mergeColoredStatics(list, colorMaterials),
           batch = new THREE.Mesh(merged.geometry, merged.material);
         batch.name = 'Static material cell';
+        batch.renderOrder = list[0].renderOrder;
         batch.castShadow = list.some((o) => o.castShadow);
         batch.receiveShadow = true;
         list.forEach((o, i) => {
@@ -1911,7 +1938,8 @@ export class GameWorld {
       for (const actor of this.zoneData[name].npcs) {
         actor.mesh.traverse((o) => {
           if (!o.isMesh) return;
-          const key = o.geometry.uuid + '|' + o.material.uuid;
+          const surface = instanceSurfaceKey(o);
+          const key = o.geometry.uuid + '|' + (surface || o.material.uuid);
           const list = crowdGroups.get(key) || [];
           list.push({ source: o, actor: actor.mesh });
           crowdGroups.set(key, list);
@@ -1919,13 +1947,19 @@ export class GameWorld {
       }
       for (const list of crowdGroups.values()) {
         const first = list[0].source,
-          batch = new THREE.InstancedMesh(first.geometry, first.material, list.length);
+          surface = instanceSurfaceKey(first),
+          batch = new THREE.InstancedMesh(
+            first.geometry,
+            instanceSurfaceMaterial(first.material, instanceMaterials, surface),
+            list.length,
+          );
+        if (surface) list.forEach((o, i) => batch.setColorAt(i, o.source.material.color));
         batch.castShadow = true;
         batch.receiveShadow = true;
         batch.frustumCulled = false;
         for (const item of list) item.source.visible = false;
         root.add(batch);
-        this.crowdBatches.push({ zone: name, batch, list });
+        this.crowdBatches.push({ zone: name, batch, list, colored: !!surface });
       }
     }
   }
@@ -1949,10 +1983,15 @@ export class GameWorld {
       if (item.zone !== this.zone) continue;
       let count = 0;
       for (const o of item.list)
-        if (o.actor.userData.renderVisible) item.batch.setMatrixAt(count++, o.source.matrixWorld);
+        if (o.actor.userData.renderVisible) {
+          item.batch.setMatrixAt(count, o.source.matrixWorld);
+          if (item.colored) item.batch.setColorAt(count, o.source.material.color);
+          count++;
+        }
       item.batch.count = count;
       item.batch.visible = count > 0;
       item.batch.instanceMatrix.needsUpdate = true;
+      if (item.colored && count) item.batch.instanceColor.needsUpdate = true;
     }
   }
   makeRain() {
@@ -2205,11 +2244,11 @@ export class GameWorld {
     if (!driving && !cinematicIntro) {
       b.velocity.x = vx;
       b.velocity.z = vz;
-      zone.physics.step(1 / 60, Math.min(dt, 0.05), 3);
+      stepGamePhysics(zone.physics, dt);
     }
     if (driving && dt > 0) {
       const held = b.position.clone();
-      zone.physics.step(1 / 60, Math.min(dt, 0.05), 3);
+      stepGamePhysics(zone.physics, dt);
       b.position.copy(held);
       b.velocity.setZero();
     }
@@ -2456,8 +2495,10 @@ export class GameWorld {
       this.lastShadowPosition.copy(this.player.position);
     }
     // The film keeps antialiasing and real shadows without the extra full-scene SSAO passes.
-    if (shouldUseRemasterAO(this, cinematicIntro)) this.composer.render(dt);
-    else this.renderer.render(this.scene, this.camera);
+    renderGameScene(this, this.scene, this.camera, {
+      ao: shouldUseRemasterAO(this, cinematicIntro),
+      dt,
+    });
   }
   dispose() {
     this.renderer.dispose();

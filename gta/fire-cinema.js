@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { renderGameScene } from './scene-matrix-scheduler.js';
 import { FIRE_LINES } from './fire-lines.js';
 import { buildFireSet, updateFireSet } from './fire-sets.js';
 
@@ -472,7 +473,7 @@ export class FireCinema {
     renderer.shadowMap.needsUpdate = true;
     movie.set.scene.environment = this.w.scene?.environment || null;
     movie.set.scene.environmentIntensity = 0.46;
-    renderer.render(movie.set.scene, this.camera);
+    renderGameScene(this.w, movie.set.scene, this.camera);
     this.ui.subtitles.hidden = this.g.sim.s.audioSubtitles === false || !segment;
     this.ui.progress.style.transform = `scaleX(${movie.elapsed / movie.duration})`;
     const time = `${Math.floor(movie.elapsed)} / ${Math.ceil(movie.duration)} s`;

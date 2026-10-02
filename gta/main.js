@@ -146,7 +146,8 @@ export class Game {
         hidden,
         cinematic: !!this.cinematic || !!this.extras.intro.current,
       });
-      // Resolution alone cannot solve a draw-call bottleneck on integrated GPUs.
+      // Leave a small margin above the 30 FPS floor before choosing the existing
+      // balanced preset. Resolution alone cannot fix a draw-call bottleneck.
       const adaptive = this.world.remasterPerformance;
       const sustainedFloorLoad =
         !paused &&
@@ -154,7 +155,7 @@ export class Game {
         !this.extras.intro.current &&
         !this.world.lowQuality &&
         adaptive.scale <= adaptive.floor + 0.001 &&
-        this.fps < 28 &&
+        this.fps < 32 &&
         rawDelta < 0.2;
       this.remasterSlowSeconds = sustainedFloorLoad
         ? (this.remasterSlowSeconds || 0) + rawDelta
@@ -416,22 +417,38 @@ export class Game {
   updateHUD() {
     this.updateTaskDeadline();
     updateCinematicHUD(this);
+    const nodes = (this.hudNodes ||= new Map());
+    const node = (selector) => {
+      let value = nodes.get(selector);
+      if (!value?.isConnected) {
+        value = $(selector);
+        nodes.set(selector, value);
+      }
+      return value;
+    };
+    const text = (element, value) => {
+      const label = String(value);
+      if (element.textContent !== label) element.textContent = label;
+    };
     const s = this.sim.s;
-    $('#money').textContent = euro(s.money);
-    $('#clock').textContent = this.sim.clock;
-    $('#day-name').textContent = this.sim.weekday.slice(0, 2);
-    $('#weather').textContent =
-      `Tag ${s.day} · ${s.weather === 'Regen' ? '14 °C · Regen' : '19 °C · ' + (s.minutes > 1200 || s.minutes < 360 ? 'Nacht' : 'Sonnig')}`;
-    $('#career').textContent = this.sim.career.name;
-    $('#level').textContent = `LEVEL ${this.sim.level}`;
-    $('#rep').textContent = `${Math.floor(s.rep)} REP`;
+    text(node('#money'), euro(s.money));
+    text(node('#clock'), this.sim.clock);
+    text(node('#day-name'), this.sim.weekday.slice(0, 2));
+    text(
+      node('#weather'),
+      `Tag ${s.day} · ${s.weather === 'Regen' ? '14 °C · Regen' : '19 °C · ' + (s.minutes > 1200 || s.minutes < 360 ? 'Nacht' : 'Sonnig')}`,
+    );
+    text(node('#career'), this.sim.career.name);
+    text(node('#level'), `LEVEL ${this.sim.level}`);
+    text(node('#rep'), `${Math.floor(s.rep)} REP`);
     for (const key of ['hunger', 'energy', 'happy', 'focus']) {
-      $('#bar-' + key).style.width = s[key] + '%';
-      $('#bar-' + key).classList.toggle('low', s[key] < 25);
-      $('#value-' + key).textContent = Math.round(s[key]);
+      const width = s[key] + '%';
+      if (node('#bar-' + key).style.width !== width) node('#bar-' + key).style.width = width;
+      node('#bar-' + key).classList.toggle('low', s[key] < 25);
+      text(node('#value-' + key), Math.round(s[key]));
     }
     const z = this.world.zone;
-    $('#zone-name').textContent =
+    let zoneName =
       z === 'office'
         ? 'BBE Handelsberatung'
         : z === 'city'
@@ -439,7 +456,7 @@ export class Game {
           : z === 'brewery'
             ? 'Brienner Bräu'
             : this.world.currentRestaurant.name;
-    $('#zone-address').textContent =
+    let zoneAddress =
       z === 'office'
         ? 'Brienner Straße 45'
         : z === 'city'
@@ -448,29 +465,39 @@ export class Game {
             ? 'Brienner Straße · Hausbrauerei'
             : this.world.currentRestaurant.address;
     if (z === 'city') {
-      const p = this.world.player.position,
-        stop = CITY_STOPS.map((q) => ({ q, d: Math.hypot(p.x - q.x, p.z - q.z) })).sort(
-          (a, b) => a.d - b.d,
-        )[0];
-      if (stop.d < 75) {
-        $('#zone-name').textContent = stop.q.name;
-        $('#zone-address').textContent =
-          stop.q.id === 'benno' || stop.q.id === 'koenigsplatz'
+      const p = this.world.player.position;
+      let stop = null,
+        nearestSquared = 75 * 75;
+      for (const candidate of CITY_STOPS) {
+        const dx = p.x - candidate.x,
+          dz = p.z - candidate.z;
+        const squared = dx * dx + dz * dz;
+        if (squared < nearestSquared) {
+          stop = candidate;
+          nearestSquared = squared;
+        }
+      }
+      if (stop) {
+        zoneName = stop.name;
+        zoneAddress =
+          stop.id === 'benno' || stop.id === 'koenigsplatz'
             ? 'München · Maxvorstadt'
             : 'München · Innenstadt';
       }
       if (this.arcade?.vehicle?.type === 'helicopter')
-        $('#zone-address').textContent = 'BBE AIR · Über den Dächern von München';
+        zoneAddress = 'BBE AIR · Über den Dächern von München';
     }
     if (z === 'office' && this.world.player.position.x > 44) {
-      $('#zone-name').textContent = 'BBE · Tiefgarage';
-      $('#zone-address').textContent = 'Hinterhof · Ausgang bei der Beschilderung';
+      zoneName = 'BBE · Tiefgarage';
+      zoneAddress = 'Hinterhof · Ausgang bei der Beschilderung';
     }
     const task = s.active[0];
     if (task) {
-      $('#quest-eyebrow').textContent =
-        task.multiplier === 3 ? 'DRINGENDER BBE-AUFTRAG' : 'AKTIVER BBE-AUFTRAG';
-      $('#quest-title').textContent = task.title;
+      text(
+        node('#quest-eyebrow'),
+        task.multiplier === 3 ? 'DRINGENDER BBE-AUFTRAG' : 'AKTIVER BBE-AUFTRAG',
+      );
+      text(node('#quest-title'), task.title);
       const hints = {
         benchmark: 'Speisekarten fotografieren · ' + task.progress.length + '/3',
         mystery: task.progress.includes('service')
@@ -485,56 +512,59 @@ export class Game {
             : 'PALMTREECLUB · Lunch abholen',
         meeting: task.progress.includes('met') ? 'Am BBE-PC abgeben' : 'Kundenbüro besuchen',
       };
-      $('#quest-description').textContent = hints[task.type] || '';
-      $('#quest-location').textContent =
-        `Noch ${Math.max(0, Math.ceil(task.deadline - this.sim.absolute()))} Spielmin.`;
-      $('#quest-reward').textContent =
-        `ab ${euro(task.base * this.sim.career.pay * task.multiplier)}`;
+      text(node('#quest-description'), hints[task.type] || '');
+      text(
+        node('#quest-location'),
+        `Noch ${Math.max(0, Math.ceil(task.deadline - this.sim.absolute()))} Spielmin.`,
+      );
+      text(node('#quest-reward'), `ab ${euro(task.base * this.sim.career.pay * task.multiplier)}`);
     } else if (s.completed) {
-      $('#quest-eyebrow').textContent = 'DEIN NÄCHSTER SCHRITT';
-      $('#quest-title').textContent = 'BBE-Aufträge';
-      $('#quest-description').textContent = '';
-      $('#quest-location').textContent = `${s.completed} Aufträge erledigt`;
-      $('#quest-reward').textContent = `${s.xp} XP`;
+      text(node('#quest-eyebrow'), 'DEIN NÄCHSTER SCHRITT');
+      text(node('#quest-title'), 'BBE-Aufträge');
+      text(node('#quest-description'), '');
+      text(node('#quest-location'), `${s.completed} Aufträge erledigt`);
+      text(node('#quest-reward'), `${s.xp} XP`);
     } else {
-      $('#quest-eyebrow').textContent = 'DEIN ERSTER ARBEITSTAG';
-      $('#quest-title').textContent = 'BBE-Aufträge';
-      $('#quest-description').textContent = '';
-      $('#quest-location').textContent = 'BBE · Arbeitsplatz';
-      $('#quest-reward').textContent = 'ab 24,50 €';
+      text(node('#quest-eyebrow'), 'DEIN ERSTER ARBEITSTAG');
+      text(node('#quest-title'), 'BBE-Aufträge');
+      text(node('#quest-description'), '');
+      text(node('#quest-location'), 'BBE · Arbeitsplatz');
+      text(node('#quest-reward'), 'ab 24,50 €');
     }
-    const inter = $('#interaction'),
+    const inter = node('#interaction'),
       n = this.world.nearest;
     inter.classList.toggle('visible', !!n && this.started && !this.modal && !this.busy);
-    if (n) $('span', inter).textContent = n.label;
-    $('#fps').textContent =
-      `${Math.round(this.fps)} FPS · ${this.world.lowQuality ? 'Sparmodus' : 'Hohe Grafik'}`;
-    this.drawMap($('#minimap'), true);
+    if (n) text($('span', inter), n.label);
+    text(
+      node('#fps'),
+      `${Math.round(this.fps)} FPS · ${this.world.lowQuality ? 'Sparmodus' : 'Hohe Grafik'}`,
+    );
+    this.drawMap(node('#minimap'), true);
     if (this.modal?.title === 'Dein Smartphone' && this.phonePage === 'map')
-      this.drawMap($('#large-map'), false);
+      this.drawMap(node('#large-map'), false);
     if (this.waypoint && z === 'city') {
       const d = Math.hypot(
         this.world.player.position.x - this.waypoint.x,
         this.world.player.position.z - this.waypoint.z,
       );
-      $('#waypoint').hidden = false;
-      $('#waypoint').textContent = `◇ ${this.waypoint.name} · ${Math.round(d)} m`;
+      node('#waypoint').hidden = false;
+      text(node('#waypoint'), `◇ ${this.waypoint.name} · ${Math.round(d)} m`);
       if (d < 3) {
         this.waypoint = null;
-        $('#waypoint').hidden = true;
+        node('#waypoint').hidden = true;
       }
-    } else $('#waypoint').hidden = true;
+    } else node('#waypoint').hidden = true;
     this.workshop?.updateHUD();
     this.fireStory?.updateHUD();
     this.origin?.updateHUD();
     this.campaign?.updateHUD();
     this.quizssoir?.updateWorldProgress?.();
     if (z === 'office' && this.world.player.position.x < -13.5) {
-      $('#zone-name').textContent = inIT(this.world.player.position)
-        ? 'BBE · IT / Benjamin'
-        : 'BBE · Westflügel';
-      $('#zone-address').textContent = 'Brienner Straße 45 · Immer da fürs Team';
+      zoneName = inIT(this.world.player.position) ? 'BBE · IT / Benjamin' : 'BBE · Westflügel';
+      zoneAddress = 'Brienner Straße 45 · Immer da fürs Team';
     }
+    text(node('#zone-name'), zoneName);
+    text(node('#zone-address'), zoneAddress);
   }
   transition(zone, id) {
     if (this.quizssoir?.active) return;
@@ -1179,6 +1209,18 @@ export class Game {
   }
   drawMap(canvas, mini) {
     if (!canvas) return;
+    // A full-screen surface covers the minimap; story updates and gameplay still run normally.
+    if (
+      mini &&
+      (document.hidden ||
+        this.started === false ||
+        this.cinematic ||
+        this.extras?.intro.current ||
+        this.quizssoir?.active ||
+        this.blast?.active ||
+        this.modal?.pause)
+    )
+      return;
     if (
       this.world.zone === 'office' &&
       (this.fireStory?.running ||

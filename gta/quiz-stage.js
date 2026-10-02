@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { renderGameScene } from './scene-matrix-scheduler.js';
 import { human, animateHuman, label } from './world.js';
 import { QUIZ_ART } from './quiz-art.js';
 
@@ -1029,7 +1030,7 @@ export class QuizStage {
       }
       // Stage lights do not cast shadows; WC keeps the world's existing cached map.
       renderer.shadowMap.autoUpdate = false;
-      renderer.render(frame.scene, this.camera);
+      renderGameScene(this.world, frame.scene, this.camera);
     } finally {
       if (!frame.studio) {
         if (office) office.visible = officeVisible;

@@ -1,6 +1,9 @@
 /** A render-only policy: physics, clock, traffic and input use their original dt. */
 export const REMASTER_RENDER_POLICY = Object.freeze({
   minScale: 0.85,
+  balancedMinScale: 0.65,
+  highPixelBudget: 2560 * 1440,
+  balancedPixelBudget: 1600 * 900,
   maxScale: 1.25,
   balancedCap: 1,
   slowFPS: 42,
@@ -38,15 +41,27 @@ export class RemasterPerformance {
   get cap() {
     const device = Number(this.deviceScale());
     const hardware = Number.isFinite(device) && device > 0 ? device : 1;
+    const width = Math.max(1, Number(globalThis.innerWidth) || 1280);
+    const height = Math.max(1, Number(globalThis.innerHeight) || 720);
+    const pixels = this.world.lowQuality
+      ? REMASTER_RENDER_POLICY.balancedPixelBudget
+      : REMASTER_RENDER_POLICY.highPixelBudget;
     return Math.min(
+      Math.sqrt(pixels / (width * height)),
       hardware,
       this.world.lowQuality ? REMASTER_RENDER_POLICY.balancedCap : REMASTER_RENDER_POLICY.maxScale,
     );
   }
 
   get floor() {
-    // A browser/device already below .85 must never be forced to supersample.
-    return Math.min(REMASTER_RENDER_POLICY.minScale, this.cap);
+    // Retain the high preset's sharpness floor. The existing balanced preset has
+    // more room on weak GPUs; UI, textures, models and simulation stay native.
+    return Math.min(
+      this.world.lowQuality
+        ? REMASTER_RENDER_POLICY.balancedMinScale
+        : REMASTER_RENDER_POLICY.minScale,
+      this.cap,
+    );
   }
 
   resetTiming(grace = REMASTER_RENDER_POLICY.sceneGrace) {

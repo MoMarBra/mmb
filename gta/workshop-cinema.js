@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { renderGameScene } from './scene-matrix-scheduler.js';
 import { WORKSHOP_LINES } from './workshop-lines.js';
 import { buildBossSet, buildWorkshopSet, animateStoryActor } from './workshop-sets.js';
 
@@ -260,7 +261,7 @@ export class WorkshopCinema {
     renderer.shadowMap.needsUpdate = true;
     m.set.scene.environment = this.w.scene?.environment || null;
     m.set.scene.environmentIntensity = 0.46;
-    renderer.render(m.set.scene, this.camera);
+    renderGameScene(this.w, m.set.scene, this.camera);
     document.querySelector('.story-film-progress i').style.transform =
       `scaleX(${m.elapsed / m.duration})`;
     document.getElementById('story-film-time').textContent =

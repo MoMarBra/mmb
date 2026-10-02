@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "81ca47748b9900ed6b424de682beb9a854a6c501",
+  "sourceCommit": "a069096495e850a154ad86482cafe18c0e46acf9",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-02T09:27:32.397Z",
+  "preparedAt": "2026-10-02T10:32:47.162Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Quizssoir starts directly in the studio without format menu; optional controls live in explicit pause. Original theme, question jingle and loop verified at the real output with phone radio off; global mute, volume settings, suspend recovery and saved-round resume tested. Priority loading avoids soundtrack queue starvation. Browser and offline release validation."
+  "validation": "Performance and Marienplatz release: rooftop terrace, distinct Altstadt facades and raised existing intro camera; sparse active-body physics, compatible-colour instancing, shared contact shadows, visible-scene matrix scheduling, cached traffic/raycast broad phases, minimal HUD/canvas invalidation and adaptive pixel budgets. Visual/browser gameplay, vehicle, crowd, cinema, original quiz audio and offline checks passed. Hardware-specific measurements are documented; no universal FPS guarantee."
 }

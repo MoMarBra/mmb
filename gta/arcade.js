@@ -1,3 +1,5 @@
+import { orientedRectanglesOverlap } from './oriented-rectangle.js';
+import { instanceSurfaceKey, instanceSurfaceMaterial } from './instance-surfaces.js';
 import { VehiclePreload } from './vehicle-preload.js';
 import { VehicleLighting } from './vehicle-lighting.js';
 import { animateVehicleWheels } from './blender-vehicles.js';
@@ -11,19 +13,8 @@ import { Leisure } from './leisure.js';
 import { Atmosphere } from './atmosphere.js';
 import { Soundtrack } from './soundtrack.js';
 
-// Separating-axis test for car footprints and solid world obstacles.
-export function rectanglesOverlap(a, b, padding = 0) {
-  const axes = [a.angle, a.angle + Math.PI / 2, b.angle, b.angle + Math.PI / 2];
-  for (const angle of axes) {
-    const x = Math.cos(angle),
-      z = -Math.sin(angle);
-    const radius = (r) =>
-      (Math.abs(x * Math.cos(r.angle) - z * Math.sin(r.angle)) * r.w) / 2 +
-      (Math.abs(x * Math.sin(r.angle) + z * Math.cos(r.angle)) * r.l) / 2;
-    if (Math.abs((a.x - b.x) * x + (a.z - b.z) * z) > radius(a) + radius(b) + padding) return false;
-  }
-  return true;
-}
+// Shared exact predicate; conservative broadphase skips distant geometry.
+export const rectanglesOverlap = orientedRectanglesOverlap;
 
 export class Arcade {
   constructor(game) {
@@ -92,11 +83,14 @@ export class Arcade {
     const root = this.world.groups.city;
     root.updateMatrixWorld(true);
     const groups = new Map();
+    const instanceMaterials = new Map();
     this.vehicleBatches = [];
     for (const car of this.world.cars)
       car.mesh.traverse((source) => {
         if (!source.isMesh || source.isInstancedMesh || !source.visible) return;
-        const key = source.geometry.uuid + '|' + source.material.uuid;
+        const surface = instanceSurfaceKey(source);
+        const key =
+          source.geometry.uuid + '|' + (surface || source.material.uuid) + '|' + source.renderOrder;
         const list = groups.get(key) || [];
         list.push({ source, car });
         groups.set(key, list);
@@ -104,26 +98,32 @@ export class Arcade {
     for (const list of groups.values()) {
       if (list.length < 2) continue;
       const first = list[0].source,
-        batch = new THREE.InstancedMesh(first.geometry, first.material, list.length);
+        surface = instanceSurfaceKey(first),
+        material = instanceSurfaceMaterial(first.material, instanceMaterials, surface),
+        batch = new THREE.InstancedMesh(first.geometry, material, list.length);
+      batch.renderOrder = first.renderOrder;
       batch.castShadow = list.some((o) => o.source.castShadow);
       batch.receiveShadow = true;
       batch.frustumCulled = false;
       list.forEach((o, i) => {
         batch.setMatrixAt(i, o.source.matrixWorld);
+        if (surface) batch.setColorAt(i, o.source.material.color);
         o.source.visible = false;
       });
       root.add(batch);
       let farBatch = null;
       if (first.userData.lodGeometry) {
-        farBatch = new THREE.InstancedMesh(first.userData.lodGeometry, first.material, list.length);
+        farBatch = new THREE.InstancedMesh(first.userData.lodGeometry, material, list.length);
+        if (surface) list.forEach((o, i) => farBatch.setColorAt(i, o.source.material.color));
         farBatch.name = 'Blender traffic · distance LOD';
+        farBatch.renderOrder = first.renderOrder;
         farBatch.castShadow = batch.castShadow;
         farBatch.receiveShadow = true;
         farBatch.frustumCulled = false;
         farBatch.count = 0;
         root.add(farBatch);
       }
-      this.vehicleBatches.push({ batch, farBatch, list });
+      this.vehicleBatches.push({ batch, farBatch, list, colored: !!surface });
     }
   }
   updateVehicleBatches() {
@@ -135,21 +135,34 @@ export class Arcade {
       const d2 = car.mesh.position.distanceToSquared(this.world.camera.position);
       car.farLOD = d2 > (car.farLOD ? 52 * 52 : 62 * 62);
     }
-    for (const { batch, farBatch, list } of this.vehicleBatches) {
+    for (const { batch, farBatch, list, colored } of this.vehicleBatches) {
       let count = 0,
         farCount = 0;
       for (const o of list) {
         if (!o.car.renderVisible || o.car.detailed || o.source.userData.suppressed) continue;
-        if (farBatch && o.car.farLOD) farBatch.setMatrixAt(farCount++, o.source.matrixWorld);
-        else batch.setMatrixAt(count++, o.source.matrixWorld);
+        if (farBatch && o.car.farLOD) {
+          farBatch.setMatrixAt(farCount, o.source.matrixWorld);
+          if (colored) farBatch.setColorAt(farCount, o.source.material.color);
+          farCount++;
+        } else {
+          batch.setMatrixAt(count, o.source.matrixWorld);
+          if (colored) batch.setColorAt(count, o.source.material.color);
+          count++;
+        }
       }
       batch.count = count;
       batch.visible = count > 0;
-      if (count) batch.instanceMatrix.needsUpdate = true;
+      if (count) {
+        batch.instanceMatrix.needsUpdate = true;
+        if (colored) batch.instanceColor.needsUpdate = true;
+      }
       if (farBatch) {
         farBatch.count = farCount;
         farBatch.visible = farCount > 0;
-        if (farCount) farBatch.instanceMatrix.needsUpdate = true;
+        if (farCount) {
+          farBatch.instanceMatrix.needsUpdate = true;
+          if (colored) farBatch.instanceColor.needsUpdate = true;
+        }
       }
     }
   }
@@ -185,6 +198,11 @@ export class Arcade {
         b.position.y + ext.y < floor + 0.12 ||
         b.position.y - ext.y > floor + 1.9
       )
+        continue;
+      // Rotation-independent bound: retain every possible overlap without
+      // constructing a footprint or evaluating trigonometry for distant bodies.
+      const reach = (rect.w + rect.l) * 0.5 + ext.x + ext.z;
+      if (Math.abs(rect.x - b.position.x) > reach || Math.abs(rect.z - b.position.z) > reach)
         continue;
       const angle = 2 * Math.atan2(b.quaternion.y, b.quaternion.w);
       if (

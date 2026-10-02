@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { renderGameScene } from './scene-matrix-scheduler.js';
 import { box, label } from './world.js';
 import { buildBossSet, storyActor, animateStoryActor } from './workshop-sets.js';
 import { EXPANSION_LINES } from './expansion-voices.js';
@@ -325,9 +326,15 @@ export class BBECampaign {
     };
   }
   updateHUD() {
+    const setText = (id, value) => {
+      const element = $(id),
+        label = String(value);
+      if (element && element.textContent !== label) element.textContent = label;
+    };
     const a = this.state.active,
       goal = this.objective();
-    this.hud.hidden = !this.enabled || !a || this.cinematic || !this.g.started;
+    const hidden = !this.enabled || !a || this.cinematic || !this.g.started;
+    if (this.hud.hidden !== hidden) this.hud.hidden = hidden;
     const night = !!(
       this.enabled &&
       a?.id === 'night' &&
@@ -335,7 +342,7 @@ export class BBECampaign {
       this.w.zone === 'office' &&
       !this.cinematic
     );
-    this.nightVeil.hidden = !night;
+    if (this.nightVeil.hidden !== !night) this.nightVeil.hidden = !night;
     this.emergency.intensity = night ? 5 : 0;
     const manual = this.manualMarker > 0 && this.manualTarget && this.w.zone === 'office';
     this.marker.visible = !!(
@@ -350,22 +357,32 @@ export class BBECampaign {
     if (!a || !goal) return;
     const m = mission(a.id),
       progress = a.id === 'pitch' ? a.step / 5 : a.tasks.length / (a.id === 'research' ? 3 : 4);
-    $('campaign-chapter').textContent = `BBE · ${m.chapter}/4`;
-    $('campaign-goal').textContent = goal.label || m.short;
-    $('campaign-timer').textContent = m.seconds ? minute(a.remaining) : `${a.tasks.length}/3`;
+    setText('campaign-chapter', `BBE · ${m.chapter}/4`);
+    setText('campaign-goal', goal.label || m.short);
+    setText('campaign-timer', m.seconds ? minute(a.remaining) : `${a.tasks.length}/3`);
     $('campaign-timer').classList.toggle('urgent', m.seconds > 0 && a.remaining < 45);
     if ($('campaign-panel-timer'))
-      $('campaign-panel-timer').textContent = m.seconds
-        ? minute(a.remaining)
-        : 'RECHERCHE · OHNE ZEITDRUCK';
-    this.hud.querySelector('.campaign-meter i').style.transform = `scaleX(${progress})`;
+      setText(
+        'campaign-panel-timer',
+        m.seconds ? minute(a.remaining) : 'RECHERCHE · OHNE ZEITDRUCK',
+      );
+    const meter = this.hud.querySelector('.campaign-meter i'),
+      transform = `scaleX(${progress})`;
+    if (meter.style.transform !== transform) meter.style.transform = transform;
     if (this.manualWaypoint && this.manualMarker > 0 && this.w.zone === 'city') {
       this.g.waypoint = this.manualWaypoint;
       return;
     }
-    if (goal.zone === 'city' && this.w.zone === 'city')
-      this.g.waypoint = { x: goal.x, z: goal.z, name: goal.label, campaign: true };
-    else if (this.g.waypoint?.campaign) this.g.waypoint = null;
+    if (goal.zone === 'city' && this.w.zone === 'city') {
+      const waypoint = this.g.waypoint;
+      if (
+        !waypoint?.campaign ||
+        waypoint.x !== goal.x ||
+        waypoint.z !== goal.z ||
+        waypoint.name !== goal.label
+      )
+        this.g.waypoint = { x: goal.x, z: goal.z, name: goal.label, campaign: true };
+    } else if (this.g.waypoint?.campaign) this.g.waypoint = null;
   }
   beforeTransition(zone) {
     const a = this.state.active;
@@ -1167,7 +1184,7 @@ export class BBECampaign {
     r.shadowMap.needsUpdate = true;
     m.set.scene.environment = this.w.scene.environment;
     m.set.scene.environmentIntensity = m.id === 'night' ? 0.2 : 0.46;
-    r.render(m.set.scene, this.camera);
+    renderGameScene(this.w, m.set.scene, this.camera);
     m.drawn = true;
     m.width = this.size.x;
     m.height = this.size.y;

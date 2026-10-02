@@ -87,8 +87,23 @@ export class CityLife {
       b = to.clone().add(V(0, 1.1, 0)),
       dir = b.clone().sub(a).normalize(),
       distance = a.distanceTo(b);
+    // A yaw-rotated box fits in this sphere. Reject distant bodies before the
+    // exact slab test, preserving its near-parallel tolerance at grazing angles.
+    const margin = distance * 2e-6 + 1e-8;
     for (const body of this.w.zoneData.city.physics.bodies) {
       if (body.mass || body.collisionResponse === false) continue;
+      const h = body.shapes[0]?.halfExtents;
+      if (!h) continue;
+      const dx = body.position.x - a.x,
+        dy = body.position.y - a.y,
+        dz = body.position.z - a.z;
+      const along = Math.max(0, Math.min(distance, dx * dir.x + dy * dir.y + dz * dir.z));
+      const ox = dx - dir.x * along,
+        oy = dy - dir.y * along,
+        oz = dz - dir.z * along;
+      const reachSquared =
+        h.x * h.x + h.y * h.y + h.z * h.z + margin * (2 * (h.x + h.y + h.z) + margin);
+      if (ox * ox + oy * oy + oz * oz > reachSquared) continue;
       if (rayBoxDistance(a, dir, body, distance) < distance - 0.3) return false;
     }
     return true;

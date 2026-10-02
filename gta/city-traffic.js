@@ -1,3 +1,4 @@
+import { orientedRectanglesOverlap } from './oriented-rectangle.js';
 import { KAROLINENPLATZ_RING } from './city-streets.js';
 import { signalStage } from './street-signs.js';
 import { animateVehicleWheels } from './blender-vehicles.js';
@@ -211,27 +212,34 @@ function project(route, point, heading = null) {
   return best.s;
 }
 
-function footprint(car, p = car.mesh.position, angle = car.mesh.rotation.y) {
-  return {
-    x: p.x,
-    z: p.z,
-    angle,
-    w: car.width || (car.type === 'bus' ? 2.5 : 1.9),
-    l: car.length || (car.type === 'bus' ? 8.5 : car.type === 'van' ? 5.3 : 4.4),
-  };
+function footprint(car, p = car.mesh.position, angle = car.mesh.rotation.y, out = {}) {
+  out.x = p.x;
+  out.z = p.z;
+  out.angle = angle;
+  out.w = car.width || (car.type === 'bus' ? 2.5 : 1.9);
+  out.l = car.length || (car.type === 'bus' ? 8.5 : car.type === 'van' ? 5.3 : 4.4);
+  return out;
 }
 
-export function trafficFootprintsOverlap(a, b, padding = 0) {
-  for (const angle of [a.angle, a.angle + Math.PI / 2, b.angle, b.angle + Math.PI / 2]) {
-    const x = Math.cos(angle),
-      z = -Math.sin(angle);
-    const extent = (r) =>
-      (Math.abs(x * Math.cos(r.angle) - z * Math.sin(r.angle)) * r.w +
-        Math.abs(x * Math.sin(r.angle) + z * Math.cos(r.angle)) * r.l) *
-      0.5;
-    if (Math.abs((a.x - b.x) * x + (a.z - b.z) * z) > extent(a) + extent(b) + padding) return false;
+export const trafficFootprintsOverlap = orientedRectanglesOverlap;
+
+function refreshCarFootprints(world, state) {
+  state.footprints ||= new Map();
+  state.carShapes ||= [];
+  state.carShapes.length = 0;
+  for (const car of world.cars) {
+    let rect = state.footprints.get(car);
+    if (!rect) {
+      rect = { car };
+      state.footprints.set(car, rect);
+    }
+    footprint(car, car.mesh.position, car.mesh.rotation.y, rect);
+    state.carShapes.push(rect);
   }
-  return true;
+  if (state.footprints.size > world.cars.length) {
+    const present = new Set(world.cars);
+    for (const car of state.footprints.keys()) if (!present.has(car)) state.footprints.delete(car);
+  }
 }
 
 function rebuildSolids(world, state) {
@@ -273,13 +281,13 @@ function rebuildSolids(world, state) {
 }
 
 function solidAt(state, rect) {
-  const seen = new Set(),
+  const query = (state.solidQuery = (state.solidQuery || 0) + 1),
     reach = Math.hypot(rect.w, rect.l) / 2;
   for (let x = Math.floor((rect.x - reach) / 24); x <= Math.floor((rect.x + reach) / 24); x++)
     for (let z = Math.floor((rect.z - reach) / 24); z <= Math.floor((rect.z + reach) / 24); z++)
       for (const b of state.cells.get(`${x},${z}`) || []) {
-        if (seen.has(b)) continue;
-        seen.add(b);
+        if (b.lastQuery === query) continue;
+        b.lastQuery = query;
         if (trafficFootprintsOverlap(rect, b, 0.08)) return true;
       }
   return false;
@@ -293,7 +301,8 @@ function clearSpawn(world, state, car, route, s) {
     (other) =>
       other !== car &&
       other.mesh.position.y < 3 &&
-      distance(p, other.mesh.position) < (rect.l + footprint(other).l) * 0.5 + 6,
+      distance(p, other.mesh.position) <
+        (rect.l + (state.footprints?.get(other) || footprint(other)).l) * 0.5 + 6,
   );
 }
 
@@ -427,14 +436,14 @@ function trafficLimit(world, state, car, p, phase) {
     const gap = ahead - own.l * 0.5 - length * 0.5 - 1.4;
     if (gap < 23) limit = Math.min(limit, Math.max(0, gap * 0.7));
   };
-  for (const other of world.cars) {
+  for (const f of state.carShapes) {
+    const other = f.car;
     if (
       other === car ||
       other.mesh.position.y > 3 ||
       (other.type === 'helicopter' && other.mesh.position.y > 1)
     )
       continue;
-    const f = footprint(other);
     corridor(other.mesh.position, f.w * 0.5, f.l);
   }
   const player = world.zoneData.city.body?.position || world.player.position;
@@ -487,9 +496,7 @@ function junctionPathClear(car, junction, obstacles) {
 }
 
 function reserveJunctions(world, state, phase) {
-  const obstacles = world.cars
-    .filter((other) => other.mesh.position.y < 3)
-    .map((other) => ({ ...footprint(other), car: other }));
+  const obstacles = state.carShapes.filter((rect) => rect.car.mesh.position.y < 3);
   const player = world.zoneData.city.body?.position || world.player.position;
   if (!world.gameplay?.vehicle && player.y < 2.4)
     obstacles.push({ x: player.x, z: player.z, w: 1.1, l: 1.1, angle: 0 });
@@ -565,6 +572,7 @@ export function updateCityTraffic(world, dt, phase = world.time % 16) {
   dt = Math.min(dt, 0.08);
   state.time += dt;
   if (state.time >= state.solidRefresh) rebuildSolids(world, state);
+  refreshCarFootprints(world, state);
   reserveJunctions(world, state, mod(phase, 16));
   for (const car of state.cars) {
     if (car.controlled || car.parked) continue;
@@ -579,11 +587,11 @@ export function updateCityTraffic(world, dt, phase = world.time % 16) {
     const next = sampleTrafficRoute(t.route, nextS);
     const angle = Math.atan2(next.dx, next.dz);
     const nextFootprint = footprint(car, next, angle);
-    const blockedByCar = world.cars.some(
+    const blockedByCar = state.carShapes.some(
       (other) =>
-        other !== car &&
-        other.mesh.position.y < 3 &&
-        trafficFootprintsOverlap(nextFootprint, footprint(other), 0.2),
+        other.car !== car &&
+        other.car.mesh.position.y < 3 &&
+        trafficFootprintsOverlap(nextFootprint, other, 0.2),
     );
     if (blockedByCar || solidAt(state, nextFootprint)) car.speed = 0;
     else {
@@ -616,5 +624,7 @@ export function updateCityTraffic(world, dt, phase = world.time % 16) {
       t.waitSince = 0;
     }
     safelyRecover(world, state, car);
+    // Later cars observe earlier movement exactly as in the original sequential update.
+    footprint(car, car.mesh.position, car.mesh.rotation.y, state.footprints.get(car));
   }
 }

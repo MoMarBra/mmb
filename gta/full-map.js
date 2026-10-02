@@ -13,7 +13,7 @@ export class FullMap {
     this.selected = null;
   }
   places() {
-    return [
+    return (this.placeCache ||= [
       ...new Map(
         [
           { id: 'hq', name: 'BBE Handelsberatung', type: 'work', ...CITY_LAYOUT.hq },
@@ -24,7 +24,7 @@ export class FullMap {
           ...HELIPADS.map((p) => ({ ...p, type: 'flight' })),
         ].map((p) => [p.id, p]),
       ).values(),
-    ];
+    ]);
   }
   open() {
     const g = this.g;
@@ -90,9 +90,17 @@ export class FullMap {
         const b = this.canvas.getBoundingClientRect(),
           x = this.center.x + (e.clientX - b.left - b.width / 2) / this.unit,
           z = this.center.z + (e.clientY - b.top - b.height / 2) / this.unit;
-        const near = this.places().sort(
-          (a, b) => Math.hypot(a.x - x, a.z - z) - Math.hypot(b.x - x, b.z - z),
-        )[0];
+        let near = null,
+          nearestSquared = Infinity;
+        for (const place of this.places()) {
+          const dx = place.x - x,
+            dz = place.z - z;
+          const squared = dx * dx + dz * dz;
+          if (squared < nearestSquared) {
+            near = place;
+            nearestSquared = squared;
+          }
+        }
         this.select(
           Math.hypot(near.x - x, near.z - z) < 18 / this.unit
             ? near
@@ -158,10 +166,12 @@ export class FullMap {
     const b = canvas.getBoundingClientRect(),
       dpr = Math.min(devicePixelRatio || 1, 2);
     if (!b.width || !b.height) return;
-    canvas.width = Math.round(b.width * dpr);
-    canvas.height = Math.round(b.height * dpr);
+    const width = Math.round(b.width * dpr),
+      height = Math.round(b.height * dpr);
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
     const c = canvas.getContext('2d');
-    c.scale(dpr, dpr);
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
     const W = b.width,
       H = b.height;
     this.unit = Math.min(W / 690, H / 590) * this.zoom;
@@ -174,8 +184,8 @@ export class FullMap {
       c.fillStyle = color;
       c.fillRect(X(x - w / 2), Z(z - d / 2), w * u, d * u);
     };
-    for (const b of [...(this.g.world.cityBlocks || []), ...(this.g.world.expansionBlocks || [])])
-      rect(b.x, b.z, b.w, b.d, '#969b99');
+    for (const blocks of [this.g.world.cityBlocks, this.g.world.expansionBlocks])
+      for (const b of blocks || []) rect(b.x, b.z, b.w, b.d, '#969b99');
     for (const r of STREET_ROADS) {
       rect(r.x, r.z, r.w + 2, r.d + 2, '#eeeeeb');
       rect(r.x, r.z, r.w, r.d, '#626969');
@@ -205,7 +215,12 @@ export class FullMap {
     const player = this.player(),
       waypoint = this.g.waypoint;
     if (waypoint) {
-      const route = mapRoute(player, waypoint);
+      const key = player.x + ':' + player.z + ':' + waypoint.x + ':' + waypoint.z;
+      if (this.routeKey !== key) {
+        this.routeKey = key;
+        this.routeCache = mapRoute(player, waypoint);
+      }
+      const route = this.routeCache;
       c.strokeStyle = '#9270ca';
       c.lineWidth = 5;
       c.lineJoin = 'round';
@@ -265,6 +280,8 @@ export class FullMap {
     c.lineWidth = 2;
     c.stroke();
     c.restore();
-    document.getElementById('atlas-scale').textContent = Math.round(100 / u) + ' m ━━━━━';
+    const scale = document.getElementById('atlas-scale'),
+      label = Math.round(100 / u) + ' m ━━━━━';
+    if (scale.textContent !== label) scale.textContent = label;
   }
 }

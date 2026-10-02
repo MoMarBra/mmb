@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { renderGameScene } from './scene-matrix-scheduler.js';
 import { createUmbrella } from './aaa-props.js';
 export class WeatherEffects {
   constructor(d) {
@@ -232,7 +233,7 @@ export class WeatherEffects {
     try {
       r.setRenderTarget(this.target);
       r.clear();
-      r.render(w.scene, c);
+      renderGameScene(w, w.scene, c);
     } finally {
       r.setRenderTarget(old);
       r.clippingPlanes = planes;
