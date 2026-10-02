@@ -87,6 +87,10 @@ export class WorkshopStory {
     return `<button type="button" class="mission-row mission-open" data-workshop-open><span class="mission-row-title">Nur noch kurz zum Marienplatz.</span><span aria-hidden="true">↗</span></button>`;
   }
   brief() {
+    if (this.g.campaign?.active) {
+      this.g.toast('Zuerst das aktuelle Projektkapitel abschließen.');
+      return;
+    }
     if (this.g.origin?.active) {
       this.g.toast('Zuerst mit Lukas bei der BBE ankommen.');
       return;

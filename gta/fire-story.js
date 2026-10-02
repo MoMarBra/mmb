@@ -119,7 +119,7 @@ export class FireStory {
     if (!this.state.log.includes(key)) this.state.log.push(key);
   }
   conflict() {
-    if (this.g.origin?.active) return true;
+    if (this.g.origin?.active || this.g.campaign?.active) return true;
     return this.g.workshop?.active || this.g.sim.s.courier.active;
   }
   entryCard() {
@@ -343,7 +343,13 @@ export class FireStory {
       benjamin.storyAway = this.enabled && this.active;
       benjamin.mesh.visible = !benjamin.storyAway;
     }
-    if (office && !blocked && !this.running && distance(w.player.position, FIRE_LAPTOP) < 2.6)
+    if (
+      office &&
+      !blocked &&
+      !this.conflict() &&
+      !this.running &&
+      distance(w.player.position, FIRE_LAPTOP) < 2.6
+    )
       w.nearest = {
         kind: 'fire-laptop',
         label: s.completed

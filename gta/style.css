@@ -6217,3 +6217,5 @@ button.mission-row:focus-visible {
     overflow-wrap: anywhere;
   }
 }
+
+.discovery-card{max-width:32rem;margin:auto;padding:1rem}.discovery-card>span{font-size:.7rem;letter-spacing:.14em;color:#d5bd79}.discovery-card p{font-size:1.15rem;line-height:1.65;margin:1.2rem 0}.discovery-card small{display:block;opacity:.65;margin:0 0 1.5rem}

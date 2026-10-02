@@ -386,6 +386,13 @@ export function renderQuizScore(ctx, key) {
 
 export const QUIZ_MUSIC_GAIN = 1.55;
 export const QUIZ_QUESTION_LEAD_DURATION = 5;
+export const QUIZ_COFFEE_LEAD_DURATION = 1.25;
+export const QUIZ_SHORT_INTRO_DURATION = 5;
+export const QUIZ_SHORT_INTRO_SHOTS = Object.freeze([
+  { at: 0, end: 0.9, shot: 'portal' },
+  { at: 0.9, end: 2.6, shot: 'reveal', title: true },
+  { at: 2.6, end: 5, shot: 'duo', title: true },
+]);
 const CACHE_LIMIT = 64 * 1024 * 1024;
 // Three bounded 15 s bank attempts plus a small decode/startup margin.
 const INTRO_AUDIO_WAIT_LIMIT = 48;
@@ -433,6 +440,15 @@ export const QUIZ_SHOW_INTRO_SHOTS = Object.freeze([
 export function quizTrackPlan(name, tier = 0, options = {}) {
   tier = clamp(tier, 0, 14);
   name = ALIASES[name] || name;
+  if (name === 'intro' && options.shortIntro)
+    return [
+      segment('opening', {
+        from: 0.18,
+        duration: QUIZ_SHORT_INTRO_DURATION,
+        fadeIn: 0.15,
+        fadeOut: 0.5,
+      }),
+    ];
   if (name === 'intro')
     return [
       segment('theme'),
@@ -446,22 +462,42 @@ export function quizTrackPlan(name, tier = 0, options = {}) {
     ];
   if (name === 'question') {
     return [
-      segment('play2000', { duration: QUIZ_QUESTION_LEAD_DURATION, fadeOut: 0.4 }),
+      segment('play2000', {
+        duration:
+          options.mode === 'coffee' ? QUIZ_COFFEE_LEAD_DURATION : QUIZ_QUESTION_LEAD_DURATION,
+        fadeOut: options.mode === 'coffee' ? 0.18 : 0.4,
+      }),
       loopSegment(questionKey(tier)),
     ];
   }
+  if ((name === 'lock' || name === 'heartbeat') && options.mode === 'coffee')
+    return [loopSegment(questionKey(tier))];
   if (name === 'lock' || name === 'heartbeat')
     return tier < 6
       ? [loopSegment('questionsEarly')]
       : [segment(tier < 14 ? 'final2000' : 'finalMillion')];
   if (name === 'correct' || name === 'safety' || name === 'million')
-    return [segment(name === 'million' ? 'winMillion' : correctKey(tier))];
+    return [
+      segment(
+        name === 'million' ? 'winMillion' : correctKey(tier),
+        options.mode === 'coffee' ? { duration: 3.5, fadeOut: 0.4 } : {},
+      ),
+    ];
   if (name === 'wrong') return [segment(lossKey(tier))];
   if (name === 'exit') return [segment('closing')];
   if (name === 'finale')
     return options.outcome === 'walk-away' || options.outcome === 'abort'
       ? [segment('closing')]
-      : [segment(options.outcome === 'win' ? 'winMillion' : lossKey(tier)), segment('closing')];
+      : [
+          segment(
+            options.outcome === 'win'
+              ? options.mode === 'coffee'
+                ? 'win1000'
+                : 'winMillion'
+              : lossKey(tier),
+          ),
+          segment('closing'),
+        ];
   return [];
 }
 
@@ -469,6 +505,7 @@ export function quizTrackPlan(name, tier = 0, options = {}) {
 export class QuizAudio {
   constructor(audio) {
     this.audio = audio;
+    this.options = { mode: 'classic', shortIntro: false };
     this.active = false;
     this.disposed = false;
     this.manualPause = this.framePause = false;
@@ -508,6 +545,9 @@ export class QuizAudio {
     if (!this.audio.ready) this.audio.start?.();
     return true;
   }
+  configure(options = {}) {
+    this.options = { ...this.options, ...options };
+  }
   preloadIntro() {
     this.request('play2000');
     this.request('theme');
@@ -528,9 +568,10 @@ export class QuizAudio {
     return this.clock;
   }
   get introDuration() {
-    return QUIZ_SHOW_INTRO_DURATION;
+    return this.options.shortIntro ? QUIZ_SHORT_INTRO_DURATION : QUIZ_SHOW_INTRO_DURATION;
   }
   get lockDuration() {
+    if (this.options.mode === 'coffee') return 1.25;
     return this.tier < 6 ? 4.2 : trackInfo(this.tier < 14 ? 'final2000' : 'finalMillion').duration;
   }
   get leadRemaining() {
@@ -707,7 +748,7 @@ export class QuizAudio {
       });
     } else {
       this.remove('sting');
-      const next = quizTrackPlan(name, this.tier, options);
+      const next = quizTrackPlan(name, this.tier, { ...this.options, ...options });
       let preserve = name === 'finale' && this.lastResult && next[0]?.key === this.lastResult;
       if (preserve) this.clock = Math.min(this.clock, next[0].duration);
       if (name === 'lock' && this.tier < 6 && this.tracks.get('bed')?.key === 'questionsEarly') {
@@ -751,7 +792,7 @@ export class QuizAudio {
               : null;
       this.phase = options.phase;
       this.tier = tier;
-      if (cue) this.setPlan(quizTrackPlan(cue, tier, { resume: true }));
+      if (cue) this.setPlan(quizTrackPlan(cue, tier, { ...this.options, resume: true }));
     }
     const now = this.audio.ctx?.currentTime;
     let delta =

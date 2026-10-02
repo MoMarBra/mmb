@@ -6,13 +6,15 @@ export function storyActor(role) {
   const colors = {
     lukas: '#334652',
     Tobias: '#66786b',
+    Benjamin: '#e3e9dd',
     player: '#244e60',
     clara: '#a66c58',
     guest: '#766989',
   };
   const actor = human({
     jacket: colors[role] || '#786c62',
-    hair: role === 'clara' ? '#643d2c' : '#40372f',
+    hair: role === 'clara' ? '#643d2c' : role === 'Benjamin' ? '#604a38' : '#40372f',
+    ...(role === 'Benjamin' ? { pants: '#3c5863' } : {}),
   });
   actor.userData.storyRole = role;
   const face = new THREE.Group();
@@ -106,7 +108,7 @@ function lightScene(scene, night = false) {
   sun.shadow.normalBias = 0.045;
   scene.add(sun, sun.target);
 }
-export function buildBossSet() {
+export function buildBossSet({ nameplate = 'Lukas Fleischmann' } = {}) {
   const scene = new THREE.Scene();
   lightScene(scene);
   box(scene, 0, -0.09, 0, 10, 0.18, 11, '#9d896c');
@@ -141,7 +143,7 @@ export function buildBossSet() {
       ['#f0e6cb', '#bdd1bf', '#e6c285', '#d9a58d'][i],
     );
   cup(scene, 1.27, -1.45);
-  label(scene, 'Lukas Fleischmann', 0.75, 1.06, -0.52, 1.2, 0.21, { bg: '#233f49', fg: '#e5d1a4' });
+  label(scene, nameplate, 0.75, 1.06, -0.52, 1.2, 0.21, { bg: '#233f49', fg: '#e5d1a4' });
   const suitcase = createStreetProp(THREE, 'suitcase');
   suitcase.position.set(0.2, 0.94, -1.4);
   suitcase.rotation.y = 0.25;

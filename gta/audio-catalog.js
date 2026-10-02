@@ -1,7 +1,9 @@
+import { EXPANSION_VOICE_ASSETS } from './expansion-voices.js';
 import { WWM_AUDIO_ASSETS } from './quiz-soundtrack.js';
 import { QUIZ_VOICE_ASSETS } from './quiz-lines.js';
 import { QUIZ_SCORE_ASSETS } from './quiz-audio.js';
 export const AUDIO_ASSETS = {
+  ...EXPANSION_VOICE_ASSETS,
   ...QUIZ_VOICE_ASSETS,
   ...QUIZ_SCORE_ASSETS,
   ...WWM_AUDIO_ASSETS,

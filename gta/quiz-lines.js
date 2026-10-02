@@ -1,5 +1,7 @@
+import { EXTRA_QUIZ_LINES } from './expansion-voices.js';
 // Original fictional host dialogue and question readings. Local Windows speech synthesis.
 export const QUIZ_LINES = Object.freeze({
+  ...EXTRA_QUIZ_LINES,
   intro: {
     asset: 'quiz_host_intro',
     text: 'Willkommen im Quizssoir. Der einzige Ort, an dem Sie unter Druck eine Million machen können.',

@@ -119,7 +119,12 @@ export class OriginStory {
     this.g.waypoint = null;
   }
   async begin() {
-    if (this.g.workshop.active || this.g.fireStory.active || this.g.sim.s.courier.active) {
+    if (
+      this.g.campaign?.active ||
+      this.g.workshop.active ||
+      this.g.fireStory.active ||
+      this.g.sim.s.courier.active
+    ) {
       this.g.toast(
         'Zuerst den laufenden Auftrag abschließen.',
         'Dein Story-Speicherpunkt bleibt erhalten.',

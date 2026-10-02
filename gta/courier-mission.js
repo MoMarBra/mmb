@@ -66,7 +66,12 @@ export class CourierMission {
       this.g.toast('Eilauftrag · IT', 'Den Koffer bei Benjamin im Westflügel übernehmen.');
       return;
     }
-    if (this.g.origin?.active || this.g.workshop?.active || this.g.fireStory?.active) {
+    if (
+      this.g.campaign?.active ||
+      this.g.origin?.active ||
+      this.g.workshop?.active ||
+      this.g.fireStory?.active
+    ) {
       this.g.toast(
         this.g.fireStory?.active
           ? 'Zuerst Ticket in Flammen abschließen.'

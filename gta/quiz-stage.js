@@ -272,6 +272,55 @@ export function installQuizssoir(world) {
   return fixture;
 }
 
+/** Persistent desk award, deliberately outside the workstation's rebuildable group. */
+export function installQuizTrophy(world) {
+  if (world.quizTrophy) return world.quizTrophy;
+  const root = new THREE.Group();
+  root.name = 'Quizssoir · Schreibtisch-Trophäe';
+  root.position.set(-7.13, 0.835, 1.34);
+  root.userData.dynamic = true;
+  root.visible = false;
+  world.groups.office.add(root);
+  const b = new SetBuilder(root);
+  const gold = b.material('#d7ad56', 0.24, 0.8);
+  const base = b.material('#15313d', 0.3, 0.15);
+  b.box([0, 0.025, 0], [0.29, 0.05, 0.23], base);
+  b.cylinder([0, 0.07, 0], 0.065, 0.045, gold, root, 20);
+  b.cylinder([0, 0.14, 0], 0.026, 0.11, gold, root, 16);
+  const cup = b.mesh(
+    new THREE.SphereGeometry(0.1, 20, 12, 0, TAU, 0, Math.PI / 2),
+    gold,
+    [0, 0.24, 0],
+  );
+  cup.rotation.z = Math.PI;
+  b.ring([0, 0.24, 0], 0.1, 0.01, gold, root);
+  for (const sign of [-1, 1]) {
+    const handle = b.ring([sign * 0.1, 0.2, 0], 0.048, 0.009, gold, root, false);
+    handle.scale.x = 0.7;
+  }
+  b.text('QUIZ CLUB', [0, 0.033, 0.117], 0.24, 0.03, { bg: '#15313d', fg: '#dfc384' });
+  const result = {
+    root,
+    update(view) {
+      const trophies = (view.trophies || []).filter((t) => t.earned);
+      root.visible = trophies.length > 0;
+      const champion = (view.stats?.classicWins || 0) > 0;
+      gold.color.set(
+        champion ? '#eed078' : (view.stats?.coffeeWins || 0) > 0 ? '#ccd9de' : '#c79061',
+      );
+      root.userData.quizRank = view.rank?.title || '';
+      root.userData.earnedTrophies = trophies.map((t) => t.title);
+    },
+    dispose() {
+      root.removeFromParent();
+      b.dispose();
+      if (world.quizTrophy === result) delete world.quizTrophy;
+    },
+  };
+  world.quizTrophy = result;
+  return result;
+}
+
 /** A small isolated set, drawn with the existing renderer; no second WebGL context. */
 export class QuizStage {
   constructor(world, { fixture = world.quizssoirFixture } = {}) {

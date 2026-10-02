@@ -1,3 +1,5 @@
+import { BBECampaign } from './bbe-campaign.js';
+import { QuizDiscoveries } from './quiz-discoveries.js';
 import { Quizssoir } from './quizssoir.js';
 import { OriginStory } from './origin-story.js';
 import { TitleMusic } from './title-music.js';
@@ -63,6 +65,8 @@ export class Game {
     this.extras = new CityExtras(this);
     this.origin = new OriginStory(this);
     this.quizssoir = new Quizssoir(this);
+    this.campaign = new BBECampaign(this);
+    this.quizDiscoveries = new QuizDiscoveries(this);
     this.mouseControls = new MouseControls(this);
     this.missionPassed = new MissionPassed(this);
     this.titleMusic = new TitleMusic(this);
@@ -127,6 +131,7 @@ export class Game {
       );
       this.extras.afterAudio();
       this.origin.update(dt, paused);
+      this.campaign.update(dt, paused);
       this.fireStory.update(rawDelta, paused);
       this.missionPassed.update(renderedWorld);
       this.uiTimer += dt;
@@ -175,6 +180,7 @@ export class Game {
   }
   get activeFilm() {
     if (this.quizssoir?.active) return this.quizssoir;
+    if (this.campaign?.cinematic) return this.campaign;
     if (this.extras?.intro.current) return this.extras.intro;
     if (this.origin?.activeFilm) return this.origin.activeFilm;
     return this.fireStory?.cinematic
@@ -512,6 +518,8 @@ export class Game {
     this.workshop?.updateHUD();
     this.fireStory?.updateHUD();
     this.origin?.updateHUD();
+    this.campaign?.updateHUD();
+    this.quizssoir?.updateWorldProgress?.();
     if (z === 'office' && this.world.player.position.x < -13.5) {
       $('#zone-name').textContent = inIT(this.world.player.position)
         ? 'BBE · IT / Benjamin'
@@ -521,6 +529,7 @@ export class Game {
   }
   transition(zone, id) {
     if (this.quizssoir?.active) return;
+    if (this.campaign?.beforeTransition?.(zone) === false) return;
     if (this.origin?.beforeTransition(zone) === false) return;
     if (this.fireStory?.beforeTransition() === false) return;
     this.worldTransitionUntil = performance.now() + 700;
@@ -541,6 +550,8 @@ export class Game {
   interact() {
     if (!this.started || this.modal || this.busy) return;
     const n = this.world.nearest;
+    if (this.campaign.interact(n)) return;
+    if (this.quizDiscoveries.interact(n)) return;
     if (this.quizssoir.interact(n)) return;
     if (this.origin.interact(n)) return;
     if (this.extras.interact(n)) return;
@@ -697,7 +708,7 @@ export class Game {
           .available()
           .map((t) => this.taskCard(t, false))
           .join('') || '<p class="muted">Alles in Arbeit.</p>'
-      }</div><details class="mission-extra"><summary>Story-Missionen</summary><div class="mission-list">${this.workshop.entryCard()}${this.fireStory.entryCard()}<button id="desk-courier" class="mission-row mission-open"><span class="mission-row-title">Eilauftrag · Koffer</span><span aria-hidden="true">↗</span></button></div></details>`,
+      }</div><details class="mission-extra"><summary>Story-Missionen</summary><div class="mission-list">${this.campaign.entryCard()}${this.workshop.entryCard()}${this.fireStory.entryCard()}<button id="desk-courier" class="mission-row mission-open"><span class="mission-row-title">Eilauftrag · Koffer</span><span aria-hidden="true">↗</span></button></div></details>`,
       { eyebrow: 'BBE · AUFTRÄGE' },
     );
     document.querySelectorAll('[data-accept]').forEach(
@@ -1105,7 +1116,7 @@ export class Game {
     if (page === 'mail')
       return `<h3>BBE Mail <span class="tag">${s.mail.length}</span></h3>${s.mail.map((m) => `<article class="mail-item"><small>${m.time}</small><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p></article>`).join('')}`;
     if (page === 'tasks')
-      return `<h3 class="mission-list-heading">Stories</h3><div class="mission-list">${this.fireStory.entryCard()}${this.workshop.entryCard()}<button id="phone-courier" class="mission-row mission-open" aria-label="Eilauftrag · Koffer · ${s.courier.active ? 'Karte' : 'Öffnen'}"><span class="mission-row-title">Eilauftrag · Koffer</span><span aria-hidden="true">↗</span></button></div><h3 class="mission-list-heading">BBE-Aufträge</h3><div class="mission-list">${s.active.map((t) => `<button class="mission-row bbe-task-row" data-focus-task="${t.id}" aria-label="${esc(t.title)} · Anheften" title="Anheften"><span class="mission-row-title">${esc(t.title)}</span><span class="mission-row-icon" aria-hidden="true">↗</span></button>`).join('') || '<p class="muted mission-empty">Keine offenen Aufträge.</p>'}</div><button id="phone-desk" class="mission-row mission-open mission-home"><span class="mission-row-title">BBE-Computer</span><span aria-hidden="true">↗</span></button>`;
+      return `<h3 class="mission-list-heading">Stories</h3><div class="mission-list">${this.campaign.entryCard()}${this.fireStory.entryCard()}${this.workshop.entryCard()}<button id="phone-courier" class="mission-row mission-open" aria-label="Eilauftrag · Koffer · ${s.courier.active ? 'Karte' : 'Öffnen'}"><span class="mission-row-title">Eilauftrag · Koffer</span><span aria-hidden="true">↗</span></button></div><h3 class="mission-list-heading">BBE-Aufträge</h3><div class="mission-list">${s.active.map((t) => `<button class="mission-row bbe-task-row" data-focus-task="${t.id}" aria-label="${esc(t.title)} · Anheften" title="Anheften"><span class="mission-row-title">${esc(t.title)}</span><span class="mission-row-icon" aria-hidden="true">↗</span></button>`).join('') || '<p class="muted mission-empty">Keine offenen Aufträge.</p>'}</div><button id="phone-desk" class="mission-row mission-open mission-home"><span class="mission-row-title">BBE-Computer</span><span aria-hidden="true">↗</span></button>`;
     if (page === 'map')
       return `<h3>Dein München</h3><div class="hint-inline"><strong>Vom BBE-Ausgang aus:</strong> links 20 m zur Augustenstraße mit Restaurants · rechts 100 m zum Zugang Königsplatz. Dahinter führt der goldene Fußweg über den Karolinenplatz zur Frauenkirche.</div><canvas id="large-map" width="900" height="780" class="large-map" aria-label="Stadtkarte mit BBE und Restaurants"></canvas><div class="map-legend"><span>BBE / Ziel</span><span>Restaurants</span><span>Du</span></div><div class="toolbar"><button class="primary" id="map-home">BBE als Ziel</button><button id="map-remove">Ziel entfernen</button></div><div class="city-routes">${[...HELIPADS, ...CITY_STOPS].map((p) => `<button class="small" data-city-route="${p.id}">${p.name}</button>`).join('')}</div><p class="muted" style="font-size:.8rem">Goldene Linie: Fußweg ab BBE · Goldene Punkte: Sehenswürdigkeiten · H: Landeplätze · Blaue Quadrate: Fahrräder.</p><p class="muted" style="font-size:.8rem">Verdichteter, frei interpretierter Stadtplan. Kein Navigationsplan für das echte München.</p><button class="small ghost" id="map-recover">Festgesteckt? Zurück ins BBE-Büro</button>`;
     if (page === 'bank')
@@ -1317,6 +1328,7 @@ export class Game {
       const ok = this.sim.import(await f.text());
       this.toast(ok ? 'Spielstand geladen.' : 'Die Datei ist kein gültiger BBE-Spielstand.');
       if (ok) {
+        this.campaign.onSaveLoaded();
         this.origin.cancel();
         this.world.makeWorkstation();
         this.transition('office');
@@ -1335,6 +1347,7 @@ export class Game {
     this.uiClick('#reset-confirm', () => {
       this.origin.cancel();
       this.sim.reset();
+      this.campaign.onSaveLoaded();
       this.world.makeWorkstation();
       this.transition('office');
       this.toast('Montag, 08:17.', 'Guten Morgen. Neue Aufgaben verfügbar.');
@@ -1343,7 +1356,7 @@ export class Game {
   sources() {
     this.open(
       'München, mit etwas dichterer Storyline',
-      `<p><strong>BBE Handelsberatung: Munich Consulting Simulator</strong> ist eine fiktive, unabhängige Spielinterpretation. Die BBE ist das Hauptquartier. Menschen, Dialoge, Büroräume, Marktwerte, Preise und Abläufe wurden für das Spiel erfunden.</p><p>Restaurantnamen und Adressen basieren auf veröffentlichten Ortsangaben. Die vier Zitronengras-Gerichte orientieren sich an der veröffentlichten Speisekarte (Stand 14.10.2025); Zubereitung, Preise und der Standort neben Dogtown sind Spieladaptionen. Stadtplan und Entfernungen sind verdichtet und frei interpretiert. Die Innenräume bilden keine tatsächlichen Geschäftsräume ab.</p><p>Original-Logo: <a href="https://www.bbe.de/static/images/bbe-logo.svg" target="_blank" rel="noopener noreferrer">BBE Handelsberatung GmbH</a>, unveränderte SVG vom offiziellen Webauftritt. Die Verwendung macht das Spiel nicht zu einem offiziellen BBE-Produkt. Helikopter, Landeplätze und Arcade-Ereignisse sind erfunden.</p><ul class="source-list">${CITY_STOPS.map((p) => `<li><a href="${p.source}" target="_blank" rel="noopener noreferrer">${p.name} · Ortsquelle</a></li>`).join('')}<li><a href="https://www.bbe.de/de/kontakt/" target="_blank" rel="noopener noreferrer">BBE Handelsberatung · Brienner Straße 45</a></li>${RESTAURANTS.map((r) => `<li><a href="${r.source}" target="_blank" rel="noopener noreferrer">${r.name} · ${r.address}</a></li>`).join('')}</ul><div class="divider"></div><p><a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">Three.js</a> · 3D-Darstellung · MIT-Lizenz<br><a href="https://pmndrs.github.io/cannon-es/" target="_blank" rel="noopener noreferrer">Cannon-es</a> · Kollisionen und Physik · MIT-Lizenz</p><p class="muted">Prozedurale 3D-Modelle, PBR-Materialien, Umgebungsreflexionen, Ambient Occlusion, Kontakt- und Sonnenschatten. Echte lizenzierte Geräuschaufnahmen, gestaltete Effekte, 254 deutsche Sprechzeilen, drei Radiosongs und fünf eigene Story-Kompositionen. Kein Konto, keine In-App-Käufe. Spielstände bleiben lokal.</p><p>Audioaufnahmen: Kenney, rubberduck, unicaegames, looneybits, domasx2, IgnasD und Ylmir (CC0). Kitchen Ambience, SFX: <a href="https://opengameart.org/content/kitchen-ambience-sfx" target="_blank" rel="noopener noreferrer">DavidW</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Fliesen- und Wasserschritte: swuing, ceberation, EminYILDIRIM; bearbeitet von congusbongus, <a href="https://opengameart.org/content/footsteps-on-different-surfaces" target="_blank" rel="noopener noreferrer">Quelle</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Aufnahmen gekürzt, gefiltert und komprimiert; Wasser-/Kaffeeeffekte aus DavidWs Aufnahme gestaltet. Verkehrsaufnahme dient als allgemeine Stadtatmosphäre.</p><p>Dialoge und Musik wurden eigens für das fiktive Spiel geschrieben. Stimmen: lokal erzeugte deutsche Windows-Sprachsynthese (Hedda, Katja, Stefan), keine menschlichen Studioaufnahmen oder nachgeahmten realen Personen.</p>`,
+      `<p><strong>BBE Handelsberatung: Munich Consulting Simulator</strong> ist eine fiktive, unabhängige Spielinterpretation. Die BBE ist das Hauptquartier. Menschen, Dialoge, Büroräume, Marktwerte, Preise und Abläufe wurden für das Spiel erfunden.</p><p>Restaurantnamen und Adressen basieren auf veröffentlichten Ortsangaben. Die vier Zitronengras-Gerichte orientieren sich an der veröffentlichten Speisekarte (Stand 14.10.2025); Zubereitung, Preise und der Standort neben Dogtown sind Spieladaptionen. Stadtplan und Entfernungen sind verdichtet und frei interpretiert. Die Innenräume bilden keine tatsächlichen Geschäftsräume ab.</p><p>Original-Logo: <a href="https://www.bbe.de/static/images/bbe-logo.svg" target="_blank" rel="noopener noreferrer">BBE Handelsberatung GmbH</a>, unveränderte SVG vom offiziellen Webauftritt. Die Verwendung macht das Spiel nicht zu einem offiziellen BBE-Produkt. Helikopter, Landeplätze und Arcade-Ereignisse sind erfunden.</p><ul class="source-list">${CITY_STOPS.map((p) => `<li><a href="${p.source}" target="_blank" rel="noopener noreferrer">${p.name} · Ortsquelle</a></li>`).join('')}<li><a href="https://www.bbe.de/de/kontakt/" target="_blank" rel="noopener noreferrer">BBE Handelsberatung · Brienner Straße 45</a></li>${RESTAURANTS.map((r) => `<li><a href="${r.source}" target="_blank" rel="noopener noreferrer">${r.name} · ${r.address}</a></li>`).join('')}</ul><div class="divider"></div><p><a href="https://threejs.org/" target="_blank" rel="noopener noreferrer">Three.js</a> · 3D-Darstellung · MIT-Lizenz<br><a href="https://pmndrs.github.io/cannon-es/" target="_blank" rel="noopener noreferrer">Cannon-es</a> · Kollisionen und Physik · MIT-Lizenz</p><p class="muted">Prozedurale 3D-Modelle, PBR-Materialien, Umgebungsreflexionen, Ambient Occlusion, Kontakt- und Sonnenschatten. Echte lizenzierte Geräuschaufnahmen, gestaltete Effekte, umfangreiche deutsche Sprechzeilen, drei Radiosongs und fünf eigene Story-Kompositionen. Kein Konto, keine In-App-Käufe. Spielstände bleiben lokal.</p><p>Audioaufnahmen: Kenney, rubberduck, unicaegames, looneybits, domasx2, IgnasD und Ylmir (CC0). Kitchen Ambience, SFX: <a href="https://opengameart.org/content/kitchen-ambience-sfx" target="_blank" rel="noopener noreferrer">DavidW</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Fliesen- und Wasserschritte: swuing, ceberation, EminYILDIRIM; bearbeitet von congusbongus, <a href="https://opengameart.org/content/footsteps-on-different-surfaces" target="_blank" rel="noopener noreferrer">Quelle</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Aufnahmen gekürzt, gefiltert und komprimiert; Wasser-/Kaffeeeffekte aus DavidWs Aufnahme gestaltet. Verkehrsaufnahme dient als allgemeine Stadtatmosphäre.</p><p>Dialoge und Musik wurden eigens für das fiktive Spiel geschrieben. Stimmen: lokal erzeugte deutsche Windows-Sprachsynthese (Hedda, Katja, Stefan), keine menschlichen Studioaufnahmen oder nachgeahmten realen Personen.</p>`,
       { pause: true },
     );
   }

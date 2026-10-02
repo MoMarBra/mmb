@@ -1,3 +1,4 @@
+import { freshCampaign, normalizeCampaign } from './bbe-campaign-state.js';
 import { QuizState } from './quiz-state.js';
 import { freshOriginStory, normalizeOriginStory } from './origin-state.js';
 import { freshExtras, normalizeExtras } from './extras-state.js';
@@ -8,6 +9,8 @@ export const SAVE_KEY = 'bbe-munich-life-v1';
 export const freshState = () => ({
   version: 1,
   quizssoir: new QuizState().serialize(),
+  quizDiscoveries: [],
+  bbeCampaign: freshCampaign(),
   originStory: freshOriginStory(),
   extras: freshExtras(),
   vaults: 0,
@@ -225,6 +228,14 @@ export class Simulation {
           .map(([id, v]) => [id, { health: clamp(v.health, 0, 100) }]),
       );
       base.quizssoir = new QuizState(base.quizssoir).serialize();
+      base.bbeCampaign = normalizeCampaign(base.bbeCampaign);
+      base.quizDiscoveries = [
+        ...new Set(
+          (Array.isArray(base.quizDiscoveries) ? base.quizDiscoveries : []).filter((id) =>
+            ['board', 'benjamin', 'menu'].includes(id),
+          ),
+        ),
+      ];
       base.extras = normalizeExtras(base.extras);
       base.originStory = normalizeOriginStory(base.originStory);
       base.workshopStory = normalizeWorkshopStory(base.workshopStory);

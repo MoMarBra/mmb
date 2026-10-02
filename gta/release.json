@@ -1,11 +1,11 @@
 {
   "channel": "stable",
-  "version": "2.1.4",
+  "version": "2.2.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "1396c5e63850413b45a3398b77d2afd1c03049fa",
+  "sourceCommit": "2a88a9715b70f8d94edea893c8c430e77f4287c7",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-09-22T15:46:59.064Z",
+  "preparedAt": "2026-10-02T08:35:51.197Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Minimal startup loading line remains visible until textures and first scene frame are ready; early Space and failed module loading verified. Stable light-space shadows with altitude hysteresis and projection refresh, hardware-tested four-sample interior MSAA, common AgX cinematic response without extra fullscreen pass. Quizssoir automatically starts on approach without briefing and re-arms only after walking away. Tested delayed loading, Chrome and Edge game routes, day/night/rain and interiors, vehicle entry and pursuit, full quiz round and offline layouts."
+  "validation": "Quizssoir2.0:150 curated questions, versioned legacy saves, no-repeat history, five-question coffee mode, data questions, world discoveries and desk trophies. Four connected office-start campaign chapters with physical interactions, voiced cinematics, checkpoints and exactly-once rewards. Tested content rules, save migration, all campaign chapters, quiz modes, responsive layouts, rendering and offline packaging."
 }
