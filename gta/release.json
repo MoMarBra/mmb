@@ -2,10 +2,12 @@
   "channel": "stable",
   "version": "2.4.2",
   "publishedPath": "/gta/",
-  "sourceCommit": "599e34e6290e847aaf2b4b675a908d44fe471ddc",
+  "sourceCommit": "cc06e95cf157ba43ee4d3a4f925440a54188dbcb",
   "includesWorkingChanges": false,
   "preparedAt": "2026-10-02T11:45:31.976Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Quizssoir BBE correction: early rounds combine verified company facts with fair wordplay and double meanings. No game-world trivia in new rounds. Difficult reasoning remains late. V1/V2/V3 question banks and recordings remain intact for saved rounds. New voices, save migrations, classic and coffee modes, music and offline entry verified."
+  "validation": "Quizssoir BBE correction: early rounds combine verified company facts with fair wordplay and double meanings. No game-world trivia in new rounds. Difficult reasoning remains late. V1/V2/V3 question banks and recordings remain intact for saved rounds. New voices, save migrations, classic and coffee modes, music and offline entry verified.",
+  "searchIndexing": "noindex",
+  "searchPrivacyUpdatedAt": "2026-10-03T13:34:16.987Z"
 }

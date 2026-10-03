@@ -1,0 +1,26 @@
+# Search engines must fetch HTML to see its noindex directive.
+# Do not replace this with a blanket Disallow: / rule.
+# Media crawlers must not list this site's images or videos.
+User-agent: Googlebot-Image
+Disallow: /
+
+User-agent: Googlebot-Video
+Disallow: /
+
+User-agent: *
+Allow: /
+Disallow: /*.avif
+Disallow: /*.gif
+Disallow: /*.ico
+Disallow: /*.jpeg
+Disallow: /*.jpg
+Disallow: /*.png
+Disallow: /*.svg
+Disallow: /*.webp
+Disallow: /*.mp4
+Disallow: /*.webm
+Disallow: /*.mov
+Disallow: /*.mp3
+Disallow: /*.wav
+Disallow: /*.ogg
+Disallow: /*.flac
