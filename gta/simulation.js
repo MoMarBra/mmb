@@ -1,3 +1,4 @@
+import { normalizeFieldNotes, recordBenchmarkNote } from './field-notes-state.js';
 import { freshCoffeePitch, normalizeCoffeePitch } from './coffee-pitch-state.js';
 import { freshColleagues, normalizeColleagues, syncColleagues } from './colleagues-state.js';
 import { freshOfficeMemory, normalizeOfficeMemory, reconcileOfficeMemory, rememberMealReceipt } from './office-memory-state.js';
@@ -280,8 +281,10 @@ export class Simulation {
           ...t,
           ...TASKS.find((d) => d.type === t.type),
           progress: t.progress.filter((p) => typeof p === 'string'),
+          ...(t.type === 'benchmark' ? { fieldNotes: normalizeFieldNotes(t.fieldNotes, t) } : {}),
           multiplier: [1, 1.25, 3].includes(t.multiplier) ? t.multiplier : 1,
         }));
+      for (const task of base.active) if (task.type !== 'benchmark') delete task.fieldNotes;
       base.inventory = base.inventory.filter((v) => [8, 15, 25].includes(v)).slice(0, 30);
       base.mail = base.mail
         .filter((m) => m && typeof m.title === 'string' && typeof m.body === 'string')
@@ -438,6 +441,7 @@ export class Simulation {
       multiplier,
       revision: 0,
     };
+    if (type === 'benchmark') task.fieldNotes = [];
     this.s.active.push(task);
     this.mail('BBE · Auftrag angenommen', task.title);
     this.save();
@@ -455,6 +459,10 @@ export class Simulation {
     const t = this.task(type);
     if (!t || t.progress.includes(value)) return false;
     t.progress.push(value);
+    if (type === 'benchmark') {
+      const restaurant = RESTAURANTS.find(r => r.id === value), food = restaurant?.foods[0];
+      t.fieldNotes = recordBenchmarkNote(t, restaurant, food ? this.price(food) : NaN, this.absolute());
+    }
     this.emit('progress', `${t.title}: Fortschritt gespeichert.`);
     this.save();
     return true;
@@ -503,7 +511,8 @@ export class Simulation {
     }
     this.save();
     this.emit('mission-complete', t.title, { id: 'bbe:' + t.id + ':' + this.s.completed });
-    return { score, pay, xp, metrics, title: t.title };
+    return { score, pay, xp, metrics, title: t.title,
+      ...(t.type === 'benchmark' ? { fieldNotes: normalizeFieldNotes(t.fieldNotes, t) } : {}) };
   }
   unlock(id) {
     if (this.s.achievements.includes(id)) return;

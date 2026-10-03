@@ -2215,10 +2215,12 @@ export class GameWorld {
     const cinematicIntro = !!this.gameplay?.game?.extras?.intro.current;
     this.time += dt;
     this.blocked = blocked;
-    const zone = this.zoneData[this.zone],
-      b = zone.body;
     const movement = this.gameplay?.immersion?.motion.updateControlled(dt, blocked) || false;
     const driving = movement || this.gameplay?.updateVehicle(dt, blocked) || false;
+    // A completed door action can synchronously enter another zone. Resolve its
+    // body and actors afterwards so this frame preserves the new arrival.
+    const zone = this.zoneData[this.zone],
+      b = zone.body;
     let vx = 0,
       vz = 0;
     if (!driving && this.started && !blocked && this.pose !== 'eat') {

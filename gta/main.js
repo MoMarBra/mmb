@@ -1,4 +1,6 @@
+import { TaskNavigation } from './task-navigation.js';
 import { PhotoMode } from './photo-mode.js';
+import { fieldNotesMarkup } from './field-notes-ui.js';
 import { CoffeePitch } from './coffee-pitch.js';
 import { ownPanelCloseShortcut } from './interaction-comfort.js';
 import { OfficeMemory } from './office-memory.js';
@@ -17,7 +19,7 @@ import { FireStory } from './fire-story.js';
 import { STREET_ROADS, CIRCULAR_STREETS } from './city-streets.js';
 import { inIT } from './it-office.js';
 import { MouseControls } from './mouse-controls.js';
-import { hudIcon, updateCinematicHUD } from './cinematic-hud.js';
+import { hudIcon, updateCinematicHUD, updateWaypointHUD } from './cinematic-hud.js';
 import { WorkshopStory } from './workshop-story.js';
 import { CITY_LAYOUT, CITY_WALKS } from './city-layout.js';
 import { COURIER_DESTINATION } from './vertical-city.js';
@@ -31,6 +33,7 @@ import { Minigames } from './mission-games.js';
 import { Arcade } from './arcade.js';
 import { openAudioSettings } from './audio-settings.js';
 import { showPhone } from './smartphone.js';
+import { renderMealAdvice } from './meal-advice-ui.js';
 
 const $ = (q, root = document) => root.querySelector(q);
 const esc = (s) =>
@@ -84,6 +87,7 @@ export class Game {
     this.titleMusic = new TitleMusic(this);
     this.coffeePitch = new CoffeePitch(this);
     this.photoMode = new PhotoMode(this);
+    this.taskNavigation = new TaskNavigation(this, { restaurants: RESTAURANTS, hq: CITY_LAYOUT.hq });
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
     this.intro();
@@ -426,6 +430,7 @@ export class Game {
     setTimeout(() => el.remove(), 6200);
   }
   onEvent(e) {
+    this.taskNavigation?.onEvent(e);
     if (e.type === 'mission-complete') {
       this.missionPassed.enqueue(e);
       return;
@@ -459,6 +464,7 @@ export class Game {
     element.classList.toggle('deadline-urgent', remaining <= 10);
   }
   updateHUD() {
+    this.taskNavigation?.update();
     this.updateTaskDeadline();
     updateCinematicHUD(this);
     const nodes = (this.hudNodes ||= new Map());
@@ -556,7 +562,7 @@ export class Game {
             : 'PALMTREECLUB · Lunch abholen',
         meeting: task.progress.includes('met') ? 'Am BBE-PC abgeben' : 'Kundenbüro besuchen',
       };
-      text(node('#quest-description'), hints[task.type] || '');
+      text(node('#quest-description'), this.taskNavigation.hint(task) || hints[task.type] || '');
       text(
         node('#quest-location'),
         `Noch ${Math.max(0, Math.ceil(task.deadline - this.sim.absolute()))} Spielmin.`,
@@ -586,18 +592,7 @@ export class Game {
     this.drawMap(node('#minimap'), true);
     if (this.modal?.title === 'Dein Smartphone' && this.phonePage === 'map')
       this.drawMap(node('#large-map'), false);
-    if (this.waypoint && z === 'city') {
-      const d = Math.hypot(
-        this.world.player.position.x - this.waypoint.x,
-        this.world.player.position.z - this.waypoint.z,
-      );
-      node('#waypoint').hidden = false;
-      text(node('#waypoint'), `◇ ${this.waypoint.name} · ${Math.round(d)} m`);
-      if (d < 3) {
-        this.waypoint = null;
-        node('#waypoint').hidden = true;
-      }
-    } else node('#waypoint').hidden = true;
+    updateWaypointHUD(this, node('#waypoint'));
     this.workshop?.updateHUD();
     this.fireStory?.updateHUD();
     this.origin?.updateHUD();
@@ -630,6 +625,7 @@ export class Game {
     this.workshop?.transition();
     this.arcade?.parkForTransition();
     this.world.enter(zone, id);
+    this.taskNavigation?.update();
     setTimeout(() => f.remove(), 700);
     this.sim.save();
   }
@@ -667,7 +663,7 @@ export class Game {
     if (this.workshop.interact(n)) return;
     if (this.arcade.interact(n)) return;
     if (!n) return;
-    this.audio.play('click');
+    if (n.kind !== 'photo') this.audio.play('click');
     switch (n.kind) {
       case 'computer':
         this.desktop();
@@ -816,7 +812,7 @@ export class Game {
               )
               .join('')}</div>`
           : ''
-      }<div class="reward">+ ${euro(r.pay)}</div><p>+${r.xp} XP · ${this.sim.career.name} · ${Math.floor(this.sim.s.rep)} Reputation</p><div class="divider"></div><button class="primary" id="result-done">Zurück in den Arbeitstag</button> <button class="ghost" id="result-more">Nächster Auftrag</button></div>`,
+      }<div class="reward">+ ${euro(r.pay)}</div>${fieldNotesMarkup(r.fieldNotes)}<p>+${r.xp} XP · ${this.sim.career.name} · ${Math.floor(this.sim.s.rep)} Reputation</p><div id="dialogue-voice-slot"></div><div class="divider"></div><button class="primary" id="result-done">Zurück in den Arbeitstag</button> <button class="ghost" id="result-more">Nächster Auftrag</button></div>`,
       { pause: true },
     );
     this.audio.voices.say('Lena', 'greet', {
@@ -913,7 +909,7 @@ export class Game {
           : t.type === 'lunch'
             ? t.progress.includes('delivered')
             : t.progress.includes('met');
-    const hint = {
+    const hint = this.taskNavigation.objective(t)?.localLabel || {
       benchmark: '3 Speisekarten fotografieren · E',
       mystery: t.progress.includes('visited')
         ? 'MAMMA BAO · Service befragen'
@@ -929,40 +925,31 @@ export class Game {
     }
     this.open(
       t.title,
-      `<p class="mission-objective">${hint}</p><div class="mission-meta"><span>${t.type === 'benchmark' ? t.progress.length + '/3 Fotos' : t.type === 'mystery' ? t.progress.length + '/2 Hinweise' : t.type === 'lunch' ? (t.progress.includes('picked') ? 'Abgeholt' : 'Zur Abholung') : 'Termin offen'}</span><span>Abgabe · BBE-PC</span></div><div class="editor-bottom"><button class="primary" id="outside-map">Karte</button><button class="ghost" id="outside-close">Losgehen</button></div>`,
+      `<p class="mission-objective">${hint}</p><div class="mission-meta"><span>${t.type === 'benchmark' ? t.progress.length + '/3 Fotos' : t.type === 'mystery' ? t.progress.length + '/2 Hinweise' : t.type === 'lunch' ? (t.progress.includes('picked') ? 'Abgeholt' : 'Zur Abholung') : 'Termin offen'}</span><span>Abgabe · BBE-PC</span></div>${fieldNotesMarkup(t.fieldNotes)}<div class="editor-bottom"><button class="primary" id="outside-map">Karte</button><button class="ghost" id="outside-close">Losgehen</button></div>`,
       { task: t },
     );
     this.uiClick('#outside-close', () => this.close());
     this.uiClick('#outside-map', () => {
-      const r =
-        t.type === 'mystery'
-          ? RESTAURANTS.find((r) => r.id === 'bao')
-          : t.type === 'lunch'
-            ? RESTAURANTS.find((r) => r.id === 'palm')
-            : null;
-      this.waypoint = r
-        ? { name: r.name, x: r.x, z: r.z }
-        : t.type === 'meeting'
-          ? { name: 'Kundenbüro', x: 35, z: -30.5 }
-          : { name: 'MAMMA BAO', x: -15, z: 10 };
+      this.taskNavigation.select(t.id);
       this.phone('map');
     });
   }
   photo(id) {
     const r = RESTAURANTS.find((x) => x.id === id);
+    if (!r) return false;
     const t = this.sim.task('benchmark');
+    if (t?.progress.includes(id)) {
+      this.toast('Schon erfasst.', r.name);
+      return false;
+    }
     if (t && t.progress.length < 3) {
-      this.sim.stamp('benchmark', id);
+      if (!this.sim.stamp('benchmark', id)) return false;
       this.audio.play('click');
-      this.toast(
-        'Speisekarte fotografiert',
-        `${r.name} · ${t.progress.length}/3. ${t.progress.length >= 3 ? 'Zurück zur BBE und abgeben.' : ''}`,
-      );
-    } else
-      this.toast(
-        r.name,
-        `${r.address} · ${r.kind}. Ein Foto wert – besonders mit aktivem Benchmark-Auftrag.`,
-      );
+      this.toast('Speisekarte fotografiert', `${r.name} · ${t.progress.length}/3`);
+      return true;
+    }
+    this.toast(r.name, `${r.address} · ${r.kind}`);
+    return false;
   }
   menu() {
     const r = this.world.currentRestaurant;
@@ -1208,7 +1195,7 @@ export class Game {
       (b) =>
         (b.onclick = () => {
           const r = RESTAURANTS.find((x) => x.id === b.dataset.route);
-          this.waypoint = { name: r.name, x: r.x + (r.x < 0 ? 2 : -2), z: r.z };
+          this.taskNavigation.manual({ name: r.name, x: r.x + (r.x < 0 ? 2 : -2), z: r.z });
           this.phone('map');
         }),
     );
@@ -1219,6 +1206,7 @@ export class Game {
           if (i >= 0) {
             const t = this.sim.s.active.splice(i, 1)[0];
             this.sim.s.active.unshift(t);
+            this.taskNavigation.select(t.id);
             this.toast('Auftrag angeheftet', t.title);
             this.close();
           }
@@ -1228,21 +1216,21 @@ export class Game {
       (b) =>
         (b.onclick = () => {
           const p = [...CITY_STOPS, ...HELIPADS].find((p) => p.id === b.dataset.cityRoute);
-          this.waypoint = { name: p.name, x: p.x, z: p.z };
+          this.taskNavigation.manual({ name: p.name, x: p.x, z: p.z });
           this.close();
         }),
     );
     this.uiClick('#map-home', () => {
-      this.waypoint = { name: 'BBE Handelsberatung', ...CITY_LAYOUT.hq };
+      this.taskNavigation.manual({ name: 'BBE Handelsberatung', ...CITY_LAYOUT.hq });
       this.close();
     });
     this.uiClick('#map-remove', () => {
-      this.waypoint = null;
+      this.taskNavigation.dismiss();
       this.phone('map');
     });
     this.uiClick('#map-recover', () => this.transition('office'));
     this.uiClick('#phone-desk', () => {
-      this.waypoint = { name: 'BBE Handelsberatung', ...CITY_LAYOUT.hq };
+      this.taskNavigation.manual({ name: 'BBE Handelsberatung', ...CITY_LAYOUT.hq });
       this.close();
     });
     this.uiClick('#phone-courier', () => {
@@ -1277,7 +1265,7 @@ export class Game {
     if (page === 'bank')
       return `<div class="eyebrow">DEIN KONTO</div><div class="reward" style="font-size:2.8rem">${euro(s.money)}</div><div class="two-col"><div class="card"><small>Eingenommen</small><h3>${euro(s.earnings)}</h3></div><div class="card"><small>Ausgegeben</small><h3>${euro(s.spent)}</h3></div></div><div class="divider"></div><h3>Kontobewegungen</h3>${s.ledger.map((l) => `<div class="mail-item"><small style="color:${l.amount >= 0 ? 'var(--mint)' : '#dfb597'}">${l.amount > 0 ? '+' : ''}${euro(l.amount)}</small><b style="font-size:.85rem">${esc(l.label)}</b><p>Tag ${l.day} · ${l.time}</p></div>`).join('') || '<p class="muted">Deine erste Gehaltsbuchung wartet.</p>'}`;
     if (page === 'restaurants')
-      return `<h3>Entdecke die Augustenstraße</h3>${RESTAURANTS.map((r) => `<article class="card" style="margin-bottom:12px;border-left:3px solid ${r.color}"><span class="tag">${s.visits.includes(r.id) ? 'BEREITS GENOSSEN' : 'NOCH AUF DER LISTE'}</span><h3>${r.name}</h3><p>${r.address} · ${r.kind}</p><div class="card-footer"><small>Spielgerichte ab ${euro(Math.min(...r.foods.map((f) => f.price)))}</small><button class="small" data-route="${r.id}">Ziel markieren</button></div></article>`).join('')}`;
+      return `${renderMealAdvice(this.sim)}<h3>Entdecke die Augustenstraße</h3>${RESTAURANTS.map((r) => `<article class="card" style="margin-bottom:12px;border-left:3px solid ${r.color}"><span class="tag">${s.visits.includes(r.id) ? 'BEREITS GENOSSEN' : 'NOCH AUF DER LISTE'}</span><h3>${r.name}</h3><p>${r.address} · ${r.kind}</p><div class="card-footer"><small>Spielgerichte ab ${euro(Math.min(...r.foods.map((f) => this.sim.price(f))))}</small><button class="small" data-route="${r.id}">Ziel markieren</button></div></article>`).join('')}`;
     if (page === 'stats') {
       const next = CAREERS[this.sim.level],
         prev = CAREERS[this.sim.level - 1],

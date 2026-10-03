@@ -1,13 +1,13 @@
 {
   "channel": "stable",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "aa433eadf6e80cbce334f1d73086da39652b58e5",
+  "sourceCommit": "000f18bdf4e9a670a3342ca4b3f8697df3223fbd",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-03T18:26:30.982Z",
+  "preparedAt": "2026-10-03T19:08:22.922Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Paused smartphone photo mode with native local PNGs, orbit/lens controls, owned cancellation and camera-dependent sky/rain reflections. No extra render resources, clocks, rewards or audio settings. Existing chase-camera vectors/hits are reused with exact original outputs. Sixty pure regression groups, actual native browser/PNG checks, serial fixed-quality old-new-old office comparison, world/vehicle smoke, offline Edge photo and quiz soundtrack checks. Baseline varies across runs; no causal FPS gain or hardware-independent guarantee.",
+  "validation": "Task navigation follows actual registered doors, counters, reception and workplaces while preserving manual/story targets. Three benchmark observations retain the observed dish, actual price and time; duplicates do not progress, save or click again. Smartphone meal suggestions use actual affordability, current discounts and clamped effects. Existing actors remain valid across office/restaurant door transitions. Sixty-seven pure regression groups, four native mission completions with original interactions and single payouts, native smartphone checks and offline smartphone/artifact checks passed.",
   "searchIndexing": "noindex",
   "searchPrivacyUpdatedAt": "2026-10-03T13:34:16.987Z"
 }

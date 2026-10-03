@@ -38,3 +38,21 @@ export function updateCinematicHUD(game) {
       .map(([key, text]) => `<span class="control-pair"><kbd>${key}</kbd>${text}</span>`)
       .join('') + '<span class="control-pair mouse-ui-hint"><kbd>Alt</kbd> Cursor</span>';
 }
+
+
+/** One existing label, local coordinates indoors and city coordinates outside. */
+export function updateWaypointHUD(game, element) {
+  const ownedTarget = game.taskNavigation?.displayTarget();
+  const point = ownedTarget || (game.world.zone === 'city' ? game.waypoint : null);
+  if (!point) { element.hidden = true; return; }
+  const p = game.world.player.position;
+  const distance = Math.hypot(p.x - point.x, p.z - point.z);
+  // Arrival is presentation only for a task. Its real E interaction still owns
+  // progress. Keep the target stable; never clear/recreate it on every HUD tick.
+  if (distance < 3 && !ownedTarget) {
+    game.waypoint = null; element.hidden = true; return;
+  }
+  const label = '◇ ' + point.name + (distance < 3 ? '' : ' · ' + Math.round(distance) + ' m');
+  if (element.textContent !== label) element.textContent = label;
+  element.hidden = false;
+}

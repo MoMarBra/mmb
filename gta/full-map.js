@@ -1,3 +1,4 @@
+import { clientMapPlace } from './task-objective.js';
 import { mapRoute } from './map-routing.js';
 import { STREET_ROADS, CIRCULAR_STREETS } from './city-streets.js';
 import { CITY_LAYOUT, CITY_WALKS } from './city-layout.js';
@@ -17,6 +18,7 @@ export class FullMap {
       ...new Map(
         [
           { id: 'hq', name: 'BBE Handelsberatung', type: 'work', ...CITY_LAYOUT.hq },
+          ...[clientMapPlace(this.g.world.zoneData)].filter(Boolean),
           { id: 'origin-home', name: 'Zuhause', type: 'city', x: -14.4, z: 110 },
           ...RESTAURANTS.map((r) => ({ ...r, type: 'food' })),
           ...Object.values(EXTRA_PLACES).map((r) => ({ ...r, type: 'food' })),
@@ -61,7 +63,7 @@ export class FullMap {
       this.draw();
     };
     document.getElementById('atlas-clear').onclick = () => {
-      g.waypoint = null;
+      if (!g.taskNavigation.dismiss()) return;
       this.selected = null;
       document.getElementById('atlas-destination').textContent = 'Ort auswählen';
       this.draw();
@@ -152,7 +154,7 @@ export class FullMap {
       .forEach((b) => b.classList.toggle('selected', b.dataset.mapFilter === this.filter));
   }
   select(p) {
-    this.g.waypoint = { name: p.name, x: p.x, z: p.z };
+    if (!this.g.taskNavigation.manual(p)) return;
     this.selected = p;
     document.getElementById('atlas-destination').textContent = p.name;
     this.draw();
