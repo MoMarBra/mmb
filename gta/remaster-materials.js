@@ -58,6 +58,14 @@ export function photographicTexture(key, map = 'albedo') {
   }
   return texture;
 }
+// Shared function identity also survives the single-file/minified offline bundle.
+export function applyMunichLimewash(shader) {
+  shader.fragmentShader = shader.fragmentShader.replace(
+    '#include <map_fragment>',
+    '#include <map_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, diffuse, 0.58);',
+  );
+}
+
 export function remasterMaterial(key, options = {}) {
   const id = key + JSON.stringify(options);
   if (materials.has(id)) return materials.get(id);
@@ -75,12 +83,7 @@ export function remasterMaterial(key, options = {}) {
   });
   if (key === 'plaster') {
     // Painted Munich stucco: preserve photographed grain while keeping clean limewash albedo.
-    material.onBeforeCompile = (shader) => {
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <map_fragment>',
-        '#include <map_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, diffuse, 0.58);',
-      );
-    };
+    material.onBeforeCompile = applyMunichLimewash;
     material.customProgramCacheKey = () => 'munich-limewash-v1';
   }
   material.userData.remasterSurface = key;
@@ -204,6 +207,28 @@ export function installPhotographicLighting(world) {
     });
   world.remasterReady = Promise.all([...pending, hdrTask]);
   return world.remasterReady;
+}
+/** Wait for final images, including surfaces registered by later game systems. */
+export async function waitForPhotographicAssets(world) {
+  await world.remasterReady;
+  let done = 0;
+  while (done < pending.length) {
+    const batch = pending.slice(done);
+    done = pending.length;
+    await Promise.all(batch);
+  }
+  // ImageLoader's load event does not guarantee that a decoded bitmap is ready.
+  await Promise.all(
+    [...textures.values()].map(async (texture) => {
+      if (typeof texture.image?.decode !== 'function') return;
+      try {
+        await texture.image.decode();
+      } catch {
+        /* Existing fallback remains usable. */
+      }
+    }),
+  );
+  return remasterAssetStatus();
 }
 export function remasterAssetStatus() {
   return { textures: textures.size, materials: materials.size, failures: failures.slice() };

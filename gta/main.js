@@ -1,3 +1,4 @@
+import { prepareGameGraphics } from './gpu-preparation.js';
 import { BBEBlast } from './bbe-blast.js';
 import { installBlastPC, BLAST_PC } from './blast-office.js';
 import { BBECampaign } from './bbe-campaign.js';
@@ -61,6 +62,7 @@ export class Game {
       return;
     }
     this.minigames = new Minigames(this);
+    this.world.gpuPreparationPlanned = true;
     this.arcade = new Arcade(this);
     this.workshop = new WorkshopStory(this);
     this.fireStory = new FireStory(this);
@@ -79,25 +81,32 @@ export class Game {
     this.intro();
     this.updateHUD();
     const boot = window.__bbeBoot;
-    this.extras.intro.skipKeyHeld = !!boot?.spaceHeld;
-    boot?.takeOver?.();
-    if (!boot?.skipIntro) {
-      this.introReady = this.extras.intro.play({ automatic: true }).catch((error) => {
-        this.error('Das Intro konnte nicht starten.', 'Bitte die Seite neu laden.', error);
-      });
-    } else this.titleMusic.adopt();
-    // Keep the minimal boot overlay until surfaces and a real scene frame are ready.
-    // Skipping the intro must not wait for a cancelled shader warm-up.
+    // Preparation belongs to the game, not to the skippable film. Keep the early
+    // Space listener and loading cover until actual GPU resources are ready.
+    const welcome = document.getElementById('welcome');
+    if (welcome) welcome.inert = true;
     let bootAssetsReady = false;
-    Promise.resolve(this.world.remasterReady).then(
-      () => {
-        bootAssetsReady = true;
-      },
-      () => {
-        bootAssetsReady = true;
-      },
-    );
+    this.graphicsReady = prepareGameGraphics(this);
+    this.introReady = this.graphicsReady.then(() => {
+      bootAssetsReady = true;
+      this.lastFrame = performance.now();
+      this.world.keys.clear();
+      this.extras.intro.skipKeyHeld = !!boot?.spaceHeld;
+      boot?.takeOver?.();
+      if (welcome) welcome.inert = false;
+      if (!boot?.skipIntro) {
+        return this.extras.intro.play({ automatic: true }).catch((error) => {
+          this.error('Das Intro konnte nicht starten.', 'Bitte die Seite neu laden.', error);
+        });
+      }
+      this.titleMusic.adopt();
+    });
     this.frame = (now) => {
+      if (!bootAssetsReady) {
+        this.lastFrame = now;
+        requestAnimationFrame(this.frame);
+        return;
+      }
       const rawDelta = (now - this.lastFrame) / 1000 || 0.016;
       const dt = Math.min(rawDelta, 0.08);
       this.lastFrame = now;

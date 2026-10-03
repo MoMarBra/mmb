@@ -1,3 +1,4 @@
+import { prepareVisibleGraphics } from './gpu-preparation.js';
 import * as THREE from 'three';
 import { IntroStage } from './intro-stage.js';
 import { TITLE_INTRO_MUSIC } from './title-music.js';
@@ -420,6 +421,8 @@ export class IntroFilm {
     if (!this.current.paused) this.playMusic(0);
   }
   async warm(token) {
+    await this.w.graphicsReady;
+    if (token !== this.generation) return;
     if (!this.w.renderer.compileAsync) return;
     const w = this.w,
       g = this.g,
@@ -438,7 +441,10 @@ export class IntroFilm {
       g.sim.s.weather = 'Sonnig';
       g.arcade.atmosphere.update(0);
       w.scene.updateMatrixWorld(true);
-      await w.renderer.compileAsync(w.scene, w.camera);
+      await prepareVisibleGraphics(w, {
+        reflection: zone === 'city',
+        shouldContinue: () => token === this.generation && !!this.current,
+      });
     }
     if (token !== this.generation) return;
     this.stage.visible = false;

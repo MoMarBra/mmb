@@ -1,3 +1,4 @@
+import { fuseSSAOComposite } from './ssao-composite.js';
 import { buildMarienplatzRooftop } from './marienplatz-rooftop.js';
 import { instanceSurfaceKey, instanceSurfaceMaterial } from './instance-surfaces.js';
 import { ActiveBodyBroadphase, stepGamePhysics } from './game-physics.js';
@@ -522,7 +523,9 @@ export class GameWorld {
         ssao.minDistance = 0.001;
         ssao.maxDistance = 0.06;
         composer.addPass(ssao);
-        composer.addPass(new OutputPass());
+        const output = new OutputPass();
+        composer.addPass(output);
+        this.ssaoComposite = fuseSSAOComposite(composer, ssao, output);
         composer.setSize(innerWidth, innerHeight);
         this.composer = composer;
         this.ssao = ssao;
@@ -530,6 +533,7 @@ export class GameWorld {
       } catch (error) {
         // Optional effects must not prevent a playable, directly rendered scene.
         console.warn('BBE: Zusätzliche Grafikeffekte konnten nicht geladen werden.', error);
+        this.ssaoComposite?.dispose();
         for (const pass of composer?.passes || []) pass.dispose();
         if (ssao && !composer?.passes.includes(ssao)) ssao.dispose();
         composer?.dispose();
@@ -1928,6 +1932,7 @@ export class GameWorld {
         batch.receiveShadow = true;
         list.forEach((o, i) => {
           o.visible = false;
+          o.userData.batchedStaticSource = true;
           o.matrixWorldAutoUpdate = false;
         });
         batch.matrixAutoUpdate = false;
@@ -2501,6 +2506,7 @@ export class GameWorld {
     });
   }
   dispose() {
+    this.ssaoComposite?.dispose();
     this.renderer.dispose();
   }
 }

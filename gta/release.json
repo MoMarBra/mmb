@@ -1,13 +1,13 @@
 {
   "channel": "stable",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "publishedPath": "/gta/",
-  "sourceCommit": "cc06e95cf157ba43ee4d3a4f925440a54188dbcb",
+  "sourceCommit": "2cc4ed3613537dbd8a402eba94872000ca6fe540",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-02T11:45:31.976Z",
+  "preparedAt": "2026-10-03T15:31:45.704Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Quizssoir BBE correction: early rounds combine verified company facts with fair wordplay and double meanings. No game-world trivia in new rounds. Difficult reasoning remains late. V1/V2/V3 question banks and recordings remain intact for saved rounds. New voices, save migrations, classic and coffee modes, music and offline entry verified.",
+  "validation": "GPU resources and shader layouts prepared before gameplay; stable light slots; photographic static material batching; identical garage models with fewer submissions; SSAO composition fused into output with full MSAA, maps, shadows and AO preserved. Office traversal, driving, boot/skip, full intro, mission voices and offline Quizssoir audio checked. Hardware-specific performance results in source release notes; no universal FPS guarantee.",
   "searchIndexing": "noindex",
   "searchPrivacyUpdatedAt": "2026-10-03T13:34:16.987Z"
 }

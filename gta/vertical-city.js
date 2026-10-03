@@ -1,3 +1,4 @@
+import { batchStaticProp } from './static-prop-batches.js';
 import { CITY_LAYOUT } from './city-layout.js';
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
@@ -212,7 +213,11 @@ export function buildVerticalCity(w, h) {
     [0, 50],
     [1, 60],
   ]) {
-    w.car(inside, 'car', i ? '#425b6c' : '#b7bdb8').position.set(x, 0, 42);
+    // These are garage decorations, never registered as drivable cars.
+    // Keep each car's bounds and opaque materials intact while sharing draws.
+    const decoration = w.car(inside, 'car', i ? '#425b6c' : '#b7bdb8');
+    decoration.position.set(x, 0, 42);
+    batchStaticProp(decoration);
     w.obstacle('office', x, 42, 1.9, 4.5, 0.8, 1.6);
   }
   label(inside, 'AUSGANG · HINTERHOF', 57, 2.5, 29.15, 7, 0.8);

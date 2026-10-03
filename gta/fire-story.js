@@ -37,6 +37,14 @@ export class FireStory {
     this.laptop.name = 'Story 02 · brennender Empower-Laptop';
     this.laptop.userData.dynamic = true;
     this.w.scene.add(this.laptop);
+    // Keep the office's light layout constant when the prop is hidden or carried.
+    // Cinematic sets keep their own independent laptop/light hierarchy.
+    this.laptopLight = this.laptop.userData.fireData.light;
+    this.laptopLightOffset = this.laptopLight.position.clone();
+    this.laptopLight.name = 'Laptop fire · stable office light';
+    this.laptopLight.userData.dynamicIntensity = true;
+    this.laptopLight.intensity = 0;
+    this.w.groups.office.add(this.laptopLight);
     this.palms = [new THREE.Vector3(), new THREE.Vector3()];
     this.routeStep = 0;
     this.lastTimeActive = false;
@@ -248,6 +256,8 @@ export class FireStory {
       s = this.state;
     const active =
       g.started && !document.hidden && !paused && !g.modal && !g.busy && !this.cinematic;
+    // The normal world update is paused while a separate cinematic set renders.
+    if (this.cinematic || w.zone !== 'office') this.laptopLight.intensity = 0;
     if (this.running) {
       if (w.zone !== 'office') {
         this.fail();
@@ -293,6 +303,21 @@ export class FireStory {
     }
     this.updateHUD();
   }
+  updateLaptopLight() {
+    const light = this.laptopLight;
+    let visible = this.w.zone === 'office' && !this.cinematic;
+    for (let parent = this.laptop; visible && parent; parent = parent.parent)
+      visible = parent.visible;
+    if (!visible) {
+      light.intensity = 0;
+      return;
+    }
+    // The laptop may move with both hands or an arbitrary transformed parent.
+    // Convert the authored flame offset into the office light's local space.
+    this.laptop.updateWorldMatrix(true, false);
+    light.position.copy(this.laptopLightOffset).applyMatrix4(this.laptop.matrixWorld);
+    light.parent.worldToLocal(light.position);
+  }
   updateWorld(dt, blocked) {
     const w = this.w,
       s = this.state,
@@ -333,6 +358,7 @@ export class FireStory {
       this.laptop.rotation.set(0, 0, 0);
       this.marker.position.set(FIRE_START.x, 0, FIRE_START.z);
     }
+    this.updateLaptopLight();
     this.marker.visible =
       office &&
       !this.cinematic &&

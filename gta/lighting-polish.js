@@ -1,5 +1,22 @@
 import * as THREE from 'three';
 
+// Preserve callers' intensity writes even while a source is out of player range.
+// Changing visibility changes NUM_POINT_LIGHTS and recompiles every lit material.
+export function installLightRangeGate(light) {
+  let requested = light.intensity;
+  const gate = { active: true };
+  Object.defineProperty(light, 'intensity', {
+    configurable: true,
+    enumerable: true,
+    get: () => (gate.active ? requested : 0),
+    set: (value) => {
+      requested = value;
+    },
+  });
+  light.visible = true;
+  return gate;
+}
+
 export class LocalLighting {
   constructor(world) {
     this.w = world;
@@ -65,15 +82,18 @@ export class LocalLighting {
       night = 1 - THREE.MathUtils.smoothstep(day, 0.12, 0.52);
     this.poolMaterial.opacity = night;
     for (const lamp of this.lamps) lamp.material.emissiveIntensity = 0.035 + night * 1.7;
-    this.interiorLights ||= w.groups.office.children.filter((o) => o.isPointLight);
-    for (const light of this.interiorLights) {
+    this.interiorLights ||= w.groups.office.children
+      .filter((o) => o.isPointLight && !o.userData.dynamicIntensity)
+      .map((light) => ({ light, gate: installLightRangeGate(light) }));
+    for (const { light, gate } of this.interiorLights) {
       const range = light.distance + 4;
-      light.visible =
+      gate.active =
         w.zone === 'office' &&
         Math.hypot(light.position.x - w.player.position.x, light.position.z - w.player.position.z) <
           range;
     }
-    for (const light of this.streetLights) light.visible = w.zone === 'city' && night > 0.001;
+    // The city parent already hides these outside; zero intensity handles daylight.
+    for (const light of this.streetLights) light.visible = true;
     if (w.zone !== 'city') return;
     const p = w.cinematicFocus || w.player.position;
     const nearest = this.lamps

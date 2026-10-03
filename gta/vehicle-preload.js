@@ -52,7 +52,9 @@ export class VehiclePreload {
     world.scene.traverse((node) => {
       if (node.isLight) this.lights.push(node);
     });
-    if (!world.renderer.compileAsync) return;
+    // The game-wide preparation owns all final light layouts after construction.
+    // Standalone callers retain this narrower legacy warm-up and its fallback.
+    if (!world.renderer.compileAsync || world.gpuPreparationPlanned) return;
     const prepareCity = (streetLights) => {
       const target = new THREE.Scene();
       target.fog = world.scene.fog;
@@ -94,6 +96,7 @@ export class VehiclePreload {
 
   update() {
     const { world } = this;
+    if (world.graphicsPreparation?.ready && !world.graphicsPreparation.errors?.length) return;
     if (world.zone !== 'city' || this.pending || !world.renderer.compileAsync) return;
     const key = lightKey(this.lights.filter(visible), world.renderer.shadowMap.enabled);
     if (this.keys.has(key)) return;
