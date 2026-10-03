@@ -1,3 +1,4 @@
+import { mountColleagueConversation } from './colleagues-ui.js';
 import { VOICE_LINES } from './voice-lines.js';
 
 const esc = (value) =>
@@ -122,6 +123,11 @@ export class DialogueDirector {
       document.getElementById('audio-preview-slot') ||
       document.getElementById('dialogue-voice-slot');
     this.caption.classList.toggle('inline', !!slot);
+    const dialogueCard = slot?.closest('.dialogue-card');
+    this.caption.classList.toggle(
+      'duplicate-answer',
+      !!dialogueCard && dialogueCard.querySelector('#dialogue-answer')?.textContent === line.text,
+    );
     (slot || document.body).append(this.caption);
     this.caption.innerHTML = `<span class="voice-speaker">${esc(names[actor] || actor)}${options.ambient ? '<i>in der Nähe</i>' : ''}</span><span class="voice-text">${esc(line.text)}</span>`;
     this.caption.hidden = a.sim?.s.audioSubtitles === false;
@@ -238,7 +244,7 @@ export class DialogueDirector {
     const greeting = this.resolve(actor, 'greet');
     game.open(
       `${actor} · BBE Handelsberatung`,
-      `<section class="dialogue-card"><div class="dialogue-person"><div class="dialogue-avatar">${esc(actor[0])}</div><div><span class="eyebrow">BBE HANDELSBERATUNG</span><h2>${esc(actor)}</h2><p>${esc(roles[actor] || 'Team')}</p></div><span class="dialogue-badge">IM GESPRÄCH</span></div><blockquote id="dialogue-answer">${esc(greeting.text)}</blockquote><div id="dialogue-voice-slot"></div><p class="dialogue-question">Was liegt an?</p><div class="dialogue-choices">${[
+      `<section class="dialogue-card"><div class="dialogue-person"><div class="dialogue-avatar">${esc(actor[0])}</div><div><span class="eyebrow">BBE HANDELSBERATUNG</span><h2>${esc(actor)}</h2><p>${esc(roles[actor] || 'Team')}</p></div><span class="dialogue-badge">IM GESPRÄCH</span></div><blockquote id="dialogue-answer">${esc(greeting.text)}</blockquote><div id="dialogue-voice-slot"></div><div data-colleague-support></div><p class="dialogue-question">Was liegt an?</p><div class="dialogue-choices">${[
         ['work', 'Zum aktuellen Auftrag', 'Eine klare Frage spart drei Abstimmungen.'],
         ['coffee', 'Zeit für eine Kaffeepause?', 'Networking mit Crema.'],
         ['success', 'Die Folie kam gut an.', 'Erfolg darf kurz ausgesprochen werden.'],
@@ -253,7 +259,8 @@ export class DialogueDirector {
         )}</div><div class="toolbar"><button id="dialogue-followup">Und was ist dein bester Rat?</button><button class="primary" id="colleague-thanks">Danke. Ich mache es managementtauglich.</button></div></section>`,
       { onClose: () => this.stop() },
     );
-    this.say(actor, 'greet', { npc, force: true, priority: 4 });
+    if (!mountColleagueConversation(game, stem))
+      this.say(actor, 'greet', { npc, force: true, priority: 4 });
     document.querySelectorAll('[data-dialogue]').forEach(
       (button) =>
         (button.onclick = () => {
@@ -275,7 +282,8 @@ export class DialogueDirector {
       this.sequence([{ actor, id: line.id, npc }]);
     };
     document.getElementById('colleague-thanks').onclick = () => {
-      game.sim.change('happy', 3);
+      // Stat recovery is the explicit, source-backed team help above. Closing
+      // a conversation remains free and cannot be farmed for repeat rewards.
       game.close();
       this.say(actor, 'greet', { id: `${stem}_dialog_goodbye`, npc, force: true, priority: 4 });
     };

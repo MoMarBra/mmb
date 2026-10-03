@@ -1,3 +1,4 @@
+import { HeldAxis } from './interaction-comfort.js';
 import { remasterInteriorGroup } from './remaster-interiors.js';
 import { upgradeInteriorSurfaces } from './remaster-materials.js';
 import { decorateBrewery } from './interior-detail.js';
@@ -14,6 +15,7 @@ export class Brewery {
     this.session = null;
     this.drink = null;
     this.steer = 0;
+    this.balanceInput = new HeldAxis();
     const root = this.w.group('brewery');
     root.visible = false;
     this.w.zoneData.brewery.bounds = 10.8;
@@ -107,16 +109,19 @@ export class Brewery {
         } else if (['KeyA', 'KeyD', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          this.steer = ['KeyA', 'ArrowLeft'].includes(e.code) ? -1 : 1;
+          this.steer = this.balanceInput.press(e.code, ['KeyA', 'ArrowLeft'].includes(e.code) ? -1 : 1);
         }
       },
       true,
     );
     window.addEventListener('keyup', (e) => {
-      if (['KeyA', 'KeyD', 'ArrowLeft', 'ArrowRight'].includes(e.code)) this.steer = 0;
+      if (['KeyA', 'KeyD', 'ArrowLeft', 'ArrowRight'].includes(e.code))
+        this.steer = this.balanceInput.release(e.code);
     });
+    const releaseBalance = () => { this.steer = this.balanceInput.clear(); };
+    window.addEventListener('blur', releaseBalance);
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) this.steer = 0;
+      if (document.hidden) releaseBalance();
     });
   }
   spend(amount, label) {
@@ -181,6 +186,7 @@ export class Brewery {
     this.g.audio.setActive?.(true);
     this.g.busy = true;
     this.w.keys.clear();
+    this.steer = this.balanceInput.clear();
     this.w.teleport(-4.25, 2.31);
     this.w.player.rotation.y = Math.PI;
     this.savedCamera = { yaw: this.w.yaw, pitch: this.w.pitch, distance: this.w.distance };
@@ -202,9 +208,11 @@ export class Brewery {
     this.hud.querySelectorAll('[data-stein-axis]').forEach((b) => {
       b.onpointerdown = (e) => {
         b.setPointerCapture(e.pointerId);
-        this.steer = Number(b.dataset.steinAxis);
+        this.steer = this.balanceInput.press(`pointer:${e.pointerId}`, Number(b.dataset.steinAxis));
       };
-      b.onpointerup = b.onpointercancel = () => (this.steer = 0);
+      b.onpointerup = b.onpointercancel = b.onlostpointercapture = (e) => {
+        this.steer = this.balanceInput.release(`pointer:${e.pointerId}`);
+      };
     });
     this.g.extras.say('brewery.contest', true, 'v160_brewery_contest_03');
     this.g.audio.sample('v160_beer_clink', { volume: 0.55 });
@@ -224,7 +232,7 @@ export class Brewery {
     this.drink = null;
     this.hud.hidden = true;
     this.g.busy = false;
-    this.steer = 0;
+    this.steer = this.balanceInput.clear();
     this.set.mug.position.copy(this.set.mug.userData.restPosition);
     this.set.mug.rotation.set(0, 0, 0);
     this.set.mug.userData.beer.scale.y = 1;

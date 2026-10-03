@@ -1,3 +1,4 @@
+import { shouldPreferVehicleInteraction, vehicleExitPrompt } from './interaction-comfort.js';
 import { orientedRectanglesOverlap } from './oriented-rectangle.js';
 import { instanceSurfaceKey, instanceSurfaceMaterial } from './instance-surfaces.js';
 import { VehiclePreload } from './vehicle-preload.js';
@@ -689,7 +690,10 @@ export class Arcade {
       }
     }
     if (this.vehicle) {
-      this.world.nearest = { kind: 'vehicle-exit', label: 'Aussteigen · erst anhalten' };
+      this.world.nearest = {
+        kind: 'vehicle-exit',
+        label: vehicleExitPrompt(this.speed, this.vehicle.type) || 'Aussteigen · erst anhalten',
+      };
     } else if (this.world.zone === 'city') {
       const p = this.world.player.position;
       const cars = this.world.cars
@@ -707,7 +711,7 @@ export class Arcade {
             o.car.mesh.position.y < 0.5,
         )
         .sort((a, b) => a.d - b.d);
-      if (cars.length && (!this.world.nearest || cars[0].d < 2.8))
+      if (cars.length && shouldPreferVehicleInteraction(this.world.nearest, p, cars[0].d))
         this.world.nearest = {
           kind: 'vehicle',
           data: cars[0].car,

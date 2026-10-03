@@ -1,3 +1,4 @@
+import { mountColleagueConversation } from './colleagues-ui.js';
 import * as THREE from 'three';
 import { label } from './world.js';
 import { setDoor, arrive } from './doors.js';
@@ -453,9 +454,10 @@ export class FireStory {
     if (n?.kind === 'it-benjamin') {
       this.g.open(
         'Benjamin · IT',
-        `<div class="story-brief"><span class="tag gold">IMMER DA FÜRS TEAM</span><h2>${this.state.completed ? 'Gelöscht. Gelöst. Geschlossen.' : 'Ein Ticket ist noch keine Katastrophe.'}</h2><p>${this.state.completed ? '„Der Laptop läuft wieder. Empower läuft vorerst unter Beobachtung.“' : '„Für normale Probleme reicht ein Neustart. Für besondere habe ich einen Feuerlöscher.“'}</p><p class="muted">Ticketstatus: ${this.state.completed ? 'gelöst · Ursache thermisch überzeugend' : 'bereit · Eskalationsweg frei'}</p><button data-fire-open>Ticket in Flammen · Story & Dialogbuch</button></div>`,
-        { pause: true },
+        `<div class="story-brief"><span class="tag gold">IMMER DA FÜRS TEAM</span><h2>${this.state.completed ? 'Gelöscht. Gelöst. Geschlossen.' : 'Ein Ticket ist noch keine Katastrophe.'}</h2><p id="dialogue-answer">${this.state.completed ? '„Der Laptop läuft wieder. Empower läuft vorerst unter Beobachtung.“' : '„Für normale Probleme reicht ein Neustart. Für besondere habe ich einen Feuerlöscher.“'}</p><div id="dialogue-voice-slot"></div><div data-colleague-support></div><p class="muted">Ticketstatus: ${this.state.completed ? 'gelöst · Ursache thermisch überzeugend' : 'bereit · Eskalationsweg frei'}</p><button data-fire-open>Ticket in Flammen · Story & Dialogbuch</button></div>`,
+        { pause: true, onClose: () => this.g.audio.voices.stop() },
       );
+      mountColleagueConversation(this.g, 'benjamin');
       return true;
     }
     return this.running;

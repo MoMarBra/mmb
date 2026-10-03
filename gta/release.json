@@ -1,13 +1,13 @@
 {
   "channel": "stable",
-  "version": "2.4.3",
+  "version": "2.5.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "2cc4ed3613537dbd8a402eba94872000ca6fe540",
+  "sourceCommit": "44d376a68fb82bb88dd1bc8dbffd1c6b14da89fe",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-03T15:31:45.704Z",
+  "preparedAt": "2026-10-03T16:15:28.022Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "GPU resources and shader layouts prepared before gameplay; stable light slots; photographic static material batching; identical garage models with fewer submissions; SSAO composition fused into output with full MSAA, maps, shadows and AO preserved. Office traversal, driving, boot/skip, full intro, mission voices and offline Quizssoir audio checked. Hardware-specific performance results in source release notes; no universal FPS guarantee.",
+  "validation": "Three existing colleagues remember confirmed progress and offer finite stored support; personal six-memory pinboard and 27 verified German voice clips. Menu/vehicle interaction and held-input fixes; stale dialogue queue replaced and duplicate NPC captions visually reduced. 100 focused browser checks, 27 real audio clips, existing regression groups, serial office A-B-A comparison, world/vehicle smoke and offline Edge Quizssoir audio verified. Existing graphics, saves and search privacy preserved; no universal FPS guarantee.",
   "searchIndexing": "noindex",
   "searchPrivacyUpdatedAt": "2026-10-03T13:34:16.987Z"
 }

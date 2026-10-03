@@ -40,6 +40,7 @@ export class FullMap {
         },
       },
     );
+    g.modal.map = true;
     document.body.classList.add('atlas-open');
     this.canvas = document.getElementById('atlas-canvas');
     this.observer = new ResizeObserver(() => this.draw());

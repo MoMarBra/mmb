@@ -1,3 +1,5 @@
+import { freshColleagues, normalizeColleagues, syncColleagues } from './colleagues-state.js';
+import { freshOfficeMemory, normalizeOfficeMemory, reconcileOfficeMemory, rememberMealReceipt } from './office-memory-state.js';
 import { freshBlast, normalizeBlast } from './blast-state.js';
 import { freshCampaign, normalizeCampaign } from './bbe-campaign-state.js';
 import { QuizState } from './quiz-state.js';
@@ -11,6 +13,8 @@ export const freshState = () => ({
   version: 1,
   quizssoir: new QuizState().serialize(),
   quizDiscoveries: [],
+  colleagues: freshColleagues(),
+  officeMemory: freshOfficeMemory(),
   bbeCampaign: freshCampaign(),
   bbeBlast: freshBlast(),
   originStory: freshOriginStory(),
@@ -109,6 +113,7 @@ export class Simulation {
     this.listeners = [];
     this.pending = [];
     this.load();
+    syncColleagues(this.state, { silent: true });
   }
   get s() {
     return this.state;
@@ -243,6 +248,9 @@ export class Simulation {
       base.originStory = normalizeOriginStory(base.originStory);
       base.workshopStory = normalizeWorkshopStory(base.workshopStory);
       base.fireStory = normalizeFireStory(base.fireStory);
+      base.colleagues = normalizeColleagues(v.colleagues);
+      syncColleagues(base, { silent: true });
+      base.officeMemory = normalizeOfficeMemory(v.officeMemory, base);
       const c = base.courier;
       base.courier =
         c?.active && Number.isFinite(c.remaining) && c.remaining > 0
@@ -291,6 +299,8 @@ export class Simulation {
   }
   save() {
     try {
+      syncColleagues(this.s);
+      this.s.officeMemory = reconcileOfficeMemory(this.s.officeMemory, this.s).state;
       this.storage?.setItem(SAVE_KEY, JSON.stringify(this.s));
       return !!this.storage;
     } catch {
@@ -543,6 +553,8 @@ export class Simulation {
     this.transaction(-price, `${r.name}: ${f.name}`);
     for (const stat of ['hunger', 'energy', 'happy', 'focus']) this.change(stat, f[stat]);
     if (!this.s.visits.includes(id)) this.s.visits.push(id);
+    const memoryReceipt = { restaurant: id, sequence: this.s.officeMemory.lastMealReceipt + 1, paid: true };
+    this.s.officeMemory = rememberMealReceipt(this.s.officeMemory, memoryReceipt).state;
     this.checkAchievements();
     this.save();
     return { ok: true, food: f, restaurant: r, price };

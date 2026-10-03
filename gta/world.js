@@ -813,19 +813,8 @@ export class GameWorld {
     this.interact('office', 'printer', 'Drucker · kleine Bürogeschichte', -10.9, 4.4, {
       kind: 'printer',
     });
-    box(g, -13.32, 1.85, 3, 0.1, 1.35, 2.5, '#a58457');
-    for (let i = 0; i < 6; i++) {
-      box(
-        g,
-        -13.25,
-        1.5 + (i % 2) * 0.53,
-        2.2 + Math.floor(i / 2) * 0.65,
-        0.015,
-        0.4,
-        0.48,
-        ['#ddd185', '#a5cbb7', '#edd4ba'][i % 3],
-      );
-    }
+    // The personal memory pinboard replaces this former decorative board.
+    // Game installs it after construction, before graphics preparation.
     for (const x of [-11, -9]) {
       this.solid('office', g, x, 1.1, 10.3, 1.5, 2.2, 0.55, '#e3e1d3');
       for (let i = 0; i < 9; i++)

@@ -6219,3 +6219,19 @@ button.mission-row:focus-visible {
 }
 
 .discovery-card{max-width:32rem;margin:auto;padding:1rem}.discovery-card>span{font-size:.7rem;letter-spacing:.14em;color:#d5bd79}.discovery-card p{font-size:1.15rem;line-height:1.65;margin:1.2rem 0}.discovery-card small{display:block;opacity:.65;margin:0 0 1.5rem}
+
+/* Only the exact current answer already visible in a normal NPC dialogue.
+   Keep the existing live region available to assistive technology. */
+.dialogue-card .voice-caption.inline.duplicate-answer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  max-width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+}

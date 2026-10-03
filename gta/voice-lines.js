@@ -1,4 +1,6 @@
+import { OFFICE_LIFE_VOICE_LINES } from './office-life-voices.js';
 export const VOICE_LINES = [
+  ...OFFICE_LIFE_VOICE_LINES,
   {
     "id": "lena_greet",
     "actor": "Lena",

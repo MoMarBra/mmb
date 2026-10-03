@@ -1,3 +1,6 @@
+import { ownPanelCloseShortcut } from './interaction-comfort.js';
+import { OfficeMemory } from './office-memory.js';
+import { OfficeMemoryDisplay } from './office-memory-display.js';
 import { prepareGameGraphics } from './gpu-preparation.js';
 import { BBEBlast } from './bbe-blast.js';
 import { installBlastPC, BLAST_PC } from './blast-office.js';
@@ -75,6 +78,7 @@ export class Game {
     this.blastPC = installBlastPC(this.world);
     this.mouseControls = new MouseControls(this);
     this.missionPassed = new MissionPassed(this);
+    this.officeMemory = new OfficeMemory(this, new OfficeMemoryDisplay(this.world.groups.office));
     this.titleMusic = new TitleMusic(this);
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
@@ -178,6 +182,7 @@ export class Game {
         );
       }
       if (this.uiTimer > 0.15) {
+        this.officeMemory.update(now);
         this.uiTimer = 0;
         if (!this.extras.intro.current) this.updateHUD();
       }
@@ -250,6 +255,18 @@ export class Game {
             else this.workshop.film.finish();
           }
         }
+        return;
+      }
+      if (ownPanelCloseShortcut(e, {
+        started: this.started,
+        busy: this.busy,
+        cinematic: this.cinematic,
+        modal: this.modal,
+        phonePage: this.phonePage,
+        editing: !!(e.target?.isContentEditable || e.target?.closest?.('input,textarea,select')),
+      })) {
+        e.preventDefault();
+        this.close();
         return;
       }
       if (e.key === 'Escape') {
