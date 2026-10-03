@@ -1,3 +1,4 @@
+import { setInstanceColorIfChanged, flushInstanceUploads } from './instance-uploads.js';
 import { fuseSSAOComposite } from './ssao-composite.js';
 import { buildMarienplatzRooftop } from './marienplatz-rooftop.js';
 import { instanceSurfaceKey, instanceSurfaceMaterial } from './instance-surfaces.js';
@@ -1979,13 +1980,12 @@ export class GameWorld {
       for (const o of item.list)
         if (o.actor.userData.renderVisible) {
           item.batch.setMatrixAt(count, o.source.matrixWorld);
-          if (item.colored) item.batch.setColorAt(count, o.source.material.color);
+          if (item.colored) setInstanceColorIfChanged(item.batch, count, o.source.material.color);
           count++;
         }
       item.batch.count = count;
       item.batch.visible = count > 0;
-      item.batch.instanceMatrix.needsUpdate = true;
-      if (item.colored && count) item.batch.instanceColor.needsUpdate = true;
+      flushInstanceUploads(item.batch, count);
     }
   }
   makeRain() {
@@ -2235,6 +2235,8 @@ export class GameWorld {
       vz = ((-Math.cos(this.yaw) * forward - Math.sin(this.yaw) * side) / length) * speed;
       if (forward || side) this.pose = 'walk';
     }
+    const coffeeVelocity = !driving && !cinematicIntro ? this.coffeePitch?.movementVelocity(dt) : null;
+    if (coffeeVelocity) { vx = coffeeVelocity.x; vz = coffeeVelocity.z; }
     if (!driving && !cinematicIntro) {
       b.velocity.x = vx;
       b.velocity.z = vz;
@@ -2251,7 +2253,7 @@ export class GameWorld {
     b.position.z = clamp(b.position.z, -limit, limit);
     this.player.position.x = b.position.x;
     this.player.position.z = b.position.z;
-    this.moveSpeed = movement ? this.gameplay.immersion.motion.speed || 0 : Math.hypot(vx, vz);
+    this.moveSpeed = movement ? this.gameplay.immersion.motion.speed || 0 : coffeeVelocity ? this.coffeePitch.approachSpeed(dt) : Math.hypot(vx, vz);
     if (this.moveSpeed > 0.1 && !movement) {
       const angle = Math.atan2(vx, vz);
       this.player.rotation.y +=
@@ -2461,6 +2463,7 @@ export class GameWorld {
     if (!cinematicIntro) {
       this.workshop?.updateWorld(dt, blocked);
       this.fireStory?.updateWorld(dt, blocked);
+      this.coffeePitch?.updateWorld();
     }
     this.updateCrowd();
     this.gameplay?.game?.extras?.beforeRender(dt);

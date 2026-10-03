@@ -1,3 +1,4 @@
+import { CoffeePitch } from './coffee-pitch.js';
 import { ownPanelCloseShortcut } from './interaction-comfort.js';
 import { OfficeMemory } from './office-memory.js';
 import { OfficeMemoryDisplay } from './office-memory-display.js';
@@ -80,6 +81,7 @@ export class Game {
     this.missionPassed = new MissionPassed(this);
     this.officeMemory = new OfficeMemory(this, new OfficeMemoryDisplay(this.world.groups.office));
     this.titleMusic = new TitleMusic(this);
+    this.coffeePitch = new CoffeePitch(this);
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
     this.intro();
@@ -115,6 +117,7 @@ export class Game {
       const dt = Math.min(rawDelta, 0.08);
       this.lastFrame = now;
       const hidden = document.hidden;
+      this.coffeePitch.prepareFrame(rawDelta);
       const paused = !this.started || hidden || this.modal?.pause === true;
       const renderedWorld = !hidden && !this.cinematic && !this.blast.active;
       if (!hidden && !this.blast.active) {
@@ -123,7 +126,7 @@ export class Game {
           film.performance?.record(rawDelta, film.current);
           film.render(Math.min(rawDelta, 0.25));
         } else
-          this.world.update(paused ? 0 : dt, !!this.modal || this.busy || !this.started || hidden);
+          this.world.update(paused ? 0 : dt, !!this.modal || this.busy || !this.started || hidden || this.coffeePitch.blocksMovement);
       }
       if (!hidden && bootAssetsReady && !this.extras.intro.current?.loading) boot?.complete?.();
       if (!paused) {
@@ -370,6 +373,8 @@ export class Game {
     } = {},
   ) {
     this.missionPassed?.pause();
+    this.coffeePitch?.freeze();
+    this.cancelTimedAction();
     if (this.modal?.onClose) this.modal.onClose();
     if (!this.modal) this.focusReturn = document.activeElement;
     this.modal = { title, pause, locked, onClose, task };
@@ -584,6 +589,7 @@ export class Game {
     this.fireStory?.updateHUD();
     this.origin?.updateHUD();
     this.campaign?.updateHUD();
+    this.coffeePitch?.updateHUD();
     this.quizssoir?.updateWorldProgress?.();
     if (z === 'office' && this.world.player.position.x < -13.5) {
       zoneName = inIT(this.world.player.position) ? 'BBE · IT / Benjamin' : 'BBE · Westflügel';
@@ -597,6 +603,8 @@ export class Game {
     if (this.campaign?.beforeTransition?.(zone) === false) return;
     if (this.origin?.beforeTransition(zone) === false) return;
     if (this.fireStory?.beforeTransition() === false) return;
+    this.coffeePitch?.suspend();
+    this.cancelTimedAction();
     this.worldTransitionUntil = performance.now() + 700;
     this.missionPassed?.pause();
     this.close();
@@ -615,6 +623,7 @@ export class Game {
   interact() {
     if (!this.started || this.modal || this.busy) return;
     const n = this.world.nearest;
+    if (this.coffeePitch?.interact(n)) return;
     if (n?.kind === 'bbe-blast') {
       const p = this.world.player.position;
       if (
@@ -715,15 +724,48 @@ export class Game {
         break;
     }
   }
-  timedAction(title, body, duration, done) {
+  cancelTimedAction(resetPose = true) {
+    const action = this.currentTimedAction;
+    if (!action) return;
+    this.currentTimedAction = null;
+    clearTimeout(action.timer);
+    action.banner.remove();
+    // A replaced save/world or later film owns its own busy flag and pose.
+    if (this.sim.s !== action.owner || this.world !== action.world || this.world.zone !== action.zone ||
+      this.cinematic || this.workshop?.boarding ||
+      this.extras?.brewery?.session || this.extras?.brewery?.drink) return;
+    this.busy = false;
+    if (resetPose && this.world.zone === action.zone && this.world.pose === action.pose) {
+      this.world.pose = 'walk';
+      if (action.food && this.world.foodProp === action.food) action.food.visible = false;
+      // Restore only this action's spatial pose after its timer/banner were cleared.
+      // Replacing an action uses resetPose=false and must not undo its successor.
+      action.onCancel?.();
+    }
+  }
+  timedAction(title, body, duration, done, onCancel = null) {
+    // A caller has already selected its new pose; replacing an older action
+    // must not clear that pose while cancelling the older completion callback.
+    this.cancelTimedAction(false);
     this.busy = true;
     const e = document.createElement('div');
     e.className = 'eat-banner';
     e.innerHTML = `<strong>${title}</strong><p>${body}</p><div class="eat-progress"></div>`;
     e.querySelector('.eat-progress').style.setProperty('--duration', duration + 's');
     document.body.append(e);
-    setTimeout(() => {
+    const action = {
+      owner: this.sim.s, world: this.world, zone: this.world.zone, pose: this.world.pose,
+      food: this.world.pose === 'eat' ? this.world.foodProp : null, banner: e, timer: null,
+      onCancel: typeof onCancel === 'function' ? onCancel : null,
+    };
+    this.currentTimedAction = action;
+    action.timer = setTimeout(() => {
+      if (this.currentTimedAction !== action) return;
+      this.currentTimedAction = null;
       e.remove();
+      if (this.sim.s !== action.owner || this.world !== action.world ||
+        this.world.zone !== action.zone || this.cinematic || this.workshop?.boarding ||
+      this.extras?.brewery?.session || this.extras?.brewery?.drink) return;
       this.busy = false;
       done?.();
     }, duration * 1000);
@@ -1004,38 +1046,50 @@ export class Game {
   }
   returnMachine() {
     let total = 0,
-      feeding = false;
+      feeding = false,
+      closed = false,
+      timer = null,
+      modalOwner = null;
+    const saveOwner = this.sim.s;
+    const ownsSession = () =>
+      !closed && this.modal === modalOwner && this.sim.s === saveOwner;
     this.open(
       'Der kleine Kreislauf des Geldes',
       `<div class="bottle-machine"><div class="eyebrow">PFANDRÜCKGABE · AUGUSTENSTRASSE</div><div class="machine-display" id="return-display">BEREIT</div><div class="bottle-animation" id="return-animation">♻</div><p id="return-count"></p><button class="primary" id="feed-bottle">Eine Flasche einlegen</button><div class="return-total" id="return-total">Pfandbon: 0,00 €</div><small>Jede Flasche wird sofort gutgeschrieben. Der Bon ist deine Übersicht.</small></div>`,
       {
         onClose: () => {
+          closed = true;
           feeding = false;
+          clearTimeout(timer);
+          timer = null;
         },
       },
     );
+    modalOwner = this.modal;
     const update = () => {
-      if (!$('#return-count')) return;
+      if (!ownsSession() || !$('#return-count')) return;
       $('#return-count').textContent =
         `${this.sim.s.inventory.length} Flaschen im Rucksack · ${euro(this.sim.s.inventory.reduce((a, b) => a + b, 0) / 100)} Pfandwert`;
       $('#feed-bottle').disabled = !this.sim.s.inventory.length || feeding;
     };
     update();
     this.uiClick('#feed-bottle', () => {
-      if (feeding || !this.sim.s.inventory.length) return;
+      if (!ownsSession() || feeding || !this.sim.s.inventory.length) return;
       feeding = true;
       update();
       $('#return-animation').classList.add('feeding');
       this.world.returnTime = 0.55;
       this.audio.play('bottle');
-      setTimeout(() => {
-        if (this.modal?.title !== 'Der kleine Kreislauf des Geldes') return;
+      timer = setTimeout(() => {
+        if (!ownsSession() || !feeding) return;
+        timer = null;
+        feeding = false;
         const cents = this.sim.returnBottle();
+        if (!ownsSession()) return;
         total += cents;
         $('#return-display').textContent = `+ ${euro(cents / 100)}`;
         $('#return-total').textContent = `Pfandbon: ${euro(total / 100)}`;
         $('#return-animation').classList.remove('feeding');
-        feeding = false;
         update();
       }, 550);
     });
@@ -1400,6 +1454,7 @@ export class Game {
       $('#audio-toggle').textContent = this.audio.toggle() ? 'Ton an' : 'Ton aus';
     });
     this.arcade.addSettings();
+    this.coffeePitch?.addSettings();
     const soundButton = document.createElement('button');
     soundButton.id = 'audio-studio';
     soundButton.textContent = 'Soundstudio · Stimmen & Mix';

@@ -318,6 +318,10 @@ export class Leisure {
           this.game.toast('Weiter geht’s.', '+10 Energie · +7 Zufriedenheit · +8 Gesundheit');
           this.sim.save();
         },
+        () => {
+          // Cancel a seated pause without its rewards or a save write.
+          this.world.teleport(standing.x, standing.z, Math.max(0, standing.y));
+        },
       );
     }
     if (type === 'parking') {

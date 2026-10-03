@@ -1,10 +1,12 @@
 import * as THREE from 'three';
+import { VehicleHeadlightPolicy } from './vehicle-headlight-policy.js';
 
 // Keep the light layout stable from the very first frame. Adding a pair of lights
 // on every first entry used to recompile all visible city material programs.
 export class VehicleLighting {
   constructor(world) {
     this.world = world;
+    this.headlightPolicy = new VehicleHeadlightPolicy();
     this.car = null;
     this.point = new THREE.Vector3();
     this.lights = [-1, 1].map((side) => {
@@ -19,6 +21,13 @@ export class VehicleLighting {
     });
   }
 
+  toggle(car) {
+    // L keeps its original harmless behavior for bikes/helis, which never use
+    // this shared headlamp pair or acquire an automatic policy.
+    if (!this.headlightPolicy.toggle(car, this.world.sim.s) && car)
+      car.headlights = !car.headlights;
+  }
+
   update(car) {
     const active =
       car &&
@@ -26,6 +35,11 @@ export class VehicleLighting {
       car.mesh.visible &&
       !['bike', 'helicopter'].includes(car.type);
     this.car = active ? car : null;
+    const gameplay = this.world.gameplay;
+    // The IntroStage authors a separate headlightCar. Never derive its lighting
+    // from gameplay time/weather or mutate it, even during an intro replay.
+    if (active && car === gameplay?.vehicle && !gameplay?.game?.extras?.intro?.current)
+      this.headlightPolicy.update(car, this.world.sim.s, gameplay?.immersion?.weather?.cloud);
     if (!active || !car.headlights) {
       for (const light of this.lights) light.intensity = 0;
       return;

@@ -1,5 +1,7 @@
+import { COFFEE_PITCH_VOICE_LINES } from './coffee-pitch-voices.js';
 import { OFFICE_LIFE_VOICE_LINES } from './office-life-voices.js';
 export const VOICE_LINES = [
+  ...COFFEE_PITCH_VOICE_LINES,
   ...OFFICE_LIFE_VOICE_LINES,
   {
     "id": "lena_greet",

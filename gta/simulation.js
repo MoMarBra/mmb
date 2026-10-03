@@ -1,3 +1,4 @@
+import { freshCoffeePitch, normalizeCoffeePitch } from './coffee-pitch-state.js';
 import { freshColleagues, normalizeColleagues, syncColleagues } from './colleagues-state.js';
 import { freshOfficeMemory, normalizeOfficeMemory, reconcileOfficeMemory, rememberMealReceipt } from './office-memory-state.js';
 import { freshBlast, normalizeBlast } from './blast-state.js';
@@ -15,6 +16,7 @@ export const freshState = () => ({
   quizDiscoveries: [],
   colleagues: freshColleagues(),
   officeMemory: freshOfficeMemory(),
+  coffeePitch: freshCoffeePitch(),
   bbeCampaign: freshCampaign(),
   bbeBlast: freshBlast(),
   originStory: freshOriginStory(),
@@ -251,6 +253,7 @@ export class Simulation {
       base.colleagues = normalizeColleagues(v.colleagues);
       syncColleagues(base, { silent: true });
       base.officeMemory = normalizeOfficeMemory(v.officeMemory, base);
+      base.coffeePitch = normalizeCoffeePitch(v.coffeePitch);
       const c = base.courier;
       base.courier =
         c?.active && Number.isFinite(c.remaining) && c.remaining > 0

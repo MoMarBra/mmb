@@ -1,3 +1,4 @@
+import { setInstanceColorIfChanged, flushInstanceUploads } from './instance-uploads.js';
 import { shouldPreferVehicleInteraction, vehicleExitPrompt } from './interaction-comfort.js';
 import { orientedRectanglesOverlap } from './oriented-rectangle.js';
 import { instanceSurfaceKey, instanceSurfaceMaterial } from './instance-surfaces.js';
@@ -71,7 +72,7 @@ export class Arcade {
           game.audio.play(this.vehicle.type === 'bike' ? 'bike-bell' : 'horn');
       }
       if (e.code === 'KeyL' && this.vehicle) {
-        this.vehicle.headlights = !this.vehicle.headlights;
+        this.vehicleLighting.toggle(this.vehicle);
       }
       if (e.code === 'KeyR') this.music.toggle();
     });
@@ -143,27 +144,21 @@ export class Arcade {
         if (!o.car.renderVisible || o.car.detailed || o.source.userData.suppressed) continue;
         if (farBatch && o.car.farLOD) {
           farBatch.setMatrixAt(farCount, o.source.matrixWorld);
-          if (colored) farBatch.setColorAt(farCount, o.source.material.color);
+          if (colored) setInstanceColorIfChanged(farBatch, farCount, o.source.material.color);
           farCount++;
         } else {
           batch.setMatrixAt(count, o.source.matrixWorld);
-          if (colored) batch.setColorAt(count, o.source.material.color);
+          if (colored) setInstanceColorIfChanged(batch, count, o.source.material.color);
           count++;
         }
       }
       batch.count = count;
       batch.visible = count > 0;
-      if (count) {
-        batch.instanceMatrix.needsUpdate = true;
-        if (colored) batch.instanceColor.needsUpdate = true;
-      }
+      flushInstanceUploads(batch, count);
       if (farBatch) {
         farBatch.count = farCount;
         farBatch.visible = farCount > 0;
-        if (farCount) {
-          farBatch.instanceMatrix.needsUpdate = true;
-          if (colored) farBatch.instanceColor.needsUpdate = true;
-        }
+        flushInstanceUploads(farBatch, farCount);
       }
     }
   }
@@ -234,6 +229,7 @@ export class Arcade {
     if (this.vehicle || this.world.zone !== 'city') return false;
     this.vehicle = car;
     car.controlled = true;
+    this.vehicleLighting.update(car);
     car.parked = true;
     if (this.world.pedestrianNav) this.world.pedestrianNav.count = -1;
     this.speed = 0;
