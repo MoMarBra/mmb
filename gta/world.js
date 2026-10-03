@@ -1,3 +1,4 @@
+import { updateChaseCamera } from './office-hotpath.js';
 import { setInstanceColorIfChanged, flushInstanceUploads } from './instance-uploads.js';
 import { fuseSSAOComposite } from './ssao-composite.js';
 import { buildMarienplatzRooftop } from './marienplatz-rooftop.js';
@@ -2427,28 +2428,7 @@ export class GameWorld {
         );
       }
     }
-    const desiredTarget = new THREE.Vector3(
-      b.position.x,
-      flightHeight || b.position.y - 0.34 + (this.pose === 'eat' ? 1.0 : 1.25),
-      b.position.z,
-    );
-    this.target.lerp(desiredTarget, 1 - Math.exp(-dt * 10));
-    const offset = new THREE.Vector3(
-      Math.sin(this.yaw) * Math.cos(this.pitch) * this.distance,
-      1 + Math.sin(this.pitch) * this.distance,
-      Math.cos(this.yaw) * Math.cos(this.pitch) * this.distance,
-    );
-    const desired = this.target.clone().add(offset);
-    this.ray.set(this.target, offset.clone().normalize());
-    this.ray.far = offset.length();
-    const hits = cinematicIntro ? [] : this.ray.intersectObjects(zone.obstacles, false);
-    if (hits.length && hits[0].distance > 0.1)
-      desired
-        .copy(this.target)
-        .addScaledVector(offset.normalize(), Math.max(0.45, hits[0].distance - 0.2));
-    this.camera.position.lerp(desired, 1 - Math.exp(-dt * 12));
-    this.camera.lookAt(this.target);
-    this.camera.updateMatrixWorld();
+    updateChaseCamera(this, b, zone, dt, flightHeight, cinematicIntro);
     this.gameplay?.game?.extras?.intro?.camera();
     this.visibilityFrustum ||= new THREE.Frustum();
     this.visibilityProjection ||= new THREE.Matrix4();

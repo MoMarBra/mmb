@@ -1,3 +1,4 @@
+import { nearestVisibleNPC } from './office-hotpath.js';
 import { setInstanceColorIfChanged, flushInstanceUploads } from './instance-uploads.js';
 import { shouldPreferVehicleInteraction, vehicleExitPrompt } from './interaction-comfort.js';
 import { orientedRectanglesOverlap } from './oriented-rectangle.js';
@@ -433,12 +434,7 @@ export class Arcade {
     return true;
   }
   targetNPC() {
-    const p = this.world.player.position;
-    return this.world.zoneData[this.world.zone].npcs
-      .filter((n) => !n.down && n.mesh.visible && Math.abs(n.mesh.position.y - p.y) < 2)
-      .map((n) => ({ n, d: Math.hypot(n.mesh.position.x - p.x, n.mesh.position.z - p.z) }))
-      .filter((o) => o.d < 2.25 && this.lineClear(p, o.n.mesh.position))
-      .sort((a, b) => a.d - b.d)[0]?.n;
+    return nearestVisibleNPC(this);
   }
   lineClear(a, b) {
     const data = this.world.zoneData[this.world.zone];

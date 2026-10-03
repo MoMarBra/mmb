@@ -1,13 +1,13 @@
 {
   "channel": "stable",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "publishedPath": "/gta/",
-  "sourceCommit": "a68ba569771586b8eb13b1bac29422a2095ed776",
+  "sourceCommit": "aa433eadf6e80cbce334f1d73086da39652b58e5",
   "includesWorkingChanges": false,
-  "preparedAt": "2026-10-03T17:36:17.108Z",
+  "preparedAt": "2026-10-03T18:26:30.982Z",
   "gameTestsRun": true,
   "browserVisualQA": true,
-  "validation": "Three-pair voiced coffee delivery with real tray grips, visible fluid and staged refill; automatic existing vehicle headlights with per-car manual choices; owned bottle-return and timed-action cancellation including bench placement. Existing systems checked through 57 pure regression groups, real office deliveries and pause, eight real voice playbacks, 52 light/timer browser checks and separate bank cancellation, serial fixed-quality office comparison, world smoke and offline Edge quiz soundtrack checks. Conservative unchanged-color upload suppression preserves visuals. No hardware-independent FPS guarantee.",
+  "validation": "Paused smartphone photo mode with native local PNGs, orbit/lens controls, owned cancellation and camera-dependent sky/rain reflections. No extra render resources, clocks, rewards or audio settings. Existing chase-camera vectors/hits are reused with exact original outputs. Sixty pure regression groups, actual native browser/PNG checks, serial fixed-quality old-new-old office comparison, world/vehicle smoke, offline Edge photo and quiz soundtrack checks. Baseline varies across runs; no causal FPS gain or hardware-independent guarantee.",
   "searchIndexing": "noindex",
   "searchPrivacyUpdatedAt": "2026-10-03T13:34:16.987Z"
 }

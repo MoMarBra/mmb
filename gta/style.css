@@ -6235,3 +6235,37 @@ button.mission-row:focus-visible {
   clip: rect(0, 0, 0, 0);
   clip-path: inset(50%);
 }
+/* Existing paused phone owner; no WebGL pass, blur or always-running animation. */
+.modal-shade.photo-shade { background: transparent; backdrop-filter: none; padding: 0; }
+.photo-view { position: fixed; inset: 0; color: #fffdf5; font-family: inherit; }
+.photo-surface { position: absolute; inset: 0; touch-action: none; cursor: grab; }
+.photo-surface:active { cursor: grabbing; }
+.photo-top, .photo-bottom { position: absolute; z-index: 2; display: flex; align-items: center; gap: 14px; }
+.photo-top { top: 22px; left: 26px; right: 26px; justify-content: space-between; }
+.photo-top h2 { font-size: 14px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; text-shadow: 0 1px 6px #000; }
+.photo-view button { color: inherit; background: #10242ec9; border: 1px solid #ffffff38; border-radius: 999px; min-height: 42px; padding: 10px 16px; }
+.photo-view button:hover, .photo-view button[aria-pressed="true"] { border-color: #f6dfab; background: #3f453de6; }
+.photo-view button:focus-visible, .photo-view input:focus-visible { outline: 2px solid #ffdc99; outline-offset: 4px; }
+.photo-top button { width: 44px; padding: 10px; }
+.photo-view svg { width: 22px; height: 22px; vertical-align: middle; }
+.photo-bottom { bottom: 22px; left: 50%; transform: translateX(-50%); flex-direction: column; gap: 10px; width: min(92vw, 440px); text-align: center; }
+.photo-lenses { display: flex; gap: 6px; }
+.photo-lenses button { font-size: 12px; min-height: 34px; padding: 6px 14px; }
+.photo-adjust { display: flex; gap: 16px; padding: 8px 14px; background: #10242ec9; border-radius: 12px; font-size: 11px; }
+.photo-adjust label { display: grid; gap: 4px; text-align: left; }
+.photo-adjust input { width: 130px; accent-color: #f6dfab; }
+.photo-view .photo-shutter { border: 3px solid #fff9; outline: 1px solid #263a40; outline-offset: 3px; width: 62px; height: 62px; background: #f6f1df; color: #243d40; }
+.photo-view .photo-shutter:hover, .photo-view .photo-shutter:focus-visible { background: #fffaf0; color: #162d36; border-color: #fff; }
+.photo-view .photo-shutter:disabled { opacity: .6; }
+.photo-bottom small { font-size: 11px; color: #fffdf3; text-shadow: 0 1px 4px #000; }
+.photo-status { font-size: 12px; margin: 0; min-height: 16px; text-shadow: 0 1px 4px #000; }
+.photo-thirds { pointer-events: none; position: absolute; inset: 0; background: linear-gradient(to right, transparent calc(33.333% - .5px), #fff5 calc(33.333% - .5px), #fff5 calc(33.333% + .5px), transparent calc(33.333% + .5px), transparent calc(66.666% - .5px), #fff5 calc(66.666% - .5px), #fff5 calc(66.666% + .5px), transparent calc(66.666% + .5px)), linear-gradient(to bottom, transparent calc(33.333% - .5px), #fff5 calc(33.333% - .5px), #fff5 calc(33.333% + .5px), transparent calc(33.333% + .5px), transparent calc(66.666% - .5px), #fff5 calc(66.666% - .5px), #fff5 calc(66.666% + .5px), transparent calc(66.666% + .5px)); }
+.photo-thirds[hidden] { display: none; }
+.phone-app-icon.app-camera { background: linear-gradient(145deg, #738382, #263b45); }
+[data-photo-notice]:empty { display: none; }
+@media (max-height: 520px) {
+  .photo-top { top: 8px; }
+  .photo-bottom { bottom: 12px; gap: 7px; }
+  .photo-adjust, .photo-bottom small { display: none; }
+  .photo-view .photo-shutter { width: 48px; height: 48px; padding: 8px; }
+}

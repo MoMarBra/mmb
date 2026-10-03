@@ -6,6 +6,7 @@ const escapeHTML = (value) =>
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
   );
 const paths = {
+  camera: '<path d="M3 7h5l2-3h4l2 3h5v13H3z"/><circle cx="12" cy="13" r="4"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>',
   tasks:
     '<rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 3h6v4H9zM9 12l1 1 2-2m2 1h2M9 17h7"/>',
@@ -38,6 +39,7 @@ export const PHONE_APPS = [
   ['stats', 'Mein Leben', 'Stats & Inventar'],
   ['achievements', 'Erfolge', 'Achievements'],
   ['music', 'ISAR FM', 'Musik'],
+  ['camera', 'Kamera', 'Foto als PNG'],
   ['settings', 'Einstellungen', 'Einstellungen'],
 ];
 const STATIONS = [
@@ -62,6 +64,7 @@ function home(game) {
     <div class="phone-home-heading"><p>${escapeHTML(sim.weekday)} · Maxvorstadt</p><h1>Dein München.</h1><div class="phone-weather">${icon(s.weather === 'Regen' ? 'rain' : 'sun')}<span>${escapeHTML(s.weather)}</span><span class="phone-clock">${sim.clock}</span></div></div>
     <button class="phone-day-card" data-phone-app="tasks"><span class="phone-card-kicker">BBE · DEIN ARBEITSTAG ${icon('arrow')}</span><strong>${s.courier.active ? 'Der Kunde wartet auf den Koffer.' : next ? escapeHTML(next.title) : 'Bereit für die nächste gute Folie?'}</strong><span>${s.courier.active ? 'Eilauftrag läuft · Uhr im Handy pausiert' : next ? `${s.active.length} offene Projekte · ${escapeHTML(sim.career.name)}` : `${escapeHTML(sim.career.name)} · Aufträge am BBE-PC`}</span></button>
     <nav class="phone-app-grid" aria-label="Smartphone Apps">${PHONE_APPS.map(([id, label, description]) => `<button data-phone-app="${id}" aria-label="${label} · ${description}"><span class="phone-app-icon app-${id}">${icon(id)}${id === 'mail' && s.mail.length ? `<span class="phone-app-badge" aria-label="${s.mail.length} Nachrichten">${s.mail.length > 99 ? '99+' : s.mail.length}</span>` : ''}</span><span>${label}</span></button>`).join('')}</nav>
+    <p class="phone-inline-status" data-photo-notice role="status" aria-live="polite"></p>
     <div class="phone-home-note">Feierabend ist auch eine Strategie.</div>`;
 }
 

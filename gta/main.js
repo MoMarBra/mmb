@@ -1,3 +1,4 @@
+import { PhotoMode } from './photo-mode.js';
 import { CoffeePitch } from './coffee-pitch.js';
 import { ownPanelCloseShortcut } from './interaction-comfort.js';
 import { OfficeMemory } from './office-memory.js';
@@ -82,6 +83,7 @@ export class Game {
     this.officeMemory = new OfficeMemory(this, new OfficeMemoryDisplay(this.world.groups.office));
     this.titleMusic = new TitleMusic(this);
     this.coffeePitch = new CoffeePitch(this);
+    this.photoMode = new PhotoMode(this);
     this.bind();
     this.sim.listeners.push((e) => this.onEvent(e));
     this.intro();
@@ -112,6 +114,14 @@ export class Game {
         this.lastFrame = now;
         requestAnimationFrame(this.frame);
         return;
+      }
+      // A photo owns only rendering. No world/controller/audio/clock tick runs here.
+      if (this.photoMode.active) {
+        this.lastFrame = now;
+        if (this.photoMode.frame()) {
+          requestAnimationFrame(this.frame);
+          return;
+        }
       }
       const rawDelta = (now - this.lastFrame) / 1000 || 0.016;
       const dt = Math.min(rawDelta, 0.08);
@@ -191,6 +201,7 @@ export class Game {
       }
       if (!hidden) this.quizssoir.update(dt);
       this.mouseControls.update();
+      if (this.photoMode.pending) this.photoMode.arm();
       requestAnimationFrame(this.frame);
     };
     requestAnimationFrame(this.frame);
@@ -198,7 +209,7 @@ export class Game {
     document.addEventListener('visibilitychange', () => {
       this.lastFrame = performance.now();
       this.world.keys.clear();
-      if (document.hidden) this.sim.save();
+      if (document.hidden && !this.photoMode.active) this.sim.save();
     });
   }
   get activeFilm() {
@@ -372,6 +383,7 @@ export class Game {
       task = null,
     } = {},
   ) {
+    this.photoMode?.cancel();
     this.missionPassed?.pause();
     this.coffeePitch?.freeze();
     this.cancelTimedAction();
@@ -396,6 +408,7 @@ export class Game {
   }
   close() {
     if (this.modal?.locked) return;
+    this.photoMode?.cancel();
     if (this.modal?.onClose) this.modal.onClose();
     this.modal = null;
     $('#modal-root').innerHTML = '';
@@ -1185,6 +1198,8 @@ export class Game {
     );
   }
   phone(page = 'home', navigation = 'push') {
+    if (page === 'camera') return this.photoMode.request();
+    this.photoMode?.cancel();
     if (page === 'map') return this.extras.map.open();
     const activePage = showPhone(this, page, navigation);
     if (!activePage) return;
