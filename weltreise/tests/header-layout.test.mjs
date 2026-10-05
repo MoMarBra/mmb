@@ -24,3 +24,9 @@ test('mobile viewport and compact spacing remain, with current versioned stylesh
   const version=createHash('sha256').update(css).digest('hex').slice(0,12);
   assert.ok(html.includes(`./style.css?v=${version}`));
 });
+
+test('position card keeps a concise estimated label without the removed notice',()=>{
+  assert.doesNotMatch(html,/class="position-note"|Fahrplanbasierte Position · simuliert|Geschätzter Verlauf entlang einer vereinfachten Wasserroute\.|Keine AIS- oder Live-Positionsdaten\./);
+  assert.match(html,/<div class="position-copy">[^]*?<span id="status-subtitle">[^<]*<\/span><span class="position-estimate">Geschätzte Position<\/span><\/div>/);
+  assert.match(html,/Die Karte zeigt auch im Live-Modus eine Simulation\./);
+});
