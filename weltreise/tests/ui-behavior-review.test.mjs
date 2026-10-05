@@ -110,7 +110,9 @@ test('settings apply switches exact input instant and reset returns live',async(
   const h=await boot();h.fire('settings-trigger');assert.equal(h.elements['settings-dialog'].open,true);
   h.elements['preview-datetime'].value='2026-10-18T19:30';h.fire('apply-preview');
   assert.equal(h.api.getState().preview,engine.startTime);assert.equal(h.elements['settings-dialog'].open,false);assert.equal(h.elements['status-eyebrow'].textContent,'AUF SEE');
-  assert.equal(h.elements['cd-days'].textContent,'125');assert.equal(h.elements['cd-hours'].textContent,'13');assert.equal(h.elements['cd-minutes'].textContent,'30');
+  assert.equal(h.elements['countdown-label'].textContent,'Ankunft in A Coruña');
+  assert.equal(h.elements['cd-days'].textContent,'2');assert.equal(h.elements['cd-hours'].textContent,'15');assert.equal(h.elements['cd-minutes'].textContent,'00');
+  assert.equal(h.elements['home-cd-days'].textContent,'125');assert.equal(h.elements['home-cd-hours'].textContent,'13');assert.equal(h.elements['home-cd-minutes'].textContent,'30');
   h.fire('settings-trigger');h.fire('reset-live');assert.equal(h.api.getState().preview,null);assert.equal(h.api.getState().playing,false);assert.equal(h.elements['settings-dialog'].open,false);assert.equal(h.elements['status-title'].textContent,'Start in Hamburg');
 });
 test('ambiguous datetime reports an error without closing dialog or applying',async()=>{
@@ -193,4 +195,57 @@ test('3D model remains available without WebGL and map marker follows route with
  const marker=h.elements['ship-marker'],start=marker.attrs.transform;
  h.api.setPreview((engine.startTime+engine.legs[0].end)/2);assert.notEqual(marker.attrs.transform,start);
  const size=()=>Number(marker.attrs.transform.match(/scale\(([^)]+)\)/)[1]),initial=size();h.fire('zoom-in');assert.ok(Math.abs(size()*h.api.getState().scale-initial)<1e-10);
+});
+
+function assertTimers(h,ms){
+ const state=engine.deriveState(ms),pre=ms<engine.startTime,done=ms>=engine.endTime;
+ const target=pre?engine.startTime:done?engine.endTime:state.port?state.port.departure:state.nextPort.arrival;
+ const label=pre?'Die Reise beginnt in':done?'Einmal um die Welt. Wieder zu Hause.':state.port?`Ablegen in ${state.port.name}`:`Ankunft in ${state.nextPort.name}`;
+ assert.equal(h.elements['countdown-label'].textContent,label,`${ms} primary label`);
+ assert.equal(h.elements['return-countdown-card'].hidden,pre,`${ms} return visibility`);
+ assert.equal(h.elements['return-countdown-label'].textContent,done?'Wieder in Hamburg':'Bis zur Rückkehr nach Hamburg');
+ for(const [prefix,targetTime]of [['cd-',target],['home-cd-',engine.endTime]]){
+  const expected=utils.countdownParts(targetTime-ms);
+  for(const key of ['days','hours','minutes','seconds'])assert.equal(h.elements[prefix+key].textContent,key==='days'?String(expected[key]):String(expected[key]).padStart(2,'0'),`${ms} ${prefix}${key}`);
+ }
+ const clocksAt=clocks.clockPair(ms,state,h.api.getState().preview!==null);
+ assert.equal(h.elements['local-clock'].textContent,clocksAt.local.time);
+ assert.equal(h.elements['germany-clock'].textContent,clocksAt.germany.time);
+}
+test('both rendered timers and clocks follow all 44 port boundaries at ±1ms',async()=>{
+ const h=await boot();let count=0;
+ for(const port of engine.ports)for(const kind of ['arrival','departure'])if(port[kind]!==null)for(const delta of [-1,0,1]){
+  const ms=port[kind]+delta;h.api.setPreview(ms);assertTimers(h,ms);count++;
+ }
+ assert.equal(count,258);
+ for(const leg of engine.legs){const ms=(leg.start+leg.end)/2;h.api.setPreview(ms);assertTimers(h,ms);}
+});
+test('live clock switches countdown target at departure, arrival and final return',async()=>{
+ const h=await boot();
+ for(const ms of [engine.startTime,engine.ports[1].arrival,engine.ports[1].departure,engine.endTime]){
+  h.setClock(ms-1);h.api.render(true);assertTimers(h,ms-1);
+  h.setClock(ms);for(const fn of h.intervals)fn();assertTimers(h,ms);
+  assert.equal(h.api.getState().preview,null);
+ }
+});
+test('unapplied date cancellation preserves timers and reset restores predeparture layout',async()=>{
+ const h=await boot(),ms=engine.ports.find(p=>p.id==='sydney').arrival;
+ h.api.setPreview(ms);assertTimers(h,ms);
+ h.fire('settings-trigger');h.elements['preview-datetime'].value='2027-02-21T08:00';
+ h.elements['settings-dialog'].close();assertTimers(h,ms);
+ h.advance(60000);for(const fn of h.intervals)fn();assertTimers(h,ms);
+ h.fire('settings-trigger');h.fire('reset-live');assertTimers(h,Date.parse('2026-10-05T15:01:00Z'));
+ assert.equal(h.elements['return-countdown-card'].hidden,true);assert.equal(h.elements['countdown'].getAttribute('aria-label'),'Countdown bis zur Abfahrt');
+});
+test('slider, port click, repeated apply and playback completion keep both timers in sync',async()=>{
+ const h=await boot();
+ h.fire('settings-trigger');h.elements['journey-slider'].value='0';h.fire('journey-slider','input');assertTimers(h,engine.startTime);
+ h.elements['journey-slider'].value='10000';h.fire('journey-slider','input');assertTimers(h,engine.endTime);
+ h.fire('toggle-playback');assertTimers(h,engine.startTime);h.advance(100);assertTimers(h,h.api.getState().preview);
+ h.fire('toggle-playback');const ms=engine.endTime-100;h.api.setPreview(ms);h.fire('toggle-playback');h.advance(100);assertTimers(h,engine.endTime);
+ assert.equal(h.api.getState().playing,false);
+ const port=engine.ports.find(p=>p.id==='cape-town');h.fire('itinerary-list','click',{target:{closest:()=>({dataset:{port:String(port.index)}})}});assertTimers(h,port.arrival);
+ for(const value of ['2026-10-18T19:29','2026-10-18T19:30','2027-02-21T08:00']){
+  h.fire('settings-trigger');h.elements['preview-datetime'].value=value;h.fire('apply-preview');assertTimers(h,utils.parseWallTime(value,'Europe/Berlin'));
+ }
 });

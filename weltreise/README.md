@@ -20,6 +20,7 @@ This is a schedule simulation, not AIS, a confirmed actual position, a nautical 
 ## Interface
 
 - Live mode uses the device clock.
+- Before the first departure, the main countdown and layout are unchanged. From departure onward, it counts down to the next arrival while at sea (Ankunft in …) or to departure from the current port (Ablegen in …). A smaller Hamburg-return countdown appears below the clocks and next-stop card. Both follow the same live/preview instant; arrival and departure change the target at the exact boundary, and final return shows completion with zeroed timers.
 - The discreet bottom-right settings button opens a date/time preview, explicit timezone choice, trip slider, playback controls, and reset to live mode.
 - Ambiguous and nonexistent DST input times are rejected with an explanation.
 - Settings are ephemeral in this tab, with no server-side storage.
