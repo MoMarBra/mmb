@@ -55,3 +55,16 @@ test('no-WebGL fallback projects the same model and remains rotatable',()=>{
  const first=fallback.children.map(f=>f.attrs.points).join(';');model.rotate();assert.notEqual(fallback.children.map(f=>f.attrs.points).join(';'),first);
  let prevented=false;listeners.webglcontextlost({preventDefault(){prevented=true;}});assert.ok(prevented);assert.equal(fallback.children.length,shipMesh.length);
 });
+
+test('WebGL path submits XYZ colored triangles with depth, perspective and fitted rotation',()=>{
+ const {canvas,fallback}=fallbackHarness(),calls=[];
+ const gl={getShaderParameter:()=>true,getProgramParameter:()=>true,isContextLost:()=>false,getAttribLocation:(_,name)=>name==='position'?0:1,getUniformLocation:(_,name)=>name,
+ createShader:()=>({}),createProgram:()=>({}),createBuffer:()=>({})};
+ for(const name of ['shaderSource','compileShader','attachShader','linkProgram','deleteShader','bindBuffer','bufferData','useProgram','enableVertexAttribArray','vertexAttribPointer','enable','clearColor','viewport','clear','uniform1f','drawArrays'])gl[name]=(...args)=>calls.push([name,...args]);
+ Object.assign(gl,{VERTEX_SHADER:1,FRAGMENT_SHADER:2,COMPILE_STATUS:3,LINK_STATUS:4,ARRAY_BUFFER:5,STATIC_DRAW:6,FLOAT:7,DEPTH_TEST:8,COLOR_BUFFER_BIT:16,DEPTH_BUFFER_BIT:32,TRIANGLES:9});
+ canvas.getContext=()=>gl;const model=createShipModel(canvas,fallback);
+ assert.equal(canvas.dataset.renderer,'webgl');assert.equal(canvas.dataset.rendererReason,'depth-renderer');assert.equal(canvas.hidden,false);assert.equal(fallback.style.display,'none');
+ assert.ok(calls.some(c=>c[0]==='enable'&&c[1]===gl.DEPTH_TEST));assert.ok(calls.some(c=>c[0]==='drawArrays'&&c[3]>1000));
+ assert.ok(calls.some(c=>c[0]==='shaderSource'&&c[2].includes('7.-depth')));
+ model.rotate();assert.ok(calls.filter(c=>c[0]==='uniform1f'&&c[1]==='yaw').length===2);
+});

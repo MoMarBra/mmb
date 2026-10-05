@@ -23,10 +23,11 @@ This is a schedule simulation, not AIS, a confirmed actual position, a nautical 
 - The discreet bottom-right settings button opens a date/time preview, explicit timezone choice, trip slider, playback controls, and reset to live mode.
 - Ambiguous and nonexistent DST input times are rejected with an explanation.
 - Settings are ephemeral in this tab, with no server-side storage.
-- Months and port-preview controls provide an accessible itinerary; the map has button and keyboard zoom/pan controls.
+- Months and port-preview controls provide an accessible itinerary; the map has button and keyboard zoom/pan controls, one-finger drag, and focal-point-anchored two-finger pinch/pan. Gestures starting inside the map operate the map; page scrolling remains available outside it.
 - Reduced-motion preference is respected for scrolling. The 3D ship has no automatic rotation or animation; its button turns the view by 45 degrees.
-- A small procedural XYZ mesh is rendered with WebGL perspective and a depth buffer. The same geometry is projected and depth-sorted into SVG when WebGL is unavailable or lost; the map marker uses that geometry too. No external 3D library or model downloads. The model is stylized, not an exact AIDAsol replica.
+- A small procedural XYZ mesh is rendered with WebGL perspective and a depth buffer. The same geometry is projected and depth-sorted into SVG when WebGL is unavailable or lost; the map marker uses that geometry too. No external 3D library or model downloads. The ship marker has no circular backing. The model is stylized, not an exact AIDAsol replica.
 - Two always-visible clock tiles use the same live or preview instant, show the full civil date and UTC offset, and use IANA zones for both local port time and Germany (Europe/Berlin). At sea, the clearly named next port supplies a reference clock, not an asserted onboard time. Before departure and after return the local clock is Hamburg.
+- Small screen-sized port labels prioritize the current and next harbor, avoid label/control collisions, and reveal additional names when zooming.
 
 ## Checks
 

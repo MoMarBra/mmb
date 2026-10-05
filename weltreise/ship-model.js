@@ -69,7 +69,7 @@ export function createShipModel(canvas,fallback){
  function init(){
   try{
    gl=canvas.getContext?.('webgl',{alpha:true,antialias:true,depth:true,powerPreference:'low-power',preserveDrawingBuffer:false});
-   if(!gl)return false;
+   if(!gl){canvas.dataset.rendererReason='no-webgl-context';return false;}
    const compile=(type,source)=>{const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error('Ship shader');return shader;};
    const vert=compile(gl.VERTEX_SHADER,`attribute vec3 position; attribute vec3 color; varying vec3 tint; uniform float yaw; uniform float zoom; void main(){float c=cos(yaw),s=sin(yaw);float x=position.x*c-position.y*s,y=position.x*s+position.y*c,z=position.z-.40;float depth=y*cos(.55)+z*sin(.55);gl_Position=vec4(x*2.75*zoom,(z*cos(.55)-y*sin(.55))*5.5*zoom,-depth/8.,7.-depth);tint=color;}`);
    const frag=compile(gl.FRAGMENT_SHADER,'precision mediump float; varying vec3 tint; void main(){gl_FragColor=vec4(tint,1.);}');
@@ -78,8 +78,8 @@ export function createShipModel(canvas,fallback){
    const vertices=[];for(const face of faces){const color=shaded(face);for(let i=1;i<face.points.length-1;i++)for(const p of [face.points[0],face.points[i],face.points[i+1]])vertices.push(...p,...color);}
    count=vertices.length/6;buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
    gl.useProgram(program);for(const [name,offset]of [['position',0],['color',12]]){const index=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(index);gl.vertexAttribPointer(index,3,gl.FLOAT,false,24,offset);}
-   gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);return true;
-  }catch{gl=null;return false;}
+   gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);canvas.dataset.rendererReason='depth-renderer';return true;
+  }catch{gl=null;canvas.dataset.rendererReason='graphics-initialization-failed';return false;}
  }
  function draw(){
   if(gl&&!gl.isContextLost()){
@@ -89,7 +89,7 @@ export function createShipModel(canvas,fallback){
    canvas.hidden=false;fallback.style.display='none';canvas.dataset.renderer='webgl';
   }else{canvas.hidden=true;fallback.style.display='block';drawShipSvg(fallback,{yaw});canvas.dataset.renderer='svg-3d';}
  }
- canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();gl=null;draw();});
+ canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();gl=null;canvas.dataset.rendererReason='context-lost';draw();});
  canvas.addEventListener('webglcontextrestored',()=>{init();draw();});
  init();draw();
  return {rotate(){yaw+=Math.PI/4;draw();},getYaw:()=>yaw};

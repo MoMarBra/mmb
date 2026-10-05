@@ -1,7 +1,8 @@
 import {ports,legs,startTime,endTime,deriveState,positionAt,sampleLeg,routeForTime,interiorWaterways} from './engine.js';
 import {clamp,fmt,inputValue,parseWallTime,project,pathData,countdownParts} from './ui-utils.js';
 import {clockPair} from './clocks.js?v=7d3e66c6b255';
-import {createShipModel,drawShipSvg} from './ship-model.js?v=94ca44557daa';
+import {createShipModel,drawShipSvg} from './ship-model.js?v=de3bab32a7a4';
+import {renderPortLabels} from './port-labels.js?v=8597157f2201';
 const $=id=>document.getElementById(id);
 const svgNS='http://www.w3.org/2000/svg';
 const el=(tag,attrs={})=>{const node=document.createElementNS(svgNS,tag);for(const [k,v]of Object.entries(attrs))node.setAttribute(k,v);return node;};
@@ -72,6 +73,7 @@ function updateShipMarker(s=currentState){
  // Keep a legible 34px marker at every zoom level, without covering the route.
  const size=34/(100*unit*scale);
  $('ship-marker').setAttribute('transform',`translate(${p[0]},${p[1]}) scale(${size})`);
+ renderPortLabels($('map-port-labels'),ports,project,center,scale,rect,s);
 }
 function legPath(leg){return leg.samples??leg.path??leg.coordinates??[];}
 function renderRoute(s){
@@ -109,15 +111,72 @@ function renderItinerary(){
 $('month-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-month]');if(b){selectedMonth=b.dataset.month;renderItinerary();}});
 $('itinerary-list').addEventListener('click',e=>{const b=e.target.closest('[data-port]');if(b){playing=false;const p=ports[+b.dataset.port];setPreview(p.arrival??p.departure-1);$('map-heading').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}});
 $('jump-current').addEventListener('click',()=>{const p=currentState.port??currentState.nextPort??ports.at(-1);selectedMonth=(p.arrivalDate??p.departureDate).slice(0,7);renderItinerary();$('port-'+p.id)?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});
-function updateMapTransform(){$('map-canvas').classList.toggle('zoomed',scale>1);const x=500-center[0]*scale,y=250-center[1]*scale;$('map-scene').setAttribute('transform',`translate(${x},${y}) scale(${scale})`);$('map-labels').style.opacity=scale>2.5?'.4':'1';updateShipMarker();}
-function zoom(factor){scale=clamp(scale*factor,1,7);if(scale===1)center=[500,250];updateMapTransform();}
-$('zoom-in').addEventListener('click',()=>zoom(1.6));$('zoom-out').addEventListener('click',()=>zoom(1/1.6));$('fit-map').addEventListener('click',()=>{scale=1;center=[500,250];updateMapTransform();});
-$('locate-ship').addEventListener('click',()=>{const p=currentState.position;const coord=Array.isArray(p)?p:p?.coord??p?.coordinates;if(coord){center=project(coord);scale=3.3;updateMapTransform();}});
-const canvas=$('map-canvas');
-canvas.addEventListener('pointerdown',e=>{if(e.target.closest('button')||e.button!==0)return;drag={x:e.clientX,y:e.clientY,center:[...center],active:false};if(e.pointerType==='mouse')canvas.setPointerCapture(e.pointerId);});
-canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!drag.active&&Math.abs(dx)<5&&Math.abs(dy)<5)return;if(!drag.active&&e.pointerType!=='mouse'&&Math.abs(dy)>Math.abs(dx)&&scale===1){drag=null;return;}drag.active=true;canvas.classList.add('dragging');const r=canvas.getBoundingClientRect();const units=Math.min(r.width/1000,r.height/500)*scale;center=[clamp(drag.center[0]-dx/units,0,1000),clamp(drag.center[1]-dy/units,0,500)];updateMapTransform();});
-for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{drag=null;canvas.classList.remove('dragging');});
-canvas.addEventListener('keydown',e=>{const move=30/scale;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','=','Home'].includes(e.key)){e.preventDefault();if(e.key==='+'||e.key==='=')zoom(1.6);else if(e.key==='-')zoom(1/1.6);else if(e.key==='Home')$('fit-map').click();else{center[0]+=e.key==='ArrowLeft'?-move:e.key==='ArrowRight'?move:0;center[1]+=e.key==='ArrowUp'?-move:e.key==='ArrowDown'?move:0;updateMapTransform();}}});
+function updateMapTransform(){
+ scale=clamp(scale,1,7);center=[clamp(center[0],0,1000),clamp(center[1],0,500)];
+ $('map-canvas').classList.toggle('zoomed',scale>1);const x=500-center[0]*scale,y=250-center[1]*scale;
+ $('map-scene').setAttribute('transform',`translate(${x},${y}) scale(${scale})`);$('map-labels').style.opacity=scale>2.5?'.4':'1';updateShipMarker();
+}
+function zoom(factor){clearMapGesture();scale=clamp(scale*factor,1,7);if(scale===1)center=[500,250];updateMapTransform();}
+$('zoom-in').addEventListener('click',()=>zoom(1.6));$('zoom-out').addEventListener('click',()=>zoom(1/1.6));$('fit-map').addEventListener('click',()=>{clearMapGesture();scale=1;center=[500,250];updateMapTransform();});
+$('locate-ship').addEventListener('click',()=>{const p=currentState.position;const coord=Array.isArray(p)?p:p?.coord??p?.coordinates;if(coord){clearMapGesture();center=project(coord);scale=3.3;updateMapTransform();}});
+const canvas=$('map-canvas'),mapPointers=new Map();
+// The SVG uses xMidYMid meet, so account for its letterboxing on narrow screens.
+function mapPoint(point){
+ const r=canvas.getBoundingClientRect(),unit=Math.min(r.width/1000,r.height/500)||1;
+ return [500+(point.x-r.left-r.width/2)/unit,250+(point.y-r.top-r.height/2)/unit];
+}
+function beginMapGesture(active=false){
+ const [a,b]=mapPointers.values();
+ if(!a){drag=null;canvas.classList.remove('dragging');return;}
+ if(b){
+  const pa=mapPoint(a),pb=mapPoint(b),mid=[(pa[0]+pb[0])/2,(pa[1]+pb[1])/2];
+  drag={kind:'pinch',distance:Math.hypot(b.x-a.x,b.y-a.y),scale,anchor:[center[0]+(mid[0]-500)/scale,center[1]+(mid[1]-250)/scale],active:true};
+ }else drag={kind:'pan',x:a.x,y:a.y,center:[...center],active};
+ canvas.classList.toggle('dragging',drag.active);
+}
+function releaseMapPointer(id){
+ try{if(canvas.hasPointerCapture?.(id))canvas.releasePointerCapture(id);}catch{/* The browser may already have cancelled this pointer. */}
+}
+function clearMapGesture(){
+ const ids=[...mapPointers.keys()];mapPointers.clear();drag=null;canvas.classList.remove('dragging');
+ for(const id of ids)releaseMapPointer(id);
+}
+canvas.addEventListener('pointerdown',e=>{
+ if(e.target.closest('button')||e.button!==0)return;
+ mapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});beginMapGesture(drag?.active??false);
+ // Capture every finger, including when it leaves the map before pointerup.
+ try{canvas.setPointerCapture(e.pointerId);}catch{/* Detached/cancelled pointers need no capture. */}
+ if(e.pointerType!=='mouse')e.preventDefault();
+});
+canvas.addEventListener('pointermove',e=>{
+ const point=mapPointers.get(e.pointerId);if(!point||!drag)return;
+ point.x=e.clientX;point.y=e.clientY;
+ // Additional fingers are tracked for handover but do not move the active pair.
+ if(![...mapPointers.keys()].slice(0,2).includes(e.pointerId))return;
+ if(drag.kind==='pinch'){
+  const [a,b]=mapPointers.values();
+  // Fingers starting at the same point must not cause infinite or sudden zoom.
+  if(drag.distance<2){beginMapGesture(true);return;}
+  const pa=mapPoint(a),pb=mapPoint(b),mid=[(pa[0]+pb[0])/2,(pa[1]+pb[1])/2];
+  scale=clamp(drag.scale*Math.hypot(b.x-a.x,b.y-a.y)/drag.distance,1,7);
+  center=[drag.anchor[0]-(mid[0]-500)/scale,drag.anchor[1]-(mid[1]-250)/scale];
+ }else{
+  const dx=point.x-drag.x,dy=point.y-drag.y;
+  if(!drag.active&&Math.abs(dx)<5&&Math.abs(dy)<5)return;
+  drag.active=true;const r=canvas.getBoundingClientRect(),units=(Math.min(r.width/1000,r.height/500)||1)*scale;
+  center=[drag.center[0]-dx/units,drag.center[1]-dy/units];
+ }
+ e.preventDefault();canvas.classList.add('dragging');updateMapTransform();
+});
+function endMapPointer(e){
+ if(!mapPointers.delete(e.pointerId))return;
+ // Rebase on the remaining finger, so a pinch can continue as a pan without a jump.
+ beginMapGesture(drag?.active??false);releaseMapPointer(e.pointerId);
+}
+for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,endMapPointer);
+globalThis.addEventListener?.('blur',clearMapGesture);
+document.addEventListener?.('visibilitychange',()=>{if(document.hidden)clearMapGesture();});
+canvas.addEventListener('keydown',e=>{const move=30/scale;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','=','Home'].includes(e.key)){e.preventDefault();clearMapGesture();if(e.key==='+'||e.key==='=')zoom(1.6);else if(e.key==='-')zoom(1/1.6);else if(e.key==='Home')$('fit-map').click();else{center[0]+=e.key==='ArrowLeft'?-move:e.key==='ArrowRight'?move:0;center[1]+=e.key==='ArrowUp'?-move:e.key==='ArrowDown'?move:0;updateMapTransform();}}});
 $('settings-trigger').addEventListener('click',()=>{$('preview-datetime').value=inputValue(preview??Date.now(),$('preview-zone').value);$('preview-error').textContent='';dialog.showModal();render(true);});
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 $('preview-zone').addEventListener('change',()=>{$('preview-error').textContent='';});

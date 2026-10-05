@@ -6,6 +6,7 @@ import * as engine from '../engine.js';
 import * as utils from '../ui-utils.js';
 import * as clocks from '../clocks.js';
 import * as ship from '../ship-model.js';
+import * as portLabels from '../port-labels.js';
 
 const base = new URL('../', import.meta.url);
 class Element {
@@ -36,7 +37,7 @@ async function boot({landFails=false}={}) {
   elements['preview-zone'].value='Europe/Berlin'; elements['journey-slider'].value='0';elements['playback-speed'].value='86400';
   let clock=Date.parse('2026-10-05T15:00:00Z'),time=100;const raf=[],intervals=[],errors=[];
   class FakeDate extends Date{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
-  const sandbox={...engine,...utils,...clocks,...ship,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
+  const sandbox={...engine,...utils,...clocks,...ship,...portLabels,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
     document:{getElementById:id=>elements[id]??null,createElementNS:(_,tag)=>new Element('',tag),activeElement:null},
     performance:{now:()=>time},requestAnimationFrame:fn=>raf.push(fn),setInterval:fn=>intervals.push(fn),matchMedia:()=>({matches:false}),
     fetch:async()=>({ok:!landFails,json:async()=>JSON.parse(fs.readFileSync(new URL('assets/land.json',base),'utf8'))})};
