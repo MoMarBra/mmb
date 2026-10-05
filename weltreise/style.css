@@ -301,7 +301,7 @@ h2 {
   position:relative;
   background:var(--sea);
   overflow:hidden;
-  touch-action:pan-y;
+  touch-action:none;
   cursor:grab
 }
 .map-canvas.zoomed {
@@ -1411,3 +1411,7 @@ h2 {
 @media(max-width:649px) { .position-card .status-chip { display:none; } }
 @media(min-width:650px) { .ship-model-button { flex-basis:144px; } .ship-model-stage { width:144px; height:72px; } .ship-model-label { font-size:9px; } .clock-card { padding:22px 25px; } .clock-card .detail-label { min-height:15px; } }
 @media(max-width:359px) { .ship-model-button { flex-basis:96px; } .ship-model-stage { width:96px; height:48px; } .clock-card { padding-inline:12px; } .clocks-heading h3 { font-size:12px; } }
+
+/* Label size is kept in screen pixels by the map layout helper. */
+.port-label { fill:#496a83; stroke:#fbfdff; stroke-width:2.5px; vector-effect:non-scaling-stroke; paint-order:stroke; stroke-linejoin:round; font-weight:500; pointer-events:none; }
+.port-label.active { fill:#086baf; font-weight:700; }
