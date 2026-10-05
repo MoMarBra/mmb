@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import * as engine from '../engine.js';
 import * as utils from '../ui-utils.js';
+import * as clocks from '../clocks.js';
+import * as ship from '../ship-model.js';
 
 const base = new URL('../', import.meta.url);
 class Element {
@@ -34,7 +36,7 @@ async function boot({landFails=false}={}) {
   elements['preview-zone'].value='Europe/Berlin'; elements['journey-slider'].value='0';elements['playback-speed'].value='86400';
   let clock=Date.parse('2026-10-05T15:00:00Z'),time=100;const raf=[],intervals=[],errors=[];
   class FakeDate extends Date{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
-  const sandbox={...engine,...utils,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
+  const sandbox={...engine,...utils,...clocks,...ship,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
     document:{getElementById:id=>elements[id]??null,createElementNS:(_,tag)=>new Element('',tag),activeElement:null},
     performance:{now:()=>time},requestAnimationFrame:fn=>raf.push(fn),setInterval:fn=>intervals.push(fn),matchMedia:()=>({matches:false}),
     fetch:async()=>({ok:!landFails,json:async()=>JSON.parse(fs.readFileSync(new URL('assets/land.json',base),'utf8'))})};
@@ -175,4 +177,19 @@ test('month button keeps keyboard focus after replacement without scrolling',asy
   h.api.render(true);const refreshed=tabs.querySelector('[data-month="2026-11"]');
   assert.equal(h.sandbox.document.activeElement,refreshed);assert.equal(refreshed.focusOptions.preventScroll,true);
   h.elements['preview-datetime'].focus();h.api.render(true);assert.equal(h.sandbox.document.activeElement,h.elements['preview-datetime']);
+});
+
+test('two visible clocks switch together between live, simulation, playback and reset',async()=>{
+ const h=await boot();assert.equal(h.elements['local-clock'].textContent,'17:00:00');assert.equal(h.elements['germany-clock'].textContent,'17:00:00');
+ assert.match(h.elements['clocks-mode'].textContent,/Jetzt/);
+ h.api.setPreview(Date.parse('2027-01-06T01:00:00Z'));assert.equal(h.elements['local-clock'].textContent,'11:30:00');assert.equal(h.elements['germany-clock'].textContent,'02:00:00');assert.match(h.elements['clocks-mode'].textContent,/Simulation/);
+ h.fire('toggle-playback');h.advance(100);assert.notEqual(h.elements['local-clock'].textContent,'11:30:00');assert.notEqual(h.elements['germany-clock'].textContent,'02:00:00');
+ h.fire('reset-live');assert.match(h.elements['clocks-mode'].textContent,/Jetzt/);assert.equal(h.elements['local-clock'].textContent,h.elements['germany-clock'].textContent);
+});
+test('3D model remains available without WebGL and map marker follows route without zoom growth',async()=>{
+ const h=await boot();assert.equal(h.elements['ship-model'].dataset.renderer,'svg-3d');assert.ok(h.elements['ship-fallback'].children.length>100);
+ const before=h.elements['ship-fallback'].children[0].attrs.points;h.fire('rotate-ship');assert.notEqual(h.elements['ship-fallback'].children[0].attrs.points,before);
+ const marker=h.elements['ship-marker'],start=marker.attrs.transform;
+ h.api.setPreview((engine.startTime+engine.legs[0].end)/2);assert.notEqual(marker.attrs.transform,start);
+ const size=()=>Number(marker.attrs.transform.match(/scale\(([^)]+)\)/)[1]),initial=size();h.fire('zoom-in');assert.ok(Math.abs(size()*h.api.getState().scale-initial)<1e-10);
 });
