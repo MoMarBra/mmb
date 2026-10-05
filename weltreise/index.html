@@ -10,30 +10,23 @@
 <meta name="description" content="126 Tage um die Welt mit AIDAsol. Countdown, Reiseroute und fahrplanbasierte Positionssimulation.">
 <title>Weltreise 2026 · AIDAsol</title>
 <link rel="icon" href="./assets/compass.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./style.css?v=b91b9d6d8cff">
+<link rel="stylesheet" href="./style.css?v=e021695c91bd">
 </head>
 <body>
 <div class="page-glow" aria-hidden="true"></div>
-<header class="topbar shell">
-<a class="wordmark" href="#start" aria-label="Weltreise, zum Anfang"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="m15.8 8.2-2.1 5.5-5.5 2.1 2.1-5.5z"/></svg><span>Weltreise<span class="wordmark-year"> 2026</span></span></a>
-<a class="top-link" href="#reiseplan">Reiseplan <span aria-hidden="true"><svg class="arrow-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></a>
-</header>
 <main class="shell" id="start">
-<section class="hero" aria-labelledby="hero-title">
-<div class="eyebrow"><span class="tiny-line"></span> AIDAsol · 126 Tage</div>
-<h1 id="hero-title">Einmal um<br><span>die Welt.</span></h1>
-<p class="hero-sub">Von Hamburg in die Ferne. Und mit<br class="mobile-br"> unendlich vielen Geschichten zurück.</p>
-<p class="trip-dates">18. Oktober 2026 <span>→</span> 21. Februar 2027</p>
+<section class="hero compact-hero" aria-label="Countdown und Reisedatum">
 <div class="countdown-card">
+<p class="trip-dates">18. Oktober 2026 <span>→</span> 21. Februar 2027</p>
 <div class="countdown-top"><span id="countdown-label">Die Reise beginnt in</span><span class="small-ship" aria-hidden="true"><svg class="arrow-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></div>
 <div class="countdown" aria-label="Countdown bis zur Abfahrt" id="countdown"><div><strong id="cd-days">–</strong><span>Tage</span></div><i>:</i><div><strong id="cd-hours">–</strong><span>Stunden</span></div><i>:</i><div><strong id="cd-minutes">–</strong><span>Minuten</span></div><i>:</i><div><strong id="cd-seconds">–</strong><span>Sekunden</span></div></div>
 <div class="countdown-foot"><span id="journey-caption">Hamburg · Abfahrt 19:30 Uhr Ortszeit</span><span id="journey-percent">0 %</span></div><div class="progress-track"><div id="journey-progress"></div></div>
 </div>
 </section>
 <section class="journey-section" aria-labelledby="map-heading">
-<div class="section-heading"><div><div class="eyebrow">DEM HORIZONT ENTGEGEN</div><h2 id="map-heading">Die Welt im Blick.</h2></div><span class="mode-pill" id="mode-pill"><i></i> Live-Zeit</span></div>
+<h2 id="map-heading" class="visually-hidden">Die Reiseroute</h2>
 <div class="map-card">
-<div class="map-toolbar"><span class="map-title"><span class="map-dot"></span> AIDAsol</span><button type="button" class="text-button" id="fit-map">Weltkarte <span aria-hidden="true"><svg class="arrow-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></button></div>
+<div class="map-toolbar"><span class="map-title"><span class="map-dot"></span> AIDAsol</span><span class="mode-pill" id="mode-pill"><i></i> Live-Zeit</span><button type="button" class="text-button" id="fit-map">Weltkarte <span aria-hidden="true"><svg class="arrow-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></button></div>
 <div class="map-canvas" id="map-canvas" tabindex="0" role="region" aria-label="Interaktive Weltkarte der Reiseroute. Mit Plus und Minus zoomen, mit Pfeiltasten verschieben.">
 <svg id="world-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="map-svg-title map-svg-desc"><title id="map-svg-title">Weltreise der AIDAsol</title><desc id="map-svg-desc">Route von Hamburg über Südamerika, den Südpazifik, Australien und Afrika zurück nach Hamburg. Fahrplanbasierte Simulation, keine Live-Schiffsdaten.</desc><defs><pattern id="sea-grid" width="83.333" height="83.333" patternUnits="userSpaceOnUse"><path d="M 83.333 0 L 0 0 0 83.333" fill="none" stroke="#c2d9e8" stroke-width=".45" opacity=".45"/></pattern><filter id="ship-shadow" x="-80%" y="-80%" width="260%" height="260%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0b5180" flood-opacity=".18"/></filter></defs><g id="map-scene"><rect x="-1000" y="-300" width="3000" height="1200" fill="url(#sea-grid)"/><g id="map-land"></g><g id="map-waterways"></g><g id="map-labels"></g><g id="route-base"></g><g id="route-progress"></g><g id="port-dots"></g><g id="ship-marker" filter="url(#ship-shadow)"><circle r="15" fill="white"/><circle r="11" fill="#0877c9"/><path d="M0 -7 5.5 5.5 0 3 -5.5 5.5Z" fill="white"/></g></g></svg>
 <div class="map-loading" id="map-loading">Die Weltkarte wird geladen …</div>
