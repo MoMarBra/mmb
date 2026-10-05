@@ -1377,7 +1377,7 @@ h2 {
 .card-icon .arrow-icon,.clock-icon { width:22px; height:22px; stroke:currentColor; stroke-width:1.4; }
 .small-ship .arrow-icon { width:17px; height:17px; }
 
-/* The journey opens directly with time and map, without introductory copy. */
+/* Keep the restored journey title, countdown and map close together. */
 .visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .hero.compact-hero { padding:20px 0 18px; }
 .compact-hero .countdown-card { margin:0 auto; }
