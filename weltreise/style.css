@@ -339,7 +339,7 @@ h2 {
 }
 .route-path {
   fill:none;
-  stroke:#aec7d9;
+  stroke:#729ab5;
   stroke-width:1.25;
   stroke-linecap:round;
   stroke-linejoin:round
@@ -1372,3 +1372,7 @@ h2 {
 .form-error {
   min-height:16px
 }
+
+.arrow-icon { width:12px; height:12px; display:inline-block; vertical-align:-1px; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.card-icon .arrow-icon,.clock-icon { width:22px; height:22px; stroke:currentColor; stroke-width:1.4; }
+.small-ship .arrow-icon { width:17px; height:17px; }
