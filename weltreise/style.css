@@ -1385,3 +1385,29 @@ h2 {
 .compact-hero .countdown { margin-bottom:18px; }
 .map-toolbar .mode-pill { margin-left:auto; margin-right:14px; }
 @media(min-width:650px) { .hero.compact-hero { padding:28px 0 22px; } .compact-hero .trip-dates { font-size:12px; } }
+
+/* One small genuine 3D model; draw on demand instead of a continuous GPU loop. */
+.ship-model-button { flex:0 0 112px; padding:0 0 5px; border:0; border-radius:14px; background:#edf6fd; color:#426b88; overflow:hidden; }
+.ship-model-stage { display:block; position:relative; width:112px; height:56px; }
+.ship-model-stage canvas,.ship-model-stage svg { position:absolute; inset:0; width:100%; height:100%; }
+.ship-model-stage [hidden] { display:none; }
+.ship-model-label { display:block; font-size:8px; line-height:1.3; }
+.clocks-section,.next-card { max-width:740px; margin-inline:auto; }
+.clocks-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 3px 12px; }
+.clocks-heading h3 { font-size:13px; font-weight:600; letter-spacing:-.2px; }
+#clocks-mode { font-size:9px; color:#397154; text-align:right; }
+#clocks-mode.is-preview { color:#8a601e; }
+.clock-card { padding:18px 15px; }
+.clock-card .detail-label { min-height:26px; font-size:10px; line-height:1.35; margin-bottom:5px; }
+.clock-card .clock { font-size:clamp(23px,6.1vw,34px); letter-spacing:-.8px; white-space:nowrap; }
+.clock-card .clock-zone { font-size:9px; margin-top:1px; }
+#clock-offset,#germany-offset { font-weight:600; margin-top:10px; }
+.germany-clock { background:#eef5fa; border-color:#e8f0f7; }
+.clock-note { font-size:10px; line-height:1.5; color:#586f84; margin:11px 3px 17px; }
+.next-card { display:flex; gap:14px; padding:17px 18px; }
+.next-card .card-icon { margin:0; padding-top:2px; }
+.next-card h3 { font-size:18px; }
+#next-time { font-size:11px; color:#586f84; margin-top:6px; }
+@media(max-width:649px) { .position-card .status-chip { display:none; } }
+@media(min-width:650px) { .ship-model-button { flex-basis:144px; } .ship-model-stage { width:144px; height:72px; } .ship-model-label { font-size:9px; } .clock-card { padding:22px 25px; } .clock-card .detail-label { min-height:15px; } }
+@media(max-width:359px) { .ship-model-button { flex-basis:96px; } .ship-model-stage { width:96px; height:48px; } .clock-card { padding-inline:12px; } .clocks-heading h3 { font-size:12px; } }

@@ -1,5 +1,7 @@
 import {ports,legs,startTime,endTime,deriveState,positionAt,sampleLeg,routeForTime,interiorWaterways} from './engine.js';
 import {clamp,fmt,inputValue,parseWallTime,project,pathData,countdownParts} from './ui-utils.js';
+import {clockPair} from './clocks.js?v=7d3e66c6b255';
+import {createShipModel,drawShipSvg} from './ship-model.js?v=94ca44557daa';
 const $=id=>document.getElementById(id);
 const svgNS='http://www.w3.org/2000/svg';
 const el=(tag,attrs={})=>{const node=document.createElementNS(svgNS,tag);for(const [k,v]of Object.entries(attrs))node.setAttribute(k,v);return node;};
@@ -8,6 +10,9 @@ let preview=null,playing=false,playSpeed=86400,lastFrame=performance.now(),now=D
 let currentState=deriveState(now);
 let scale=1,center=[500,250],drag=null;
 const dialog=$('settings-dialog');
+const shipModel=createShipModel($('ship-model'),$('ship-fallback'));
+$('rotate-ship').addEventListener('click',()=>shipModel.rotate());
+let lastShipHeading=null;
 const months=[['2026-10','Okt'],['2026-11','Nov'],['2026-12','Dez'],['2027-01','Jan'],['2027-02','Feb']];
 const dateOptions={day:'numeric',month:'long'};
 const shortDate={day:'2-digit',month:'2-digit'};
@@ -42,12 +47,13 @@ function render(force=false){
  else{const from=s.leg?.from?.name?s.leg.from:ports[s.leg?.fromIndex??s.leg?.index??0];const to=s.nextPort??ports[(from?.index??0)+1];title=`Kurs auf ${to.name}`;eyebrow='AUF SEE';subtitle=`${from?.name??'Unterwegs'} → ${to.name}`;chip='Unterwegs';nextName=to.name;nextTime=to.arrival;nextZone=to.timezone;nextLabel='Nächster Hafen';}
  $('status-title').textContent=title;$('status-eyebrow').textContent=eyebrow;$('status-subtitle').textContent=subtitle;$('status-chip').textContent=chip;
  $('next-label').textContent=nextLabel;$('next-name').textContent=nextName;$('next-time').textContent=dateTime(nextTime,nextZone);$('next-zone').textContent='Hafen-Ortszeit · '+fmt(nextTime,nextZone,{timeZoneName:'short'}).split(' ').at(-1);
- const clockPort=pre?ports[0]:done?ports.at(-1):statePort(s);
- $('clock-label').textContent=(preview!==null?'Vorschau: ':'Jetzt in ')+clockPort.name;
- $('local-clock').textContent=fmt(now,clockPort.timezone,{...timeOptions,second:'2-digit'});$('local-date').textContent=fmt(now,clockPort.timezone,{weekday:'short',day:'numeric',month:'long'});
- $('clock-zone').textContent=clockPort.timezone+(s.port||pre||done?'':' · nächster Hafen');
- const coord=Array.isArray(s.position)?s.position:s.position?.coord??s.position?.coordinates;
- if(coord){const p=project(coord);$('ship-marker').setAttribute('transform',`translate(${p[0]},${p[1]}) rotate(${s.heading??0})`);}
+ const clocks=clockPair(now,s,preview!==null);
+ $('clocks-mode').textContent=clocks.mode;$('clocks-mode').classList.toggle('is-preview',clocks.isPreview);
+ $('clock-label').textContent=clocks.local.label;$('local-clock').textContent=clocks.local.time;$('local-date').textContent=clocks.local.date;
+ $('clock-zone').textContent=clocks.local.zone;$('clock-offset').textContent=clocks.local.offset;
+ $('germany-clock').textContent=clocks.germany.time;$('germany-date').textContent=clocks.germany.date;$('germany-offset').textContent=clocks.germany.offset;
+ $('clocks-note').textContent=clocks.note;
+ updateShipMarker(s);
  renderRoute(s);
  const key=`${s.phase}-${s.port?.id??''}-${s.nextPort?.id??''}`;
  if(!selectedMonth)selectedMonth=inputValue(pre?startTime:done?endTime:now,'Europe/Berlin').slice(0,7);
@@ -55,6 +61,17 @@ function render(force=false){
  if(dialog.open&&document.activeElement!==$('journey-slider'))$('journey-slider').value=Math.round(progress*10000);
  $('slider-label').textContent=fmt(now,'Europe/Berlin',{...dateOptions,year:'numeric'});
  $('toggle-playback').textContent=playing?'Ⅱ Pausieren':'▶ Abspielen';
+}
+function updateShipMarker(s=currentState){
+ const coord=Array.isArray(s.position)?s.position:s.position?.coord??s.position?.coordinates;
+ if(!coord)return;
+ const heading=Math.round((s.heading??0)/3)*3;
+ if(heading!==lastShipHeading){drawShipSvg($('map-ship-model'),{yaw:(heading-90)*Math.PI/180,pitch:1.18,aspect:1});lastShipHeading=heading;}
+ const p=project(coord),rect=$('map-canvas').getBoundingClientRect();
+ const unit=Math.min(rect.width/1000,rect.height/500)||1;
+ // Keep a legible 34px marker at every zoom level, without covering the route.
+ const size=34/(100*unit*scale);
+ $('ship-marker').setAttribute('transform',`translate(${p[0]},${p[1]}) scale(${size})`);
 }
 function legPath(leg){return leg.samples??leg.path??leg.coordinates??[];}
 function renderRoute(s){
@@ -92,7 +109,7 @@ function renderItinerary(){
 $('month-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-month]');if(b){selectedMonth=b.dataset.month;renderItinerary();}});
 $('itinerary-list').addEventListener('click',e=>{const b=e.target.closest('[data-port]');if(b){playing=false;const p=ports[+b.dataset.port];setPreview(p.arrival??p.departure-1);$('map-heading').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}});
 $('jump-current').addEventListener('click',()=>{const p=currentState.port??currentState.nextPort??ports.at(-1);selectedMonth=(p.arrivalDate??p.departureDate).slice(0,7);renderItinerary();$('port-'+p.id)?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});
-function updateMapTransform(){$('map-canvas').classList.toggle('zoomed',scale>1);const x=500-center[0]*scale,y=250-center[1]*scale;$('map-scene').setAttribute('transform',`translate(${x},${y}) scale(${scale})`);$('map-labels').style.opacity=scale>2.5?'.4':'1';}
+function updateMapTransform(){$('map-canvas').classList.toggle('zoomed',scale>1);const x=500-center[0]*scale,y=250-center[1]*scale;$('map-scene').setAttribute('transform',`translate(${x},${y}) scale(${scale})`);$('map-labels').style.opacity=scale>2.5?'.4':'1';updateShipMarker();}
 function zoom(factor){scale=clamp(scale*factor,1,7);if(scale===1)center=[500,250];updateMapTransform();}
 $('zoom-in').addEventListener('click',()=>zoom(1.6));$('zoom-out').addEventListener('click',()=>zoom(1/1.6));$('fit-map').addEventListener('click',()=>{scale=1;center=[500,250];updateMapTransform();});
 $('locate-ship').addEventListener('click',()=>{const p=currentState.position;const coord=Array.isArray(p)?p:p?.coord??p?.coordinates;if(coord){center=project(coord);scale=3.3;updateMapTransform();}});
@@ -110,6 +127,8 @@ $('toggle-playback').addEventListener('click',()=>{if(playing){playing=false;}el
 $('playback-speed').addEventListener('change',()=>{playSpeed=+$('playback-speed').value;});
 $('reset-live').addEventListener('click',()=>{preview=null;playing=false;lastSecond=-1;selectedMonth=null;render(true);$('preview-datetime').value=inputValue(now,$('preview-zone').value);dialog.close();});
 function frame(timestamp){const dt=Math.min(timestamp-lastFrame,250);lastFrame=timestamp;if(playing){preview=Math.min(endTime,preview+dt*playSpeed);if(preview>=endTime)playing=false;render();}requestAnimationFrame(frame);}
+// Layout changes keep the map marker the same screen size.
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>updateShipMarker()).observe($('map-canvas'));
 // The next port clock avoids inventing a ship timezone while at sea.
 $('stat-ports').textContent=new Set(ports.map(p=>p.name)).size;
 render(true);initMap();setInterval(()=>{if(!playing)render();},250);requestAnimationFrame(frame);
