@@ -29,3 +29,13 @@ export function splitAtDateline(coords){
 export const project=([lon,lat])=>[(lon+180)*1000/360,(84-lat)*1000/360];
 export function pathData(coords){return splitAtDateline(coords).map(line=>line.map((point,i)=>{const [x,y]=project(point);return `${i?'L':'M'}${x.toFixed(2)},${y.toFixed(2)}`;}).join('')).join('');}
 export function countdownParts(milliseconds){let seconds=Math.max(0,Math.floor(milliseconds/1000));const days=Math.floor(seconds/86400);seconds%=86400;const hours=Math.floor(seconds/3600);seconds%=3600;const minutes=Math.floor(seconds/60);return {days,hours,minutes,seconds:seconds%60};}
+
+// Both timers use the same derived instant as the map and clocks, including previews.
+export function countdownView(state){
+ const pre=state.phase==='precruise',done=state.phase==='complete';
+ const label=pre?'Die Reise beginnt in':done?'Einmal um die Welt. Wieder zu Hause.':state.phase==='port'?`Ablegen in ${state.port.name}`:`Ankunft in ${state.nextPort.name}`;
+ return {
+  primary:{label,ariaLabel:pre?'Countdown bis zur Abfahrt':done?'Die Weltreise ist abgeschlossen':`Countdown: ${label}`,parts:countdownParts(state.eventRemainingMs)},
+  home:{visible:!pre,label:done?'Wieder in Hamburg':'Bis zur Rückkehr nach Hamburg',ariaLabel:done?'In Hamburg angekommen':'Countdown bis zur Rückkehr nach Hamburg',parts:countdownParts(state.journeyRemainingMs)}
+ };
+}

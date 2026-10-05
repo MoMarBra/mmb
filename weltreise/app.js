@@ -1,5 +1,5 @@
 import {ports,legs,startTime,endTime,deriveState,positionAt,sampleLeg,routeForTime,interiorWaterways} from './engine.js';
-import {clamp,fmt,inputValue,parseWallTime,project,pathData,countdownParts} from './ui-utils.js';
+import {clamp,fmt,inputValue,parseWallTime,project,pathData,countdownView} from './ui-utils.js?v=f2948d13afae';
 import {clockPair} from './clocks.js?v=7d3e66c6b255';
 import {createShipModel,drawShipSvg} from './ship-model.js?v=de3bab32a7a4';
 import {renderPortLabels} from './port-labels.js?v=8597157f2201';
@@ -33,10 +33,11 @@ function setPreview(ms){if(!Number.isFinite(ms))return;preview=ms;now=ms;lastSec
 function render(force=false){
  now=preview??Date.now();const second=Math.floor(now/1000);if(!force&&second===lastSecond)return;lastSecond=second;
  currentState=normalizeState(deriveState(now));const s=currentState;const pre=now<startTime;const done=now>=endTime;
- const part=countdownParts((pre?startTime:done?endTime:endTime)-now);
- for(const key of ['days','hours','minutes','seconds'])$('cd-'+key).textContent=key==='days'?String(part[key]):String(part[key]).padStart(2,'0');
- $('countdown-label').textContent=pre?'Die Reise beginnt in':done?'Einmal um die Welt. Wieder zu Hause.':'Bis zur Rückkehr nach Hamburg';
- $('countdown').setAttribute('aria-label',pre?'Countdown bis zur Abfahrt':'Countdown bis zur Rückkehr');
+ const timers=countdownView(s);
+ for(const [prefix,timer]of [['cd-',timers.primary],['home-cd-',timers.home]])for(const key of ['days','hours','minutes','seconds'])$(prefix+key).textContent=key==='days'?String(timer.parts[key]):String(timer.parts[key]).padStart(2,'0');
+ $('countdown-label').textContent=timers.primary.label;$('countdown').setAttribute('aria-label',timers.primary.ariaLabel);
+ $('return-countdown-card').hidden=!timers.home.visible;$('return-countdown-label').textContent=timers.home.label;
+ $('return-countdown').setAttribute('aria-label',timers.home.ariaLabel);
  const progress=clamp((now-startTime)/(endTime-startTime));
  $('journey-caption').textContent=pre?'Hamburg · Abfahrt 19:30 Uhr Ortszeit':done?'126 Tage · so viele neue Horizonte':`Reisetag ${journeyDay(now)} von 126`;
  $('journey-percent').textContent=Math.floor(progress*100)+' %';$('journey-progress').style.width=progress*100+'%';

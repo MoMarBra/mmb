@@ -30,3 +30,11 @@ test('position card keeps a concise estimated label without the removed notice',
   assert.match(html,/<div class="position-copy">[^]*?<span id="status-subtitle">[^<]*<\/span><span class="position-estimate">Geschätzte Position<\/span><\/div>/);
   assert.match(html,/Die Karte zeigt auch im Live-Modus eine Simulation\./);
 });
+
+test('return countdown starts hidden below the clocks and next stop, with smaller digits',()=>{
+ assert.match(html,/<article class="detail-card return-countdown-card"[^>]* hidden>/);
+ assert.ok(html.indexOf('id="return-countdown-card"')>html.indexOf('id="next-time"'));
+ assert.match(css,/\.return-countdown-card\[hidden\] \{ display:none; \}/);
+ assert.match(css,/\.return-countdown strong \{ font-size:26px;/);
+ assert.doesNotMatch(css,/\.clocks-section \{ margin-top:20px;/);
+});

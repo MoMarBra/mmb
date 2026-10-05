@@ -1415,3 +1415,13 @@ h2 {
 /* Label size is kept in screen pixels by the map layout helper. */
 .port-label { fill:#496a83; stroke:#fbfdff; stroke-width:2.5px; vector-effect:non-scaling-stroke; paint-order:stroke; stroke-linejoin:round; font-weight:500; pointer-events:none; }
 .port-label.active { fill:#086baf; font-weight:700; }
+
+/* The overall return stays secondary once the voyage starts; hidden beforehand. */
+.return-countdown-card { max-width:740px; margin:14px auto 0; padding:16px 18px; background:#eef5fa; border-color:#e8f0f7; }
+.return-countdown-card[hidden] { display:none; }
+.return-countdown-card .detail-label { margin:0; font-size:11px; }
+.return-countdown { max-width:330px; margin:10px 0; }
+.return-countdown strong { font-size:26px; letter-spacing:-.6px; }
+.return-countdown span { font-size:9px; margin-top:1px; }
+.return-countdown i { font-size:18px; padding-top:4px; }
+.return-countdown-card .return-date { font-size:10px; color:#586f84; margin:0; }
