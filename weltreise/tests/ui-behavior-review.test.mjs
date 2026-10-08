@@ -7,6 +7,8 @@ import * as utils from '../ui-utils.js';
 import * as clocks from '../clocks.js';
 import * as ship from '../ship-model.js';
 import * as portLabels from '../port-labels.js';
+import * as birthday from '../birthday.js';
+import {installBirthdayDom} from './birthday-dom.js';
 
 const base = new URL('../', import.meta.url);
 class Element {
@@ -37,10 +39,11 @@ async function boot({landFails=false}={}) {
   elements['preview-zone'].value='Europe/Berlin'; elements['journey-slider'].value='0';elements['playback-speed'].value='86400';
   let clock=Date.parse('2026-10-05T15:00:00Z'),time=100;const raf=[],intervals=[],errors=[];
   class FakeDate extends Date{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
-  const sandbox={...engine,...utils,...clocks,...ship,...portLabels,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
+  const sandbox={...engine,...utils,...clocks,...ship,...portLabels,...birthday,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
     document:{getElementById:id=>elements[id]??null,createElementNS:(_,tag)=>new Element('',tag),activeElement:null},
     performance:{now:()=>time},requestAnimationFrame:fn=>raf.push(fn),setInterval:fn=>intervals.push(fn),matchMedia:()=>({matches:false}),
     fetch:async()=>({ok:!landFails,json:async()=>JSON.parse(fs.readFileSync(new URL('assets/land.json',base),'utf8'))})};
+  installBirthdayDom(sandbox.document,elements);
   for(const element of Object.values(elements))element.ownerDocument=sandbox.document;
   // Model replacement month buttons and the browser's focus loss on removal.
   let monthMarkup='';
@@ -249,3 +252,52 @@ test('slider, port click, repeated apply and playback completion keep both timer
   h.fire('settings-trigger');h.elements['preview-datetime'].value=value;h.fire('apply-preview');assertTimers(h,utils.parseWallTime(value,'Europe/Berlin'));
  }
 });
+
+function assertBirthday(h,expected){
+ const body=h.sandbox.document.body;
+ assert.equal(body.classList.contains('birthday-party'),expected);
+ assert.equal(h.elements['birthday-card'].hidden,!expected);
+ assert.equal(h.elements['birthday-ship-pennants'].hidden,!expected);
+ assert.equal(h.elements['birthday-balloons'].children.length,expected?18:0);
+ assert.equal(body.querySelectorAll('.birthday-atmosphere').length,expected?1:0);
+}
+test('birthday preview follows the Germany clock at exact boundaries without disturbing countdowns',async()=>{
+ const h=await boot(),start=Date.parse('2026-11-21T23:00:00Z'),end=Date.parse('2026-11-23T23:00:00Z');
+ assertBirthday(h,false);
+ for(const [ms,on] of [[start-1,false],[start,true],[start+86400000,true],[end-1,true],[end,false],[start,true],[end,false]]){
+  h.api.setPreview(ms);assertBirthday(h,on);assertTimers(h,ms);
+ }
+ assert.equal(h.errors.length,0);
+});
+test('birthday updates in live mode and reset uses the real date, including returning to a birthday',async()=>{
+ const h=await boot(),start=Date.parse('2026-11-21T23:00:00Z'),end=Date.parse('2026-11-23T23:00:00Z');
+ h.setClock(start-1);h.api.render(true);assertBirthday(h,false);
+ h.setClock(start);for(const fn of h.intervals)fn();assertBirthday(h,true);assertTimers(h,start);
+ h.api.setPreview(end);assertBirthday(h,false);
+ h.fire('reset-live');assertBirthday(h,true);assert.equal(h.api.getState().preview,null);
+ h.setClock(end);for(const fn of h.intervals)fn();assertBirthday(h,false);assertTimers(h,end);
+ h.api.setPreview(start);assertBirthday(h,true);
+ h.fire('reset-live');assertBirthday(h,false);assert.equal(h.api.getState().preview,null);
+});
+test('birthday settings respect the selected input zone and ignore unapplied or cancelled dates',async()=>{
+ const h=await boot();h.fire('settings-trigger');h.elements['preview-datetime'].value='2026-11-22T00:00';
+ h.elements['settings-dialog'].close();assertBirthday(h,false);
+ h.fire('settings-trigger');h.elements['preview-datetime'].value='2026-11-22T00:00';h.fire('apply-preview');assertBirthday(h,true);
+ assert.equal(h.api.getState().preview,Date.parse('2026-11-21T23:00:00Z'));
+ h.fire('settings-trigger');h.elements['preview-zone'].value='UTC';h.fire('preview-zone','change');
+ h.elements['preview-datetime'].value='2026-11-21T22:59';h.fire('apply-preview');assertBirthday(h,false);
+ h.fire('settings-trigger');h.elements['preview-datetime'].value='2026-11-23T22:59';h.fire('apply-preview');assertBirthday(h,true);
+ h.fire('settings-trigger');h.elements['preview-datetime'].value='2026-11-23T23:00';h.fire('apply-preview');assertBirthday(h,false);
+ assert.equal(h.elements['preview-error'].textContent,'');
+});
+test('playback crosses both birthday boundaries and repeated renders cannot duplicate party nodes',async()=>{
+ const h=await boot(),start=Date.parse('2026-11-21T23:00:00Z'),end=Date.parse('2026-11-23T23:00:00Z');
+ h.elements['playback-speed'].value='1';h.fire('playback-speed','change');
+ h.api.setPreview(start-100);h.fire('toggle-playback');h.advance(100);assertBirthday(h,true);assertTimers(h,start);
+ const activeNodes=h.sandbox.document.body.querySelectorAll('*').length;
+ for(let i=0;i<12;i++){h.advance(100);h.api.render(true);assertBirthday(h,true);assert.equal(h.sandbox.document.body.querySelectorAll('*').length,activeNodes);}
+ h.fire('toggle-playback');h.api.setPreview(end-100);h.fire('toggle-playback');h.advance(100);assertBirthday(h,false);assertTimers(h,end);
+ h.fire('toggle-playback');h.api.setPreview(start);assertBirthday(h,true);
+ h.fire('reset-live');assertBirthday(h,false);
+});
+

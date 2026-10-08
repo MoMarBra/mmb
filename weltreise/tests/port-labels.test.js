@@ -27,7 +27,7 @@ test('hidden or zero-width map safely omits labels',()=>{
 
 test('enlarged hull keeps harbor names clear at mobile and desktop zoom levels',()=>{
  for(const width of [320,393,960])for(const scale of [1,3.3,7]){
-  const rect={width,height:width<600?300:465},position=ports[0].coord,center=project(position),markerPixels=width<600?60:72;
+  const rect={width,height:width<600?300:465},position=ports[0].coord,center=project(position),markerPixels=width<600?92:116;
   const state={port:ports[0],position,markerPixels};
   const labels=layoutPortLabels(ports,project,center,scale,rect,state);
   assert.ok(labels.some(l=>l.port.id===ports[0].id));

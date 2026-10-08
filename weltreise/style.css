@@ -1426,3 +1426,14 @@ h2 {
 .return-countdown i { font-size:18px; padding-top:4px; }
 .return-countdown-card .return-date { font-size:10px; color:#586f84; margin:0; }
 
+
+/* Generous model, with a separate row on narrow screens so the status stays legible. */
+.ship-model-button { flex-basis:300px; }
+.ship-model-stage { width:300px; height:150px; }
+@media(max-width:649px) {
+ .position-card { flex-wrap:wrap; gap:14px; }
+ .ship-model-button { flex:0 0 100%; display:flex; flex-direction:column; align-items:center; }
+ .ship-model-stage { width:min(100%,280px); height:140px; }
+ .ship-model-label { padding:0 0 7px; font-size:9px; }
+ .position-copy { flex-basis:100%; }
+}

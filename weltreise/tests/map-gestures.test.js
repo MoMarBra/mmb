@@ -7,6 +7,8 @@ import * as utils from '../ui-utils.js';
 import * as clocks from '../clocks.js';
 import * as ship from '../ship-model.js';
 import * as labels from '../port-labels.js';
+import * as birthday from '../birthday.js';
+import {installBirthdayDom} from './birthday-dom.js';
 
 const base=new URL('../',import.meta.url);
 class Element {
@@ -38,9 +40,10 @@ function boot(rect){
  elements['preview-zone'].value='Europe/Berlin';
  if(rect)elements['map-canvas'].rect=rect;
  const document=new Element();Object.assign(document,{getElementById:id=>elements[id],createElementNS:(_,tag)=>{const node=new Element('',tag);node.ownerDocument=document;return node;},activeElement:null});
+ installBirthdayDom(document,elements);
  for(const node of Object.values(elements))node.ownerDocument=document;
  const windowEvents=new Element();
- const sandbox={...engine,...utils,...clocks,...ship,...labels,document,console,Date,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
+ const sandbox={...engine,...utils,...clocks,...ship,...labels,...birthday,document,console,Date,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
   performance:{now:()=>0},requestAnimationFrame(){},setInterval(){},matchMedia:()=>({matches:false}),fetch:()=>new Promise(()=>{}),
   addEventListener:(name,fn)=>windowEvents.addEventListener(name,fn)};
  vm.createContext(sandbox);
@@ -187,10 +190,10 @@ test('larger ship marker stays screen-sized through zoom, reset and layout chang
  for(const width of [280,350,599,600,958]){
   const rect={left:0,top:0,width,height:width<600?300:465},h=boot(rect);
   const screenSize=()=>Number(h.elements['ship-marker'].attrs.transform.match(/scale\(([^)]+)\)/)[1])*100*Math.min(rect.width/1000,rect.height/500)*h.read().scale;
-  const expected=width<600?60:72;close(screenSize(),expected);
+  const expected=width<600?92:116;close(screenSize(),expected);
   for(let i=0;i<8;i++){h.click('zoom-in');close(screenSize(),expected);}
   h.click('locate-ship');close(screenSize(),expected);
   h.click('fit-map');close(screenSize(),expected);
-  rect.width=800;h.click('fit-map');close(screenSize(),72);
+  rect.width=800;h.click('fit-map');close(screenSize(),116);
  }
 });

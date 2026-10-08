@@ -53,3 +53,10 @@ All public HTML includes `noindex, nofollow, nosnippet, noimageindex`. The repos
 ## Map data
 
 `assets/land.json` is a rounded-coordinate derivative of [Natural Earth's 1:110m land polygons](https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_110m_land.geojson), public-domain cartographic data. River centerlines use Natural Earth 1:50m/1:110m data; narrow channels have a schematic water-colored underlay. See SOURCES.md for attribution and limits. No provided user image or private personal information is published.
+
+
+## Birthday special
+
+Only November 22 and 23, 2026 in Europe/Berlin: “Happy birthday Sanni”, rising pearl/rose/gold/lilac balloons, soft party lights, confetti stars and ship bunting. The same effective instant drives the special, clocks, countdown and manual/playback preview. The date basis is labeled on the card. No annual recurrence. Decorative nodes are created only on entry and removed on exit; bounded CSS animations need no extra timers or animation loop. Reduced motion uses static decorations. Decorations never intercept map gestures or controls.
+
+The map ship uses a constant 92px mobile / 116px desktop projection frame at every zoom. The preview has a dedicated full-width row on phones and a 300px stage on desktop.
