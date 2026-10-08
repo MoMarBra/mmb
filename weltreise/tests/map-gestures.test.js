@@ -181,3 +181,16 @@ test('map touch handling prevents native page pinch zoom without restricting the
  assert.match(css,/\.map-canvas\s*\{[^}]*touch-action:\s*none\b/);
  assert.doesNotMatch(html,/user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
 });
+
+
+test('larger ship marker stays screen-sized through zoom, reset and layout changes',()=>{
+ for(const width of [280,350,599,600,958]){
+  const rect={left:0,top:0,width,height:width<600?300:465},h=boot(rect);
+  const screenSize=()=>Number(h.elements['ship-marker'].attrs.transform.match(/scale\(([^)]+)\)/)[1])*100*Math.min(rect.width/1000,rect.height/500)*h.read().scale;
+  const expected=width<600?60:72;close(screenSize(),expected);
+  for(let i=0;i<8;i++){h.click('zoom-in');close(screenSize(),expected);}
+  h.click('locate-ship');close(screenSize(),expected);
+  h.click('fit-map');close(screenSize(),expected);
+  rect.width=800;h.click('fit-map');close(screenSize(),72);
+ }
+});

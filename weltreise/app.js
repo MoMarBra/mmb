@@ -2,7 +2,7 @@ import {ports,legs,startTime,endTime,deriveState,positionAt,sampleLeg,routeForTi
 import {clamp,fmt,inputValue,parseWallTime,project,pathData,countdownView} from './ui-utils.js?v=f2948d13afae';
 import {clockPair} from './clocks.js?v=7d3e66c6b255';
 import {createShipModel,drawShipSvg} from './ship-model.js?v=de3bab32a7a4';
-import {renderPortLabels} from './port-labels.js?v=8597157f2201';
+import {renderPortLabels} from './port-labels.js?v=674918ff0dc8';
 const $=id=>document.getElementById(id);
 const svgNS='http://www.w3.org/2000/svg';
 const el=(tag,attrs={})=>{const node=document.createElementNS(svgNS,tag);for(const [k,v]of Object.entries(attrs))node.setAttribute(k,v);return node;};
@@ -71,10 +71,11 @@ function updateShipMarker(s=currentState){
  if(heading!==lastShipHeading){drawShipSvg($('map-ship-model'),{yaw:(heading-90)*Math.PI/180,pitch:1.18,aspect:1});lastShipHeading=heading;}
  const p=project(coord),rect=$('map-canvas').getBoundingClientRect();
  const unit=Math.min(rect.width/1000,rect.height/500)||1;
- // Keep a legible 34px marker at every zoom level, without covering the route.
- const size=34/(100*unit*scale);
+ // Make the 3D hull easy to recognize while keeping its size stable when zooming.
+ const markerPixels=rect.width<600?60:72;
+ const size=markerPixels/(100*unit*scale);
  $('ship-marker').setAttribute('transform',`translate(${p[0]},${p[1]}) scale(${size})`);
- renderPortLabels($('map-port-labels'),ports,project,center,scale,rect,s);
+ renderPortLabels($('map-port-labels'),ports,project,center,scale,rect,{...s,markerPixels});
 }
 function legPath(leg){return leg.samples??leg.path??leg.coordinates??[];}
 function renderRoute(s){
@@ -192,3 +193,4 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>updateShipMarker()
 // The next port clock avoids inventing a ship timezone while at sea.
 $('stat-ports').textContent=new Set(ports.map(p=>p.name)).size;
 render(true);initMap();setInterval(()=>{if(!playing)render();},250);requestAnimationFrame(frame);
+
