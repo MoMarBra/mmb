@@ -11,13 +11,17 @@ export function layoutPortLabels(ports,project,center,scale,rect,state){
  const unique=new Map();for(const p of ports){const key=p.name;if(!unique.has(key)||priority(p)<priority(unique.get(key)))unique.set(key,p);}
  const candidates=[...unique.values()].sort((a,b)=>priority(a)-priority(b)||a.index-b.index);
  const placed=[];
+ // Leave clear space around the enlarged hull, including between ports.
+ const coord=Array.isArray(state.position)?state.position:state.position?.coord??state.position?.coordinates;
+ const marker=coord&&state.markerPixels?project(coord):null,radius=(state.markerPixels??0)/2;
+ const shipBox=marker?{x:rect.width/2+(marker[0]-center[0])*factor-radius,y:rect.height/2+(marker[1]-center[1])*factor-radius,width:radius*2,height:radius*2}:null;
  for(const port of candidates){
   const [x,y]=project(port.coord),sx=rect.width/2+(x-center[0])*factor,sy=rect.height/2+(y-center[1])*factor;
   if(sx<0||sx>rect.width||sy<0||sy>rect.height)continue;
   const name=shortNames[port.id]??port.name,font=scale>2?9.5:8.5,width=name.length*font*.58+4,height=font+3;
-  const offsets=[[7,-height-3],[7,5],[-width-7,-height-3],[-width-7,5]];
+  const offsets=[[7,-height-3],[7,5],[-width-7,-height-3],[-width-7,5],[radius+7,-height-3],[radius+7,5],[-width-radius-7,-height-3],[-width-radius-7,5]];
   // Map controls occupy the lower corners. Avoid text underneath them.
-  const occupied=[{x:0,y:rect.height-62,width:61,height:62},{x:rect.width-60,y:rect.height-105,width:60,height:105},...placed.map(p=>p.box)];
+  const occupied=[{x:0,y:rect.height-62,width:61,height:62},{x:rect.width-60,y:rect.height-105,width:60,height:105},...(shipBox?[shipBox]:[]),...placed.map(p=>p.box)];
   for(const [dx,dy]of offsets){const box={x:sx+dx,y:sy+dy,width,height};
    if(box.x<4||box.y<4||box.x+width>rect.width-4||box.y+height>rect.height-15||occupied.some(b=>overlaps(box,b)))continue;
    placed.push({port,name,x:x+dx/factor,y:y+(dy+font)/factor,fontSize:font/factor,box,active:port.id===active||port.id===next});break;
@@ -26,7 +30,7 @@ export function layoutPortLabels(ports,project,center,scale,rect,state){
  return placed;
 }
 export function renderPortLabels(group,ports,project,center,scale,rect,state){
- const key=[center[0],center[1],scale,rect.width,rect.height,state.port?.id,state.nextPort?.id].join('|');
+ const key=[center[0],center[1],scale,rect.width,rect.height,state.port?.id,state.nextPort?.id,JSON.stringify(state.position),state.markerPixels].join('|');
  if(cached.get(group)===key)return;cached.set(group,key);
  const doc=group.ownerDocument;
  const nodes=layoutPortLabels(ports,project,center,scale,rect,state).map(label=>{
@@ -36,3 +40,4 @@ export function renderPortLabels(group,ports,project,center,scale,rect,state){
  });
  group.replaceChildren(...nodes);
 }
+
