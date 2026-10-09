@@ -8,7 +8,9 @@ import * as clocks from '../clocks.js';
 import * as ship from '../ship-model.js';
 import * as labels from '../port-labels.js';
 import * as birthday from '../birthday.js';
+import * as holiday from '../holiday.js';
 import {installBirthdayDom} from './birthday-dom.js';
+import {installHolidayDom} from './holiday-dom.js';
 
 const base=new URL('../',import.meta.url);
 class Element {
@@ -41,23 +43,39 @@ function boot(rect){
  if(rect)elements['map-canvas'].rect=rect;
  const document=new Element();Object.assign(document,{getElementById:id=>elements[id],createElementNS:(_,tag)=>{const node=new Element('',tag);node.ownerDocument=document;return node;},activeElement:null});
  installBirthdayDom(document,elements);
+ installHolidayDom(document,elements);
  for(const node of Object.values(elements))node.ownerDocument=document;
  const windowEvents=new Element();
- const sandbox={...engine,...utils,...clocks,...ship,...labels,...birthday,document,console,Date,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
+ const sandbox={...engine,...utils,...clocks,...ship,...labels,...birthday,...holiday,document,console,Date,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
   performance:{now:()=>0},requestAnimationFrame(){},setInterval(){},matchMedia:()=>({matches:false}),fetch:()=>new Promise(()=>{}),
   addEventListener:(name,fn)=>windowEvents.addEventListener(name,fn)};
  vm.createContext(sandbox);
  const source=readFileSync(new URL('app.js',base),'utf8').replace(/^import .*;\n/gm,'');
- vm.runInContext(source+'\nglobalThis.mapReview={read:()=>({scale,center,drag,pointers:mapPointers.size}),clearMapGesture};',sandbox);
+ vm.runInContext(source+'\nglobalThis.mapReview={read:()=>({scale,center,drag,pointers:mapPointers.size}),clearMapGesture,setPreview};',sandbox);
  const canvas=elements['map-canvas'];
  const pointer=(type,id,x,y,extra={})=>canvas.fire(type,{pointerId:id,pointerType:'touch',button:0,clientX:x,clientY:y,...extra});
  const read=()=>JSON.parse(JSON.stringify(sandbox.mapReview.read()));
- return {elements,canvas,pointer,read,document,windowEvents,click:id=>elements[id].click(),key:key=>canvas.fire('keydown',{key})};
+ return {elements,canvas,pointer,read,document,windowEvents,preview:ms=>sandbox.mapReview.setPreview(ms),click:id=>elements[id].click(),key:key=>canvas.fire('keydown',{key})};
 }
 function close(actual,expected,message=''){assert.ok(Math.abs(actual-expected)<1e-8,`${message}: ${actual} != ${expected}`);}
 function sameState(h,state){close(h.read().scale,state.scale);h.read().center.forEach((x,i)=>close(x,state.center[i]));}
 function pointUnder(h,x,y){const r=h.canvas.getBoundingClientRect(),u=Math.min(r.width/1000,r.height/500)||1,s=h.read();return [s.center[0]+(x-r.left-r.width/2)/u/s.scale,s.center[1]+(y-r.top-r.height/2)/u/s.scale];}
 function startPinch(h){h.pointer('pointerdown',1,400,250);h.pointer('pointerdown',2,600,250);h.pointer('pointermove',1,300,250);h.pointer('pointermove',2,700,250);}
+
+test('seasonal decorations preserve pinch, pan and map controls through repeated theme changes',()=>{
+ const h=boot();
+ for(const [ms,theme] of [[Date.parse('2026-12-24T12:00:00Z'),'christmas'],[Date.parse('2026-12-31T12:00:00Z'),'newyear'],[Date.parse('2026-12-25T12:00:00Z'),'christmas']]){
+  h.preview(ms);assert.equal(h.document.body.classList.contains(`holiday-${theme}`),true);
+  h.click('fit-map');startPinch(h);close(h.read().scale,2);
+  h.pointer('pointercancel',1,300,250);h.pointer('pointercancel',2,700,250);assert.equal(h.read().pointers,0);
+  h.click('zoom-in');assert.ok(h.read().scale>2);h.key('Home');close(h.read().scale,1);
+  const before=h.read();h.pointer('pointerdown',1,500,250);h.pointer('pointermove',1,530,280);
+  close(h.read().center[0],before.center[0]-30);close(h.read().center[1],before.center[1]-30);
+  h.pointer('pointerup',1,530,280);assert.equal(h.read().pointers,0);
+  assert.equal(h.document.body.querySelectorAll('.holiday-atmosphere').length,1);
+ }
+ h.preview(Date.parse('2027-01-02T12:00:00Z'));assert.equal(h.document.body.querySelectorAll('.holiday-atmosphere').length,0);
+});
 
 test('two-finger zoom preserves its moving focal point across SVG letterboxing',()=>{
  for(const rect of [{left:0,top:0,width:1000,height:500},{left:40,top:100,width:390,height:300},{left:60,top:25,width:1400,height:400}]){
@@ -197,3 +215,4 @@ test('larger ship marker stays screen-sized through zoom, reset and layout chang
   rect.width=800;h.click('fit-map');close(screenSize(),116);
  }
 });
+

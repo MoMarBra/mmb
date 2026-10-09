@@ -4,6 +4,7 @@ import {clockPair} from './clocks.js?v=7d3e66c6b255';
 import {createShipModel,drawShipSvg} from './ship-model.js?v=de3bab32a7a4';
 import {renderPortLabels} from './port-labels.js?v=674918ff0dc8';
 import {createBirthdayParty} from './birthday.js?v=7cf2ff2e07ea';
+import {createHolidaySpecial} from './holiday.js?v=fc304010e5ba';
 const $=id=>document.getElementById(id);
 const svgNS='http://www.w3.org/2000/svg';
 const el=(tag,attrs={})=>{const node=document.createElementNS(svgNS,tag);for(const [k,v]of Object.entries(attrs))node.setAttribute(k,v);return node;};
@@ -13,6 +14,7 @@ let currentState=deriveState(now);
 let scale=1,center=[500,250],drag=null;
 const dialog=$('settings-dialog');
 const birthdayParty=createBirthdayParty(document);
+const holidaySpecial=createHolidaySpecial(document);
 const shipModel=createShipModel($('ship-model'),$('ship-fallback'));
 $('rotate-ship').addEventListener('click',()=>shipModel.rotate());
 let lastShipHeading=null;
@@ -36,6 +38,7 @@ function render(force=false){
  now=preview??Date.now();const second=Math.floor(now/1000);if(!force&&second===lastSecond)return;lastSecond=second;
  currentState=normalizeState(deriveState(now));const s=currentState;const pre=now<startTime;const done=now>=endTime;
  birthdayParty.update(now);
+ holidaySpecial.update(now);
  const timers=countdownView(s);
  for(const [prefix,timer]of [['cd-',timers.primary],['home-cd-',timers.home]])for(const key of ['days','hours','minutes','seconds'])$(prefix+key).textContent=key==='days'?String(timer.parts[key]):String(timer.parts[key]).padStart(2,'0');
  $('countdown-label').textContent=timers.primary.label;$('countdown').setAttribute('aria-label',timers.primary.ariaLabel);
@@ -196,4 +199,5 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>updateShipMarker()
 // The next port clock avoids inventing a ship timezone while at sea.
 $('stat-ports').textContent=new Set(ports.map(p=>p.name)).size;
 render(true);initMap();setInterval(()=>{if(!playing)render();},250);requestAnimationFrame(frame);
+
 
