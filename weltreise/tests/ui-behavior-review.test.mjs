@@ -8,7 +8,9 @@ import * as clocks from '../clocks.js';
 import * as ship from '../ship-model.js';
 import * as portLabels from '../port-labels.js';
 import * as birthday from '../birthday.js';
+import * as holiday from '../holiday.js';
 import {installBirthdayDom} from './birthday-dom.js';
+import {installHolidayDom} from './holiday-dom.js';
 
 const base = new URL('../', import.meta.url);
 class Element {
@@ -39,11 +41,12 @@ async function boot({landFails=false}={}) {
   elements['preview-zone'].value='Europe/Berlin'; elements['journey-slider'].value='0';elements['playback-speed'].value='86400';
   let clock=Date.parse('2026-10-05T15:00:00Z'),time=100;const raf=[],intervals=[],errors=[];
   class FakeDate extends Date{constructor(...args){super(...(args.length?args:[clock]));}static now(){return clock;}}
-  const sandbox={...engine,...utils,...clocks,...ship,...portLabels,...birthday,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
+  const sandbox={...engine,...utils,...clocks,...ship,...portLabels,...birthday,...holiday,console:{error:(...a)=>errors.push(a)},Date:FakeDate,Intl,Number,Math,Set,Map,Array,Object,String,Error,Promise,
     document:{getElementById:id=>elements[id]??null,createElementNS:(_,tag)=>new Element('',tag),activeElement:null},
     performance:{now:()=>time},requestAnimationFrame:fn=>raf.push(fn),setInterval:fn=>intervals.push(fn),matchMedia:()=>({matches:false}),
     fetch:async()=>({ok:!landFails,json:async()=>JSON.parse(fs.readFileSync(new URL('assets/land.json',base),'utf8'))})};
   installBirthdayDom(sandbox.document,elements);
+  installHolidayDom(sandbox.document,elements);
   for(const element of Object.values(elements))element.ownerDocument=sandbox.document;
   // Model replacement month buttons and the browser's focus loss on removal.
   let monthMarkup='';
@@ -300,4 +303,116 @@ test('playback crosses both birthday boundaries and repeated renders cannot dupl
  h.fire('toggle-playback');h.api.setPreview(start);assertBirthday(h,true);
  h.fire('reset-live');assertBirthday(h,false);
 });
+
+function assertHoliday(h,expected){
+ const body=h.sandbox.document.body;
+ assert.equal(body.classList.contains('holiday-christmas'),expected==='christmas');
+ assert.equal(body.classList.contains('holiday-newyear'),expected==='newyear');
+ assert.equal(h.elements['holiday-card'].hidden,expected===null);
+ assert.equal(h.elements['holiday-ship-decoration'].hidden,expected===null);
+ assert.equal(body.querySelectorAll('.holiday-atmosphere').length,expected===null?0:1);
+ if(expected===null)assert.equal(h.elements['holiday-art'].children.length,0);
+}
+const holidayBoundaries=[
+ [Date.parse('2026-12-23T23:00:00Z'),Date.parse('2026-12-25T23:00:00Z'),'christmas'],
+ [Date.parse('2026-12-30T23:00:00Z'),Date.parse('2027-01-01T23:00:00Z'),'newyear'],
+];
+
+test('Christmas and New Year previews match the Germany clock at exact boundaries and leave timers synchronized',async()=>{
+ const h=await boot();assertHoliday(h,null);
+ for(const [start,end,id] of holidayBoundaries){
+  for(const [ms,expected] of [[start-1,null],[start,id],[start+86400000,id],[end-1,id],[end,null],[start,id],[end,null]]){
+   h.api.setPreview(ms);assertHoliday(h,expected);assertBirthday(h,false);assertTimers(h,ms);
+  }
+ }
+ assert.equal(h.errors.length,0);
+});
+
+test('holiday live boundaries and resetting a preview always use the actual live date',async()=>{
+ const h=await boot();
+ for(const [start,end,id] of holidayBoundaries){
+  h.setClock(start-1);h.api.render(true);assertHoliday(h,null);
+  h.setClock(start);for(const fn of h.intervals)fn();assertHoliday(h,id);assertTimers(h,start);
+  h.api.setPreview(end);assertHoliday(h,null);
+  h.fire('reset-live');assertHoliday(h,id);assert.equal(h.api.getState().preview,null);assertTimers(h,start);
+  h.setClock(end);for(const fn of h.intervals)fn();assertHoliday(h,null);assertTimers(h,end);
+  h.api.setPreview(start);assertHoliday(h,id);
+  h.fire('reset-live');assertHoliday(h,null);assert.equal(h.api.getState().preview,null);assertTimers(h,end);
+ }
+});
+
+test('manual holiday dates honor the chosen zone and unapplied, invalid or cancelled changes preserve the active theme',async()=>{
+ const h=await boot();
+ for(const [value,id,ms] of [
+  ['2026-12-24T00:00','christmas',holidayBoundaries[0][0]],
+  ['2026-12-31T00:00','newyear',holidayBoundaries[1][0]],
+ ]){
+  h.fire('settings-trigger');h.elements['preview-datetime'].value=value;h.fire('apply-preview');
+  assertHoliday(h,id);assertTimers(h,ms);assert.equal(h.api.getState().preview,ms);
+  h.fire('settings-trigger');h.elements['preview-datetime'].value='2027-01-02T00:00';h.elements['settings-dialog'].close();
+  assertHoliday(h,id);assertTimers(h,ms);
+  h.fire('settings-trigger');h.elements['preview-datetime'].value='2026-02-30T12:00';h.fire('apply-preview');
+  assert.ok(h.elements['preview-error'].textContent);assert.equal(h.elements['settings-dialog'].open,true);
+  assertHoliday(h,id);assertTimers(h,ms);h.elements['settings-dialog'].close();
+  h.api.setPreview(NaN);assertHoliday(h,id);assert.equal(h.api.getState().preview,ms);
+ }
+ h.fire('settings-trigger');h.elements['preview-zone'].value='UTC';h.fire('preview-zone','change');
+ for(const [value,id] of [
+  ['2026-12-23T22:59',null],['2026-12-23T23:00','christmas'],['2026-12-25T23:00',null],
+  ['2026-12-30T22:59',null],['2026-12-30T23:00','newyear'],['2027-01-01T22:59','newyear'],['2027-01-01T23:00',null],
+ ]){
+  h.fire('settings-trigger');h.elements['preview-datetime'].value=value;h.fire('apply-preview');
+  assert.equal(h.elements['preview-error'].textContent,'');assertHoliday(h,id);assertTimers(h,utils.parseWallTime(value,'UTC'));
+ }
+});
+
+test('repeated birthday to Christmas to New Year previews cleanly replace themes and reset without leftovers',async()=>{
+ const h=await boot(),body=h.sandbox.document.body,initialNodes=body.querySelectorAll('*').length;
+ for(let cycle=0;cycle<8;cycle++){
+  for(const [ms,id] of [
+   [Date.parse('2026-11-22T12:00:00Z'),'birthday'],[holidayBoundaries[0][0],'christmas'],
+   [holidayBoundaries[1][0],'newyear'],[Date.parse('2027-01-02T12:00:00Z'),null],
+  ]){
+   h.api.setPreview(ms);assertBirthday(h,id==='birthday');assertHoliday(h,id==='birthday'?null:id);assertTimers(h,ms);
+   if(id===null)assert.equal(body.querySelectorAll('*').length,initialNodes);
+  }
+ }
+ h.api.setPreview(holidayBoundaries[0][0]);h.setClock(holidayBoundaries[1][0]);h.fire('reset-live');assertHoliday(h,'newyear');
+ h.api.setPreview(holidayBoundaries[1][0]);h.setClock(holidayBoundaries[0][0]);h.fire('reset-live');assertHoliday(h,'christmas');
+ h.setClock(Date.parse('2026-10-05T15:00:00Z'));h.fire('reset-live');assertHoliday(h,null);assertBirthday(h,false);
+ assert.equal(body.querySelectorAll('*').length,initialNodes);
+});
+
+test('existing playback crosses all holiday boundaries without extra loops or same-theme node churn',async()=>{
+ const h=await boot(),body=h.sandbox.document.body;h.elements['playback-speed'].value='1';h.fire('playback-speed','change');
+ assert.equal(h.intervals.length,1);
+ for(const [start,end,id] of holidayBoundaries){
+  h.api.setPreview(start-100);h.fire('toggle-playback');h.advance(100);assertHoliday(h,id);assertTimers(h,start);
+  const nodes=body.querySelectorAll('*'),layer=body.querySelectorAll('.holiday-atmosphere')[0];
+  for(let i=0;i<12;i++){
+   h.advance(100);h.api.render(true);assertHoliday(h,id);
+   assert.deepEqual(body.querySelectorAll('*'),nodes);assert.equal(body.querySelectorAll('.holiday-atmosphere')[0],layer);
+  }
+  h.fire('toggle-playback');h.api.setPreview(end-100);h.fire('toggle-playback');h.advance(100);
+  assertHoliday(h,null);assertTimers(h,end);assert.equal(layer.parentNode,null);
+  h.fire('toggle-playback');
+ }
+ h.fire('reset-live');assertHoliday(h,null);assert.equal(h.api.getState().playing,false);
+});
+
+test('holiday slider and port previews use the same instant even when the destination civil date differs',async()=>{
+ const h=await boot();
+ for(const [start,,id] of holidayBoundaries){
+  const value=Math.round((start+12*3600000-engine.startTime)/(engine.endTime-engine.startTime)*10000);
+  h.fire('settings-trigger');h.elements['journey-slider'].value=String(value);h.fire('journey-slider','input');
+  const ms=engine.startTime+(engine.endTime-engine.startTime)*(value/10000);
+  assert.equal(h.api.getState().preview,ms);assertHoliday(h,id);assertTimers(h,ms);
+ }
+ // Mystery Island is already on December 26 locally, while Germany is still on Christmas Day.
+ const port=engine.ports.find(p=>p.id==='mystery-island');
+ h.fire('itinerary-list','click',{target:{closest:()=>({dataset:{port:String(port.index)}})}});
+ assertHoliday(h,'christmas');assertTimers(h,port.arrival);
+ assert.match(h.elements['local-date'].textContent,/26\./);assert.match(h.elements['germany-date'].textContent,/25\./);
+});
+
 

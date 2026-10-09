@@ -12,6 +12,7 @@
 <link rel="icon" href="./assets/compass.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./style.css?v=259be0e33552">
 <link rel="stylesheet" href="./birthday.css?v=8392bfe1434f">
+<link rel="stylesheet" href="./holiday.css?v=49e30543e7c9">
 </head>
 <body>
 <div class="page-glow" aria-hidden="true"></div>
@@ -23,6 +24,11 @@
 <div class="birthday-balloons" id="birthday-balloons" aria-hidden="true"></div>
 <span class="birthday-star-seal" aria-hidden="true">✧</span>
 <div class="birthday-message"><p class="birthday-kicker">Ein ganz besonderer Moment</p><h2 id="birthday-title">Happy birthday<span>Sanni</span></h2><p class="birthday-wish">Die Welt liegt dir zu Füßen.<br>Heute gehört der ganze Horizont dir.</p><p class="birthday-date">22. & 23. November 2026<small>Geburtstags-Special · Deutschland-Zeit</small></p></div>
+</section>
+<section class="holiday-card" id="holiday-card" aria-labelledby="holiday-title" hidden>
+<div class="holiday-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="holiday-copy"><p class="holiday-eyebrow" id="holiday-eyebrow"></p><h2 id="holiday-title"></h2><p class="holiday-message" id="holiday-message"></p><p class="holiday-date" id="holiday-date"></p><p class="holiday-clock-note">Zwei besondere Tage · Deutschland-Zeit</p></div>
+<div class="holiday-art" id="holiday-art" aria-hidden="true"></div>
 </section>
 <section class="hero compact-hero" aria-labelledby="hero-title">
 <div class="eyebrow"><span class="tiny-line"></span> AIDAsol · 126 Tage</div>
@@ -45,7 +51,7 @@
 <span class="map-attribution">Natural Earth</span>
 </div>
 <div class="map-legend"><span><i class="legend-done"></i> Zurückgelegt</span><span><i class="legend-planned"></i> Geplant</span><span class="map-hint">Ziehen · 2 Finger zoomen</span></div>
-<div class="position-card"><button type="button" class="ship-model-button" id="rotate-ship" aria-label="Stilisiertes 3D-Schiffsmodell drehen" title="3D-Schiffsmodell drehen"><span class="birthday-ship-pennants" id="birthday-ship-pennants" aria-hidden="true" hidden><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="ship-model-stage" aria-hidden="true"><canvas id="ship-model" width="320" height="160" hidden></canvas><svg id="ship-fallback" viewBox="-50 -50 100 100" preserveAspectRatio="none"></svg></span><span class="ship-model-label">3D · Ansicht drehen</span></button><div class="position-copy"><p id="status-eyebrow">BEREIT FÜR DIE GROSSE REISE</p><h3 id="status-title">Start in Hamburg</h3><span id="status-subtitle">18. Oktober · 19:30 Uhr</span><span class="position-estimate">Geschätzte Position</span></div><span class="status-chip" id="status-chip">Vorfreude</span></div>
+<div class="position-card"><button type="button" class="ship-model-button" id="rotate-ship" aria-label="Stilisiertes 3D-Schiffsmodell drehen" title="3D-Schiffsmodell drehen"><span class="birthday-ship-pennants" id="birthday-ship-pennants" aria-hidden="true" hidden><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="holiday-ship-decoration" id="holiday-ship-decoration" aria-hidden="true" hidden></span><span class="ship-model-stage" aria-hidden="true"><canvas id="ship-model" width="320" height="160" hidden></canvas><svg id="ship-fallback" viewBox="-50 -50 100 100" preserveAspectRatio="none"></svg></span><span class="ship-model-label">3D · Ansicht drehen</span></button><div class="position-copy"><p id="status-eyebrow">BEREIT FÜR DIE GROSSE REISE</p><h3 id="status-title">Start in Hamburg</h3><span id="status-subtitle">18. Oktober · 19:30 Uhr</span><span class="position-estimate">Geschätzte Position</span></div><span class="status-chip" id="status-chip">Vorfreude</span></div>
 </div>
 <section class="clocks-section" aria-labelledby="clocks-heading"><div class="clocks-heading"><h3 id="clocks-heading">Zeit an zwei Orten</h3><span id="clocks-mode">Jetzt · aktuelle Zeit</span></div>
 <div class="details-grid clocks-grid"><article class="detail-card clock-card"><p class="detail-label" id="clock-label">Ortszeit · Hamburg</p><h3 class="clock" id="local-clock">––:––:––</h3><p id="local-date">–</p><span class="detail-meta" id="clock-offset">UTC+02:00</span><span class="detail-meta clock-zone" id="clock-zone">Europe/Berlin</span></article><article class="detail-card clock-card germany-clock"><p class="detail-label">Deutschland</p><h3 class="clock" id="germany-clock">––:––:––</h3><p id="germany-date">–</p><span class="detail-meta" id="germany-offset">UTC+02:00</span><span class="detail-meta clock-zone">Europe/Berlin</span></article></div>
@@ -61,6 +67,7 @@
 <button class="settings-trigger" id="settings-trigger" aria-label="Datum, Uhrzeit und Simulation einstellen" aria-haspopup="dialog" title="Zeitreise"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m9.5 3-1 2.4-2.5.4-1.5 2.6.9 2.4-1 2.4 1.5 2.6 2.6.4 1 2.4h3l1-2.4 2.6-.4 1.5-2.6-.9-2.4.9-2.4-1.5-2.6-2.6-.4-1-2.4z" transform="translate(1 1)"/></svg></button>
 <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title"><form method="dialog" class="dialog-close-form"><button aria-label="Einstellungen schließen" class="close-button">×</button></form><div class="sheet-handle" aria-hidden="true"></div><div class="eyebrow">EIN KLEINER SPRUNG IN DIE ZUKUNFT</div><h2 id="settings-title">Zeitreise.</h2><p class="settings-intro">Entdecke jeden Moment der Reise.</p><div class="setting-row"><label for="preview-datetime">Datum & Uhrzeit</label><input type="datetime-local" id="preview-datetime" step="60" min="2026-10-01T00:00" max="2027-03-01T23:59"></div><div class="setting-row"><label for="preview-zone">Zeitzone der Eingabe</label><select id="preview-zone"><option value="Europe/Berlin">Hamburg · Europe/Berlin</option><option value="UTC">UTC · Weltzeit</option></select></div><p class="form-error" id="preview-error" role="alert"></p><button class="primary-button" type="button" id="apply-preview">Diesen Moment ansehen <span><svg class="arrow-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></button><div class="playback-section"><div class="playback-heading"><label for="journey-slider">Die ganze Reise</label><output id="slider-label">18. Oktober 2026</output></div><input type="range" id="journey-slider" min="0" max="10000" value="0" aria-label="Zeitpunkt auf der Reise"><div class="playback-actions"><button type="button" class="secondary-button" id="toggle-playback">▶ Abspielen</button><select id="playback-speed" aria-label="Geschwindigkeit der Vorschau"><option value="21600">6 Stunden / Sek.</option><option value="86400" selected>1 Tag / Sek.</option><option value="259200">3 Tage / Sek.</option></select></div></div><button class="live-button" type="button" id="reset-live"><i></i> Zur aktuellen Zeit zurück</button><p class="settings-note">Alle Einstellungen bleiben nur auf diesem Gerät.<br>Die Karte zeigt auch im Live-Modus eine Simulation.</p></dialog>
 <noscript><div class="noscript">Für die interaktive Karte und den Countdown bitte JavaScript aktivieren. AIDAsol: 18. Oktober 2026 ab Hamburg, 19:30 Uhr, bis 21. Februar 2027, 08:00 Uhr.</div></noscript>
-<script type="module" src="./app.js?v=8d2a654f8066"></script>
+<script type="module" src="./app.js?v=b5cf58a6b4cf"></script>
 </body></html>
+
 

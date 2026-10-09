@@ -1,0 +1,75 @@
+/* Two short voyage specials: warm winter light and a champagne-gold new year. */
+#holiday-card[hidden],#holiday-ship-decoration[hidden] { display:none; }
+.holiday-card { position:relative; isolation:isolate; overflow:hidden; display:grid; grid-template-columns:1.15fr 1fr; align-items:center; min-height:370px; margin:7px auto 22px; padding:48px 54px; border:1px solid #ede5d7; border-radius:32px; background:radial-gradient(ellipse at 88% 25%,#ffedc3b0,transparent 53%),linear-gradient(125deg,#fffcf5,#f1f3e9); box-shadow:0 20px 70px #75654a16,inset 0 0 45px #ffffffc0; }
+.holiday-card::before { content:''; position:absolute; inset:12px; border:1px solid #bda67738; border-radius:22px; pointer-events:none; z-index:-1; }
+.holiday-copy { position:relative; z-index:2; }
+.holiday-eyebrow { max-width:330px; font-size:9px; line-height:1.6; letter-spacing:2.1px; text-transform:uppercase; font-weight:600; color:#6d634f; }
+.holiday-card h2 { margin:19px 0 17px; font-size:clamp(38px,5.2vw,64px); line-height:1.04; letter-spacing:-2.6px; font-weight:500; color:#36584b; white-space:pre-line; }
+.holiday-message { font-size:12px; line-height:1.8; color:#6b7466; white-space:pre-line; }
+.holiday-date { margin-top:25px; font-size:9px; line-height:1.5; letter-spacing:1.1px; text-transform:uppercase; color:#6d634f; }
+.holiday-clock-note { margin-top:5px; font-size:9px; letter-spacing:.25px; color:#6d634f; }
+.holiday-art { width:100%; max-width:350px; justify-self:end; pointer-events:none; }
+.holiday-art svg { width:100%; height:auto; overflow:visible; display:block; }
+.holiday-lights { position:absolute; top:0; left:5%; right:5%; height:22px; border-bottom:1px solid #7f87665e; border-radius:0 0 50% 50%; display:flex; justify-content:space-around; pointer-events:none; }
+.holiday-lights i { width:4px; height:7px; margin-top:20px; border-radius:50%; background:#ffefbe; box-shadow:0 0 7px 2px #e6bd626e,0 0 17px 5px #eac56a28; }
+.holiday-lights i:nth-child(3n) { margin-top:16px; }
+.holiday-lights i:first-child,.holiday-lights i:last-child { margin-top:10px; }
+.holiday-ornament { transform-origin:183px 96px; animation:holiday-bauble-sway 8s ease-in-out infinite alternate; }
+.holiday-pearl { transform-origin:275px 163px; animation:holiday-bauble-sway 10s -4s ease-in-out infinite alternate-reverse; }
+@keyframes holiday-bauble-sway { from { transform:rotate(-2deg); } to { transform:rotate(2deg); } }
+.holiday-christmas { background:linear-gradient(145deg,#fbf9f1,#f6f8f3 40%,#f5f8fb); }
+.holiday-christmas .page-glow { background:radial-gradient(ellipse at top right,#eee2bf77,transparent 65%); }
+.holiday-christmas .map-card { border-color:#e4e9dd; box-shadow:0 18px 60px #66816b12; }
+.holiday-christmas .ship-model-button { background:linear-gradient(125deg,#f7f0d9,#e8f0e7 65%,#f7faf7); }
+.holiday-christmas .progress-track>div { background:linear-gradient(90deg,#698f7f,#c7ac68); }
+.holiday-christmas .ship-model-button,.holiday-newyear .ship-model-button { position:relative; }
+.holiday-ship-decoration { position:absolute; top:6px; left:0; right:0; text-align:center; font-size:16px; letter-spacing:7px; color:#a68b4f; pointer-events:none; }
+.holiday-atmosphere { position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:4; contain:strict; }
+.holiday-atmosphere * { pointer-events:none; }
+.holiday-snow { position:absolute; left:var(--x); top:-12px; width:var(--size); height:var(--size); border-radius:50%; background:#bcb8a5; opacity:.28; animation:holiday-snowfall var(--fall) var(--delay) linear infinite; }
+@keyframes holiday-snowfall { from { transform:translate3d(0,-20px,0); } to { transform:translate3d(var(--drift),calc(100vh + 40px),0); } }
+.holiday-newyear { background:linear-gradient(155deg,#fbf8f1,#f3f4fa 45%,#f6f8fb); }
+.holiday-newyear .page-glow { background:radial-gradient(ellipse at top right,#e1d5b965,transparent 65%); }
+.holiday-newyear .holiday-card { background:radial-gradient(ellipse at 89% 25%,#8c715436,transparent 50%),linear-gradient(120deg,#17283e,#25324b 55%,#313545); border-color:#394150; box-shadow:0 22px 65px #17243d24,inset 0 0 40px #d3b77a08; }
+.holiday-newyear .holiday-card::before { border-color:#d1b37433; }
+.holiday-newyear .holiday-card h2 { color:#f9efda; font-weight:450; }
+.holiday-newyear .holiday-eyebrow { color:#d6c397; }
+.holiday-newyear .holiday-message { color:#c5ccda; }
+.holiday-newyear .holiday-date { color:#dbc596; }
+.holiday-newyear .holiday-clock-note { color:#a8afc0; }
+.holiday-newyear .holiday-lights { display:none; }
+.holiday-newyear .map-card { border-color:#e9e2d3; }
+.holiday-newyear .ship-model-button { background:linear-gradient(125deg,#f7f0dc,#e9ecf5 70%); }
+.holiday-newyear .progress-track>div { background:linear-gradient(90deg,#687ba2,#c5a763); }
+.holiday-newyear .holiday-ship-decoration { font-size:11px; letter-spacing:5px; }
+.holiday-bubbles { animation:holiday-bubble-rise 5s ease-in-out infinite; }
+@keyframes holiday-bubble-rise { 0%,100% { transform:translateY(2px);opacity:.35; } 55% { transform:translateY(-5px);opacity:.9; } }
+.holiday-firework { position:absolute; width:120px; height:120px; color:#bea065; opacity:0; animation:holiday-firework-bloom 10s var(--delay) ease-out infinite; }
+.firework-0 { left:3%; top:17%; }
+.firework-1 { right:4%; top:9%; width:150px;height:150px;color:#afa0bd; }
+.firework-2 { right:6%; top:58%; width:95px;height:95px; }
+.holiday-firework-ray { position:absolute; top:50%; left:50%; width:2px; height:13px; border-radius:50%; background:currentColor; transform:rotate(var(--angle)) translateY(-48px); transform-origin:0 0; box-shadow:0 -9px 0 -0.2px currentColor; }
+/* Each burst is a slow, small bloom. No flashes, screen wash, sound, or JS loop. */
+@keyframes holiday-firework-bloom { 0%,12% { transform:scale(.18);opacity:0; } 27% { opacity:.48; } 52% { transform:scale(1.08);opacity:0; } 100% { transform:scale(1.08);opacity:0; } }
+@media(max-width:649px) {
+ .holiday-card { grid-template-columns:1fr; min-height:0; margin-top:0; padding:45px 23px 25px; border-radius:26px; text-align:center; }
+ .holiday-card::before { inset:10px;border-radius:18px; }
+ .holiday-eyebrow { max-width:100%;font-size:8px;letter-spacing:1.5px; }
+ .holiday-card h2 { font-size:42px;letter-spacing:-1.8px;margin:14px 0; }
+ .holiday-message { font-size:11px;line-height:1.7; }
+ .holiday-date { margin-top:17px;font-size:8px; }
+ .holiday-clock-note { font-size:8.5px; }
+ .holiday-art { width:190px; justify-self:center; margin-top:2px; margin-bottom:-5px; }
+ .holiday-newyear .holiday-art { width:180px;margin-top:12px; }
+ .holiday-snow:nth-child(n+11) { display:none; }
+ .holiday-firework { width:80px;height:80px; }
+ .firework-0 { left:-20px;top:13%; }
+ .firework-1 { right:-20px;top:49%; }
+ .firework-2 { display:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .holiday-art *, .holiday-atmosphere * { animation:none!important; }
+ .holiday-snow { top:var(--rest);opacity:.18; }
+ .holiday-firework { opacity:.2;transform:scale(.65); }
+}
+@media print { .holiday-atmosphere { display:none; } }

@@ -60,3 +60,11 @@ All public HTML includes `noindex, nofollow, nosnippet, noimageindex`. The repos
 Only November 22 and 23, 2026 in Europe/Berlin: “Happy birthday Sanni”, rising pearl/rose/gold/lilac balloons, soft party lights, confetti stars and ship bunting. The same effective instant drives the special, clocks, countdown and manual/playback preview. The date basis is labeled on the card. No annual recurrence. Decorative nodes are created only on entry and removed on exit; bounded CSS animations need no extra timers or animation loop. Reduced motion uses static decorations. Decorations never intercept map gestures or controls.
 
 The map ship uses a constant 92px mobile / 116px desktop projection frame at every zoom. The preview has a dedicated full-width row on phones and a 300px stage on desktop.
+
+
+## Christmas & New Year specials
+
+- December 24–25, 2026 in Europe/Berlin: warm winter light, a gold-and-pearl ornament illustration, a small garland, gentle snow and “Weihnachten. Mit Meerblick.”
+- December 31, 2026 through January 1, 2027 in Europe/Berlin: midnight-blue and champagne gold, two illustrated glasses, small slow fireworks and a greeting that changes at midnight to “Hallo, 2027.”
+- Each special lasts exactly two civil days on this voyage, with no annual recurrence. Both follow the same live/manual/playback instant as the birthday, clocks and countdowns. Their date basis is labeled on the card.
+- Switching dates or resetting to live removes the old decorations immediately. Decoration nodes are bounded, reused on normal clock ticks, and removed on exit. CSS-only transform/opacity motion uses no extra JavaScript timer or loop, with fewer particles on phones and static artwork for reduced motion. All decorative layers ignore pointer events; there is no flashing, audio, new network dependency or storage.
