@@ -1,4 +1,5 @@
 import {config} from './config.js';
+import {renderMenu} from './menus.js';
 import {RatingStore,SupabaseAdapter,LocalAdapter,spinTarget,sampleWinner,normalizeAngle} from './store.js';
 import {drawFallback,fallbackPick} from './wheel-fallback.js';
 import {celebrate} from './confetti.js';
@@ -49,7 +50,7 @@ function ratingWidget(person,snack,context){
   if(status.state==='error'){const retry=node('button','text-button inline-retry','Erneut versuchen');retry.type='button';retry.id=`retry-${context}-${person.id}-${snack.id}`;retry.addEventListener('click',()=>saveRating(person.id,snack.id,store.get(person.id,snack.id)));line.append(document.createTextNode(' · '),retry)}wrap.append(line);return wrap;
 }
 function renderDetail(){
-  const snack=store.restaurantStats().find(s=>s.id===ui.selectedId);$('restaurant-detail').setAttribute('aria-busy',String(store.loading));$('restaurant-detail').hidden=!snack;
+  const snack=store.restaurantStats().find(s=>s.id===ui.selectedId);$('restaurant-detail').setAttribute('aria-busy',String(store.loading));$('restaurant-detail').hidden=!snack;renderMenu($('restaurant-menu'),snack);
   if(!snack){$('detail-title').textContent=store.loading?'Einen Moment …':'Keine Restaurants';$('detail-score').textContent='–';$('detail-count').textContent='';$('detail-rank').hidden=true;$('detail-stars').replaceChildren();$('quick-rating').replaceChildren();$('community-list').replaceChildren();$('toggle-community').hidden=true;return}
   $('selection-label').textContent=ui.selection==='winner'?'Gewinner':'Bewertungen';$('detail-title').textContent=snack.name;$('detail-rank').textContent=snack.rank?`Rang ${snack.rank}`:'Noch unbewertet';$('detail-rank').hidden=false;
   $('detail-score').textContent=snack.count?format(snack.average):'–';$('detail-stars').textContent='★★★★★';$('detail-stars').style.setProperty('--rating',`${snack.average/5*100}%`);$('detail-count').textContent=snack.count?`aus ${snack.count} ${snack.count===1?'Bewertung':'Bewertungen'}`:'Noch keine Bewertungen';
@@ -152,3 +153,4 @@ window.addEventListener('beforeunload',e=>{if(store.pending||store.failures.leng
 $('wheel-3d').addEventListener('wheel-context-lost',()=>{ui.wheel3d=null;drawFallback($('wheel-fallback'),store.snacks,ui.rotation,ui.selectedId,ui.explosionProgress)});
 await load();
 try{const {createWheel}=await import('./wheel3d.js');ui.wheel3d=await createWheel($('wheel-3d'),store.snacks,id=>selectRestaurant(id));ui.wheel3d.rotate(ui.rotation);ui.wheel3d.select(ui.selectedId);ui.wheel3d.setInteractive(!ui.spinning&&!ui.exploding);if(ui.exploding)ui.wheel3d.explode(ui.explosionProgress);$('wheel-fallback').hidden=true}catch(error){$('wheel-3d').hidden=true;drawFallback($('wheel-fallback'),store.snacks,ui.rotation,ui.selectedId,ui.explosionProgress);console.info('2D-Rad aktiv:',error.message)}
+
