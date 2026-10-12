@@ -52,3 +52,31 @@ footer{margin-top:16px;padding:12px 0;font-size:12px}#save-status{margin-left:0}
 .gravity-piece *{pointer-events:none!important;user-select:none!important}
 .gravity-floor{position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(transparent,#050916c9);border-bottom:2px solid #6aa5ff33;opacity:0}
 #warp-transit{position:fixed;inset:0;width:100vw;height:100dvh;z-index:220;pointer-events:none;contain:strict}
+
+
+/* The selected restaurant's official menu, above its ratings. */
+.restaurant-menu{margin:16px 0 20px}
+.menu-button{display:flex;align-items:center;justify-content:center;min-height:46px;width:100%;padding:11px 15px;border:1px solid #a9cbff55;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-size:15px;font-weight:650;text-align:center;text-decoration:none;line-height:1.4}
+.menu-button:hover{background:#8dbaff}
+.menu-button:focus-visible{outline-offset:3px}
+.menu-note{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+/* Preserve usable touch targets: the original desktop minimum caused mobile auto-zoom. */
+@media(max-width:1099px){
+  body{min-width:300px;overflow-x:clip}
+  .app-shell{padding:0 16px}
+  .site-header{height:auto;min-height:68px;flex-wrap:wrap;gap:12px;padding:12px 0}
+  .wordmark{font-size:23px}
+  .header-actions{gap:6px}
+  .tabs{gap:16px;overflow-x:auto}
+  .wheel-stage{width:min(440px,100%)}
+  .restaurant-chips{max-height:none}
+  .restaurant-chip{min-height:44px}
+  .detail-panel{left:max(16px,calc((100vw - 540px)/2));right:auto;width:min(540px,calc(100vw - 32px));max-width:none;margin:0;max-height:calc(100dvh - 32px);padding:20px;overscroll-behavior:contain}
+  .detail-topline .icon-button{width:44px;height:44px;flex-shrink:0}
+}
+@media(max-width:480px){
+  .header-actions{margin-left:0;width:100%;justify-content:flex-end}
+  .tabs button{font-size:12px}
+  .detail-panel{padding:16px}
+  .detail-panel h2{font-size:25px}
+}
