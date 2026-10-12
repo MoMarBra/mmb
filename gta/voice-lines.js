@@ -1058,182 +1058,182 @@ export const VOICE_LINES = [
     "actor": "Lena",
     "event": "fire.story",
     "text": "Der Laptop brennt schon wieder!",
-    "duration": 2.3748
+    "duration": 1.48898
   },
   {
     "id": "fire_intro_02",
     "actor": "Tobias",
     "event": "fire.story",
     "text": "Das kann nur Empower gewesen sein. Empower ist schuld.",
-    "duration": 5.3755
+    "duration": 4.440816
   },
   {
     "id": "fire_intro_03",
     "actor": "player",
     "event": "fire.story",
     "text": "Ist das die neue Brandstrategie?",
-    "duration": 2.3428
+    "duration": 1.880816
   },
   {
     "id": "fire_intro_04",
     "actor": "lukas",
     "event": "fire.story",
     "text": "Abstand halten. Tobias, sichern!",
-    "duration": 4.874
+    "duration": 2.586122
   },
   {
     "id": "fire_intro_05",
     "actor": "Lena",
     "event": "fire.story",
     "text": "Ticketpriorität: leicht flambiert.",
-    "duration": 3.4393
+    "duration": 2.690612
   },
   {
     "id": "fire_intro_06",
     "actor": "lukas",
     "event": "fire.story",
     "text": "Hol Benjamin aus der IT. Du hast sechzig Sekunden!",
-    "duration": 5.6616
+    "duration": 3.866122
   },
   {
     "id": "fire_intro_07",
     "actor": "player",
     "event": "fire.story",
     "text": "Ich bin unterwegs.",
-    "duration": 1.7441
+    "duration": 1.645714
   },
   {
     "id": "fire_run_01",
     "actor": "player",
     "event": "fire.story",
     "text": "Zur IT. Bitte heute ohne Warteschleife.",
-    "duration": 3.7781
+    "duration": 3.239184
   },
   {
     "id": "fire_run_02",
     "actor": "Tobias",
     "event": "fire.story",
     "text": "Benjamin ist im IT-Büro. Folge der Markierung.",
-    "duration": 4.61
+    "duration": 3.787755
   },
   {
     "id": "fire_run_03",
     "actor": "Lena",
     "event": "fire.story",
     "text": "Der Kunde fragt, ob die Folie schon warmgelaufen ist.",
-    "duration": 4.2935
+    "duration": 3.004082
   },
   {
     "id": "fire_run_04",
     "actor": "player",
     "event": "fire.story",
     "text": "Ja. Die Präsentation hat jetzt einen Brennpunkt.",
-    "duration": 4.2504
+    "duration": 2.925714
   },
   {
     "id": "fire_run_05",
     "actor": "Tobias",
     "event": "fire.story",
     "text": "Benjamin mitbringen. Keinen Verbesserungsvorschlag.",
-    "duration": 4.802
+    "duration": 3.709388
   },
   {
     "id": "fire_warn_30",
     "actor": "lukas",
     "event": "fire.story",
     "text": "Noch dreißig Sekunden. Benjamin zuerst.",
-    "duration": 4.9773
+    "duration": 2.586122
   },
   {
     "id": "fire_warn_15",
     "actor": "Lena",
     "event": "fire.story",
     "text": "Fünfzehn Sekunden! Wir brauchen Benjamin!",
-    "duration": 4.0526
+    "duration": 2.847347
   },
   {
     "id": "fire_warn_10",
     "actor": "Tobias",
     "event": "fire.story",
     "text": "Zehn Sekunden. Das ist jetzt wirklich dringend.",
-    "duration": 4.4849
+    "duration": 2.847347
   },
   {
     "id": "fire_rescue_01",
     "actor": "Tobias",
     "event": "fire.story",
     "text": "Moment. Wieso kommt Benjamin von oben?",
-    "duration": 4.2596
+    "duration": 3.160816
   },
   {
     "id": "fire_rescue_02",
     "actor": "benjamin",
     "event": "fire.story",
     "text": "Für dieses Ticket nehme ich den direkten Eskalationsweg.",
-    "duration": 4.7032
+    "duration": 3.160816
   },
   {
     "id": "fire_rescue_03",
     "actor": "Lena",
     "event": "fire.story",
     "text": "Da ist der Feuerlöscher. Endlich ein Tool, das liefert.",
-    "duration": 4.9602
+    "duration": 3.082449
   },
   {
     "id": "fire_rescue_04",
     "actor": "benjamin",
     "event": "fire.story",
     "text": "Benjamin steht für: Immer da fürs Team!",
-    "duration": 4.4354
+    "duration": 2.925714
   },
   {
     "id": "fire_rescue_05",
     "actor": "player",
     "event": "fire.story",
     "text": "Das ist die erste Lösung, die nicht als PDF kommt.",
-    "duration": 4.054
+    "duration": 2.586122
   },
   {
     "id": "fire_rescue_06",
     "actor": "Tobias",
     "event": "fire.story",
     "text": "Feuer aus. Und die Folie hat sogar weniger Text.",
-    "duration": 4.8774
+    "duration": 4.362449
   },
   {
     "id": "fire_rescue_07",
     "actor": "lukas",
     "event": "fire.story",
     "text": "Danke, Benjamin. Genau so sieht Löschungskompetenz aus.",
-    "duration": 6.4928
+    "duration": 3.474286
   },
   {
     "id": "fire_rescue_08",
     "actor": "benjamin",
     "event": "fire.story",
     "text": "Ich sichere das Gerät. Ihr atmet erst einmal durch.",
-    "duration": 5.336
+    "duration": 4.205714
   },
   {
     "id": "fire_success_01",
     "actor": "player",
     "event": "fire.story",
     "text": "Wir müssen echt dieses Empower loswerden.",
-    "duration": 3.0179
+    "duration": 2.35102
   },
   {
     "id": "fire_failure_01",
     "actor": "Tobias",
     "event": "fire.story",
     "text": "Zu spät. Das Ticket hat sich selbst eskaliert.",
-    "duration": 4.5996
+    "duration": 3.395918
   },
   {
     "id": "fire_failure_02",
     "actor": "lukas",
     "event": "fire.story",
     "text": "Alle raus, keiner verletzt. Wir üben den Weg zur IT noch einmal.",
-    "duration": 6.866
+    "duration": 3.970612
   },
   {
     "id": "v160_intro_01",

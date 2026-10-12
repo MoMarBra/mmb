@@ -5640,6 +5640,7 @@ button.mission-row:focus-visible {
 }
 .origin-film header {
   position: absolute;
+  z-index: 6; /* Keep resume/skip reachable above the pause overlay. */
   top: 10%;
   left: 5%;
   right: 5%;
@@ -6333,4 +6334,55 @@ button.mission-row:focus-visible {
   font-size: 12px;
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+/* Spoken Quick Wok feedback owns a stable strip outside the playable stage. */
+.quick-wok {
+  flex-direction: column;
+  gap: 12px;
+}
+.quick-wok .wok-stage {
+  flex-shrink: 0;
+  width: min(1200px, calc(100vw - 32px), calc((100dvh - 156px) * 1.66667));
+}
+.quick-wok .wok-dialogue {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: min(720px, 100%);
+  min-height: 96px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #082c26e8;
+  color: #fff4df;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.45;
+  pointer-events: none;
+}
+.quick-wok .wok-dialogue[hidden] {
+  display: block !important;
+  visibility: hidden;
+}
+.wok-dialogue b {
+  display: block;
+  color: #e7ce88;
+  font-size: 12px;
+  letter-spacing: .06em;
+}
+.wok-dialogue p { margin: 4px 0 0; }
+@media (max-width: 700px) {
+  .quick-wok .wok-stage {
+    width: min(calc(100vw - 8px), calc((100dvh - 132px) * 1.66667));
+  }
+}
+@media (max-height: 500px) {
+  .quick-wok { gap: 8px; padding: 8px; }
+  .quick-wok .wok-stage {
+    width: min(calc(100vw - 16px), calc((100dvh - 104px) * 1.66667));
+  }
+  .quick-wok .wok-dialogue {
+    min-height: 80px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.35;
+  }
 }

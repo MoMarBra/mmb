@@ -1,3 +1,4 @@
+import { measuredVoiceLine, quizIntroVoiceFinished, quizVoiceFinished } from './voice-timing.js';
 import * as THREE from 'three';
 import { QuizState, QUIZ_LADDER } from './quiz-state.js';
 import { QuizStage, installQuizssoir, installQuizTrophy } from './quiz-stage.js';
@@ -693,7 +694,7 @@ export class Quizssoir {
         '</tbody></table>';
     }
   }
-  speak(key, offset = 0, resolved = false) {
+  speak(key, offset = 0, resolved = false, durationHint = 0) {
     this.stopVoice();
     const variants =
       key === 'coffee_correct'
@@ -714,12 +715,22 @@ export class Quizssoir {
     session.voiceStartedAt = null;
     session.voiceStatus = 'loading';
     session.voiceRequestedAt = session.clock;
+    session.voiceCaptionStartedAt = session.clock;
+    session.voiceDuration = measuredVoiceLine(
+      { ...line, duration: durationHint || line.duration },
+      this.g.audio.bank,
+    ).duration;
+    session.voiceUntil = session.clock + Math.max(0, session.voiceDuration - offset);
     $('quiz-host-line').textContent = line.text;
     $('quiz-host').hidden = !this.g.sim.s.audioSubtitles;
     this.g.audio.bank
       ?.get(line.asset)
       .then((buffer) => {
         if (token !== this.voiceToken || this.current !== session || session.paused) return;
+        if (Number.isFinite(buffer?.duration) && buffer.duration > 0)
+          session.voiceDuration = buffer.duration;
+        session.voiceCaptionStartedAt = session.clock;
+        session.voiceUntil = session.clock + Math.max(0, session.voiceDuration - offset);
         if (!buffer || !this.g.audio.enabled) {
           session.voiceStatus = 'silent';
           return;
@@ -731,7 +742,6 @@ export class Quizssoir {
         });
         session.voiceStatus = session.voice ? 'playing' : 'silent';
         session.voiceStartedAt = session.voice ? this.g.audio.ctx.currentTime : null;
-        session.voiceUntil = session.clock + Math.max(0, buffer.duration - offset);
       })
       .catch(() => {
         if (token === this.voiceToken && this.current === session) session.voiceStatus = 'silent';
@@ -747,6 +757,8 @@ export class Quizssoir {
       this.current.voiceKey = null;
       this.current.voiceStartedAt = null;
       this.current.voiceOffset = 0;
+      this.current.voiceDuration = 0;
+      this.current.voiceCaptionStartedAt = null;
       this.current.voiceStatus = 'idle';
     }
     this.g.audio.cinematicVoice = false;
@@ -758,15 +770,19 @@ export class Quizssoir {
     if (
       value &&
       m.voiceLine &&
-      (m.voiceStartedAt === null ||
-        (m.voice && !m.voice.ended && !m.voice.stopped && m.clock < m.voiceUntil))
+      (m.voiceStatus === 'loading' ||
+        (m.voiceStatus === 'silent' && m.clock < m.voiceUntil) ||
+        (m.voice && !m.voice.ended && !m.voice.stopped))
     ) {
       m.resumeVoice = {
         key: m.voiceKey,
+        duration: m.voiceDuration,
         offset:
           m.voiceOffset +
           (m.voiceStartedAt === null
-            ? 0
+            ? m.voiceStatus === 'silent'
+              ? Math.max(0, m.clock - m.voiceCaptionStartedAt)
+              : 0
             : Math.max(0, this.g.audio.ctx.currentTime - m.voiceStartedAt)),
       };
     }
@@ -784,7 +800,7 @@ export class Quizssoir {
     if (!value && m.resumeVoice) {
       const voice = m.resumeVoice;
       m.resumeVoice = null;
-      this.speak(voice.key, voice.offset, true);
+      this.speak(voice.key, voice.offset, true, voice.duration);
     }
     this.w.keys.clear();
     this.draw();
@@ -876,16 +892,17 @@ export class Quizssoir {
       tier: Math.max(0, (v.difficultyLevel || v.level) - 1),
     });
     if (v.phase === 'intro' || v.phase === 'locked') m.elapsed = this.audio.presentationTime;
-    if (v.phase === 'intro' && m.elapsed >= this.audio.introDuration) {
+    if (
+      v.phase === 'intro' &&
+      !m.paused &&
+      m.elapsed >= this.audio.introDuration &&
+      quizIntroVoiceFinished(m)
+    ) {
       this.finishEntrance();
       this.phaseEntered();
       v = this.state.view();
     }
-    const lockVoiceDone =
-      (m.voice?.ended && !m.voice.stopped) ||
-      ['silent', 'idle'].includes(m.voiceStatus) ||
-      (m.voiceStatus === 'playing' && m.clock >= m.voiceUntil + 0.06) ||
-      (m.voiceStatus === 'loading' && m.clock - m.voiceRequestedAt >= 3);
+    const lockVoiceDone = quizVoiceFinished(m);
     if (
       v.phase === 'locked' &&
       !m.paused &&
@@ -897,12 +914,7 @@ export class Quizssoir {
       v = this.state.view();
     }
     if (v.phase === 'reveal' && !m.paused) {
-      const ended = m.voice?.ended && !m.voice.stopped;
-      const fallback =
-        (!m.voice || m.voice.stopped) &&
-        m.elapsed >= m.reactionDuration &&
-        (m.voiceStatus !== 'loading' || m.clock - m.voiceRequestedAt >= 3);
-      if (ended || fallback) {
+      if (quizVoiceFinished(m) && (m.voiceLine || m.elapsed >= m.reactionDuration)) {
         m.reactionCompleteAt ??= m.clock + 0.2;
         if (m.clock >= m.reactionCompleteAt) {
           this.next();
@@ -942,18 +954,21 @@ export class Quizssoir {
       m.pendingVoice = null;
       this.speak(line);
     }
+    const liveVoice = !!(m.voice && !m.voice.ended && !m.voice.stopped);
     const speaking = !!(
-      m.voice &&
-      !m.voice.ended &&
-      !m.voice.stopped &&
-      m.clock < m.voiceUntil &&
+      liveVoice &&
       !m.paused &&
-      this.g.audio.enabled
+      this.g.audio.enabled &&
+      this.g.audio.ctx?.state === 'running'
     );
+    const captioning =
+      m.voiceLine &&
+      !m.paused &&
+      (m.voiceStatus === 'playing' ? liveVoice : m.clock < m.voiceUntil);
     this.g.audio.cinematicVoice = speaking;
     if ($('quiz-host'))
       $('quiz-host').hidden =
-        !speaking || !this.g.sim.s.audioSubtitles || m.voiceKey?.startsWith('question_');
+        !captioning || !this.g.sim.s.audioSubtitles || m.voiceKey?.startsWith('question_');
     const shot = this.stage.render(
       {
         phase:

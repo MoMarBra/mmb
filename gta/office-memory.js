@@ -119,6 +119,17 @@ export class OfficeMemory {
     const g = this.game, voices = g.audio?.voices;
     const voiced = g.audio?.enabled && g.audio?.ready && voices?.resolve?.('player', 'office_memory', entry.voiceId);
     if (voiced) {
+      const bank = g.audio.bank, assetId = 'voice_' + entry.voiceId;
+      const failure = bank?.retryState?.get(assetId);
+      const terminal = bank?.failures?.has(assetId) && failure &&
+        (failure.retryable === false || failure.attempts >= bank.maxAttempts);
+      if (terminal && !bank.pending?.has(assetId) && !bank.buffers?.has(assetId)) {
+        // A fresh, eligible visit may read a permanently unavailable line. Never
+        // turn an old cancelled async voice result into a consumed notice.
+        if (!context.current() || !this.ready()) return false;
+        g.toast(entry.title, entry.line);
+        return true;
+      }
       // say() can resolve false after a cooldown, suspended mix or replacement token.
       // Its true result confirms this exact line made it through the async audio loader.
       const pending = this.presenting;

@@ -226,7 +226,7 @@ export class Soundscape {
       this.sim.save();
     }
     if (this.enabled) this.start();
-    else this.voices.stop();
+    else this.voices.mute();
     this.applyMix();
     return this.enabled;
   }

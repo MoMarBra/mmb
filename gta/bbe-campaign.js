@@ -46,6 +46,7 @@ export class BBECampaign {
     this.token = 0;
     this.voiceToken = 0;
     this.voice = null;
+    this.voiceCaptionOwner = null;
     this.panel = null;
     this.panelClock = 0;
     this.autosave = 0;
@@ -846,21 +847,39 @@ export class BBECampaign {
       if (this.state.active.id === 'pitch') this.openPitch();
     };
   }
+  ownsVoiceCaption(owner = this.voiceCaptionOwner) {
+    return !!owner && this.voiceCaptionOwner === owner && this.g.modal === owner.modal &&
+      this.w.zone === owner.zone && this.g.audio.voices === owner.voices &&
+      owner.voices?.token === owner.dialogueToken;
+  }
   async speak(id) {
     this.stopVoice();
     const token = ++this.voiceToken,
       l = meta(id);
     if (!l?.text) return;
+    const voices = this.g.audio.voices,
+      owner = this.voiceCaptionOwner = {
+        modal: this.g.modal, zone: this.w.zone, voices, dialogueToken: voices?.token,
+      };
     this.caption.innerHTML = `<span>${esc(l.speaker)}</span><b>${esc(l.text)}</b>`;
     this.caption.hidden = !this.g.sim.s.audioSubtitles || this.cinematic;
     this.captionRemaining = l.duration || Math.max(3, l.text.length / 15);
     try {
       const buffer = await this.g.audio.bank?.get(l.asset);
-      if (token !== this.voiceToken || document.hidden) return;
-      this.g.audio.voices?.stop();
+      // A delayed campaign fetch no longer owns a later office conversation or panel.
+      if (token !== this.voiceToken) return;
+      if (document.hidden || !this.ownsVoiceCaption(owner)) {
+        this.stopVoice();
+        return;
+      }
+      // Keep the caption fallback without cancelling another speaker for a missing clip.
+      if (!buffer) return;
+      voices?.stop();
+      owner.dialogueToken = voices?.token;
       this.voice = this.g.audio.emit?.(buffer, { bus: 'dialogue', volume: 0.92 });
       this.captionRemaining = buffer?.duration || this.captionRemaining;
     } catch {
+      if (token === this.voiceToken && !this.ownsVoiceCaption(owner)) this.stopVoice();
       /* Captions remain available after a transient audio failure. */
     }
   }
@@ -868,6 +887,7 @@ export class BBECampaign {
     ++this.voiceToken;
     this.voice?.stop(0.06);
     this.voice = null;
+    this.voiceCaptionOwner = null;
     this.captionRemaining = 0;
     if (this.caption) this.caption.hidden = true;
   }
@@ -1303,6 +1323,7 @@ export class BBECampaign {
     }
   }
   update(dt, paused = false) {
+    if (this.voiceCaptionOwner && !this.ownsVoiceCaption()) this.stopVoice();
     if (!this.g.started || document.hidden) return;
     this.autosave += dt;
     if (this.captionRemaining > 0 && !this.cinematic) {

@@ -1,4 +1,3 @@
-// Original German dialogue, locally synthesized with installed Windows voices.
 export const EXTRA_QUIZ_LINES = Object.freeze({
   "question_v2-01a": {
     "asset": "quiz_question_v2-01a",
@@ -903,55 +902,55 @@ export const EXTRA_QUIZ_LINES = Object.freeze({
   "coffee_intro": {
     "asset": "quiz_host_coffee_intro",
     "text": "Fünf Fragen. Ein Kaffee. Und diesmal endet das Meeting pünktlich.",
-    "duration": 6.3876,
+    "duration": 5.250612,
     "speaker": "Moderator"
   },
   "coffee_correct": {
     "asset": "quiz_host_coffee_correct",
     "text": "Richtig. Kurz, präzise, abrechenbar.",
-    "duration": 5.117,
+    "duration": 2.925714,
     "speaker": "Moderator"
   },
   "coffee_correct_02": {
     "asset": "quiz_host_coffee_correct_02",
     "text": "Sauber. Der Kaffee bleibt heiß.",
-    "duration": 3.527,
+    "duration": 2.194286,
     "speaker": "Moderator"
   },
   "coffee_correct_03": {
     "asset": "quiz_host_coffee_correct_03",
     "text": "Passt. Kein Follow-up nötig.",
-    "duration": 3.4219,
+    "duration": 2.037551,
     "speaker": "Moderator"
   },
   "coffee_wrong": {
     "asset": "quiz_host_coffee_wrong",
     "text": "Knapp daneben. Den Kaffee gibt es trotzdem.",
-    "duration": 4.3605,
+    "duration": 2.690612,
     "speaker": "Moderator"
   },
   "coffee_safety": {
     "asset": "quiz_host_coffee_safety",
     "text": "Zwanzig Euro sicher. Kaffeebudget freigegeben.",
-    "duration": 4.6856,
+    "duration": 3.160816,
     "speaker": "Moderator"
   },
   "coffee_win": {
     "asset": "quiz_host_coffee_win",
     "text": "Fünf von fünf. So sieht eine produktive Pause aus.",
-    "duration": 4.9781,
+    "duration": 3.395918,
     "speaker": "Moderator"
   },
   "coffee_lock": {
     "asset": "quiz_host_coffee_lock",
     "text": "Steht.",
-    "duration": 1.3513,
+    "duration": 0.914286,
     "speaker": "Moderator"
   },
   "coffee_exit": {
     "asset": "quiz_host_coffee_exit",
     "text": "Gewinn gesichert. Zurück ins Tagesgeschäft.",
-    "duration": 4.25,
+    "duration": 2.925714,
     "speaker": "Moderator"
   },
   "question_v3-01d": {

@@ -1,3 +1,4 @@
+import { measuredVoiceLine } from './voice-timing.js';
 import * as THREE from 'three';
 import { renderGameScene } from './scene-matrix-scheduler.js';
 import { ORIGIN_LINES } from './origin-lines.js';
@@ -9,9 +10,9 @@ export const ORIGIN_TITLES = {
   offer: ['02 · EIN TISCH VERÄNDERT ALLES', 'Ein Angebot. Kein Pitch.'],
   arrival: ['03 · BBE HANDELSBERATUNG', 'Dein nächstes Kapitel.'],
 };
-export function originTimeline(kind) {
+export function originTimeline(kind, allLines = ORIGIN_LINES) {
   let t = 1.2;
-  const segments = ORIGIN_LINES.filter((l) => l.key.startsWith(kind + '_')).map((line) => {
+  const segments = allLines.filter((l) => l.key.startsWith(kind + '_')).map((line) => {
     const part = { line, start: t, voiceEnd: t + line.duration, end: t + line.duration + 0.45 };
     t = part.end;
     return part;
@@ -35,12 +36,22 @@ export class OriginCinema {
       'keydown',
       (e) => {
         if (!this.current && !this.loading) return;
-        if (e.code === 'Enter' && e.target?.tagName === 'BUTTON') return;
+        this.g.audio.unlockOnInput?.(e);
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (
+          ['Enter', 'Space'].includes(e.code) &&
+          e.target?.tagName === 'BUTTON' &&
+          e.target.offsetParent !== null &&
+          !e.target.disabled
+        ) {
+          e.stopImmediatePropagation();
+          return;
+        }
         if (e.code === 'Escape' || e.code === 'Enter') {
           e.preventDefault();
           e.stopImmediatePropagation();
           if (!e.repeat) {
-            if (e.code === 'Escape') this.pause(!this.current?.paused);
+            if (e.code === 'Escape') this.pause(!(this.current?.paused ?? this.pendingPaused));
             else this.finish();
           }
         } else if (!['Tab', 'ShiftLeft', 'ShiftRight'].includes(e.code)) {
@@ -68,12 +79,16 @@ export class OriginCinema {
     $('origin-loading-skip').onclick = () => this.finish();
     this.g.audio.update(0, this.w, false);
     try {
-      const timeline = originTimeline(kind);
+      let timeline = originTimeline(kind);
       await this.g.audio.bank?.preload([
         ...timeline.segments.map((s) => s.line.asset),
         'story_underscore',
       ]);
       if (token !== this.token) return;
+      timeline = originTimeline(
+        kind,
+        ORIGIN_LINES.map((line) => measuredVoiceLine(line, this.g.audio.bank)),
+      );
       const set = (this.sets[kind] ??= kind === 'arrival' ? buildBossSet() : cinematicSet(kind));
       await this.w.renderer.compileAsync?.(set.scene, this.camera);
       if (token !== this.token) return;
@@ -112,6 +127,7 @@ export class OriginCinema {
       $('origin-pause').onclick = () => this.pause(!this.current?.paused);
       $('origin-skip').onclick = () => this.finish();
       $('origin-skip').focus?.();
+      this.updatePauseUI(this.current.paused);
       this.bed();
       this.render(0);
     } catch (error) {
@@ -163,7 +179,27 @@ export class OriginCinema {
       return;
     }
     const m = this.current;
-    if (!m || m.paused === value) return;
+    if (!m) return;
+    if (value) m.resumeRequest = null;
+    if (m.paused === value) return;
+    const audio = this.g.audio;
+    if (!value && audio.ready && audio.enabled &&
+        ['suspended', 'interrupted'].includes(audio.ctx?.state)) {
+      // A trusted click starts resume asynchronously. Keep this edit paused until
+      // it settles, rather than letting the next render immediately pause it again.
+      if (m.resumeRequest) return;
+      const request = m.resumeRequest = {};
+      const clear = () => { if (m.resumeRequest === request) m.resumeRequest = null; };
+      try {
+        Promise.resolve(audio.ctx.resume()).then(() => {
+          if (this.current !== m || m.resumeRequest !== request) return;
+          clear();
+          if (!document.hidden && audio.ctx.state === 'running') this.pause(false);
+        }, clear);
+      } catch { clear(); }
+      return;
+    }
+    m.resumeRequest = null;
     m.paused = value;
     m.voice?.stop(0.06);
     m.bed?.stop(0.15);
@@ -176,6 +212,9 @@ export class OriginCinema {
       }
       this.bed();
     }
+    this.updatePauseUI(value);
+  }
+  updatePauseUI(value) {
     if ($('origin-paused')) $('origin-paused').hidden = !value;
     if ($('origin-pause'))
       $('origin-pause').textContent = value ? 'Fortsetzen · Esc' : 'Pause · Esc';
@@ -183,6 +222,11 @@ export class OriginCinema {
   render(dt) {
     const m = this.current;
     if (!m) return;
+    const audio = this.g.audio;
+    // A visible browser can interrupt audio without a visibility/pause event.
+    // Freeze the edit so the existing resume control can replay the unheard line.
+    if (!m.paused && audio.ready && audio.enabled &&
+        ['suspended', 'interrupted'].includes(audio.ctx?.state)) this.pause(true);
     this.w.renderer.getSize(this.size);
     if (m.paused && m.drawn && m.width === this.size.x && m.height === this.size.y) return;
     if (!m.paused) m.elapsed += dt;
@@ -216,7 +260,9 @@ export class OriginCinema {
     const actor =
       (m.kind === 'home' ? m.set.actors.player : m.set.actors[segment?.line.actor]) ||
       m.set.actors.player;
-    const wide = m.elapsed < 4.8 || m.elapsed > m.duration - 2;
+    const portrait = this.size.x < this.size.y;
+    // A landscape establishing shot crops the speaker entirely on a tall phone.
+    const wide = !portrait && (m.elapsed < 4.8 || m.elapsed > m.duration - 2);
     if (wide) {
       this.look.set(m.kind === 'home' ? -1 : 0, 1.2, m.kind === 'arrival' ? -1.3 : -0.6);
       this.eye.set(m.kind === 'home' ? 4.8 : 5, 3.1, 6 - m.elapsed * 0.005);
@@ -232,6 +278,7 @@ export class OriginCinema {
           ),
         );
     }
+    if (m.width && (m.width < m.height) !== portrait) m.framed = false;
     if (!m.framed) {
       this.camera.position.copy(this.eye);
       m.target = this.look.clone();

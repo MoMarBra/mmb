@@ -1,3 +1,4 @@
+import { measuredVoiceLine } from './voice-timing.js';
 import * as THREE from 'three';
 import { renderGameScene } from './scene-matrix-scheduler.js';
 import { FIRE_LINES } from './fire-lines.js';
@@ -92,8 +93,19 @@ export class FireCinema {
     };
     listen(window, 'keydown', (event) => {
       if (!this.current && !this.loading) return;
+      this.g.audio.unlockOnInput?.(event);
       // Keep browser/system shortcuts; all unmodified gameplay keys stay inside the movie.
       if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (
+        ['Enter', 'Space'].includes(event.code) &&
+        event.target?.tagName === 'BUTTON' &&
+        event.target.offsetParent !== null &&
+        !event.target.disabled
+      ) {
+        // Let the focused movie control click normally without moving the player.
+        event.stopImmediatePropagation();
+        return;
+      }
       event.preventDefault();
       event.stopImmediatePropagation();
       if (event.repeat) return;
@@ -141,7 +153,7 @@ export class FireCinema {
       listen(window, type, blockWorldPointer, { capture: true, passive: false });
     const suspend = () => {
       const movie = this.current || this.pending;
-      if (movie && !movie.paused) {
+      if (movie && (!movie.paused || movie.resumeRequest)) {
         this.pause(true);
         movie.autoPaused = true;
       }
@@ -161,7 +173,7 @@ export class FireCinema {
     const pending = (this.pending = { kind, done, result, paused: false, restored: false, token });
     this.loading = true;
     try {
-      const timeline = fireTimeline(kind);
+      let timeline = fireTimeline(kind);
       this.bindControls();
       this.g.open(
         'BBE Stories · Ticket in Flammen',
@@ -181,6 +193,10 @@ export class FireCinema {
         'fire_extinguish',
       ]);
       if (token !== this.token || this.pending !== pending) return;
+      timeline = fireTimeline(
+        kind,
+        FIRE_LINES.map((line) => measuredVoiceLine(line, this.g.audio.bank)),
+      );
       const set = (this.sets[kind] ??= buildFireSet(kind));
       const movie = {
         ...pending,
@@ -349,7 +365,27 @@ export class FireCinema {
   }
   pause(value) {
     const movie = this.current || this.pending;
-    if (!movie || movie.paused === !!value) return;
+    if (!movie) return;
+    if (value) movie.resumeRequest = null;
+    if (movie.paused === !!value) return;
+    const audio = this.g.audio;
+    if (!value && this.current === movie && audio.ready && audio.enabled &&
+        ['suspended', 'interrupted'].includes(audio.ctx?.state)) {
+      // Preserve movie ownership and its paused edit while a trusted Resume's
+      // AudioContext promise settles; a render must not race ahead of that promise.
+      if (movie.resumeRequest) return;
+      const request = movie.resumeRequest = {};
+      const clear = () => { if (movie.resumeRequest === request) movie.resumeRequest = null; };
+      try {
+        Promise.resolve(audio.ctx.resume()).then(() => {
+          if (this.current !== movie || movie.resumeRequest !== request) return;
+          clear();
+          if (!document.hidden && audio.ctx.state === 'running') this.pause(false);
+        }, clear);
+      } catch { clear(); }
+      return;
+    }
+    movie.resumeRequest = null;
     movie.paused = !!value;
     movie.autoPaused = false;
     this.resetInput();
@@ -374,7 +410,20 @@ export class FireCinema {
     const look = this.look,
       pos = this.desired;
     let fov = 42;
-    if (kind === 'intro' && t < 7) {
+    const portrait = this.camera.aspect < 1;
+    const actionShot =
+      kind === 'rescue' &&
+      (t < movie.markers.landing ||
+        (t >= movie.markers.sprayStart - 0.6 && t < movie.markers.sprayEnd + 1));
+    if (portrait && !actionShot) {
+      // Keep the speaking actor visible when the group shot becomes a narrow crop.
+      const actor = set.actors[segment?.line.actor] || set.actors.player || set.actors.lukas;
+      look.copy(actor.position);
+      look.y += 1.33;
+      pos.copy(look).add(new THREE.Vector3(1.25, 0.38, 3.0));
+      if (segment?.line.actor === 'benjamin') pos.set(look.x - 2.8, look.y + 0.32, look.z + 1.9);
+      fov = 39;
+    } else if (kind === 'intro' && t < 7) {
       const u = smooth(0, 7, t);
       pos.set(5 - u * 1.7, 2.9 - u * 0.7, 5.2 - u * 1.4);
       look.set(0, 1.12, -0.1);
@@ -433,6 +482,11 @@ export class FireCinema {
     const movie = this.current;
     if (!movie) return;
     if (document.hidden && !movie.paused) this.pause(true);
+    const audio = this.g.audio;
+    // Keep the edit behind an interrupted recording, even while the tab is visible.
+    // Muted/caption-only playback does not depend on the AudioContext clock.
+    if (!movie.paused && audio.ready && audio.enabled &&
+        ['suspended', 'interrupted'].includes(audio.ctx?.state)) this.pause(true);
     if (!movie.paused) movie.elapsed = Math.min(movie.duration, movie.elapsed + clamp(dt, 0, 0.25));
     if (movie.elapsed >= movie.duration) {
       this.finish();
@@ -479,6 +533,9 @@ export class FireCinema {
     const time = `${Math.floor(movie.elapsed)} / ${Math.ceil(movie.duration)} s`;
     if (this.ui.time.textContent !== time) this.ui.time.textContent = time;
     if (this.ui.title) {
+      // The compact header already carries this title; its large duplicate covers
+      // the speaking face in portrait close-ups.
+      this.ui.title.hidden = this.camera.aspect < 1;
       const opacity = smooth(0.35, 1, movie.elapsed) * (1 - smooth(3.6, 4.7, movie.elapsed));
       this.ui.title.style.opacity = opacity;
       this.ui.title.style.transform = `translateY(${(1 - opacity) * 8}px)`;

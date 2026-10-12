@@ -75,19 +75,34 @@ export class DialogueDirector {
   }
   async say(actor, event, options = {}) {
     const a = this.audio;
-    if (!a.ready || !a.enabled || (!a.active && !options.preview)) return false;
+    if (!a.ready || (!a.active && !options.preview)) return false;
+    if (!a.enabled && !options.preview && (options.ambient || event === 'ambient')) return false;
     const line = this.resolve(actor, event, options.id);
     if (!line) return false;
+    // Memory notices are one-shot earned dialogue. Their quiet nearby mix must
+    // not put the requested clip behind every cold-start ambience preload.
+    const memoryNotice = event === 'office_memory';
     const priority = options.priority ?? (event === 'ambient' ? 0 : 2),
-      now = a.ctx.currentTime;
+      now = a.ctx.currentTime,
+      captionNow = this.captionTime();
     const cooldownKey = options.npc?.arcadeId || actor;
-    if (!options.force && now < (this.cooldowns.get(cooldownKey) || 0)) return false;
+    if (!options.force && captionNow < (this.cooldowns.get(cooldownKey) || 0)) return false;
     if (this.current && this.current.priority >= priority && !options.force) return false;
     this.stop(false);
     const token = ++this.token;
-    this.current = { line, priority, preview: !!options.preview, loading: true, ends: now + 15 };
-    const buffer = await a.bank.get('voice_' + line.id);
-    if (token !== this.token || !a.enabled || (!a.active && !options.preview)) return false;
+    this.current = {
+      line, priority, preview: !!options.preview, loading: true, muted: !a.enabled,
+      ends: now + 15, captionEnds: captionNow + 15,
+    };
+    // Muted explicit dialogue uses a measured cached duration or registry metadata,
+    // without starting a download. A mute during loading also owns the whole line.
+    const buffer = a.enabled
+      ? await a.bank.get('voice_' + line.id, {
+          priority: memoryNotice || (!options.ambient && event !== 'ambient'),
+        })
+      : a.bank.buffers?.get('voice_' + line.id);
+    if (token !== this.token || (!a.active && !options.preview)) return false;
+    const muted = this.current.muted || !a.enabled;
     const pos = options.npc?.mesh.position || options.position;
     const duration = buffer?.duration || line.duration || Math.max(3, line.text.length / 13);
     const offset = Math.max(
@@ -97,7 +112,7 @@ export class DialogueDirector {
     const follow = options.npc
       ? () => ({ x: options.npc.mesh.position.x, y: 1.55, z: options.npc.mesh.position.z })
       : undefined;
-    const h = buffer
+    const h = buffer && !muted
       ? a.emit(buffer, {
           bus: 'dialogue',
           offset,
@@ -108,15 +123,24 @@ export class DialogueDirector {
           lowpass: options.ambient ? 6200 : 16000,
         })
       : null;
+    // OfficeMemory consumes a notice only when say() succeeds. Keep failed,
+    // source-capped or muted-while-loading notices available for a later visit.
+    // Other dialogue retains its existing subtitle-only fallback.
+    if (memoryNotice && !h) {
+      this.stop(false);
+      return false;
+    }
     this.current = {
       line,
       priority,
       preview: !!options.preview,
       handle: h,
+      muted,
       ends: a.ctx.currentTime + duration - offset,
+      captionEnds: this.captionTime() + duration - offset,
       loading: false,
     };
-    this.cooldowns.set(cooldownKey, a.ctx.currentTime + duration + (options.ambient ? 25 : 2));
+    this.cooldowns.set(cooldownKey, this.captionTime() + duration + (options.ambient ? 25 : 2));
     this.heard.add(line.id);
     this.mount();
     const slot =
@@ -136,6 +160,23 @@ export class DialogueDirector {
   npc(n, event, options = {}) {
     return this.say(this.actorFor(n), event, { npc: n, ...options });
   }
+  captionTime() {
+    return (globalThis.performance?.now?.() ?? Date.now()) / 1000;
+  }
+  mute() {
+    // Discard automatic greetings scheduled before mute, including between lines.
+    this.arrival = null;
+    if (!this.current) return;
+    // Keep subtitle/queue ownership, but never replay this line after unmuting.
+    this.current.muted = true;
+    if (this.current.handle && !this.current.handle.ended && !this.current.handle.stopped) {
+      // A suspended context may have outlived the original wall-clock deadline.
+      this.current.captionEnds = this.captionTime() +
+        Math.max(0, this.current.ends - this.audio.ctx.currentTime);
+    }
+    this.current.handle?.stop(0.06);
+    this.current.handle = null;
+  }
   stop(clearQueue = true) {
     this.token++;
     this.current?.handle?.stop(0.06);
@@ -153,13 +194,21 @@ export class DialogueDirector {
   }
   tick() {
     const now = this.audio.ctx?.currentTime || 0;
-    if (this.current && now > this.current.ends) this.stop(false);
+    if (this.current) {
+      const captionFinished = this.captionTime() >= this.current.captionEnds;
+      // Silent/loading captions are bounded even when the context is suspended.
+      // Live audio keeps its clock through interruptions; pause/close cancels it.
+      const finished = this.current.loading || !this.current.handle
+        ? captionFinished
+        : now >= this.current.ends || this.current.handle.ended || this.current.handle.stopped;
+      if (finished) this.stop(false);
+    }
     if (!this.current && this.queue.length) {
       const next = this.queue.shift();
       this.say(next.actor, next.event || 'greet', { ...next, force: true, priority: 4 });
     }
     if (this.caption && this.current)
-      this.caption.hidden = this.audio.sim?.s.audioSubtitles === false || !this.audio.enabled;
+      this.caption.hidden = this.current.loading || this.audio.sim?.s.audioSubtitles === false;
   }
   arrive(world) {
     const actor =
@@ -257,10 +306,10 @@ export class DialogueDirector {
         .join(
           '',
         )}</div><div class="toolbar"><button id="dialogue-followup">Und was ist dein bester Rat?</button><button class="primary" id="colleague-thanks">Danke. Ich mache es managementtauglich.</button></div></section>`,
-      { onClose: () => this.stop() },
+      { pause: true, onClose: () => this.stop() },
     );
     if (!mountColleagueConversation(game, stem))
-      this.say(actor, 'greet', { npc, force: true, priority: 4 });
+      this.say(actor, 'greet', { npc, force: true, priority: 4, preview: true });
     document.querySelectorAll('[data-dialogue]').forEach(
       (button) =>
         (button.onclick = () => {
@@ -271,21 +320,21 @@ export class DialogueDirector {
             .querySelectorAll('[data-dialogue]')
             .forEach((b) => b.classList.toggle('selected', b === button));
           this.sequence([
-            { actor: 'player', id: 'player_ask_' + topic },
-            { actor, id: answer.id, npc },
+            { actor: 'player', id: 'player_ask_' + topic, preview: true },
+            { actor, id: answer.id, npc, preview: true },
           ]);
         }),
     );
     document.getElementById('dialogue-followup').onclick = () => {
       const line = VOICE_LINES.find((l) => l.id === `${stem}_dialog_followup`);
       document.getElementById('dialogue-answer').textContent = line.text;
-      this.sequence([{ actor, id: line.id, npc }]);
+      this.sequence([{ actor, id: line.id, npc, preview: true }]);
     };
     document.getElementById('colleague-thanks').onclick = () => {
       // Stat recovery is the explicit, source-backed team help above. Closing
       // a conversation remains free and cannot be farmed for repeat rewards.
       game.close();
-      this.say(actor, 'greet', { id: `${stem}_dialog_goodbye`, npc, force: true, priority: 4 });
+      this.say(actor, 'greet', { id: `${stem}_dialog_goodbye`, npc, force: true, priority: 4, preview: true });
     };
   }
 }

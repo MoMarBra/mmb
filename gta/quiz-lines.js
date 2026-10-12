@@ -1,11 +1,10 @@
 import { EXTRA_QUIZ_LINES } from './expansion-voices.js';
-// Original fictional host dialogue and question readings. Local Windows speech synthesis.
 export const QUIZ_LINES = Object.freeze({
   ...EXTRA_QUIZ_LINES,
   intro: {
     asset: 'quiz_host_intro',
     text: 'Willkommen im Quizssoir. Der einzige Ort, an dem Sie unter Druck eine Million machen können.',
-    duration: 7.442,
+    duration: 5.642449,
   },
   welcome: {
     asset: 'quiz_host_welcome',
@@ -15,47 +14,47 @@ export const QUIZ_LINES = Object.freeze({
   lock: {
     asset: 'quiz_host_lock',
     text: 'Eingeloggt. Die Entscheidung steht.',
-    duration: 2.522,
+    duration: 2.272653,
   },
   correct: {
     asset: 'quiz_host_correct',
     text: 'Richtig. Das war analytisch sauber. Und überraschend ohne Excel.',
-    duration: 6.4111,
+    duration: 3.787755,
   },
   wrong: {
     asset: 'quiz_host_wrong',
     text: 'Leider falsch. Die Annahme war mutig. Die Daten waren anderer Meinung.',
-    duration: 6.8856,
+    duration: 4.440816,
   },
   safety: {
     asset: 'quiz_host_safety',
     text: 'Sicherheitsstufe erreicht. Dieses Budget nimmt Ihnen jetzt keiner mehr weg.',
-    duration: 5.9269,
+    duration: 4.519184,
   },
   million: {
     asset: 'quiz_host_million',
     text: 'Eine Million! Sie haben den Business Case Ihres Lebens gewonnen!',
-    duration: 5.2848,
+    duration: 4.519184,
   },
   exit: {
     asset: 'quiz_host_exit',
     text: 'Sie steigen aus. Vernünftiges Risikomanagement. Das Geld geht auf Ihr Konto.',
-    duration: 7.2165,
+    duration: 5.32898,
   },
   telephone: {
     asset: 'quiz_host_telephone',
     text: 'Benjamin ist in der Leitung. Immer da fürs Team. Auch wenn das Team gerade im Pissoir steht.',
-    duration: 8.1499,
+    duration: 6.765714,
   },
   fifty: {
     asset: 'quiz_host_fifty',
     text: 'Fünfzig zu fünfzig. Zwei falsche Antworten haben wir aus dem Scope genommen.',
-    duration: 6.5301,
+    duration: 5.485714,
   },
   audience: {
     asset: 'quiz_host_audience',
     text: 'Wir fragen das Publikum. Mehr Meinungen als im Steering Committee. Aber heute zählt die Mehrheit.',
-    duration: 8.2745,
+    duration: 6.034286,
   },
   next: {
     asset: 'quiz_host_next',
@@ -290,122 +289,122 @@ export const QUIZ_LINES = Object.freeze({
   lock_02: {
     asset: 'quiz_host_lock_02',
     text: 'Eingeloggt. Jetzt zählen Fakten.',
-    duration: 2.5405,
+    duration: 2.76898,
   },
   lock_03: {
     asset: 'quiz_host_lock_03',
     text: 'Die Antwort steht. Keine neue Version.',
-    duration: 2.8515,
+    duration: 2.507755,
   },
   lock_04: {
     asset: 'quiz_host_lock_04',
     text: 'Entschieden. Jetzt wird geprüft.',
-    duration: 2.4636,
+    duration: 2.507755,
   },
   correct_02: {
     asset: 'quiz_host_correct_02',
     text: 'Richtig! Dafür braucht es keine zweite Meinung.',
-    duration: 3.8942,
+    duration: 3.395918,
   },
   correct_03: {
     asset: 'quiz_host_correct_03',
     text: 'Genau! Die Folie können wir so lassen.',
-    duration: 3.2319,
+    duration: 2.429388,
   },
   correct_04: {
     asset: 'quiz_host_correct_04',
     text: 'Volltreffer. Sogar der Kunde hätte nichts zu ändern.',
-    duration: 4.0648,
+    duration: 3.787755,
   },
   correct_05: {
     asset: 'quiz_host_correct_05',
     text: 'Das stimmt. Ein Ergebnis ohne drei Abstimmungsrunden.',
-    duration: 4.2297,
+    duration: 3.866122,
   },
   correct_06: {
     asset: 'quiz_host_correct_06',
     text: 'Richtig! Ihr Bauchgefühl hat offenbar Quellen.',
-    duration: 3.7338,
+    duration: 2.76898,
   },
   correct_07: {
     asset: 'quiz_host_correct_07',
     text: 'Sehr gut. Diese Antwort ist wirklich final.',
-    duration: 3.775,
+    duration: 3.552653,
   },
   wrong_02: {
     asset: 'quiz_host_wrong_02',
     text: 'Leider falsch. Das kommt auf die Lernkurve.',
-    duration: 3.4293,
+    duration: 2.507755,
   },
   wrong_03: {
     asset: 'quiz_host_wrong_03',
     text: 'Das war es nicht. Auch ein schöner Titel rettet keine falsche Zahl.',
-    duration: 4.898,
+    duration: 3.709388,
   },
   wrong_04: {
     asset: 'quiz_host_wrong_04',
     text: 'Leider daneben. Beim nächsten Mal prüfen wir die Annahme zuerst.',
-    duration: 5.0293,
+    duration: 3.63102,
   },
   safety_02: {
     asset: 'quiz_host_safety_02',
     text: 'Die Sicherheitsstufe steht. Dieses Budget ist freigegeben.',
-    duration: 4.4901,
+    duration: 3.787755,
   },
   safety_03: {
     asset: 'quiz_host_safety_03',
     text: 'Geschafft! Ein Polster, das keine Nachkalkulation mehr schrumpft.',
-    duration: 5.4237,
+    duration: 4.127347,
   },
   million_02: {
     asset: 'quiz_host_million_02',
     text: 'Eine Million! Das nennen wir ein belastbares Ergebnis.',
-    duration: 4.2407,
+    duration: 3.970612,
   },
   million_03: {
     asset: 'quiz_host_million_03',
     text: 'Sie haben die Million! Dafür gibt es ausnahmsweise Standing Ovations statt Feedback.',
-    duration: 6.1142,
+    duration: 5.407347,
   },
   exit_02: {
     asset: 'quiz_host_exit_02',
     text: 'Gewinn gesichert. Eine Entscheidung mit positiver Bilanz.',
-    duration: 4.2395,
+    duration: 4.440816,
   },
   exit_03: {
     asset: 'quiz_host_exit_03',
     text: 'Sie nehmen das Geld mit. Endlich mal ein sauberer Projektabschluss.',
-    duration: 4.7909,
+    duration: 4.257959,
   },
   telephone_02: {
     asset: 'quiz_host_telephone_02',
     text: 'Benjamin ist dran. Hoffentlich hat er diesmal mehr als einen Neustart im Angebot.',
-    duration: 6.0194,
+    duration: 4.989388,
   },
   telephone_03: {
     asset: 'quiz_host_telephone_03',
     text: 'Wir rufen Benjamin an. Kurze Frage, großer Unterstützungsbedarf.',
-    duration: 5.7285,
+    duration: 4.91102,
   },
   fifty_02: {
     asset: 'quiz_host_fifty_02',
     text: 'Zwei Antworten fallen weg. So sieht eine echte Priorisierung aus.',
-    duration: 4.9383,
+    duration: 4.675918,
   },
   fifty_03: {
     asset: 'quiz_host_fifty_03',
     text: 'Wir halbieren die Auswahl. Der Schwierigkeitsgrad bleibt Verhandlungssache.',
-    duration: 5.3207,
+    duration: 4.440816,
   },
   audience_02: {
     asset: 'quiz_host_audience_02',
     text: 'Das Publikum stimmt ab. Heute bekommen wir die Marktforschung sofort.',
-    duration: 5.0837,
+    duration: 4.519184,
   },
   audience_03: {
     asset: 'quiz_host_audience_03',
     text: 'Eine kurze Umfrage im Saal. Mal sehen, ob die Mehrheit eine Quelle hat.',
-    duration: 5.8879,
+    duration: 4.362449,
   },
 });
 

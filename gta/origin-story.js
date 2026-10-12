@@ -13,6 +13,7 @@ import {
   completeOrigin,
 } from './origin-state.js';
 import { ORIGIN_LINES } from './origin-lines.js';
+import { measuredVoiceLine } from './voice-timing.js';
 const $ = (id) => document.getElementById(id);
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export class OriginStory {
@@ -83,7 +84,7 @@ export class OriginStory {
     this.walkTalk.hidden = true;
     $('ui').append(this.walkTalk);
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) this.stopVoice();
+      if (document.hidden) this.pauseVoice();
     });
   }
   buildZone(name, set) {
@@ -326,61 +327,154 @@ export class OriginStory {
         ? { ...ORIGIN_ROUTE.at(-1), name: 'Mit Lukas zur BBE' }
         : null;
   }
+  voiceTime() {
+    return (globalThis.performance?.now?.() ?? Date.now()) / 1000;
+  }
+  ownsVoice(session) {
+    return this.voiceSession === session && this.state === session.owner &&
+      this.state.phase === session.phase && this.w.zone === session.zone &&
+      this.enabled === session.enabled && !this.g.cinematic;
+  }
   say(key, preview = false) {
-    const line = ORIGIN_LINES.find((l) => l.key === key);
-    if (!line) return;
+    const source = ORIGIN_LINES.find((l) => l.key === key);
+    if (!source) return;
     this.stopVoice();
-    const token = ++this.voiceToken;
+    if (this.g.cinematic) return;
     this.g.audio.voices.stop();
-    this.voiceUntil = this.clock + line.duration;
-    this.voiceWallUntil = performance.now() + line.duration * 1000 + 500;
+    const line = measuredVoiceLine(source, this.g.audio.bank);
+    const session = this.voiceSession = {
+      line, preview, owner: this.state, phase: this.state.phase, zone: this.w.zone,
+      enabled: this.enabled, duration: line.duration, offset: 0, elapsed: 0,
+      lastTick: this.voiceTime(), status: 'loading', paused: false, muted: !this.g.audio.enabled,
+    };
+    // Existing route/arrival gates use this nonzero ownership marker. It is no
+    // longer an instruction to stop a still-playing recording on a guessed timer.
+    this.voiceUntil = this.clock + Math.max(.001, line.duration);
     this.walkTalk.innerHTML = '<b>' + line.speaker + '</b><span>' + line.text + '</span>';
-    this.walkTalk.hidden = !this.g.sim.s.audioSubtitles || !!this.g.cinematic;
-    this.g.audio.cinematicVoice = true;
-    const subtitle = $('cook-dialogue');
-    if (subtitle) {
-      subtitle.textContent = line.speaker + ' · ' + line.text;
-      subtitle.hidden = !this.g.sim.s.audioSubtitles;
+    if (document.hidden || this.g.modal?.pause) this.pauseVoice();
+    this.syncVoiceCaption();
+    if (!session.paused) return this.loadVoice(session);
+  }
+  async loadVoice(session) {
+    const token = ++this.voiceToken, audio = this.g.audio;
+    if (!this.ownsVoice(session) || session.paused) return false;
+    session.status = 'loading';
+    if (!audio.ready || !audio.enabled || session.muted) {
+      session.muted = true;
+      session.status = 'silent';
+      return true;
     }
-    this.g.audio
-      .sample(line.asset, {
-        bus: 'dialogue',
-        volume: 0.93,
-        preview,
-        onEnded: () => {
-          if (token === this.voiceToken) this.stopVoice();
-        },
-      })
-      .then((handle) => {
-        if (token === this.voiceToken) {
-          this.voice = handle;
-          if (handle) {
-            this.voiceUntil = this.clock + line.duration + 0.15;
-            this.voiceWallUntil = performance.now() + line.duration * 1000 + 500;
-          }
-        } else handle?.stop(0.05);
-      })
-      .catch(() => {});
+    let buffer;
+    try {
+      buffer = audio.bank?.buffers?.get(session.line.asset) ||
+        await audio.bank?.get(session.line.asset, { priority: true });
+    } catch { /* A failed explicit load keeps the existing caption fallback. */ }
+    if (token !== this.voiceToken || !this.ownsVoice(session) || session.paused) {
+      if (this.voiceSession === session && !this.ownsVoice(session)) this.stopVoice();
+      return false;
+    }
+    if (document.hidden || this.g.modal?.pause) {
+      this.pauseVoice();
+      return false;
+    }
+    if (Number.isFinite(buffer?.duration) && buffer.duration > 0) session.duration = buffer.duration;
+    session.offset = Math.min(session.offset, session.duration);
+    if (buffer && audio.enabled && !session.muted && session.offset < session.duration) {
+      let handle;
+      try {
+        handle = audio.emit(buffer, {
+          bus: 'dialogue', volume: 0.93, offset: session.offset,
+          onEnded: () => {
+            if (token === this.voiceToken && this.voiceSession === session && this.voice === handle)
+              this.finishVoice();
+          },
+        });
+      } catch { /* An unavailable context also falls back to captions. */ }
+      this.voice = handle || null;
+      if (handle) {
+        session.elapsed = 0;
+        session.lastTick = this.voiceTime();
+      }
+    }
+    session.status = this.voice ? 'playing' : 'silent';
+    this.voiceUntil = this.clock + Math.max(.001, session.duration - session.offset);
+    this.syncVoiceCaption();
+    return true;
+  }
+  silenceVoice(session) {
+    this.voiceToken++;
+    if (this.voice) {
+      session.offset = Math.min(session.duration, session.offset +
+        Math.max(0, this.g.audio.ctx.currentTime - this.voice.startedAt));
+      session.elapsed = 0;
+      this.voice.stop(0);
+      this.voice = null;
+    }
+  }
+  pauseVoice() {
+    const session = this.voiceSession;
+    if (!session || session.paused) return;
+    session.elapsed += Math.max(0, this.voiceTime() - session.lastTick);
+    session.pausedStatus = session.status;
+    session.paused = true;
+    this.silenceVoice(session);
+    this.syncVoiceCaption();
+  }
+  syncVoiceCaption() {
+    const session = this.voiceSession;
+    this.walkTalk.hidden = !session || session.paused ||
+      this.g.sim.s.audioSubtitles === false || !!this.g.cinematic;
+    this.g.audio.cinematicVoice = !!session && !session.paused;
+  }
+  finishVoice() {
+    if (this.voiceSession?.line.key.startsWith('walk_'))
+      this.nextWalkLine = Math.max(this.nextWalkLine, this.clock + 1.8);
+    this.stopVoice();
   }
   stopVoice() {
     this.voiceToken++;
-    this.voice?.stop(0.08);
+    if (this.voice && !this.voice.ended && !this.voice.stopped) this.voice.stop(0);
     this.voice = null;
+    this.voiceSession = null;
     this.voiceUntil = 0;
     this.voiceWallUntil = 0;
-    const subtitle = $('cook-dialogue');
-    if (subtitle) subtitle.hidden = true;
     if (this.walkTalk) this.walkTalk.hidden = true;
     this.g.audio.cinematicVoice = false;
   }
-  update(dt, paused) {
-    if (this.voiceWallUntil && performance.now() > this.voiceWallUntil) this.stopVoice();
-    if (paused || document.hidden) {
-      if (this.voice && !this.g.cinematic) this.stopVoice();
-      return;
+  updateVoice(paused) {
+    const session = this.voiceSession;
+    if (!session) return;
+    if (!this.ownsVoice(session)) { this.stopVoice(); return; }
+    if (this.voice?.ended) { this.finishVoice(); return; }
+    if (paused) { this.pauseVoice(); return; }
+    if (session.paused) {
+      session.paused = false;
+      session.lastTick = this.voiceTime();
+      if (session.pausedStatus === 'silent') session.status = 'silent';
+      else this.loadVoice(session);
     }
+    const now = this.voiceTime();
+    if (!this.g.audio.enabled && ['playing', 'loading'].includes(session.status)) {
+      this.silenceVoice(session);
+      session.muted = true;
+      session.status = 'silent';
+      session.lastTick = now;
+    }
+    session.elapsed += Math.max(0, now - session.lastTick);
+    session.lastTick = now;
+    const remaining = Math.max(0, session.duration - session.offset);
+    // Pending explicit loads get the engine's bounded 15-second allowance,
+    // independent of how short the eventual caption/recording may be.
+    const finished = session.status === 'playing'
+      ? this.voice?.ended || this.voice?.stopped
+      : session.elapsed >= (session.status === 'loading' ? 15 : remaining);
+    if (finished) this.finishVoice();
+    else this.syncVoiceCaption();
+  }
+  update(dt, paused) {
+    this.updateVoice(paused || document.hidden);
+    if (paused || document.hidden) return;
     this.clock += dt;
-    if (this.voiceUntil && this.clock > this.voiceUntil) this.stopVoice();
     if (this.w.zone === 'zitronengras') {
       animateHuman(this.noi, this.clock, 0, 'work');
       animateKitchen(this.zitronengras, this.clock, { phase: 'idle' });

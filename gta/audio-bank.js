@@ -7,6 +7,9 @@ export class AudioBank {
     this.buffers = new Map();
     this.pending = new Map();
     this.failures = new Set();
+    this.retryState = new Map();
+    this.maxAttempts = 3;
+    this.retryDelay = 1000;
     this.queue = [];
     this.loading = 0;
     this.bytes = 0;
@@ -33,7 +36,16 @@ export class AudioBank {
       if (priority) this.prioritize(id);
       return this.pending.get(id);
     }
-    if (!AUDIO_ASSETS[id] || this.failures.has(id)) return Promise.resolve(null);
+    if (!AUDIO_ASSETS[id]) return Promise.resolve(null);
+    const failure = this.retryState.get(id);
+    if (this.failures.has(id)) {
+      // Only another request can retry; background timers never download assets.
+      if (!failure || !failure.retryable || failure.attempts >= this.maxAttempts ||
+          Date.now() < failure.nextAt) return Promise.resolve(null);
+    } else if (failure) {
+      // Existing explicit Retry controls clear failures to start a fresh attempt.
+      this.retryState.delete(id);
+    }
     const promise = new Promise((resolve) => this.queue.push({ id, resolve, priority }));
     this.pending.set(id, promise);
     if (priority) this.prioritize(id);
@@ -64,16 +76,19 @@ export class AudioBank {
               this.buffers.delete(oldest);
             }
           }
-          job.resolve(buffer);
+          return buffer;
         })
         .finally(() => {
           this.loading--;
           this.pending.delete(job.id);
           this.pump();
-        });
+        })
+        // Release the pending owner before callers can request a retry.
+        .then(job.resolve);
     }
   }
   async decode(id) {
+    let retryable = false;
     try {
       let bytes;
       if (this.embedded?.[id]) {
@@ -83,15 +98,31 @@ export class AudioBank {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15000);
         try {
+          retryable = true; // Network errors, incomplete bodies and timeouts can recover.
           const response = await fetch(AUDIO_ASSETS[id].path, { signal: controller.signal });
-          if (!response.ok) throw Error('Audio asset unavailable');
+          if (!response.ok) {
+            retryable = response.status === 408 || response.status === 429 ||
+              (response.status >= 500 && response.status <= 599);
+            throw Error('Audio asset unavailable');
+          }
           bytes = await response.arrayBuffer();
         } finally {
           clearTimeout(timeout);
         }
       }
-      return await this.ctx.decodeAudioData(bytes);
+      // Bad encoded audio is not repaired by repeatedly downloading the same file.
+      retryable = false;
+      const buffer = await this.ctx.decodeAudioData(bytes);
+      this.failures.delete(id);
+      this.retryState.delete(id);
+      return buffer;
     } catch {
+      const attempts = (this.retryState.get(id)?.attempts || 0) + 1;
+      this.retryState.set(id, {
+        attempts,
+        retryable,
+        nextAt: Date.now() + this.retryDelay * 2 ** (attempts - 1),
+      });
       this.failures.add(id);
       return null;
     }

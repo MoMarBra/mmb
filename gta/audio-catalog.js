@@ -1,3 +1,4 @@
+import { PROFESSIONAL_VOICE_ASSETS } from './professional-voice-assets.js';
 import { COFFEE_PITCH_AUDIO_ASSETS } from './coffee-pitch-voices.js';
 import { OFFICE_LIFE_AUDIO_ASSETS } from './office-life-voices.js';
 import { EXPANSION_VOICE_ASSETS } from './expansion-voices.js';
@@ -1804,5 +1805,6 @@ export const AUDIO_ASSETS = {
     "path": "./assets/audio/intro_theme_1_6_1.mp3",
     "group": "music",
     "duration": 88.3853
-  }
+  },
+  ...PROFESSIONAL_VOICE_ASSETS
 };

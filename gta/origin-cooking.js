@@ -1,4 +1,6 @@
 import { CookingRound } from './origin-state.js';
+import { ORIGIN_LINES } from './origin-lines.js';
+import { measuredVoiceLine } from './voice-timing.js';
 import { FOOD_ART } from './food-art.js';
 import { QuickWokView, insideWok } from './quick-wok-view.js';
 const $ = (id) => document.getElementById(id);
@@ -20,11 +22,13 @@ export class OriginCooking {
     this.w = story.w;
     this.current = null;
     this.token = 0;
+    this.voiceToken = 0;
     this.keys = new Set();
     window.addEventListener(
       'keydown',
       (e) => {
         if (!this.current) return;
+        this.g.audio.unlockOnInput?.(e);
         if (this.current.paused && e.code === 'Tab') {
           e.preventDefault();
           e.stopImmediatePropagation();
@@ -85,9 +89,14 @@ export class OriginCooking {
         stir: false,
         drops: [],
         resultTime: 0,
+        voice: null,
+        voiceQueue: [],
+        resultVoiceQueued: false,
+        resultVoiceDone: false,
       };
       this.loading = false;
       this.keys.clear();
+      this.story.stopVoice();
       this.g.audio.voices.stop();
       this.g.arcade.music.current?.handle?.gain?.gain?.setTargetAtTime(
         0,
@@ -97,7 +106,7 @@ export class OriginCooking {
       document.body.classList.add('story-cinematic', 'origin-cooking');
       const r = this.current.round;
       $('modal-root').innerHTML =
-        `<section class="quick-wok" role="dialog" aria-modal="true" aria-label="Zitronengras – Kochrunde"><div class="wok-stage" id="wok-stage"><canvas id="wok-canvas" aria-hidden="true"></canvas><header class="wok-heading"><small>ZITRONENGRAS <span>• QUICK WOK</span></small><h1>${r.recipe.name}</h1><div class="wok-rounds" aria-label="Runde ${r.level + 1} von 4">${[0, 1, 2, 3].map((i) => `<i class="${i < r.level ? 'complete' : i === r.level ? 'current' : ''}">${i < r.level ? '✓' : i + 1}</i>`).join('')}</div></header><div class="wok-actions"><button id="cook-pause" aria-label="Pause">Ⅱ</button><button id="cook-leave" aria-label="Kochrunde verlassen">×</button></div><div class="wok-trays">${r.recipe.ingredients.map((name, i) => `<button class="wok-tray" id="cook-pick-${i}" aria-label="${name} in den Wok geben"><span class="wok-food">${FOOD_ART[INGREDIENT_ART[name]]}</span><span class="wok-food-name">${name === 'Huhn' ? 'Hähnchen' : name === 'Reisbandnudeln' ? 'Nudeln' : name}<kbd>${i + 1}</kbd></span><span class="wok-check" aria-hidden="true">✓</span></button>`).join('')}</div><div class="wok-hint" id="cook-hint" role="status">Zutaten in den Wok ziehen</div><div class="wok-meter"><span id="cook-time"></span><div><i id="cook-doneness"></i></div></div><button class="wok-stir" id="cook-stir" disabled><kbd>LEERTASTE</kbd><span>Rühren halten</span></button><div class="wok-result" id="cook-result" hidden><span class="wok-stars" id="cook-stars">✦ ✦ ✦</span><strong id="cook-score"></strong><small id="cook-reward"></small><button id="cook-retry" hidden>Neu versuchen</button></div><div class="origin-paused" id="cook-paused" hidden><b>PAUSE</b><button id="cook-resume">Weiterkochen</button></div></div><div id="wok-ghost" class="wok-ghost" hidden aria-hidden="true"></div></section>`;
+        `<section class="quick-wok" role="dialog" aria-modal="true" aria-label="Zitronengras – Kochrunde"><div class="wok-stage" id="wok-stage"><canvas id="wok-canvas" aria-hidden="true"></canvas><header class="wok-heading"><small>ZITRONENGRAS <span>• QUICK WOK</span></small><h1>${r.recipe.name}</h1><div class="wok-rounds" aria-label="Runde ${r.level + 1} von 4">${[0, 1, 2, 3].map((i) => `<i class="${i < r.level ? 'complete' : i === r.level ? 'current' : ''}">${i < r.level ? '✓' : i + 1}</i>`).join('')}</div></header><div class="wok-actions"><button id="cook-pause" aria-label="Pause">Ⅱ</button><button id="cook-leave" aria-label="Kochrunde verlassen">×</button></div><div class="wok-trays">${r.recipe.ingredients.map((name, i) => `<button class="wok-tray" id="cook-pick-${i}" aria-label="${name} in den Wok geben"><span class="wok-food">${FOOD_ART[INGREDIENT_ART[name]]}</span><span class="wok-food-name">${name === 'Huhn' ? 'Hähnchen' : name === 'Reisbandnudeln' ? 'Nudeln' : name}<kbd>${i + 1}</kbd></span><span class="wok-check" aria-hidden="true">✓</span></button>`).join('')}</div><div class="wok-hint" id="cook-hint" role="status">Zutaten in den Wok ziehen</div><div class="wok-meter"><span id="cook-time"></span><div><i id="cook-doneness"></i></div></div><button class="wok-stir" id="cook-stir" disabled><kbd>LEERTASTE</kbd><span>Rühren halten</span></button><div class="wok-result" id="cook-result" hidden><span class="wok-stars" id="cook-stars">✦ ✦ ✦</span><strong id="cook-score"></strong><small id="cook-reward"></small><button id="cook-retry" hidden>Neu versuchen</button></div><div class="origin-paused" id="cook-paused" hidden><b>PAUSE</b><button id="cook-resume">Weiterkochen</button></div></div><div id="cook-dialogue" class="wok-dialogue" role="status" aria-live="polite" aria-atomic="true" hidden><b id="cook-speaker"></b><p id="cook-line"></p></div><div id="wok-ghost" class="wok-ghost" hidden aria-hidden="true"></div></section>`;
       this.view = new QuickWokView($('wok-canvas'));
       for (let i = 0; i < 3; i++) this.bindIngredient($('cook-pick-' + i), i);
       const stir = $('cook-stir');
@@ -119,6 +128,7 @@ export class OriginCooking {
         this.finish(false);
         this.start(level);
       };
+      this.queueVoice('support');
       this.sync();
       this.render(0);
       $('cook-paused').hidden = !this.current.paused;
@@ -126,6 +136,7 @@ export class OriginCooking {
       if (token !== this.token) return;
       this.clearDrag();
       this.current?.loop?.stop(0.1);
+      this.stopVoice();
       this.current = null;
       this.loading = false;
       this.view = null;
@@ -210,14 +221,137 @@ export class OriginCooking {
   effect(id, volume) {
     this.g.audio.emit?.(this.g.audio.bank?.buffers?.get(id), { bus: 'ui', volume });
   }
+  voiceTime() {
+    return (globalThis.performance?.now?.() ?? Date.now()) / 1000;
+  }
+  queueVoice(kind) {
+    const m = this.current;
+    if (!m) return;
+    const line = ORIGIN_LINES.find((entry) => entry.key === `shift${m.round.level + 1}_${kind}`);
+    if (line) m.voiceQueue.push({ line, kind });
+    else if (kind !== 'support') m.resultVoiceDone = true;
+  }
+  startVoice(entry) {
+    const m = this.current;
+    if (!m || m.paused) return;
+    const line = measuredVoiceLine(entry.line, this.g.audio.bank);
+    const voice = { ...entry, line, duration: line.duration, offset: 0, elapsed: 0,
+      lastTick: this.voiceTime(), status: 'loading', handle: null };
+    m.voice = voice;
+    $('cook-speaker').textContent = line.speaker;
+    $('cook-line').textContent = line.text;
+    this.loadVoice(voice);
+  }
+  async loadVoice(voice) {
+    const m = this.current, audio = this.g.audio, token = ++this.voiceToken;
+    if (!m || m.voice !== voice || m.paused) return;
+    voice.status = 'loading';
+    const canLoad = audio.ready && audio.enabled && !voice.muted;
+    if (!canLoad) {
+      voice.muted = true;
+      voice.status = 'silent';
+      return;
+    }
+    let buffer;
+    try {
+      buffer = audio.bank?.buffers?.get(voice.line.asset) ||
+        await audio.bank?.get(voice.line.asset, { priority: true });
+    } catch { /* The existing caption is the bounded fallback. */ }
+    if (token !== this.voiceToken || this.current !== m || m.voice !== voice || m.paused) return;
+    const measured = buffer?.duration;
+    if (Number.isFinite(measured) && measured > 0) voice.duration = measured;
+    voice.offset = Math.min(voice.offset, voice.duration);
+    if (buffer && audio.enabled && !voice.muted && voice.offset < voice.duration) {
+      try {
+        voice.handle = audio.emit(buffer, { bus: 'dialogue', volume: 0.93, offset: voice.offset });
+      } catch { /* A closed/unavailable context keeps the caption fallback. */ }
+      if (voice.handle) {
+        voice.elapsed = 0;
+        voice.lastTick = this.voiceTime();
+      }
+    }
+    voice.status = voice.handle ? 'playing' : 'silent';
+  }
+  stopVoice(clearQueue = true) {
+    this.voiceToken++;
+    const m = this.current;
+    m?.voice?.handle?.stop(0);
+    if (m) {
+      m.voice = null;
+      if (clearQueue) m.voiceQueue = [];
+    }
+    if ($('cook-dialogue')) $('cook-dialogue').hidden = true;
+    this.g.audio.cinematicVoice = false;
+  }
+  pauseVoice() {
+    const voice = this.current?.voice;
+    if (!voice) return;
+    this.voiceToken++;
+    voice.pausedStatus = voice.status;
+    voice.elapsed += Math.max(0, this.voiceTime() - voice.lastTick);
+    if (voice.handle) {
+      voice.offset = Math.min(voice.duration, voice.offset +
+        Math.max(0, this.g.audio.ctx.currentTime - voice.handle.startedAt));
+      voice.elapsed = 0;
+      voice.handle.stop(0);
+      voice.handle = null;
+    }
+    voice.status = 'paused';
+  }
+  resumeVoice() {
+    const voice = this.current?.voice;
+    if (!voice || voice.status !== 'paused') return;
+    voice.lastTick = this.voiceTime();
+    if (voice.pausedStatus === 'silent') voice.status = 'silent';
+    else this.loadVoice(voice);
+  }
+  updateVoice() {
+    const m = this.current;
+    if (!m) return;
+    if (!m.paused && !m.voice && m.voiceQueue.length) this.startVoice(m.voiceQueue.shift());
+    const voice = m.voice, audio = this.g.audio;
+    if (voice && !m.paused) {
+      const now = this.voiceTime();
+      if (!audio.enabled && ['playing', 'loading'].includes(voice.status)) {
+        this.voiceToken++;
+        if (voice.handle) {
+          voice.offset = Math.min(voice.duration, voice.offset +
+            Math.max(0, audio.ctx.currentTime - voice.handle.startedAt));
+          voice.handle.stop(0);
+          voice.handle = null;
+          voice.elapsed = 0;
+          voice.lastTick = now;
+        }
+        voice.muted = true;
+        voice.status = 'silent';
+      }
+      voice.elapsed += Math.max(0, now - voice.lastTick);
+      voice.lastTick = now;
+      const remaining = Math.max(0, voice.duration - voice.offset);
+      // Audio completion owns live recordings, even through context interruptions.
+      // Missing/muted/loading lines use a bounded, pause-aware caption clock.
+      const finished = voice.status === 'playing'
+        ? voice.handle.ended || voice.handle.stopped
+        : voice.elapsed >= (voice.status === 'loading' ? Math.max(3, remaining) : remaining);
+      if (finished) {
+        if (voice.kind !== 'support') m.resultVoiceDone = true;
+        this.stopVoice(false);
+      }
+    }
+    audio.cinematicVoice = !!m.voice && !m.paused;
+    $('cook-dialogue').hidden = !m.voice || m.paused || this.g.sim.s.audioSubtitles === false;
+  }
   pause(value) {
     if (this.loading) {
       this.pendingPaused = value;
       return;
     }
     const m = this.current;
-    if (!m) return;
+    if (!m || m.paused === value) return;
     m.paused = value;
+    if (value) this.pauseVoice();
+    else this.resumeVoice();
+    this.updateVoice();
     m.stir = false;
     this.keys.clear();
     this.clearDrag();
@@ -247,6 +381,10 @@ export class OriginCooking {
       failed: 'Neue Pfanne. Neues Glück.',
     }[r.phase];
     if (['done', 'failed'].includes(r.phase)) {
+      if (!m.resultVoiceQueued) {
+        m.resultVoiceQueued = true;
+        this.queueVoice(r.passed ? 'success' : 'fail');
+      }
       m.loop?.stop(0.12);
       m.loop = null;
       $('cook-result').hidden = false;
@@ -273,6 +411,7 @@ export class OriginCooking {
     dt = Number.isFinite(dt) ? Math.max(0, Math.min(0.1, dt)) : 0;
     const r = m.round,
       stir = !m.paused && (m.stir || this.keys.has('Space'));
+    this.updateVoice();
     if (!m.paused) {
       m.elapsed += dt;
       m.drops.forEach((d) => (d.age += dt));
@@ -298,7 +437,7 @@ export class OriginCooking {
       }
       if (r.phase === 'done' && r.passed) {
         m.resultTime += dt;
-        if (m.resultTime >= 1.25) {
+        if (m.resultTime >= 1.25 && m.resultVoiceDone && !m.voice && !m.voiceQueue.length) {
           this.finish(true);
           return;
         }
@@ -319,6 +458,7 @@ export class OriginCooking {
     const m = this.current;
     if (!m) return;
     this.clearDrag();
+    this.stopVoice();
     this.current = null;
     this.view = null;
     this.keys.clear();
