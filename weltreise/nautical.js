@@ -1,7 +1,7 @@
 import {portData} from './ports.js';
 import {deriveState,routeForTime,routeLines} from './engine.js';
 import {drawShipSvg} from './ship-model.js?v=de3bab32a7a4';
-import {chartCatalog,chartKey} from './nautical-data.js';
+import {chartCatalog,chartKey} from './nautical-data.js?v=f5f4c913695d';
 
 const $=id=>document.getElementById(id);
 const stops=portData.filter((p,i,a)=>a.findIndex(x=>x.name===p.name)===i);
