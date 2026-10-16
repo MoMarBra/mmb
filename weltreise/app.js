@@ -36,7 +36,7 @@ function normalizeState(s){
 function setPreview(ms){if(!Number.isFinite(ms))return;preview=ms;now=ms;lastSecond=-1;render(true);}
 function render(force=false){
  now=preview??Date.now();const second=Math.floor(now/1000);if(!force&&second===lastSecond)return;lastSecond=second;
- currentState=normalizeState(deriveState(now));const s=currentState;const pre=now<startTime;const done=now>=endTime;
+ currentState=normalizeState(deriveState(now));if(typeof CustomEvent!=='undefined')globalThis.dispatchEvent?.(new CustomEvent('journey:state',{detail:currentState}));const s=currentState;const pre=now<startTime;const done=now>=endTime;
  birthdayParty.update(now);
  holidaySpecial.update(now);
  const timers=countdownView(s);
@@ -117,7 +117,7 @@ function renderItinerary(){
  }).join('');
 }
 $('month-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-month]');if(b){selectedMonth=b.dataset.month;renderItinerary();}});
-$('itinerary-list').addEventListener('click',e=>{const b=e.target.closest('[data-port]');if(b){playing=false;const p=ports[+b.dataset.port];setPreview(p.arrival??p.departure-1);$('map-heading').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}});
+$('itinerary-list').addEventListener('click',e=>{const b=e.target.closest('[data-port]');if(b){playing=false;const p=ports[+b.dataset.port];if(typeof CustomEvent!=='undefined')globalThis.dispatchEvent?.(new CustomEvent('journey:port',{detail:p}));setPreview(p.arrival??p.departure-1);$('map-heading').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});}});
 $('jump-current').addEventListener('click',()=>{const p=currentState.port??currentState.nextPort??ports.at(-1);selectedMonth=(p.arrivalDate??p.departureDate).slice(0,7);renderItinerary();$('port-'+p.id)?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});});
 function updateMapTransform(){
  scale=clamp(scale,1,7);center=[clamp(center[0],0,1000),clamp(center[1],0,500)];
@@ -150,7 +150,7 @@ function clearMapGesture(){
  for(const id of ids)releaseMapPointer(id);
 }
 canvas.addEventListener('pointerdown',e=>{
- if(e.target.closest('button')||e.button!==0)return;
+ if(e.target.closest('button')||e.target.closest('.leaflet-container')||e.button!==0)return;
  mapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});beginMapGesture(drag?.active??false);
  // Capture every finger, including when it leaves the map before pointerup.
  try{canvas.setPointerCapture(e.pointerId);}catch{/* Detached/cancelled pointers need no capture. */}
@@ -184,7 +184,7 @@ function endMapPointer(e){
 for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,endMapPointer);
 globalThis.addEventListener?.('blur',clearMapGesture);
 document.addEventListener?.('visibilitychange',()=>{if(document.hidden)clearMapGesture();});
-canvas.addEventListener('keydown',e=>{const move=30/scale;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','=','Home'].includes(e.key)){e.preventDefault();clearMapGesture();if(e.key==='+'||e.key==='=')zoom(1.6);else if(e.key==='-')zoom(1/1.6);else if(e.key==='Home')$('fit-map').click();else{center[0]+=e.key==='ArrowLeft'?-move:e.key==='ArrowRight'?move:0;center[1]+=e.key==='ArrowUp'?-move:e.key==='ArrowDown'?move:0;updateMapTransform();}}});
+canvas.addEventListener('keydown',e=>{if(e.target.closest('.leaflet-container'))return;const move=30/scale;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','=','Home'].includes(e.key)){e.preventDefault();clearMapGesture();if(e.key==='+'||e.key==='=')zoom(1.6);else if(e.key==='-')zoom(1/1.6);else if(e.key==='Home')$('fit-map').click();else{center[0]+=e.key==='ArrowLeft'?-move:e.key==='ArrowRight'?move:0;center[1]+=e.key==='ArrowUp'?-move:e.key==='ArrowDown'?move:0;updateMapTransform();}}});
 $('settings-trigger').addEventListener('click',()=>{$('preview-datetime').value=inputValue(preview??Date.now(),$('preview-zone').value);$('preview-error').textContent='';dialog.showModal();render(true);});
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 $('preview-zone').addEventListener('change',()=>{$('preview-error').textContent='';});

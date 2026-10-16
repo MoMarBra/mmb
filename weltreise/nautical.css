@@ -1,0 +1,45 @@
+/* One geographical viewport. The switch only changes the chart overlay. */
+.topbar { justify-content:space-between; gap:12px; }
+.nautical-toggle { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:8px 13px; border:1px solid #d5e3e9; border-radius:99px; background:#fff9; color:#345c68; font-family:inherit;font-size:12px;font-weight:600;line-height:1.2; cursor:pointer; box-shadow:0 2px 10px #49728709; }
+.nautical-toggle svg { width:16px; height:16px; stroke:currentColor; stroke-width:1.5; }
+.nautical-toggle.active { background:#335c69; border-color:#335c69; color:#fff; }
+.nautical-toggle:focus-visible,.chart-actions button:focus-visible,.chart-navigation button:focus-visible { outline:3px solid #8fbac5; outline-offset:3px; }
+.nautical-view[hidden],.map-canvas[hidden],.map-legend[hidden] { display:none!important; }
+.nautical-view { border-top:1px solid #e0e9ed; background:#f9fcfd; }
+.chart-navigation { display:flex; align-items:center; gap:8px; padding:14px 18px 10px; }
+.chart-navigation select { min-width:0; flex:1; height:42px; border:1px solid #d5e3e8; border-radius:10px; background:white; color:#284e5a; padding:0 12px; font:inherit; font-size:14px; }
+.chart-navigation button { flex:none; width:38px; height:40px; border:1px solid #d5e3e8; border-radius:10px; background:#fff; color:#345c68; font-size:23px; cursor:pointer; }
+.chart-navigation button:disabled { opacity:.3; cursor:default; }
+.chart-summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 18px 12px; }
+.chart-summary h3 { margin:0; font-size:18px; color:#2c505b; }.chart-summary p { margin:4px 0 0; font-size:10px; color:#728791; }
+.chart-kind { max-width:48%; border-radius:7px; background:#e7f2ed; color:#3e6b58; font-size:10px; line-height:1.4; padding:6px 8px; text-align:right; }
+.chart-kind.is-unavailable { color:#85673b; background:#f7f0e2; }
+.chart-map-wrap { position:relative; }
+#nautical-map { position:absolute; inset:0; width:100%; height:100%; background:#eef7fb; z-index:1; font-family:inherit; }
+#nautical-map[hidden] { display:none; }
+.map-canvas.geo-ready { height:460px; }
+.geo-ready > #world-map,.geo-ready > .map-attribution,.geo-ready > .map-loading { visibility:hidden; pointer-events:none; }
+.geo-ready .map-controls { z-index:600; bottom:38px; }
+.map-ship-icon { background:none; border:0; }
+.map-ship-icon svg { width:100%;height:100%;overflow:visible;filter:drop-shadow(0 2px 4px #264f6c30); }
+.port-map-label { color:#3c6576;background:#fffffff0;border:1px solid #c9dce4;box-shadow:none;font-size:10px; }
+.chart-map-badge { position:absolute;top:12px;left:12px;z-index:500;max-width:calc(100% - 24px);background:#fffffff2;border:1px solid #d2e1e6;border-radius:8px;padding:7px 10px;font-size:10px;color:#3b6370;pointer-events:none; }
+.chart-map-badge[hidden]{display:none}.chart-map-badge[data-kind=warning],.chart-map-badge[data-kind=error]{color:#8c6331;background:#fff9ed;}
+#nautical-map .leaflet-control-attribution { font-size:9px; line-height:1.5; background:#fffffff2; max-width:min(85%,700px); white-space:normal; }
+#nautical-map .leaflet-control-attribution a { color:#345c68; }
+#nautical-map .leaflet-control-zoom a { color:#345c68; font-size:20px; }
+.chart-loading { position:absolute; z-index:500; bottom:16px; left:50%; transform:translateX(-50%); padding:9px 14px; background:#fffffff0; border:1px solid #dbe5e8; border-radius:50px; font-size:11px; color:#345c68; pointer-events:none; white-space:nowrap; }
+.chart-loading[hidden] { display:none; }
+.chart-actions { display:flex; flex-wrap:wrap; gap:6px; padding:10px 16px 0; }
+.chart-actions button { font:inherit; font-size:11px; padding:7px 9px; border:1px solid #dae5e8; background:#fff; border-radius:7px; color:#456771; cursor:pointer; min-height:34px; }
+.chart-actions button[hidden] { display:none; }
+.chart-state { min-height:18px; margin:8px 18px 0; font-size:11px; line-height:1.5; color:#71868f; }.chart-state[data-kind=error]{color:#994c55;}.chart-state[data-kind=ok]{color:#44755d;}.chart-state[data-kind=warning]{color:#906d39;}
+.chart-description { font-size:12px; line-height:1.6; color:#526e79; margin:7px 18px 12px; }
+.chart-source { margin:0 18px 12px; border:1px solid #dfe8eb; border-radius:10px; background:#fff; overflow:hidden; }
+.chart-source summary { padding:12px; cursor:pointer; font-size:12px; color:#3f6470; font-weight:600; }
+.chart-source-content { padding:0 12px 12px; font-size:11px; line-height:1.65; color:#617b84; }
+.chart-metadata { display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin:0 0 12px; }.chart-metadata div { min-width:0; }.chart-metadata dt { font-size:9px; text-transform:uppercase; letter-spacing:.05em; color:#8a9da4; }.chart-metadata dd { margin:2px 0 0; overflow-wrap:anywhere; color:#3d616c; }
+.chart-source-links { margin:10px 0; }.chart-source-links a { color:#386a7a; text-decoration:underline; text-underline-offset:2px; }
+.chart-disclaimer { border-top:1px solid #e2ebed; color:#7d9098; padding:10px 18px; font-size:10px; line-height:1.5; margin:0; }
+@media(max-width:600px){.nautical-toggle{padding:8px 11px;font-size:11px}.chart-navigation{padding:12px 12px 10px;gap:6px}.chart-summary{padding:0 12px 10px}.chart-summary h3{font-size:16px}.map-canvas.geo-ready{height:380px}.chart-navigation select{font-size:12px;padding:0 8px}.chart-metadata{grid-template-columns:1fr}.chart-actions{padding:9px 12px 0}.chart-state,.chart-description{margin-left:12px;margin-right:12px}.chart-source{margin-left:12px;margin-right:12px}.chart-kind{font-size:9px}.chart-disclaimer{padding:9px 12px}.chart-navigation button{width:34px}}
+@media(prefers-reduced-motion:reduce){#nautical-map .leaflet-zoom-animated{transition:none!important}}
