@@ -1,0 +1,285 @@
+[
+  {
+    "width": 4760,
+    "height": 5570,
+    "png_bytes": 358830,
+    "bounds_w_s_e_n": [
+      -159.89701816463514,
+      -19.01977714535997,
+      -159.66672319928196,
+      -18.764810975928537
+    ],
+    "leaflet_bounds": [
+      [
+        -19.01977714535997,
+        -159.89701816463514
+      ],
+      [
+        -18.764810975928537,
+        -159.66672319928196
+      ]
+    ],
+    "projection": "EPSG:3857",
+    "webmercator_geotransform": [
+      -17799654.64145,
+      5.3857811502878965,
+      0.0,
+      -2127265.690898783,
+      0.0,
+      -5.3857811502878965
+    ],
+    "chart_code": "ck142",
+    "lds_layer_id": 110038,
+    "official_layer_url": "https://data.linz.govt.nz/layer/110038-chart-ck-142-plans-of-the-cook-islands-southern-sheet-aitutaki/",
+    "official_metadata_api_url": "https://data.linz.govt.nz/services/api/v1.x/layers/110038/",
+    "original_url": "https://static.charts.linz.govt.nz/chart/tiff/ck142.tif",
+    "official_extent_w_s_e_n": [
+      -159.89696662449524,
+      -19.01978150573854,
+      -159.66667748955425,
+      -18.764846227207173
+    ],
+    "crop_original_pixel_edges": [
+      3129,
+      648,
+      7906,
+      6204
+    ],
+    "method": "Affine WGS84 ellipsoidal Mercator (EPSG:3395), least-squares fit to all 138 longitude and 153 latitude 0.1-arcminute graticule ticks; projection confirmed from printed chart. Warped by GDAL to EPSG:3857. No arbitrary coastline/bounding-box fitting.",
+    "registration_residual_x": {
+      "rms_pixels": 0.201908786604017,
+      "max_abs_pixels": 0.3882151680181778
+    },
+    "registration_residual_y": {
+      "rms_pixels": 0.19048203531109456,
+      "max_abs_pixels": 0.39754454499870917
+    },
+    "control_points_count": 291,
+    "not_for_navigation": true,
+    "licence": "CC BY 4.0",
+    "registration_status": "graticule-registered derivative, not agency-supplied georeferenced file",
+    "preview": {
+      "width": 1969,
+      "height": 2304,
+      "png_bytes": 273400,
+      "bounds_w_s_e_n": [
+        -159.89701816463514,
+        -19.01977714535997,
+        -159.66672319928196,
+        -18.764810975928537
+      ],
+      "leaflet_bounds": [
+        [
+          -19.01977714535997,
+          -159.89701816463514
+        ],
+        [
+          -18.764810975928537,
+          -159.66672319928196
+        ]
+      ],
+      "method": "Downsampled from the full-resolution EPSG:3857 overlay using Lanczos, then 256-colour RGBA quantization. Preview only; full detail remains in original overlay."
+    },
+    "visual_qa": {
+      "status": "passed",
+      "reference": "https://tiles-cdn.koordinates.com/services/tiles/v4/thumbnail/layer=110038.369129,style=auto/1200x630.png",
+      "checked_features": [
+        "main island shoreline",
+        "reef triangle and eastern motu chain",
+        "Arutanga coast"
+      ],
+      "result": "No visible coastline double-edge or positional displacement against the official georeferenced LINZ preview at preview resolution. The internal labelled graticule registration residuals provide the quantitative precision test; thumbnail comparison is a visual gross-error test, not independent subpixel ground truth."
+    }
+  },
+  {
+    "width": 7551,
+    "height": 5470,
+    "png_bytes": 704090,
+    "bounds_w_s_e_n": [
+      -175.21166152179362,
+      -21.14416633667809,
+      -175.1499958885179,
+      -21.102496886343157
+    ],
+    "leaflet_bounds": [
+      [
+        -21.14416633667809,
+        -175.21166152179362
+      ],
+      [
+        -21.102496886343157,
+        -175.1499958885179
+      ]
+    ],
+    "projection": "EPSG:3857",
+    "webmercator_geotransform": [
+      -19504472.94164947,
+      0.909096397258032,
+      0.0,
+      -2404104.451225316,
+      0.0,
+      -0.909096397258032
+    ],
+    "chart_code": "to504",
+    "lds_layer_id": 110098,
+    "official_layer_url": "https://data.linz.govt.nz/layer/110098-chart-to-504-nukualofa-harbour/",
+    "official_metadata_api_url": "https://data.linz.govt.nz/services/api/v1.x/layers/110098/",
+    "original_url": "https://static.charts.linz.govt.nz/chart/tiff/to504.tif",
+    "official_extent_w_s_e_n": [
+      -175.21166644733097,
+      -21.144170903879562,
+      -175.14999570214275,
+      -21.102507087492654
+    ],
+    "crop_original_pixel_edges": [
+      531,
+      634,
+      8097,
+      6083
+    ],
+    "method": "Second-order GCP transformation from 200 graticule intersections: eight labelled/sequence-verified half-minute meridians and 25 tenth-minute parallels. Source printed projection is Transverse Mercator, datum WGS84. GDAL polynomial registration using WGS84 graticule coordinates projected into EPSG:3857; no false Mercator or simple lat/lon image stretch.",
+    "registration_residual_x": {
+      "rms_pixels": 0.23467124439719242,
+      "max_abs_pixels": 0.5476329707648587
+    },
+    "registration_residual_y": {
+      "rms_pixels": 0.18989057481766666,
+      "max_abs_pixels": 0.39333498650502496
+    },
+    "control_points_count": 200,
+    "not_for_navigation": true,
+    "licence": "CC BY 4.0",
+    "registration_status": "graticule-registered derivative, not agency-supplied georeferenced file",
+    "preview": {
+      "width": 2304,
+      "height": 1669,
+      "png_bytes": 379867,
+      "bounds_w_s_e_n": [
+        -175.21166152179362,
+        -21.14416633667809,
+        -175.1499958885179,
+        -21.102496886343157
+      ],
+      "leaflet_bounds": [
+        [
+          -21.14416633667809,
+          -175.21166152179362
+        ],
+        [
+          -21.102496886343157,
+          -175.1499958885179
+        ]
+      ],
+      "method": "Downsampled from the full-resolution EPSG:3857 overlay using Lanczos, then 256-colour RGBA quantization. Preview only; full detail remains in original overlay."
+    },
+    "visual_qa": {
+      "status": "passed",
+      "reference": "https://tiles-cdn.koordinates.com/services/tiles/v4/thumbnail/layer=110098.369347,style=auto/1200x630.png",
+      "checked_features": [
+        "Pangaimotu island coastline",
+        "Vuna Wharf coast",
+        "Faua harbour and adjacent wharves",
+        "eastern reef/island outlines"
+      ],
+      "result": "No visible coastline double-edge or positional displacement against the official georeferenced LINZ preview at preview resolution. The internal labelled graticule registration residuals provide the quantitative precision test; thumbnail comparison is a visual gross-error test, not independent subpixel ground truth."
+    }
+  },
+  {
+    "chart_code": "arutanga",
+    "parent_chart": "CK 142",
+    "panel": "Arutanga Anchorage",
+    "scale_denominator": 15000,
+    "edition": "January 2022",
+    "lds_layer_id": 110039,
+    "official_layer_url": "https://data.linz.govt.nz/layer/110039-chart-ck-142-plans-of-the-cook-islands-southern-sheet-arutanga-anchorage/",
+    "official_metadata_api_url": "https://data.linz.govt.nz/services/api/v1.x/layers/110039/",
+    "original_url": "https://static.charts.linz.govt.nz/chart/tiff/ck142.tif",
+    "width": 2481,
+    "height": 2848,
+    "png_bytes": 128773,
+    "bounds_w_s_e_n": [
+      -159.82313253147177,
+      -18.87563983501068,
+      -159.7931219100268,
+      -18.843039360441175
+    ],
+    "leaflet_bounds": [
+      [
+        -18.87563983501068,
+        -159.82313253147177
+      ],
+      [
+        -18.843039360441175,
+        -159.7931219100268
+      ]
+    ],
+    "projection": "EPSG:3857",
+    "webmercator_geotransform": [
+      -17791429.730389316,
+      1.346540547215948,
+      0.0,
+      -2136465.030346308,
+      0.0,
+      -1.346540547215948
+    ],
+    "crop_original_pixel_edges": [
+      449,
+      3392,
+      2938,
+      6233
+    ],
+    "official_extent_w_s_e_n": [
+      -159.82327047486578,
+      -18.873542940840863,
+      -159.79300509022954,
+      -18.842916758405213
+    ],
+    "official_extent_note": "The LDS layer masks the bottom scale bar/title and has a smaller southern data extent. Our crop preserves the complete original inset neatline. Bounds are calculated from the actual registered raster, not copied from the different LDS mask.",
+    "method": "Affine registration in printed native projection WGS84/UTM Zone4S (EPSG:32704), using 360 sequence-verified 0.1-minute WGS84 graticule crossings. Fitted rotation preserved. GDAL warp to EPSG:3857 at full source resolution with nearest-neighbour sampling.",
+    "registration_residual_x": {
+      "rms_pixels": 0.2084006433976312,
+      "max_abs_pixels": 0.49474219489402704
+    },
+    "registration_residual_y": {
+      "rms_pixels": 0.19467107051595503,
+      "max_abs_pixels": 0.3737240957324362
+    },
+    "control_points_count": 360,
+    "not_for_navigation": true,
+    "licence": "CC BY 4.0",
+    "registration_status": "graticule-registered derivative, not agency-supplied georeferenced file",
+    "suggested_min_zoom": 15,
+    "preview": {
+      "width": 2007,
+      "height": 2304,
+      "png_bytes": 264830,
+      "bounds_w_s_e_n": [
+        -159.82313253147177,
+        -18.87563983501068,
+        -159.7931219100268,
+        -18.843039360441175
+      ],
+      "leaflet_bounds": [
+        [
+          -18.87563983501068,
+          -159.82313253147177
+        ],
+        [
+          -18.843039360441175,
+          -159.7931219100268
+        ]
+      ]
+    },
+    "visual_qa": {
+      "status": "passed",
+      "reference": "https://tiles-cdn.koordinates.com/services/tiles/v4/thumbnail/layer=110039.369130,style=auto/1200x630.png",
+      "method": "Reprojected our raster into the exact official LDS WGS84 extent, resized only for visual comparison, and blended over the public georeferenced preview.",
+      "checked_features": [
+        "Arutanga Passage",
+        "reef approach and inner reef",
+        "Arutanga/Ureia coast and wharf vicinity"
+      ],
+      "result": "No visible gross displacement/double coastline; the official image omits non-geographic title/scale ornaments that our original inset preserves. Quantitative source-graticule residual is <0.50 pixel."
+    }
+  }
+]
