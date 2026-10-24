@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "test:voices": "node tests/voice-timing.test.mjs && node tests/voice-lifecycle.test.mjs && node tests/cinema-controls.test.mjs && node tests/quiz-voice-regressions.test.mjs && node tests/audio-recovery.test.mjs && node tests/origin-cooking-voices.test.mjs && node tests/campaign-voice-ownership.test.mjs && node tests/origin-walk-voices.test.mjs && node tests/office-memory-coldstart.test.mjs",
-    "test:assets": "node tests/voice-assets.test.mjs"
+    "test:assets": "node tests/voice-assets.test.mjs",
+    "test:mobile": "node --test tests/mobile-controls.test.mjs"
   }
 }

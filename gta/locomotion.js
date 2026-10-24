@@ -1,3 +1,4 @@
+import { movementAxes } from './mobile-controls.js';
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { ROOF_ROUTE } from './vertical-city.js';
@@ -216,16 +217,11 @@ export class Locomotion {
       const b = this.w.zoneData[this.w.zone].body;
       if (this.w.zone === 'city' && b.position.y > 8 && b.velocity.y < 0.8) {
         const keys = this.w.keys,
-          forward = blocked
-            ? 0
-            : (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) -
-              (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0),
-          side = blocked
-            ? 0
-            : (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) -
-              (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0),
+          axes = movementAxes(this.w),
+          forward = blocked ? 0 : axes.forward,
+          side = blocked ? 0 : axes.side,
           speed = keys.has('ShiftLeft') ? 5.4 : 3,
-          n = Math.hypot(forward, side) || 1,
+          n = Math.max(1, Math.hypot(forward, side)),
           vx = ((-Math.sin(this.w.yaw) * forward + Math.cos(this.w.yaw) * side) / n) * speed,
           vz = ((-Math.cos(this.w.yaw) * forward - Math.sin(this.w.yaw) * side) / n) * speed,
           x = b.position.x + vx * dt,

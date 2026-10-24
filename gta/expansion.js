@@ -1,3 +1,4 @@
+import { movementAxes } from './mobile-controls.js';
 import { setHTML } from './render-batches.js';
 import { CITY_LAYOUT } from './city-layout.js';
 import * as THREE from 'three';
@@ -147,13 +148,17 @@ export class Expansion {
       this.game.audio.play('car-open');
       this.game.toast(
         'BBE AIR · Bitte die Flughöhe der Storyline beachten.',
-        'W/S Vorwärts & Rückwärts · A/D Drehen · SPACE Steigen · C Sinken · E nach der Landung',
+        this.game.mobileControls?.eligible && this.game.mobileControls.mode === 'touch'
+          ? 'Joystick zum Fliegen und Drehen · Steigen/Sinken rechts halten · Erst landen, dann aussteigen.'
+          : 'W/S Vorwärts & Rückwärts · A/D Drehen · SPACE Steigen · C Sinken · E nach der Landung',
       );
     } else {
       this.game.audio.play('bike-bell');
       this.game.toast(
         'Zwei Räder. Sehr kurze Entscheidungswege.',
-        'W/S Fahren · A/D Lenken · Shift Sprint · SPACE Bremse · F Drive-by · Maus bewegen zum Zielen · T Nachladen',
+        this.game.mobileControls?.eligible && this.game.mobileControls.mode === 'touch'
+          ? 'Joystick zum Fahren und Lenken · Sprint und Feuern halten · Zum Zielen im Bild wischen.'
+          : 'W/S Fahren · A/D Lenken · Shift Sprint · SPACE Bremse · F Drive-by · Maus bewegen zum Zielen · T Nachladen',
       );
     }
     return true;
@@ -306,14 +311,9 @@ export class Expansion {
       this.a.speed = 0;
       this.fireHeld = false;
     }
-    const gas = active
-      ? (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) -
-        (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0)
-      : 0;
-    const steer = active
-      ? (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) -
-        (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0)
-      : 0;
+    const axes = movementAxes(w);
+    const gas = active ? axes.forward : 0;
+    const steer = active ? -axes.side : 0;
     if (car.type === 'helicopter') {
       car.rotorSpeed = THREE.MathUtils.damp(car.rotorSpeed, active ? 1 : 0.35, 1.8, dt);
       const lift = active ? (keys.has('Space') ? 1 : 0) - (keys.has('KeyC') ? 1 : 0) : 0;

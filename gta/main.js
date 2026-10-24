@@ -1,3 +1,4 @@
+import { MobileControls } from './mobile-controls.js';
 import { TaskNavigation } from './task-navigation.js';
 import { PhotoMode } from './photo-mode.js';
 import { fieldNotesMarkup } from './field-notes-ui.js';
@@ -82,6 +83,7 @@ export class Game {
     this.blast = new BBEBlast(this);
     this.blastPC = installBlastPC(this.world);
     this.mouseControls = new MouseControls(this);
+    this.mobileControls = new MobileControls(this);
     this.missionPassed = new MissionPassed(this);
     this.officeMemory = new OfficeMemory(this, new OfficeMemoryDisplay(this.world.groups.office));
     this.titleMusic = new TitleMusic(this);
@@ -205,6 +207,7 @@ export class Game {
       }
       if (!hidden) this.quizssoir.update(dt);
       this.mouseControls.update();
+      this.mobileControls.update();
       if (this.photoMode.pending) this.photoMode.arm();
       requestAnimationFrame(this.frame);
     };
@@ -244,25 +247,13 @@ export class Game {
         )
         .join(
           '',
-        )}</div><div class="fps" id="fps"></div><div class="touch-controls"><div class="touch-pad"><span></span><button data-key="KeyW" aria-label="Vorwärts">↑</button><span></span><button data-key="KeyA" aria-label="Links">←</button><button data-key="KeyS" aria-label="Rückwärts">↓</button><button data-key="KeyD" aria-label="Rechts">→</button></div></div><div class="touch-actions"><button id="touch-map" aria-label="Karte">M</button><button id="touch-interact" aria-label="Interagieren">E</button></div>`;
+        )}</div><div class="fps" id="fps"></div>`;
   }
   bind() {
     this.uiClick('#phone-button', () => this.phone());
     this.uiClick('#settings-button', () => this.settings());
     this.uiClick('#tasks-button', () => this.phone('tasks'));
     this.uiClick('#interaction', () => this.interact());
-    this.uiClick('#touch-interact', () => this.interact());
-    this.uiClick('#touch-map', () => this.phone('map'));
-    document.querySelectorAll('[data-key]').forEach((b) => {
-      b.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        b.setPointerCapture(e.pointerId);
-        this.world.keys.add(b.dataset.key);
-      });
-      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((t) =>
-        b.addEventListener(t, () => this.world.keys.delete(b.dataset.key)),
-      );
-    });
     window.addEventListener('keydown', (e) => {
       if (this.workshop.cinematic) {
         if (e.code === 'Tab') this.trapFocus(e);
@@ -371,7 +362,9 @@ export class Game {
       $('#ui').classList.remove('intro-open');
       this.toast(
         'Willkommen bei der BBE',
-        'E · Benutzen. P · Smartphone. F1 · Alle Steuerungen. München wartet auf dich.',
+        this.mobileControls.eligible
+          ? 'Links bewegen · rechts Aktionen. Im Bild wischen zum Umsehen. München wartet auf dich.'
+          : 'E · Benutzen. P · Smartphone. F1 · Alle Steuerungen. München wartet auf dich.',
       );
       for (const e of this.sim.pending.splice(0)) if (e.type === 'warning') this.toast(e.message);
     });
@@ -394,6 +387,7 @@ export class Game {
     if (this.modal?.onClose) this.modal.onClose();
     if (!this.modal) this.focusReturn = document.activeElement;
     this.modal = { title, pause, locked, onClose, task };
+    this.mobileControls?.update();
     this.world.keys.clear();
     this.mouseControls?.release();
     $('#modal-root').innerHTML =
@@ -1536,6 +1530,7 @@ window.bbeStatus = () => ({
   workshop: game.workshop?.status,
   fire: game.fireStory?.status,
   extras: game.extras?.status,
+  touch: { eligible: !!game.mobileControls?.eligible, mode: game.mobileControls?.mode, axes: game.world?.touchMovement, pointers: game.mobileControls?.pointers.size },
   mouse: { locked: !!game.mouseControls?.locked, available: !game.mouseControls?.unavailable },
   camera: { yaw: game.world?.yaw, pitch: game.world?.pitch, distance: game.world?.distance },
   renderedFrames: game.world?.renderer.info.render.frame,
@@ -1563,3 +1558,5 @@ window.bbeStatus = () => ({
   save: game.sim.saved,
   audio: game.audio.status,
 });
+
+window.render_game_to_text = () => JSON.stringify({ coordinates: "world x/z ground plane; y up; movement is camera relative", ...window.bbeStatus() });

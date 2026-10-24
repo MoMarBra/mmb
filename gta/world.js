@@ -1,3 +1,4 @@
+import { movementAxes } from './mobile-controls.js';
 import { updateChaseCamera } from './office-hotpath.js';
 import { setInstanceColorIfChanged, flushInstanceUploads } from './instance-uploads.js';
 import { fuseSSAOComposite } from './ssao-composite.js';
@@ -2224,13 +2225,8 @@ export class GameWorld {
     let vx = 0,
       vz = 0;
     if (!driving && this.started && !blocked && this.pose !== 'eat') {
-      const forward =
-          (this.keys.has('KeyW') || this.keys.has('ArrowUp') ? 1 : 0) -
-          (this.keys.has('KeyS') || this.keys.has('ArrowDown') ? 1 : 0),
-        side =
-          (this.keys.has('KeyD') || this.keys.has('ArrowRight') ? 1 : 0) -
-          (this.keys.has('KeyA') || this.keys.has('ArrowLeft') ? 1 : 0);
-      const length = Math.hypot(forward, side) || 1;
+      const { forward, side } = movementAxes(this);
+      const length = Math.max(1, Math.hypot(forward, side));
       this.sprinting =
         (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight')) && this.sim.s.energy > 10;
       const speed = (this.sprinting ? 5.4 : 3.0) * (this.sim.s.energy < 15 ? 0.7 : 1);

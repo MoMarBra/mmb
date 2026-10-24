@@ -1,3 +1,4 @@
+import { movementAxes } from './mobile-controls.js';
 import { nearestVisibleNPC } from './office-hotpath.js';
 import { setInstanceColorIfChanged, flushInstanceUploads } from './instance-uploads.js';
 import { shouldPreferVehicleInteraction, vehicleExitPrompt } from './interaction-comfort.js';
@@ -250,7 +251,9 @@ export class Arcade {
     );
     this.game.toast(
       'Anschnallen. Storyline verlassen.',
-      'W/S Gas & Rückwärts · A/D Lenken · Leertaste Handbremse · E Aussteigen · H Hupe · R Radio',
+      this.game.mobileControls?.eligible && this.game.mobileControls.mode === 'touch'
+        ? 'Joystick: Gas, Rückwärts und Lenken · Bremse rechts halten · Nach dem Anhalten aussteigen.'
+        : 'W/S Gas & Rückwärts · A/D Lenken · Leertaste Handbremse · E Aussteigen · H Hupe · R Radio',
     );
     return true;
   }
@@ -258,7 +261,7 @@ export class Arcade {
     if (isSpecialVehicle(this.vehicle)) return this.expansion.exit();
     if (!this.vehicle) return false;
     if (Math.abs(this.speed) > 1.8) {
-      this.game.toast('Erst kurz anhalten.', 'Mit Leertaste bremsen.');
+      this.game.toast('Erst kurz anhalten.', this.game.mobileControls?.eligible && this.game.mobileControls.mode === 'touch' ? 'Bremse rechts halten.' : 'Mit Leertaste bremsen.');
       return false;
     }
     const car = this.vehicle,
@@ -350,12 +353,8 @@ export class Arcade {
     const driving = !blocked && this.active;
     if (!driving) this.speed = 0;
     else {
-      const gas =
-        (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) -
-        (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0);
-      const steering =
-        (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) -
-        (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0);
+      const { forward: gas, side } = movementAxes(w);
+      const steering = -side;
       const brake = keys.has('Space');
       this.speed += gas * (car.type === 'bus' ? 7 : 11) * dt;
       this.speed = THREE.MathUtils.damp(this.speed, 0, brake ? 7 : gas ? 0.16 : 1.1, dt);
@@ -427,7 +426,7 @@ export class Arcade {
       car,
       this.speed,
       dt,
-      (this.world.keys.has('KeyA') ? 1 : 0) - (this.world.keys.has('KeyD') ? 1 : 0),
+      this.world.touchMovement?.side ? -this.world.touchMovement.side : (this.world.keys.has('KeyA') ? 1 : 0) - (this.world.keys.has('KeyD') ? 1 : 0),
     );
     this.game.audio.engine?.(Math.abs(this.speed) / 25);
     this.vehicleLighting?.update(car);

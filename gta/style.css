@@ -6386,3 +6386,82 @@ button.mission-row:focus-visible {
     line-height: 1.35;
   }
 }
+
+/* Mobile input is enabled by device capability + platform, never viewport alone. */
+.touch-punch,
+.expansion-touch:not([hidden]) { display: none !important; }
+.mobile-input #world { touch-action: none; -webkit-user-select: none; user-select: none; }
+#mobile-controls { position: absolute; inset: 0; pointer-events: none; z-index: 12; }
+#mobile-joystick {
+  position: absolute;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(26px, calc(env(safe-area-inset-bottom) + 16px));
+  width: clamp(116px, 27vw, 144px); aspect-ratio: 1;
+  border: 1px solid #e9ddbc66; border-radius: 50%;
+  background: radial-gradient(circle, #17364070 30%, #0a202b99 72%);
+  box-shadow: inset 0 0 0 12px #f2e7c408, 0 4px 24px #0004;
+  pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.joystick-knob {
+  position: absolute; width: 46%; height: 46%; left: 27%; top: 27%;
+  border-radius: 50%; border: 1px solid #f3ddacaa;
+  background: radial-gradient(circle at 35% 25%, #e5d5aeaa, #57757baa);
+  box-shadow: 0 3px 12px #0005; pointer-events: none;
+}
+.joystick-label { position: absolute; bottom: -20px; width: 100%; text-align: center; font-size: 9px; letter-spacing: .12em; color: #e3e3d6; pointer-events: none; }
+#mobile-actions {
+  position: absolute; right: max(12px, env(safe-area-inset-right));
+  bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
+  display: grid; grid-template-columns: repeat(3, 58px); gap: 7px;
+  pointer-events: auto;
+}
+#mobile-actions button {
+  width: 58px; min-height: 54px; padding: 5px 2px; border-radius: 17px;
+  background: #102e3cce; border: 1px solid #e3d4b166; color: #f7ecd5;
+  font-size: 10px; line-height: 1.2; font-weight: 600; overflow-wrap: anywhere;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  box-shadow: 0 3px 12px #0003;
+}
+#mobile-actions button[data-code="KeyE"] { background: #d3bc8bd9; color: #152d36; }
+#mobile-actions button.is-held { background: #769e9ae6; border-color: #fcdf9e; transform: scale(.96); }
+#mobile-actions button:disabled { opacity: .4; }
+#mobile-input-toggle {
+  position: absolute; left: max(16px, env(safe-area-inset-left));
+  bottom: max(190px, calc(env(safe-area-inset-bottom) + 180px));
+  min-height: 44px; min-width: 70px; padding: 5px 10px;
+  border-radius: 22px; font-size: 11px; background: #132c37c9;
+  z-index: 13; pointer-events: auto; touch-action: manipulation;
+}
+.mobile-look-hint { position: absolute; bottom: max(8px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: 128px; text-align: center; font-size: 9px; color: #d3ded5b0; }
+.touch-playing .mini-wrap,
+.touch-playing .stats-hud,
+.touch-playing .controls,
+.touch-playing #fight-hint,
+.touch-playing #arcade-guide,
+.touch-playing #mouse-capture-hint,
+.touch-playing #interaction { display: none !important; }
+.touch-playing #drive-hud { bottom: max(210px, calc(env(safe-area-inset-bottom) + 195px)); right: max(18px, env(safe-area-inset-right)); }
+.touch-playing .arcade-vitals { bottom: max(250px, calc(env(safe-area-inset-bottom) + 235px)); }
+@media (max-width: 380px) {
+  #mobile-actions { grid-template-columns: repeat(3, 52px); gap: 5px; right: max(8px, env(safe-area-inset-right)); }
+  #mobile-actions button { width: 52px; min-height: 52px; }
+  .mobile-look-hint { display: none; }
+}
+@media (max-height: 500px) {
+  .touch-playing .mission-hud, .touch-playing .arcade-vitals { display: none !important; }
+  #mobile-joystick { width: 116px; bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px)); }
+  #mobile-input-toggle { bottom: max(160px, calc(env(safe-area-inset-bottom) + 150px)); }
+  .touch-playing #drive-hud { bottom: 195px; }
+}
+.touch-playing #interaction {
+  display: flex !important; pointer-events: none; max-width: min(260px, 65vw);
+  bottom: max(210px, calc(env(safe-area-inset-bottom) + 200px)); left: 50%;
+  transform: translateX(-50%); padding: 7px 10px; font-size: 11px;
+}
+.touch-playing #interaction kbd { display: none; }
+.touch-playing #interaction { bottom: max(270px, calc(env(safe-area-inset-bottom) + 260px)); }
+body.is-driving.touch-playing #interaction { display: none !important; }
+@media (max-width: 600px) { .mobile-look-hint { display: none; } }
+@media (max-height: 500px) { .touch-playing #interaction { top: 78px; bottom: auto; } }
+#mobile-actions button[data-code="KeyE"] { font-size: 9px; letter-spacing: -.1px; }
