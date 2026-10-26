@@ -1,0 +1,25 @@
+{
+  "id": "/gta/",
+  "name": "GTA MMB",
+  "short_name": "GTA MMB",
+  "lang": "de",
+  "start_url": "/gta/",
+  "scope": "/gta/",
+  "display": "standalone",
+  "background_color": "#102d37",
+  "theme_color": "#102d37",
+  "icons": [
+    {
+      "src": "/gta/icons/icon-192-20261026.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/gta/icons/icon-512-20261026.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

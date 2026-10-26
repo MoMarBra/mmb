@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Weltreise – Globus und Kreuzfahrtschiff">
+<rect width="512" height="512" fill="#092d3c"/>
+<circle cx="256" cy="216" r="143" fill="#125563" stroke="#dcbf76" stroke-width="10"/>
+<g fill="none" stroke="#73bcb5" stroke-width="7"><ellipse cx="256" cy="216" rx="68" ry="143"/><path d="M114 216H398M132 148Q256 181 380 148M132 284Q256 251 380 284"/></g>
+<path d="M213 244V218H295V244" fill="#dcbf76"/>
+<path d="M157 291V247H355V291" fill="#f7f7e9" stroke="#092d3c" stroke-width="8" stroke-linejoin="round"/>
+<path d="M109 291H405L373 352Q256 391 139 352Z" fill="#f7f7e9" stroke="#092d3c" stroke-width="10" stroke-linejoin="round"/>
+<path d="M256 294V365" fill="none" stroke="#dcbf76" stroke-width="9"/>
+<path d="M180 266H331" fill="none" stroke="#125563" stroke-width="10" stroke-dasharray="17 12"/>
+<path d="M110 383Q146 365 182 383T254 383T326 383T398 383M136 414Q166 399 196 414T256 414T316 414T376 414" fill="none" stroke="#72c7be" stroke-width="12" stroke-linecap="round"/>
+</svg>
