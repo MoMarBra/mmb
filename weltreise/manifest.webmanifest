@@ -1,0 +1,25 @@
+{
+  "id": "/weltreise/",
+  "name": "Weltreise",
+  "short_name": "Weltreise",
+  "lang": "de",
+  "start_url": "/weltreise/",
+  "scope": "/weltreise/",
+  "display": "standalone",
+  "background_color": "#f6f8fb",
+  "theme_color": "#f6f8fb",
+  "icons": [
+    {
+      "src": "/weltreise/icons/icon-192-20261026.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/weltreise/icons/icon-512-20261026.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
