@@ -5,16 +5,38 @@
 <meta name="robots" content="noindex, nofollow, nosnippet, noimageindex">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>BBE GTA</title>
+<title>Holding for GTA 6</title>
 <style>
 *,*::before,*::after{box-sizing:border-box}
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;background:#182536}
 body{margin:0}
 .scene{position:relative;isolation:isolate;display:grid;grid-template-rows:1fr auto;min-height:100vh;min-height:100svh;overflow:hidden}
 .scene-image,.scene-image img,.scene::before{position:absolute;inset:0;width:100%;height:100%}
-.scene-image{z-index:-2}
+.scene-image{z-index:-3;overflow:hidden}
+.scene-image img{display:block}
+.scene[data-motion="paused"] .scene-image img,.scene[data-motion="paused"] .daylight{animation-play-state:paused}
+@media(prefers-reduced-motion:no-preference){
+  .scene-image img{animation:city-camera 23s cubic-bezier(.45,.05,.55,.95) infinite alternate}
+  .daylight{animation:city-daylight 19s ease-in-out infinite alternate}
+}
+@keyframes city-camera{
+  from{transform:scale(1.028) translate3d(-.42%,.32%,0)}
+  54%{transform:scale(1.067) translate3d(.32%,-.38%,0)}
+  to{transform:scale(1.109) translate3d(1.13%,-.68%,0)}
+}
+@keyframes city-daylight{
+  from{opacity:.16;transform:translate3d(-23%,0,0)}
+  to{opacity:.54;transform:translate3d(14%,0,0)}
+}
+.daylight{position:absolute;inset:0;z-index:-2;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 35% 9%,rgba(255,232,193,.31),transparent 53%)}
+.title{position:absolute;z-index:1;top:max(1.25rem,calc(env(safe-area-inset-top) + .65rem));left:max(1.25rem,calc(env(safe-area-inset-left) + .65rem));margin:0;font-size:clamp(1.38rem,3.4vw,2.85rem);font-weight:690;line-height:1.12;letter-spacing:-.045em;text-shadow:0 2px 4px #111c2f,0 2px 19px #091427cf}
+#motion .motion-resume{display:none}
+#motion[aria-pressed="true"] .motion-pause{display:none}
+#motion[aria-pressed="true"] .motion-resume{display:revert}
+#motion[hidden]{display:none}
+@media(prefers-reduced-motion:reduce){#motion{display:none}}
 .scene-image img{object-fit:cover;object-position:50% 59%}
-.scene::before{z-index:-1;content:"";background:linear-gradient(0deg,rgba(6,12,22,.79),rgba(6,12,22,.27) 20%,transparent 42%)}
+.scene::before{z-index:-1;content:"";background:linear-gradient(145deg,rgba(9,16,28,.77) 0%,rgba(9,16,28,.08) 31%,transparent 47%),linear-gradient(0deg,rgba(6,12,22,.65),rgba(6,12,22,.17) 17%,transparent 37%)}
 .dock{grid-row:2;display:flex;flex-direction:column;align-items:center;gap:13px;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(20px,calc(env(safe-area-inset-bottom) + 8px)) max(16px,env(safe-area-inset-left))}
 .controls{display:flex;align-items:center;gap:10px;padding:6px;background:#0b16257a;border:1px solid #ffffff39;border-radius:999px;backdrop-filter:blur(23px) saturate(145%);-webkit-backdrop-filter:blur(23px) saturate(145%);box-shadow:0 11px 38px #0004}
 .control{display:grid;place-items:center;position:relative;width:48px;height:48px;border:1px solid #ffffff60;border-radius:50%;margin:0;background:#0d1a2da0;color:#fff;text-decoration:none;cursor:pointer;transition:background-color .16s,color .16s,border-color .16s;touch-action:manipulation;line-height:0;font-size:0;white-space:nowrap;overflow:hidden}
@@ -25,7 +47,6 @@ body{margin:0}
 .radio-pair{position:relative}
 #radio:after{content:"";position:absolute;inset:50% auto auto 50%;width:0;height:0;border:8px solid transparent;border-right:0;border-left:13px solid currentColor;transform:translate(-40%,-50%)}
 #radio[aria-pressed="true"]:after{width:12px;height:15px;border:0;border-left:4px solid currentColor;border-right:4px solid currentColor;transform:translate(-50%,-50%)}
-.notice{margin:0;text-align:center;font-size:11px;line-height:1.4;letter-spacing:.018em;color:#fff;text-shadow:0 1px 5px #000,0 1px 2px #000}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap;border:0}
 @media(hover:hover){.control:hover{background:#26374fc0}.entry:hover{background:#dce8ff;color:#091326}}
 @media(max-aspect-ratio:4/5){.scene-image img{object-position:58% 61%}}
@@ -33,13 +54,15 @@ body{margin:0}
 </style>
 </head>
 <body>
-<main class="scene" aria-label="BBE GTA">
+<main class="scene" aria-labelledby="holding-title">
+  <h1 class="title" id="holding-title">Holding for GTA 6</h1>
   <picture class="scene-image">
     <source srcset="./munich-junction-mobile.webp" media="(max-aspect-ratio: 4/5)">
     <img src="./munich-junction.webp" alt="" fetchpriority="high">
   </picture>
+  <div class="daylight" aria-hidden="true"></div>
   <footer class="dock">
-    <nav class="controls" aria-label="Spiel und Radio">
+    <nav class="controls" aria-label="Spiel, Radio und Bewegung">
       <a class="control entry" href="https://bbe-gta-private.business-5994.chatgpt.site" aria-label="Privates Spiel in ChatGPT öffnen">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 3h5.1a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5.1M3.5 12H15m-4.3-4.3L15 12l-4.3 4.3"/></svg>
       </a>
@@ -47,10 +70,26 @@ body{margin:0}
         <button class="control" id="radio" type="button" aria-pressed="false" aria-label="Radio" aria-describedby="radio-status"></button>
         <p class="sr-only" id="radio-status" role="status" aria-live="polite"></p>
       </div>
+      <button class="control" id="motion" type="button" aria-label="Hintergrundanimation pausieren" aria-pressed="false" hidden>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path class="motion-pause" d="M9 5v14M15 5v14"/>
+          <path class="motion-resume" d="m9 5 10 7-10 7z"/>
+        </svg>
+      </button>
     </nav>
-    <p class="notice">Inoffizielles Fanprojekt. Keine Verbindung zu Rockstar Games oder Take-Two Interactive.</p>
   </footer>
 </main>
+<script>
+const motionButton = document.querySelector('#motion');
+const scene = document.querySelector('.scene');
+motionButton.hidden = false;
+motionButton.addEventListener('click', () => {
+  const paused = motionButton.getAttribute('aria-pressed') !== 'true';
+  scene.dataset.motion = paused ? 'paused' : 'running';
+  motionButton.setAttribute('aria-pressed', String(paused));
+  motionButton.setAttribute('aria-label', paused ? 'Hintergrundanimation fortsetzen' : 'Hintergrundanimation pausieren');
+});
+</script>
 <script type="module">
 import {setupRadio} from './radio.js';
 setupRadio(document.querySelector('#radio'), document.querySelector('#radio-status'));
