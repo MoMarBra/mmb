@@ -222,9 +222,47 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   const $=s=>dlg.querySelector(s), room=$('.bs-room'), movie=$('.bs-movie'), 
     back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), endingLayer=$('.bs-ending'), 
     status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d');
-  const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-immersive';
+  const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-photo-song';
   let taps=0, open=false, serial=0, shownAt=0, returnAt=0, returnTimer=0, resumeFocus=true,
     pieces=[],coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
+  const birthdayLoopURL='./assets/birthday-2026/sanni-birthday-loop.m4a?v=20261121-photo-song';
+  let songBuffer=null,songSource=null,songSession=0;
+  function prepareBirthdaySong(){
+    if(!audio)return null;
+    if(!songBuffer){
+      songBuffer=fetch(birthdayLoopURL,{credentials:'same-origin'}).then(r=>{
+        if(!r.ok)throw new Error('Birthday audio '+r.status);
+        return r.arrayBuffer();
+      }).then(bits=>new Promise((resolve,reject)=>{
+        // Callback form also works in older Safari. Context was unlocked by the third tap.
+        audio.decodeAudioData(bits,resolve,reject);
+      })).catch(()=>{songBuffer=null;return null;});
+    }
+    return songBuffer;
+  }
+  function startBirthdaySong(){
+    if(!audio||!open||!movie.ended||songSession===serial)return;
+    const token=serial,tailAt=performance.now();songSession=token;
+    prepareBirthdaySong()?.then(buffer=>{
+      if(!buffer||!open||serial!==token||!movie.ended||songSource)return;
+      try{
+        if(audio.state!=='running'&&audio.state!=='closed')audio.resume().catch(()=>{});
+        const source=audio.createBufferSource();
+        source.buffer=buffer;source.loop=true;source.connect(audio.destination);
+        const carried=Number.isFinite(movie.duration)?Math.max(0,movie.duration-endingStart):0;
+        const offset=(carried+Math.max(0,(performance.now()-tailAt)/1000))%buffer.duration;
+        try{source.start(0,offset);}catch(e){source.disconnect();throw e;}
+        songSource=source;
+      }catch(_){}
+    });
+  }
+  function stopBirthdaySong(){
+    songSession=0;
+    if(!songSource)return;
+    try{songSource.stop();}catch(_){}
+    try{songSource.disconnect();}catch(_){}
+    songSource=null;
+  }
   const endingStart=27.81, endingWarmAt=25.80;
   let endingImport=null,endingState=null,endingAttempt=0;
   function primeEnding(){
@@ -300,11 +338,12 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   }
   function stopCoda(){if(coda){coda();coda=null;}}
   function openCodaAudio(){
-    try{const A=window.AudioContext||window.webkitAudioContext;if(A){if(!audio)audio=new A();audio.resume().catch(()=>{});}}catch(_){}
+    try{const A=window.AudioContext||window.webkitAudioContext;if(A){if(!audio)audio=new A();audio.resume().catch(()=>{});prepareBirthdaySong();}}catch(_){}
   }
   function beginTail(){
     if(!open)return;
     alert();stopEnding();movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
+    if(movie.ended)startBirthdaySong();
     if(mode.matches){fireworks(performance.now(),true);return;}
     try{coda=startFireworks(canvas,{reduced:false,audio,startAt:20.42});}catch(_){showCanvas();}
   }
@@ -349,7 +388,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   function halt(v){v.pause();try{v.currentTime=0;}catch(_){}v.hidden=true;}
   function reset(){
     open=false;serial++;clearTimeout(returnTimer);returnAt=0;shownAt=0;playback=0;
-    stopCanvas();stopEnding();stopCoda();halt(movie);if(audio?.state==='running')audio.suspend().catch(()=>{});
+    stopCanvas();stopEnding();stopCoda();stopBirthdaySong();halt(movie);if(audio?.state==='running')audio.suspend().catch(()=>{});
     for(const a of pieces)a.cancel();pieces=[];
     dlg.removeAttribute('data-reveal');back.hidden=true;alert();taps=0;
     document.body.classList.remove('bs-stage-open');
@@ -379,7 +418,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   movie.addEventListener('ended',beginTail);
   movie.addEventListener('error',()=>{if(open&&playback!==1){alert('Der Film konnte nicht geladen werden.',true);back.hidden=false;}else if(open){beginTail();back.hidden=false;}});
   back.addEventListener('click',reset);
-  retry.addEventListener('click',()=>{if(!open)return;if(movie.error){movie.removeAttribute('src');movie.load();}launch();});
+  retry.addEventListener('click',()=>{if(!open)return;openCodaAudio();if(movie.error){movie.removeAttribute('src');movie.load();}launch();});
   dlg.addEventListener('cancel',e=>{if(open){e.preventDefault();reset();}});
   window.addEventListener('pagehide',()=>{if(open){resumeFocus=false;reset();}});
   mode.addEventListener?.('change',()=>{if(!open)return;if(movie.ended)beginTail();else if(mode.matches){stopEnding();endingAttempt=0;}else if(playback)checkEnding();});
