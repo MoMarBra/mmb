@@ -59,7 +59,7 @@
     #birthday-card .birthday-gift[data-jolt] .bd-shadow{background:radial-gradient(ellipse,#a36d7e85 2%,#c5917337 42%,transparent 72%)}
   }
 </style>
-<style id="birthday-surprise-style" data-version="20261121-finale">
+<style id="birthday-surprise-style" data-version="20261121-horn-encore">
  #birthday-surprise{box-sizing:border-box;position:fixed;inset:0;width:100vw;width:100dvw;height:100vh;height:100dvh;max-width:none;max-height:none;border:0;margin:0;padding:0;overflow:hidden;color:#fff6e7;background:transparent;z-index:10000}
  #birthday-surprise:not([open]){display:none}
  #birthday-surprise::backdrop{background:transparent}
@@ -82,6 +82,12 @@
  #birthday-surprise .bs-retry{padding:9px 14px}
  #birthday-surprise .bs-message{grid-area:1/1;align-self:end;text-align:center;position:relative;z-index:2;width:min(90%,285px);margin-bottom:calc(65px + env(safe-area-inset-bottom));padding:12px;color:#f9e6db;background:#151022c9;border-radius:12px;text-shadow:0 1px 3px #1d1433;font:500 1rem/1.45 system-ui}
  #birthday-surprise .bs-message p{margin:0 0 7px}
+ #birthday-surprise .bs-encore{position:absolute;inset:auto 20px 80px;inset:auto max(20px,env(safe-area-inset-right)) max(80px,calc(17dvh + env(safe-area-inset-bottom))) max(20px,env(safe-area-inset-left));z-index:2;pointer-events:none;text-align:center;color:#eaf6fb;text-shadow:0 2px 8px #000,0 0 24px #191627;font-family:Georgia,serif}
+ #birthday-surprise .bs-encore p{margin:0}
+ #birthday-surprise .bs-encore .bs-greeting{font-size:clamp(27px,7vw,68px);line-height:1.06;letter-spacing:-.025em;font-weight:700;text-wrap:balance}
+ #birthday-surprise .bs-encore .bs-dedication{margin-top:.72em;font-size:clamp(13px,3.2vw,25px);line-height:1.32;font-style:italic;text-wrap:balance}
+ @media(prefers-reduced-motion:no-preference){#birthday-surprise .bs-encore:not([hidden]){animation:bs-encore-in .65s ease-out both}}
+ @keyframes bs-encore-in{from{opacity:0}to{opacity:1}}
  #birthday-surprise button:focus-visible{outline:2px solid #ffcf9f;outline-offset:4px}
  @media (orientation: portrait) {
   #birthday-surprise .bs-movie{object-fit:cover}
@@ -179,6 +185,10 @@
       <canvas class="bs-sparks" width="540" height="960" aria-hidden="true"></canvas>
       <video class="bs-movie" playsinline webkit-playsinline preload="none" aria-label="Geburtstagsfilm für Sanni" hidden></video>
       <div class="bs-ending" aria-hidden="true"></div>
+      <div class="bs-encore" hidden>
+        <p class="bs-greeting">Happy Birthday Sunny</p>
+        <p class="bs-dedication">Divided by oceans but never by heart.</p>
+      </div>
       <div class="bs-message" hidden><p role="status"></p><button type="button" class="bs-retry" hidden>Film abspielen</button></div>
     </div>
     <div class="bs-actions">
@@ -220,13 +230,14 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   const dlg=document.getElementById('birthday-surprise'), gift=document.getElementById('birthday-gift');
   const mode=window.matchMedia('(prefers-reduced-motion: reduce)');
   const $=s=>dlg.querySelector(s), room=$('.bs-room'), movie=$('.bs-movie'), 
-    back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), endingLayer=$('.bs-ending'), 
+    back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), endingLayer=$('.bs-ending'), encore=$('.bs-encore'), 
     status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d');
   const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-photo-song';
   let taps=0, open=false, serial=0, shownAt=0, returnAt=0, returnTimer=0, resumeFocus=true,
     pieces=[],coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
   const birthdayLoopURL='./assets/birthday-2026/sanni-birthday-loop.m4a?v=20261121-photo-song';
-  let songBuffer=null,songSource=null,songSession=0;
+  let songBuffer=null,songSource=null,songSession=0,encoreSession=0,hornSource=null,hornTimer=0,encoreTimer=0;
+  const hornDelay=920,encoreDelay=3200;
   function prepareBirthdaySong(){
     if(!audio)return null;
     if(!songBuffer){
@@ -247,10 +258,15 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
       if(!buffer||!open||serial!==token||!movie.ended||songSource)return;
       try{
         if(audio.state!=='running'&&audio.state!=='closed')audio.resume().catch(()=>{});
+        // Finish only the first performance already begun in the movie. Never
+        // wrap the cue or replay this song beneath the indefinite fireworks.
+        if(!Number.isFinite(movie.duration))return;
+        const carried=Math.max(0,movie.duration-endingStart);
+        const offset=carried+Math.max(0,(performance.now()-tailAt)/1000);
+        if(offset>=buffer.duration)return;
         const source=audio.createBufferSource();
-        source.buffer=buffer;source.loop=true;source.connect(audio.destination);
-        const carried=Number.isFinite(movie.duration)?Math.max(0,movie.duration-endingStart):0;
-        const offset=(carried+Math.max(0,(performance.now()-tailAt)/1000))%buffer.duration;
+        source.buffer=buffer;source.loop=false;source.connect(audio.destination);
+        source.onended=()=>{try{source.disconnect();}catch(_){}if(songSource===source)songSource=null;};
         try{source.start(0,offset);}catch(e){source.disconnect();throw e;}
         songSource=source;
       }catch(_){}
@@ -262,6 +278,38 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
     try{songSource.stop();}catch(_){}
     try{songSource.disconnect();}catch(_){}
     songSource=null;
+  }
+  function playPartyHorn(){
+    if(!audio||audio.state!=='running'||hornSource)return;
+    try{
+      const rate=audio.sampleRate,len=Math.ceil(.59*rate),buffer=audio.createBuffer(1,len,rate),out=buffer.getChannelData(0);
+      let phase=0,state=9187;
+      for(let i=0;i<len;i++){
+        const t=i/rate;
+        phase+=2*Math.PI*(510+124*(1-Math.exp(-t*17))+23*Math.sin(2*Math.PI*8.2*t))/rate;
+        state=(Math.imul(state,1664525)+1013904223)>>>0;
+        const noise=state/4294967296*2-1;
+        const env=Math.min(1,t/.018)*Math.pow(Math.max(0,1-t/.59),1.75);
+        const reed=.59*Math.sin(phase)+.24*Math.sin(phase*2)+.19*Math.sin(phase*3)+.08*Math.sin(phase*5);
+        out[i]=env*(.205*reed+.026*noise)*(1+.16*Math.sin(t*49));
+      }
+      const source=audio.createBufferSource();source.buffer=buffer;source.connect(audio.destination);
+      source.onended=()=>{try{source.disconnect();}catch(_){}if(hornSource===source)hornSource=null;};
+      try{source.start(0);}catch(e){source.disconnect();throw e;}
+      hornSource=source;
+    }catch(_){}
+  }
+  function scheduleEncore(){
+    if(encoreSession===serial)return;
+    const token=serial;encoreSession=token;
+    const active=()=>open&&movie.ended&&serial===token;
+    hornTimer=setTimeout(()=>{if(active())playPartyHorn();},hornDelay);
+    encoreTimer=setTimeout(()=>{if(active())encore.hidden=false;},encoreDelay);
+  }
+  function stopEncore(){
+    clearTimeout(hornTimer);clearTimeout(encoreTimer);hornTimer=0;encoreTimer=0;encoreSession=0;
+    encore.hidden=true;
+    if(hornSource){try{hornSource.stop();}catch(_){}try{hornSource.disconnect();}catch(_){}hornSource=null;}
   }
   const endingStart=27.81, endingWarmAt=25.80;
   let endingImport=null,endingState=null,endingAttempt=0;
@@ -343,7 +391,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   function beginTail(){
     if(!open)return;
     alert();stopEnding();movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
-    if(movie.ended)startBirthdaySong();
+    if(movie.ended){startBirthdaySong();scheduleEncore();}
     if(mode.matches){fireworks(performance.now(),true);return;}
     try{coda=startFireworks(canvas,{reduced:false,audio,startAt:20.42});}catch(_){showCanvas();}
   }
@@ -388,7 +436,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   function halt(v){v.pause();try{v.currentTime=0;}catch(_){}v.hidden=true;}
   function reset(){
     open=false;serial++;clearTimeout(returnTimer);returnAt=0;shownAt=0;playback=0;
-    stopCanvas();stopEnding();stopCoda();stopBirthdaySong();halt(movie);if(audio?.state==='running')audio.suspend().catch(()=>{});
+    stopCanvas();stopEnding();stopCoda();stopBirthdaySong();stopEncore();halt(movie);if(audio?.state==='running')audio.suspend().catch(()=>{});
     for(const a of pieces)a.cancel();pieces=[];
     dlg.removeAttribute('data-reveal');back.hidden=true;alert();taps=0;
     document.body.classList.remove('bs-stage-open');
