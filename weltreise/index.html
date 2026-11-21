@@ -59,6 +59,37 @@
     #birthday-card .birthday-gift[data-jolt] .bd-shadow{background:radial-gradient(ellipse,#a36d7e85 2%,#c5917337 42%,transparent 72%)}
   }
 </style>
+<style id="birthday-surprise-style">
+ #birthday-surprise{box-sizing:border-box;position:fixed;inset:0;width:100%;height:100%;height:100dvh;max-width:none;max-height:none;border:0;margin:0;padding:0;overflow:hidden;color:#fff6e7;background:transparent;z-index:10000}
+ #birthday-surprise:not([open]){display:none}
+ #birthday-surprise::backdrop{background:transparent}
+ body.bs-stage-open{overflow:hidden}
+ #birthday-surprise .bs-room{position:absolute;inset:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;justify-items:center;isolation:isolate;background:transparent;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));opacity:1}
+ #birthday-surprise .bs-room::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 48% 10%,#262039 0%,#101325 35%,#03040b 76%);opacity:0;transition:opacity .60s ease-in}
+ #birthday-surprise[data-reveal] .bs-room::before{opacity:1}
+ #birthday-surprise .bs-title{margin:3px 0 8px;text-align:center;color:#fff5e6;font:560 clamp(23px,4.3vw,51px)/1.08 Georgia,serif;letter-spacing:-.035em;text-shadow:0 1px 2px #2a173d,0 0 19px #1d0e26;position:relative;z-index:2}
+ #birthday-surprise .bs-title em{font-weight:500;color:#f1bbce}
+ #birthday-surprise .bs-screen{position:relative;display:grid;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr);place-items:center;min-height:0;max-width:100%;width:100%;opacity:0;transition:opacity .44s ease .24s;z-index:1}
+ #birthday-surprise[data-reveal] .bs-screen{opacity:1}
+ #birthday-surprise :is(.bs-movie,.bs-sparks){grid-area:1/1;display:block;max-width:100%;height:100%;max-height:100%;width:auto;aspect-ratio:9/16;min-width:0;min-height:0;object-fit:contain;align-self:center}
+ #birthday-surprise .bs-movie{background:#02040d}
+ #birthday-surprise [hidden]{display:none!important}
+ #birthday-surprise .bs-actions{height:48px;min-height:0;margin-top:8px;display:grid;place-items:center;align-self:end;z-index:2}
+ #birthday-surprise .bs-back,#birthday-surprise .bs-retry{appearance:none;color:#fff2e3;background:#211c35bd;border:1px solid #f2cde085;border-radius:999px;font:650 0.93rem/1.25 system-ui;min-height:44px;cursor:pointer;touch-action:manipulation}
+ #birthday-surprise .bs-back{width:44px;height:44px;padding:10px;display:grid;place-items:center}
+ #birthday-surprise .bs-back svg{width:22px;height:22px}
+ #birthday-surprise .bs-retry{padding:9px 14px}
+ #birthday-surprise .bs-message{grid-area:1/1;align-self:end;text-align:center;position:relative;z-index:2;width:min(90%,285px);padding:12px 0 20px;color:#f9e6db;text-shadow:0 1px 3px #1d1433;font:500 1rem/1.45 system-ui}
+ #birthday-surprise .bs-message p{margin:0 0 7px}
+ #birthday-surprise button:focus-visible{outline:2px solid #ffcf9f;outline-offset:4px}
+ @media(max-width:460px){
+  #birthday-surprise .bs-room{padding-inline:5px}
+  #birthday-surprise .bs-title{margin-top:4px}
+ }
+ @media(prefers-reduced-motion:reduce){
+  #birthday-surprise .bs-room::before,#birthday-surprise .bs-screen{transition:none}
+ }
+</style>
 </head>
 <body>
 <div class="page-glow" aria-hidden="true"></div>
@@ -141,6 +172,19 @@
 <noscript><div class="noscript">Für die interaktive Karte und den Countdown bitte JavaScript aktivieren. AIDAsol: 18. Oktober 2026 ab Hamburg, 19:30 Uhr, bis 21. Februar 2027, 08:00 Uhr.</div></noscript>
 <script type="module" src="./app.js?v=22c0654e3b55"></script>
 <script type="module" src="./nautical.js?v=e902cd679708"></script>
+<dialog id="birthday-surprise" aria-labelledby="birthday-surprise-title">
+  <div class="bs-room" tabindex="-1">
+    <h2 class="bs-title" id="birthday-surprise-title">Happy Birthday <em>Sanni</em></h2>
+    <div class="bs-screen">
+      <canvas class="bs-sparks" width="540" height="960" aria-hidden="true"></canvas>
+      <video class="bs-movie" playsinline webkit-playsinline preload="none" aria-label="Geburtstagsfilm für Sanni" hidden></video>
+      <div class="bs-message" hidden><p role="status"></p><button type="button" class="bs-retry" hidden>Film abspielen</button></div>
+    </div>
+    <div class="bs-actions">
+      <button class="bs-back" type="button" aria-label="Zurück zur Weltreise" hidden><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m11 6-6 6 6 6m-6-6h14"/></svg></button>
+    </div>
+  </div>
+</dialog>
 <script id="birthday-gift-script">
 (() => {
   const gift = document.getElementById('birthday-gift');
@@ -167,6 +211,143 @@
       {transform:'none',offset:1}
     ], {duration:580, easing:'ease-out'});
   });
+})();
+</script>
+<script type="module" id="birthday-surprise-script">
+import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
+(() => {
+  const dlg=document.getElementById('birthday-surprise'), gift=document.getElementById('birthday-gift');
+  const mode=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const $=s=>dlg.querySelector(s), room=$('.bs-room'), movie=$('.bs-movie'), 
+    title=$('.bs-title'), back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), 
+    status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d');
+  const movieURL='./assets/birthday-2026/sanni-film.mp4';
+  let taps=0, open=false, serial=0, shownAt=0, returnAt=0, returnTimer=0, resumeFocus=true,
+    pieces=[],titleMotion=null,coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
+  function alert(text='',play=false){
+    message.hidden=!text&&!play; status.textContent=text; retry.hidden=!play;
+  }
+  function stopCanvas(){if(canvasLoop)cancelAnimationFrame(canvasLoop);canvasLoop=0;}
+  const colors=['#ffdba3','#f19abd','#a8c5ff','#e0a6ff','#fee7cb'];
+  function rng(seed){return ()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);}
+  function fireworks(time,still=false){
+    if(!ctx)return;
+    const w=canvas.width,h=canvas.height;
+    const grad=ctx.createRadialGradient(w*.47,h*.27,0,w*.47,h*.27,w*.74);
+    grad.addColorStop(0,'#161729');grad.addColorStop(1,'#03040b');
+    ctx.globalAlpha=1;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+    for(let i=0;i<70;i++){const r=rng(i*2327+55);ctx.globalAlpha=.12+r()*.54;ctx.fillStyle='#f5e5dc';ctx.fillRect(r()*w,r()*h,1+r(),1+r());}
+    const t=still?2.4:(time-fallbackStart)/1000+.90, n=Math.floor(t/.73);
+    for(let i=Math.max(0,n-5);i<=n;i++){
+      const life=t-i*.73; if(life<0||life>3.11)continue;
+      const rand=rng(i*9931+9187), x=(.12+.76*rand())*w,y=(.12+.40*rand())*h, spread=72+103*rand();
+      const reach=spread*(1-Math.exp(-life*2.15)),f=Math.min(1,life*4.5)*Math.max(0,1-life/3.10);
+      ctx.strokeStyle=colors[i%colors.length];ctx.fillStyle=ctx.strokeStyle;
+      for(let k=0;k<54;k++){const a=(k+rand()*.65)*Math.PI*2/54,m=.45+.60*rand(),ux=Math.cos(a)*reach*m,uy=Math.sin(a)*reach*m,dy=life*life*(4+rand()*9);
+        const amp=(.70+.26*Math.sin(life*11+k)*Math.sin(life*11+k))*f;
+        ctx.globalAlpha=amp;ctx.lineWidth=k%5===0?1.6:1.0;ctx.beginPath();
+        ctx.moveTo(x+ux*.86,y+uy*.86+dy-4);ctx.lineTo(x+ux,y+uy+dy);ctx.stroke();
+        if(k%6===0)ctx.fillRect(x+ux-1,y+uy+dy,2,2);
+      }
+    }
+    ctx.globalAlpha=1;
+  }
+  function showCanvas(){
+    canvas.hidden=false;stopCanvas();fallbackStart=performance.now();
+    if(mode.matches){fireworks(fallbackStart,true);return;}
+    function frame(t){canvasLoop=0;if(!open||canvas.hidden)return;fireworks(t); canvasLoop=requestAnimationFrame(frame);}
+    canvasLoop=requestAnimationFrame(frame);
+  }
+  function hideCanvas(){canvas.hidden=true;stopCanvas();}
+  function showWait(){
+    canvas.hidden=false;stopCanvas();
+    if(ctx){ctx.globalAlpha=1;ctx.fillStyle='#090b1a';ctx.fillRect(0,0,canvas.width,canvas.height);}
+  }
+  function stopCoda(){if(coda){coda();coda=null;}}
+  function openCodaAudio(){
+    try{const A=window.AudioContext||window.webkitAudioContext;if(A){if(!audio)audio=new A();audio.resume().catch(()=>{});}}catch(_){}
+  }
+  function beginTail(){
+    if(!open)return;
+    alert();movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
+    if(mode.matches){fireworks(performance.now(),true);return;}
+    try{coda=startFireworks(canvas,{reduced:false,audio,startAt:20.42});}catch(_){showCanvas();}
+  }
+  function showBack(token){
+    if(!open||token!==serial)return;
+    back.hidden=false;
+  }
+  function startReturnTimer(){
+    if(returnAt)return;
+    returnAt=performance.now();const token=serial;clearTimeout(returnTimer);
+    returnTimer=setTimeout(()=>showBack(token),10000);
+  }
+  function launch(){
+    const token=serial;
+    if(!movieURL){alert('Der Geburtstagsfilm ist gerade nicht verfügbar.',false);back.hidden=false;return;}
+    if(movie.getAttribute('src')!==movieURL)movie.src=movieURL;
+    movie.hidden=false;movie.muted=false;
+    alert();
+    // This play() is called synchronously from the third native click on iPhone.
+    try{Promise.resolve(movie.play()).catch(()=>{
+      if(open&&token===serial){movie.hidden=true;showWait();alert('Tippe, um den Film mit Ton zu starten.',true);back.hidden=false;}
+    });}catch(_){if(open&&token===serial){alert('Tippe, um den Film mit Ton zu starten.',true);back.hidden=false;}}
+  }
+  function captureCollapse(){
+    const rect=document.getElementById('birthday-title').getBoundingClientRect(),before=window.innerHeight,
+      targets=[...document.querySelectorAll('body>.topbar, body>main>section, body>.footer, body>.settings-trigger, body>.birthday-atmosphere')];
+    return {rect, targets:targets.map((n,i)=>{const q=n.getBoundingClientRect();return {n,i,q};})
+        .filter(({q})=>q.height&&q.bottom>0&&q.top<before)};
+  }
+  function collapse({rect,targets}){
+    if(mode.matches||typeof title.animate!=='function')return;
+    const r=title.getBoundingClientRect(), dx=rect.x+rect.width*.50-r.x-r.width*.50, dy=rect.y+rect.height*.35-r.y-r.height*.50;
+    titleMotion=title.animate([{transform:`translate(${dx}px,${dy}px) scale(1.32)`},{transform:'none'}],{duration:620,easing:'cubic-bezier(.21,.76,.32,1)'});
+    targets.forEach(({n,i,q})=>{
+      const x=(q.x+q.width*.5<window.innerWidth*.5?-1:1)*(10+13*(i%3)),
+        fall=Math.max(window.innerHeight*.73,320)+(i%4)*95, spin=(i%2?1:-1)*(7+i%5*3);
+      pieces.push(n.animate([
+        {transform:'none',opacity:1,offset:0},
+        {transform:`translate(${-x*.27}px,-5px) rotate(${-spin*.12}deg)`,opacity:1,offset:.13},
+        {transform:`translate(${x}px,${fall}px) rotate(${spin}deg) scale(.69)`,opacity:0,offset:1}
+      ],{duration:570+(i%4)*39,delay:Math.min(135,i*22),fill:'forwards',easing:'cubic-bezier(.42,.02,.87,.55)'}));
+    });
+  }
+  function halt(v){v.pause();try{v.currentTime=0;}catch(_){}v.hidden=true;}
+  function reset(){
+    open=false;serial++;clearTimeout(returnTimer);returnAt=0;shownAt=0;playback=0;
+    stopCanvas();stopCoda();halt(movie);if(audio?.state==='running')audio.suspend().catch(()=>{});
+    for(const a of pieces)a.cancel();pieces=[];titleMotion?.cancel();titleMotion=null;
+    dlg.removeAttribute('data-reveal');back.hidden=true;alert();taps=0;
+    document.body.classList.remove('bs-stage-open');
+    if(dlg.open&&typeof dlg.close==='function')dlg.close();else dlg.removeAttribute('open');
+    window.scrollTo(0,savedY);
+    if(resumeFocus&&!document.getElementById('birthday-card').hidden)gift.focus({preventScroll:true});
+  }
+  function openStage(){
+    if(open||document.getElementById('birthday-card').hidden)return;
+    const plan=captureCollapse();savedY=window.scrollY;resumeFocus=true;
+    open=true;serial++;shownAt=performance.now();const token=serial;
+    if(typeof dlg.showModal==='function')dlg.showModal();else dlg.setAttribute('open','');
+    document.body.classList.add('bs-stage-open');
+    room.focus({preventScroll:true});showWait();openCodaAudio();
+    collapse(plan);requestAnimationFrame(()=>{if(open&&serial===token)dlg.setAttribute('data-reveal','');});
+    launch();
+    // Escape/Back remain available even if Safari cannot start decoding.
+    setTimeout(()=>{if(open&&serial===token&&!returnAt){back.hidden=false;if(!playback){alert('Der Film lädt noch. Erneut versuchen?',true);}}},12500);
+  }
+  gift.addEventListener('click',()=>{if(!open&&!document.getElementById('birthday-card').hidden&&++taps===3)openStage();});
+  movie.addEventListener('playing',()=>{
+    if(!open)return;
+    playback=1;startReturnTimer();alert();movie.hidden=false;hideCanvas();
+  });
+  movie.addEventListener('ended',beginTail);
+  movie.addEventListener('error',()=>{if(open&&playback!==1){alert('Der Film konnte nicht geladen werden.',true);back.hidden=false;}else if(open){beginTail();back.hidden=false;}});
+  back.addEventListener('click',reset);
+  retry.addEventListener('click',()=>{if(!open)return;if(movie.error){movie.removeAttribute('src');movie.load();}launch();});
+  dlg.addEventListener('cancel',e=>{if(open){e.preventDefault();reset();}});
+  window.addEventListener('pagehide',()=>{if(open){resumeFocus=false;reset();}});
+  mode.addEventListener?.('change',()=>{if(open&&movie.ended)beginTail();});
 })();
 </script>
 </body></html>
