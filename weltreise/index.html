@@ -59,7 +59,7 @@
     #birthday-card .birthday-gift[data-jolt] .bd-shadow{background:radial-gradient(ellipse,#a36d7e85 2%,#c5917337 42%,transparent 72%)}
   }
 </style>
-<style id="birthday-surprise-style" data-version="20261121-sanni">
+<style id="birthday-surprise-style" data-version="20261121-piano-dawn">
  #birthday-surprise{box-sizing:border-box;position:fixed;inset:0;width:100vw;width:100dvw;height:100vh;height:100dvh;max-width:none;max-height:none;border:0;margin:0;padding:0;overflow:hidden;color:#fff6e7;background:transparent;z-index:10000}
  #birthday-surprise:not([open]){display:none}
  #birthday-surprise::backdrop{background:transparent}
@@ -72,6 +72,14 @@
  #birthday-surprise :is(.bs-movie,.bs-sparks){position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;object-position:center center;border:0}
  #birthday-surprise .bs-movie,#birthday-surprise .bs-sparks{background:#000}
  #birthday-surprise .bs-sparks{object-fit:cover;object-position:center 28%}
+ #birthday-surprise .bs-dawn{position:absolute;inset:0;overflow:hidden;background:#000;pointer-events:none}
+ #birthday-surprise .bs-dawn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0}
+ #birthday-surprise .bs-dawn::after{content:'';position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse 69% 9% at 50% 54%,#b16c421f 0%,#8d502410 37%,#29102200 100%);mix-blend-mode:screen}
+ #birthday-surprise[data-dawn] .bs-sparks{mix-blend-mode:screen}
+ #birthday-surprise[data-dawn] .bs-dawn img{animation:bs-ship-dawn 30s linear both}
+ #birthday-surprise[data-dawn] .bs-dawn::after{animation:bs-horizon-dawn 33s linear both}
+ @keyframes bs-ship-dawn{0%{opacity:0}12%{opacity:.16}47%{opacity:.45}100%{opacity:.79}}
+ @keyframes bs-horizon-dawn{0%,20%{opacity:0}58%{opacity:.3}100%{opacity:.68}}
  #birthday-surprise .bs-ending{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0}
  #birthday-surprise .bs-ending[data-ready]{opacity:1}
  #birthday-surprise [hidden]{display:none!important}
@@ -95,6 +103,8 @@
  }
  @media(prefers-reduced-motion:reduce){
   #birthday-surprise .bs-room::before,#birthday-surprise .bs-screen{transition:none}
+  #birthday-surprise[data-dawn] .bs-dawn img{animation:none;opacity:.60}
+  #birthday-surprise[data-dawn] .bs-dawn::after{animation:none;opacity:.31}
  }
 </style>
 </head>
@@ -182,6 +192,7 @@
 <dialog id="birthday-surprise" aria-label="Geburtstagsüberraschung für Sanni">
   <div class="bs-room" tabindex="-1">
     <div class="bs-screen">
+      <div class="bs-dawn" aria-hidden="true" hidden><img width="720" height="1280" alt="" decoding="async"></div>
       <canvas class="bs-sparks" width="540" height="960" aria-hidden="true"></canvas>
       <video class="bs-movie" playsinline webkit-playsinline preload="none" aria-label="Geburtstagsfilm für Sanni" hidden></video>
       <div class="bs-ending" aria-hidden="true"></div>
@@ -231,7 +242,20 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   const mode=window.matchMedia('(prefers-reduced-motion: reduce)');
   const $=s=>dlg.querySelector(s), room=$('.bs-room'), movie=$('.bs-movie'), 
     back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), endingLayer=$('.bs-ending'), encore=$('.bs-encore'), 
-    status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d');
+    status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d'),
+    dawn=$('.bs-dawn'), dawnStill=dawn.querySelector('img');
+  const dawnURL='./assets/birthday-2026/sanni-coda-ship.webp?v=20261121-piano-dawn';
+  function primeDawn(){
+    if(dawnStill.getAttribute('src')!==dawnURL){
+      dawnStill.src=dawnURL;dawnStill.decode?.().catch(()=>{});
+    }
+  }
+  function revealDawn(){
+    primeDawn();dawn.hidden=false;dlg.setAttribute('data-dawn','');
+  }
+  function hideDawn(){
+    dawn.hidden=true;dlg.removeAttribute('data-dawn');
+  }
   const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-intro-piano';
   let taps=0, open=false, serial=0, shownAt=0, returnAt=0, returnTimer=0, resumeFocus=true,
     pieces=[],coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
@@ -324,7 +348,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
           if(pianoSource===source){pianoSource=null;fireworksLevel(1);}
         };
         try{source.start(0,0);}catch(e){source.disconnect();throw e;}
-        pianoSource=source;fireworksLevel(.12);
+        pianoSource=source;fireworksLevel(.12);revealDawn();
       }catch(_){}
     });
   }
@@ -337,7 +361,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   }
   function stopEncore(){
     clearTimeout(pianoTimer);clearTimeout(encoreTimer);pianoTimer=0;encoreTimer=0;encoreSession=0;
-    encore.hidden=true;
+    encore.hidden=true;hideDawn();
     if(pianoSource){try{pianoSource.stop();}catch(_){}try{pianoSource.disconnect();}catch(_){}pianoSource=null;}
     fireworksLevel(1);
   }
@@ -416,7 +440,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   }
   function stopCoda(){if(coda){coda();coda=null;}}
   function openCodaAudio(){
-    try{const A=window.AudioContext||window.webkitAudioContext;if(A){if(!audio)audio=new A();audio.resume().catch(()=>{});prepareBirthdaySong();preparePiano();}}catch(_){}
+    try{const A=window.AudioContext||window.webkitAudioContext;if(A){if(!audio)audio=new A();audio.resume().catch(()=>{});prepareBirthdaySong();preparePiano();primeDawn();}}catch(_){}
   }
   function beginTail(){
     if(!open)return;
