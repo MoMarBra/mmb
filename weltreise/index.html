@@ -24,6 +24,41 @@
 <link rel="stylesheet" href="./holiday.css?v=49e30543e7c9">
 <link rel="stylesheet" href="./assets/vendor/leaflet.css">
 <link rel="stylesheet" href="./nautical.css?v=5ec0a16d9083">
+<style id="birthday-gift-style">
+  #birthday-card .birthday-message{padding-block:13px 0}
+  #birthday-card .birthday-kicker{text-transform:none;letter-spacing:.075em;font-size:clamp(11px,1.5vw,13px);margin:0}
+  #birthday-card .birthday-gift{--box:clamp(65px,10vw,92px);--half:calc(var(--box)/2);position:relative;isolation:isolate;display:block;width:clamp(146px,22vw,194px);height:clamp(140px,20vw,178px);margin:6px auto -10px;padding:0;border:0;border-radius:22px;background:transparent;appearance:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  #birthday-card .birthday-gift:focus-visible{outline:2px solid #8c527c;outline-offset:2px}
+  #birthday-card .bd-shadow{position:absolute;width:61%;height:19%;left:19.5%;top:69%;border-radius:50%;background:radial-gradient(ellipse,#71507551 2%,#9c6c8832 36%,#9c6c8800 72%);pointer-events:none}
+  #birthday-card .bd-pulse{display:grid;place-items:center;position:absolute;inset:0;transform-origin:50% 73%;pointer-events:none}
+  #birthday-card .bd-orbit{width:var(--box);height:var(--box);display:grid;place-items:center;perspective:570px;transform-style:preserve-3d;transform:translateY(3px);pointer-events:none}
+  #birthday-card .bd-cube{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(-24deg) rotateY(-33deg) rotateZ(-3deg)}
+  #birthday-card .bd-face{position:absolute;inset:0;display:block;box-shadow:inset 0 0 0 1px #713c5e60;backface-visibility:hidden;background-color:#ae5078}
+  #birthday-card .bd-front{transform:translateZ(var(--half));background:linear-gradient(180deg,#ffe1eb60 0 15%,#57224048 16%,transparent 19%),radial-gradient(circle,#fff2d9aa 0 1.15px, transparent 1.7px) 2px 4px/13px 13px,linear-gradient(126deg,#c4709a,#a34678 78%)}
+  #birthday-card .bd-back{transform:rotateY(180deg) translateZ(var(--half));background:linear-gradient(130deg,#bd6894,#974b76)}
+  #birthday-card .bd-right{transform:rotateY(90deg) translateZ(var(--half));background:linear-gradient(180deg,#edb8d45e 0 15%,#4624406b 16%,transparent 19%),radial-gradient(circle,#fcc9a67f 0 1.10px, transparent 1.55px) 1px 2px/13px 13px,linear-gradient(114deg,#a55386,#743a6d 90%)}
+  #birthday-card .bd-left{transform:rotateY(-90deg) translateZ(var(--half));background:#a55a89}
+  #birthday-card .bd-top{transform:rotateX(90deg) translateZ(var(--half));background:radial-gradient(circle,#fff5d8a9 0 1.05px, transparent 1.6px) 1px 4px/13px 13px,linear-gradient(132deg,#e5a7ba,#b96099)}
+  #birthday-card .bd-bottom{transform:rotateX(-90deg) translateZ(var(--half));background:#743963}
+  #birthday-card .bd-face::before{content:'';position:absolute;inset:0 41%;background:linear-gradient(90deg,#ae7232,#f3c77a 24%,#fff0af 62%,#d48f47);box-shadow:1px 0 3px #65314b52}
+  #birthday-card .bd-right::before{background:linear-gradient(90deg,#965c2e,#dd9e54 25%,#f2c983 62%,#c18043)}
+  #birthday-card .bd-top::after{content:'';position:absolute;inset:41% 0;background:linear-gradient(0deg,#cc9250,#f7d38c 34%,#ffedb0 72%,#d49a54)}
+  #birthday-card .bd-bow{position:absolute;display:block;width:98%;height:48%;left:2%;top:-29%;overflow:visible;transform:translateZ(4px) rotateY(13deg);filter:drop-shadow(0 2px 1px #6e35524a)}
+  @media(prefers-reduced-motion:no-preference){
+    #birthday-card .bd-cube{animation:birthday-gift-idle 4.5s ease-in-out infinite}
+    #birthday-card .birthday-gift[data-jolt] .bd-pulse{animation:birthday-gift-legacy .56s ease-out}
+  }
+  @keyframes birthday-gift-idle{
+    0%,100%{transform:rotateX(-24deg) rotateY(-33deg) rotateZ(-3deg)}
+    50%{transform:translateY(-3px) rotateX(-21deg) rotateY(-29deg) rotateZ(2deg)}
+  }
+  @keyframes birthday-gift-legacy{
+    0%,100%{transform:none}18%{transform:translate(-5px,-6px) rotate(-11deg)}42%{transform:translate(5px,-2px) rotate(9deg)}65%{transform:translateX(-2px) rotate(-4deg)}85%{transform:rotate(2deg)}
+  }
+  @media(prefers-reduced-motion:reduce){
+    #birthday-card .birthday-gift[data-jolt] .bd-shadow{background:radial-gradient(ellipse,#a36d7e85 2%,#c5917337 42%,transparent 72%)}
+  }
+</style>
 </head>
 <body>
 <div class="page-glow" aria-hidden="true"></div>
@@ -35,7 +70,23 @@
 <section class="birthday-card" id="birthday-card" aria-labelledby="birthday-title" hidden>
 <div class="birthday-balloons" id="birthday-balloons" aria-hidden="true"></div>
 <span class="birthday-star-seal" aria-hidden="true">✧</span>
-<div class="birthday-message"><p class="birthday-kicker">Ein ganz besonderer Moment</p><h2 id="birthday-title">Happy birthday<span>Sanni</span></h2><p class="birthday-wish">Die Welt liegt dir zu Füßen.<br>Heute gehört der ganze Horizont dir.</p><p class="birthday-date">22. & 23. November 2026<small>Geburtstags-Special · Deutschland-Zeit</small></p></div>
+<div class="birthday-message">
+  <p class="birthday-kicker">Das ist ein ganz besonderer Moment</p>
+  <h2 id="birthday-title">Happy Birthday <span>Sanni</span></h2>
+  <button type="button" id="birthday-gift" class="birthday-gift" aria-label="Geschenk wackeln lassen">
+    <span class="bd-shadow" aria-hidden="true"></span>
+    <span class="bd-pulse" aria-hidden="true"><span class="bd-orbit"><span class="bd-cube">
+      <span class="bd-face bd-front"></span><span class="bd-face bd-back"></span><span class="bd-face bd-right"></span><span class="bd-face bd-left"></span><span class="bd-face bd-top"></span><span class="bd-face bd-bottom"></span>
+      <svg class="bd-bow" viewBox="0 0 100 48" fill="none" focusable="false">
+        <defs><linearGradient id="bd-bow-gold" x1="8" y1="43" x2="73" y2="5" gradientUnits="userSpaceOnUse"><stop stop-color="#b26c37"/><stop offset=".42" stop-color="#f2bf70"/><stop offset=".72" stop-color="#fff0ae"/><stop offset="1" stop-color="#daa45d"/></linearGradient></defs>
+        <path d="M48 32c-5 3-12 9-20 15l-2-8-9-2c11-4 23-7 30-11m5 6c5 3 12 9 20 15l2-8 9-2c-11-4-23-7-30-11" fill="url(#bd-bow-gold)" stroke="#b57943" stroke-width=".7"/>
+        <path d="M50 29C37 10 17 1 11 11c-7 12 12 25 37 22m2-4C63 10 83 1 89 11c7 12-12 25-37 22" stroke="url(#bd-bow-gold)" stroke-width="9" stroke-linecap="round"/>
+        <path d="M14 11c5-6 18 0 29 10m14 0C68 11 81 5 86 11" stroke="#fff2c0" stroke-width="1.2" stroke-linecap="round" opacity=".85"/>
+        <rect x="43" y="25" width="14" height="11" rx="4" fill="url(#bd-bow-gold)" stroke="#b88141" stroke-width=".6"/>
+      </svg>
+    </span></span></span>
+  </button>
+</div>
 </section>
 <section class="holiday-card" id="holiday-card" aria-labelledby="holiday-title" hidden>
 <div class="holiday-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -90,6 +141,34 @@
 <noscript><div class="noscript">Für die interaktive Karte und den Countdown bitte JavaScript aktivieren. AIDAsol: 18. Oktober 2026 ab Hamburg, 19:30 Uhr, bis 21. Februar 2027, 08:00 Uhr.</div></noscript>
 <script type="module" src="./app.js?v=22c0654e3b55"></script>
 <script type="module" src="./nautical.js?v=e902cd679708"></script>
+<script id="birthday-gift-script">
+(() => {
+  const gift = document.getElementById('birthday-gift');
+  const pulse = gift.querySelector('.bd-pulse');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let tap = 0, motion, reset;
+  gift.addEventListener('click', () => {
+    const side = ++tap % 2 ? 1 : -1;
+    motion?.cancel();
+    clearTimeout(reset);
+    gift.removeAttribute('data-jolt');
+    if (reduced.matches || typeof pulse.animate !== 'function') {
+      void pulse.offsetWidth;
+      gift.setAttribute('data-jolt', '');
+      reset = setTimeout(() => gift.removeAttribute('data-jolt'), reduced.matches ? 260 : 560);
+      return;
+    }
+    motion = pulse.animate([
+      {transform:'none', offset:0},
+      {transform:`translate(${side * -5}px,-8px) rotate(${side * -13}deg) scale(1.05)`,offset:.20},
+      {transform:`translate(${side * 4}px,-3px) rotate(${side * 10}deg)`,offset:.43},
+      {transform:`translateX(${side * -3}px) rotate(${side * -5}deg)`,offset:.66},
+      {transform:`rotate(${side * 2}deg)`,offset:.84},
+      {transform:'none',offset:1}
+    ], {duration:580, easing:'ease-out'});
+  });
+})();
+</script>
 </body></html>
 
 
