@@ -59,21 +59,19 @@
     #birthday-card .birthday-gift[data-jolt] .bd-shadow{background:radial-gradient(ellipse,#a36d7e85 2%,#c5917337 42%,transparent 72%)}
   }
 </style>
-<style id="birthday-surprise-style">
+<style id="birthday-surprise-style" data-version="20261121-edge">
  #birthday-surprise{box-sizing:border-box;position:fixed;inset:0;width:100vw;width:100dvw;height:100vh;height:100dvh;max-width:none;max-height:none;border:0;margin:0;padding:0;overflow:hidden;color:#fff6e7;background:transparent;z-index:10000}
  #birthday-surprise:not([open]){display:none}
  #birthday-surprise::backdrop{background:transparent}
  body.bs-stage-open{overflow:hidden}
  #birthday-surprise .bs-room{position:absolute;inset:0;isolation:isolate;overflow:hidden;outline:none}
- #birthday-surprise .bs-room::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 48% 10%,#262039 0%,#101325 35%,#03040b 76%);opacity:0;transition:opacity .60s ease-in}
+ #birthday-surprise .bs-room::before{content:'';position:absolute;inset:0;z-index:-1;background:#000;opacity:0;transition:opacity .60s ease-in}
  #birthday-surprise[data-reveal] .bs-room::before{opacity:1}
- #birthday-surprise .bs-title{position:absolute;inset:max(13px,env(safe-area-inset-top)) 16px auto;z-index:2;margin:0;text-align:center;color:#fff5e6;font:560 clamp(23px,4.3vw,51px)/1.08 Georgia,serif;letter-spacing:-.035em;text-shadow:0 1px 2px #2a173d,0 0 19px #1d0e26;pointer-events:none}
- #birthday-surprise .bs-title em{font-weight:500;color:#f1bbce}
- #birthday-surprise[data-film] .bs-title{display:none}
  #birthday-surprise .bs-screen{position:absolute;inset:0;display:grid;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr);place-items:center;min-height:0;width:100%;height:100%;opacity:0;transition:opacity .40s ease .19s;z-index:1}
  #birthday-surprise[data-reveal] .bs-screen{opacity:1}
  #birthday-surprise :is(.bs-movie,.bs-sparks){position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;object-position:center center;border:0}
- #birthday-surprise .bs-movie{background:#02040d}
+ #birthday-surprise .bs-movie,#birthday-surprise .bs-sparks{background:#000}
+ #birthday-surprise .bs-sparks{object-fit:cover;object-position:center 28%}
  #birthday-surprise [hidden]{display:none!important}
  #birthday-surprise .bs-actions{position:absolute;inset:auto max(12px,env(safe-area-inset-right)) max(11px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));display:grid;place-items:center;z-index:3;pointer-events:none}
  #birthday-surprise .bs-back,#birthday-surprise .bs-retry{appearance:none;color:#fff2e3;background:#211c35bd;border:1px solid #f2cde085;border-radius:999px;font:650 0.93rem/1.25 system-ui;min-height:44px;cursor:pointer;touch-action:manipulation}
@@ -83,8 +81,9 @@
  #birthday-surprise .bs-message{grid-area:1/1;align-self:end;text-align:center;position:relative;z-index:2;width:min(90%,285px);margin-bottom:calc(65px + env(safe-area-inset-bottom));padding:12px;color:#f9e6db;background:#151022c9;border-radius:12px;text-shadow:0 1px 3px #1d1433;font:500 1rem/1.45 system-ui}
  #birthday-surprise .bs-message p{margin:0 0 7px}
  #birthday-surprise button:focus-visible{outline:2px solid #ffcf9f;outline-offset:4px}
- @media (max-aspect-ratio: 9/14) {
-  #birthday-surprise :is(.bs-movie,.bs-sparks){object-fit:cover}
+ @media (orientation: portrait) {
+  #birthday-surprise .bs-movie{object-fit:cover}
+  #birthday-surprise .bs-sparks{object-position:center center}
  }
  @media(prefers-reduced-motion:reduce){
   #birthday-surprise .bs-room::before,#birthday-surprise .bs-screen{transition:none}
@@ -172,9 +171,8 @@
 <noscript><div class="noscript">Für die interaktive Karte und den Countdown bitte JavaScript aktivieren. AIDAsol: 18. Oktober 2026 ab Hamburg, 19:30 Uhr, bis 21. Februar 2027, 08:00 Uhr.</div></noscript>
 <script type="module" src="./app.js?v=22c0654e3b55"></script>
 <script type="module" src="./nautical.js?v=e902cd679708"></script>
-<dialog id="birthday-surprise" aria-labelledby="birthday-surprise-title">
+<dialog id="birthday-surprise" aria-label="Geburtstagsüberraschung für Sanni">
   <div class="bs-room" tabindex="-1">
-    <h2 class="bs-title" id="birthday-surprise-title">Happy Birthday <em>Sanni</em></h2>
     <div class="bs-screen">
       <canvas class="bs-sparks" width="540" height="960" aria-hidden="true"></canvas>
       <video class="bs-movie" playsinline webkit-playsinline preload="none" aria-label="Geburtstagsfilm für Sanni" hidden></video>
@@ -219,11 +217,11 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   const dlg=document.getElementById('birthday-surprise'), gift=document.getElementById('birthday-gift');
   const mode=window.matchMedia('(prefers-reduced-motion: reduce)');
   const $=s=>dlg.querySelector(s), room=$('.bs-room'), movie=$('.bs-movie'), 
-    title=$('.bs-title'), back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), 
+    back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), 
     status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d');
   const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-immersive';
   let taps=0, open=false, serial=0, shownAt=0, returnAt=0, returnTimer=0, resumeFocus=true,
-    pieces=[],titleMotion=null,coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
+    pieces=[],coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
   function alert(text='',play=false){
     message.hidden=!text&&!play; status.textContent=text; retry.hidden=!play;
   }
@@ -234,7 +232,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
     if(!ctx)return;
     const w=canvas.width,h=canvas.height;
     const grad=ctx.createRadialGradient(w*.47,h*.27,0,w*.47,h*.27,w*.74);
-    grad.addColorStop(0,'#161729');grad.addColorStop(1,'#03040b');
+    grad.addColorStop(0,'#0b0c18');grad.addColorStop(1,'#000');
     ctx.globalAlpha=1;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
     for(let i=0;i<70;i++){const r=rng(i*2327+55);ctx.globalAlpha=.12+r()*.54;ctx.fillStyle='#f5e5dc';ctx.fillRect(r()*w,r()*h,1+r(),1+r());}
     const t=still?2.4:(time-fallbackStart)/1000+.90, n=Math.floor(t/.73);
@@ -261,7 +259,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   function hideCanvas(){canvas.hidden=true;stopCanvas();}
   function showWait(){
     canvas.hidden=false;stopCanvas();
-    if(ctx){ctx.globalAlpha=1;ctx.fillStyle='#090b1a';ctx.fillRect(0,0,canvas.width,canvas.height);}
+    if(ctx){ctx.globalAlpha=1;ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);}
   }
   function stopCoda(){if(coda){coda();coda=null;}}
   function openCodaAudio(){
@@ -269,7 +267,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   }
   function beginTail(){
     if(!open)return;
-    alert();dlg.setAttribute('data-film','');title.hidden=true;movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
+    alert();movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
     if(mode.matches){fireworks(performance.now(),true);return;}
     try{coda=startFireworks(canvas,{reduced:false,audio,startAt:20.42});}catch(_){showCanvas();}
   }
@@ -294,15 +292,13 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
     });}catch(_){if(open&&token===serial){alert('Tippe, um den Film mit Ton zu starten.',true);back.hidden=false;}}
   }
   function captureCollapse(){
-    const rect=document.getElementById('birthday-title').getBoundingClientRect(),before=window.innerHeight,
+    const before=window.innerHeight,
       targets=[...document.querySelectorAll('body>.topbar, body>main>section, body>.footer, body>.settings-trigger, body>.birthday-atmosphere')];
-    return {rect, targets:targets.map((n,i)=>{const q=n.getBoundingClientRect();return {n,i,q};})
-        .filter(({q})=>q.height&&q.bottom>0&&q.top<before)};
+    return targets.map((n,i)=>{const q=n.getBoundingClientRect();return {n,i,q};})
+        .filter(({q})=>q.height&&q.bottom>0&&q.top<before);
   }
-  function collapse({rect,targets}){
-    if(mode.matches||typeof title.animate!=='function')return;
-    const r=title.getBoundingClientRect(), dx=rect.x+rect.width*.50-r.x-r.width*.50, dy=rect.y+rect.height*.35-r.y-r.height*.50;
-    titleMotion=title.animate([{transform:`translate(${dx}px,${dy}px) scale(1.32)`},{transform:'none'}],{duration:620,easing:'cubic-bezier(.21,.76,.32,1)'});
+  function collapse(targets){
+    if(mode.matches||typeof room.animate!=='function')return;
     targets.forEach(({n,i,q})=>{
       const x=(q.x+q.width*.5<window.innerWidth*.5?-1:1)*(10+13*(i%3)),
         fall=Math.max(window.innerHeight*.73,320)+(i%4)*95, spin=(i%2?1:-1)*(7+i%5*3);
@@ -317,8 +313,8 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   function reset(){
     open=false;serial++;clearTimeout(returnTimer);returnAt=0;shownAt=0;playback=0;
     stopCanvas();stopCoda();halt(movie);if(audio?.state==='running')audio.suspend().catch(()=>{});
-    for(const a of pieces)a.cancel();pieces=[];titleMotion?.cancel();titleMotion=null;
-    dlg.removeAttribute('data-reveal');dlg.removeAttribute('data-film');title.hidden=false;back.hidden=true;alert();taps=0;
+    for(const a of pieces)a.cancel();pieces=[];
+    dlg.removeAttribute('data-reveal');back.hidden=true;alert();taps=0;
     document.body.classList.remove('bs-stage-open');
     if(dlg.open&&typeof dlg.close==='function')dlg.close();else dlg.removeAttribute('open');
     window.scrollTo(0,savedY);
@@ -339,7 +335,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   gift.addEventListener('click',()=>{if(!open&&!document.getElementById('birthday-card').hidden&&++taps===3)openStage();});
   movie.addEventListener('playing',()=>{
     if(!open)return;
-    playback=1;dlg.setAttribute('data-film','');title.hidden=true;startReturnTimer();alert();movie.hidden=false;hideCanvas();
+    playback=1;startReturnTimer();alert();movie.hidden=false;hideCanvas();
   });
   movie.addEventListener('ended',beginTail);
   movie.addEventListener('error',()=>{if(open&&playback!==1){alert('Der Film konnte nicht geladen werden.',true);back.hidden=false;}else if(open){beginTail();back.hidden=false;}});
