@@ -59,7 +59,7 @@
     #birthday-card .birthday-gift[data-jolt] .bd-shadow{background:radial-gradient(ellipse,#a36d7e85 2%,#c5917337 42%,transparent 72%)}
   }
 </style>
-<style id="birthday-surprise-style" data-version="20261121-lofi-replace">
+<style id="birthday-surprise-style" data-version="20261121-intro-piano">
  #birthday-surprise{box-sizing:border-box;position:fixed;inset:0;width:100vw;width:100dvw;height:100vh;height:100dvh;max-width:none;max-height:none;border:0;margin:0;padding:0;overflow:hidden;color:#fff6e7;background:transparent;z-index:10000}
  #birthday-surprise:not([open]){display:none}
  #birthday-surprise::backdrop{background:transparent}
@@ -232,86 +232,116 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   const $=s=>dlg.querySelector(s), room=$('.bs-room'), movie=$('.bs-movie'), 
     back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), endingLayer=$('.bs-ending'), encore=$('.bs-encore'), 
     status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d');
-  const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-lofi-replace';
+  const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-intro-piano';
   let taps=0, open=false, serial=0, shownAt=0, returnAt=0, returnTimer=0, resumeFocus=true,
     pieces=[],coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
   const birthdayLoopURL='./assets/birthday-2026/sanni-birthday-loop.m4a?v=20261121-photo-song';
-  let songBuffer=null,songSource=null,songSession=0,encoreSession=0,hornSource=null,hornTimer=0,encoreTimer=0;
-  const hornDelay=920,encoreDelay=3200;
+  const encorePianoURL='./assets/birthday-2026/sanni-encore-piano.m4a?v=20261121-intro-piano';
+  let songBuffer=null,songSource=null,songSession=0,songDone=Promise.resolve(),finishSong=null;
+  let pianoBuffer=null,pianoSource=null,pianoTimer=0,encoreSession=0,encoreTimer=0,fxGain=null;
+  const pianoDelay=920,encoreDelay=3200;
+  function audioBuffer(url){
+    return fetch(url,{credentials:'same-origin'}).then(r=>{
+      if(!r.ok)throw new Error('Birthday audio '+r.status);
+      return r.arrayBuffer();
+    }).then(bits=>new Promise((resolve,reject)=>{
+      // Callback form also works in older Safari. The third tap unlocks the context.
+      audio.decodeAudioData(bits,resolve,reject);
+    }));
+  }
   function prepareBirthdaySong(){
     if(!audio)return null;
-    if(!songBuffer){
-      songBuffer=fetch(birthdayLoopURL,{credentials:'same-origin'}).then(r=>{
-        if(!r.ok)throw new Error('Birthday audio '+r.status);
-        return r.arrayBuffer();
-      }).then(bits=>new Promise((resolve,reject)=>{
-        // Callback form also works in older Safari. Context was unlocked by the third tap.
-        audio.decodeAudioData(bits,resolve,reject);
-      })).catch(()=>{songBuffer=null;return null;});
-    }
+    if(!songBuffer)songBuffer=audioBuffer(birthdayLoopURL).catch(()=>{songBuffer=null;return null;});
     return songBuffer;
+  }
+  function preparePiano(){
+    if(!audio)return null;
+    if(!pianoBuffer)pianoBuffer=audioBuffer(encorePianoURL).catch(()=>{pianoBuffer=null;return null;});
+    return pianoBuffer;
   }
   function startBirthdaySong(){
     if(!audio||!open||!movie.ended||songSession===serial)return;
     const token=serial,tailAt=performance.now();songSession=token;
-    prepareBirthdaySong()?.then(buffer=>{
+    songDone=prepareBirthdaySong().then(buffer=>{
       if(!buffer||!open||serial!==token||!movie.ended||songSource)return;
-      try{
-        if(audio.state!=='running'&&audio.state!=='closed')audio.resume().catch(()=>{});
-        // Finish only the first performance already begun in the movie. Never
-        // wrap the cue or replay this song beneath the indefinite fireworks.
-        if(!Number.isFinite(movie.duration))return;
-        const carried=Math.max(0,movie.duration-endingStart);
-        const offset=carried+Math.max(0,(performance.now()-tailAt)/1000);
-        if(offset>=buffer.duration)return;
-        const source=audio.createBufferSource();
-        source.buffer=buffer;source.loop=false;source.connect(audio.destination);
-        source.onended=()=>{try{source.disconnect();}catch(_){}if(songSource===source)songSource=null;};
-        try{source.start(0,offset);}catch(e){source.disconnect();throw e;}
-        songSource=source;
-      }catch(_){}
+      // Finish just the first sung performance already begun in the movie.
+      if(!Number.isFinite(movie.duration))return;
+      const carried=Math.max(0,movie.duration-endingStart);
+      const offset=carried+Math.max(0,(performance.now()-tailAt)/1000);
+      if(offset>=buffer.duration)return;
+      return new Promise(resolve=>{
+        try{
+          if(audio.state!=='running'&&audio.state!=='closed')audio.resume().catch(()=>{});
+          const source=audio.createBufferSource();
+          source.buffer=buffer;source.loop=false;source.connect(audio.destination);
+          source.onended=()=>{
+            try{source.disconnect();}catch(_){}
+            if(songSource===source){songSource=null;finishSong=null;}
+            resolve();
+          };
+          try{source.start(0,offset);}catch(e){source.disconnect();throw e;}
+          songSource=source;finishSong=resolve;
+        }catch(_){resolve();}
+      });
     });
   }
   function stopBirthdaySong(){
     songSession=0;
-    if(!songSource)return;
-    try{songSource.stop();}catch(_){}
-    try{songSource.disconnect();}catch(_){}
-    songSource=null;
+    if(songSource){
+      try{songSource.stop();}catch(_){}
+      try{songSource.disconnect();}catch(_){}
+      songSource=null;
+    }
+    finishSong?.();finishSong=null;songDone=Promise.resolve();
   }
-  function playPartyHorn(){
-    if(!audio||audio.state!=='running'||hornSource)return;
+  function fireworksAudio(){
+    if(!audio)return null;
     try{
-      const rate=audio.sampleRate,len=Math.ceil(.59*rate),buffer=audio.createBuffer(1,len,rate),out=buffer.getChannelData(0);
-      let phase=0,state=9187;
-      for(let i=0;i<len;i++){
-        const t=i/rate;
-        phase+=2*Math.PI*(510+124*(1-Math.exp(-t*17))+23*Math.sin(2*Math.PI*8.2*t))/rate;
-        state=(Math.imul(state,1664525)+1013904223)>>>0;
-        const noise=state/4294967296*2-1;
-        const env=Math.min(1,t/.018)*Math.pow(Math.max(0,1-t/.59),1.75);
-        const reed=.59*Math.sin(phase)+.24*Math.sin(phase*2)+.19*Math.sin(phase*3)+.08*Math.sin(phase*5);
-        out[i]=env*(.205*reed+.026*noise)*(1+.16*Math.sin(t*49));
-      }
-      const source=audio.createBufferSource();source.buffer=buffer;source.connect(audio.destination);
-      source.onended=()=>{try{source.disconnect();}catch(_){}if(hornSource===source)hornSource=null;};
-      try{source.start(0);}catch(e){source.disconnect();throw e;}
-      hornSource=source;
-    }catch(_){}
+      if(!fxGain){fxGain=audio.createGain();fxGain.connect(audio.destination);}
+      // Isolate the background fireworks without touching film/sung/piano audio.
+      return {
+        get state(){return audio.state;},get currentTime(){return audio.currentTime;},
+        get sampleRate(){return audio.sampleRate;},destination:fxGain,
+        createBuffer:(...args)=>audio.createBuffer(...args),
+        createBufferSource:()=>audio.createBufferSource()
+      };
+    }catch(_){return audio;}
+  }
+  function fireworksLevel(level){
+    if(!fxGain)return;
+    try{const now=audio.currentTime;fxGain.gain.cancelScheduledValues(now);fxGain.gain.setTargetAtTime(level,now,.065);}catch(_){}
+  }
+  function playPiano(active){
+    if(!audio||!active())return;
+    Promise.all([songDone,preparePiano()]).then(([,buffer])=>{
+      if(!buffer||!active()||pianoSource)return;
+      try{
+        if(audio.state!=='running'&&audio.state!=='closed')audio.resume().catch(()=>{});
+        const source=audio.createBufferSource();
+        source.buffer=buffer;source.loop=false;source.connect(audio.destination);
+        source.onended=()=>{
+          try{source.disconnect();}catch(_){}
+          if(pianoSource===source){pianoSource=null;fireworksLevel(1);}
+        };
+        try{source.start(0,0);}catch(e){source.disconnect();throw e;}
+        pianoSource=source;fireworksLevel(.12);
+      }catch(_){}
+    });
   }
   function scheduleEncore(){
     if(encoreSession===serial)return;
     const token=serial;encoreSession=token;
     const active=()=>open&&movie.ended&&serial===token;
-    hornTimer=setTimeout(()=>{if(active())playPartyHorn();},hornDelay);
+    pianoTimer=setTimeout(()=>{if(active())playPiano(active);},pianoDelay);
     encoreTimer=setTimeout(()=>{if(active())encore.hidden=false;},encoreDelay);
   }
   function stopEncore(){
-    clearTimeout(hornTimer);clearTimeout(encoreTimer);hornTimer=0;encoreTimer=0;encoreSession=0;
+    clearTimeout(pianoTimer);clearTimeout(encoreTimer);pianoTimer=0;encoreTimer=0;encoreSession=0;
     encore.hidden=true;
-    if(hornSource){try{hornSource.stop();}catch(_){}try{hornSource.disconnect();}catch(_){}hornSource=null;}
+    if(pianoSource){try{pianoSource.stop();}catch(_){}try{pianoSource.disconnect();}catch(_){}pianoSource=null;}
+    fireworksLevel(1);
   }
-  const endingStart=27.81, endingWarmAt=25.80;
+  const endingStart=33.443333, endingWarmAt=31.433333;
   let endingImport=null,endingState=null,endingAttempt=0;
   function primeEnding(){
     if(!endingImport)endingImport=import('./assets/birthday-2026/sanni-ending.js?v=20261121-finale').catch(()=>null);
@@ -386,14 +416,14 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   }
   function stopCoda(){if(coda){coda();coda=null;}}
   function openCodaAudio(){
-    try{const A=window.AudioContext||window.webkitAudioContext;if(A){if(!audio)audio=new A();audio.resume().catch(()=>{});prepareBirthdaySong();}}catch(_){}
+    try{const A=window.AudioContext||window.webkitAudioContext;if(A){if(!audio)audio=new A();audio.resume().catch(()=>{});prepareBirthdaySong();preparePiano();}}catch(_){}
   }
   function beginTail(){
     if(!open)return;
     alert();stopEnding();movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
     if(movie.ended){startBirthdaySong();scheduleEncore();}
     if(mode.matches){fireworks(performance.now(),true);return;}
-    try{coda=startFireworks(canvas,{reduced:false,audio,startAt:20.42});}catch(_){showCanvas();}
+    try{coda=startFireworks(canvas,{reduced:false,audio:fireworksAudio(),startAt:20.42});}catch(_){showCanvas();}
   }
   function showBack(token){
     if(!open||token!==serial)return;
