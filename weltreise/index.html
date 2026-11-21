@@ -60,31 +60,31 @@
   }
 </style>
 <style id="birthday-surprise-style">
- #birthday-surprise{box-sizing:border-box;position:fixed;inset:0;width:100%;height:100%;height:100dvh;max-width:none;max-height:none;border:0;margin:0;padding:0;overflow:hidden;color:#fff6e7;background:transparent;z-index:10000}
+ #birthday-surprise{box-sizing:border-box;position:fixed;inset:0;width:100vw;width:100dvw;height:100vh;height:100dvh;max-width:none;max-height:none;border:0;margin:0;padding:0;overflow:hidden;color:#fff6e7;background:transparent;z-index:10000}
  #birthday-surprise:not([open]){display:none}
  #birthday-surprise::backdrop{background:transparent}
  body.bs-stage-open{overflow:hidden}
- #birthday-surprise .bs-room{position:absolute;inset:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;justify-items:center;isolation:isolate;background:transparent;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));opacity:1}
+ #birthday-surprise .bs-room{position:absolute;inset:0;isolation:isolate;overflow:hidden;outline:none}
  #birthday-surprise .bs-room::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 48% 10%,#262039 0%,#101325 35%,#03040b 76%);opacity:0;transition:opacity .60s ease-in}
  #birthday-surprise[data-reveal] .bs-room::before{opacity:1}
- #birthday-surprise .bs-title{margin:3px 0 8px;text-align:center;color:#fff5e6;font:560 clamp(23px,4.3vw,51px)/1.08 Georgia,serif;letter-spacing:-.035em;text-shadow:0 1px 2px #2a173d,0 0 19px #1d0e26;position:relative;z-index:2}
+ #birthday-surprise .bs-title{position:absolute;inset:max(13px,env(safe-area-inset-top)) 16px auto;z-index:2;margin:0;text-align:center;color:#fff5e6;font:560 clamp(23px,4.3vw,51px)/1.08 Georgia,serif;letter-spacing:-.035em;text-shadow:0 1px 2px #2a173d,0 0 19px #1d0e26;pointer-events:none}
  #birthday-surprise .bs-title em{font-weight:500;color:#f1bbce}
- #birthday-surprise .bs-screen{position:relative;display:grid;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr);place-items:center;min-height:0;max-width:100%;width:100%;opacity:0;transition:opacity .44s ease .24s;z-index:1}
+ #birthday-surprise[data-film] .bs-title{display:none}
+ #birthday-surprise .bs-screen{position:absolute;inset:0;display:grid;grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr);place-items:center;min-height:0;width:100%;height:100%;opacity:0;transition:opacity .40s ease .19s;z-index:1}
  #birthday-surprise[data-reveal] .bs-screen{opacity:1}
- #birthday-surprise :is(.bs-movie,.bs-sparks){grid-area:1/1;display:block;max-width:100%;height:100%;max-height:100%;width:auto;aspect-ratio:9/16;min-width:0;min-height:0;object-fit:contain;align-self:center}
+ #birthday-surprise :is(.bs-movie,.bs-sparks){position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;object-position:center center;border:0}
  #birthday-surprise .bs-movie{background:#02040d}
  #birthday-surprise [hidden]{display:none!important}
- #birthday-surprise .bs-actions{height:48px;min-height:0;margin-top:8px;display:grid;place-items:center;align-self:end;z-index:2}
+ #birthday-surprise .bs-actions{position:absolute;inset:auto max(12px,env(safe-area-inset-right)) max(11px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));display:grid;place-items:center;z-index:3;pointer-events:none}
  #birthday-surprise .bs-back,#birthday-surprise .bs-retry{appearance:none;color:#fff2e3;background:#211c35bd;border:1px solid #f2cde085;border-radius:999px;font:650 0.93rem/1.25 system-ui;min-height:44px;cursor:pointer;touch-action:manipulation}
- #birthday-surprise .bs-back{width:44px;height:44px;padding:10px;display:grid;place-items:center}
+ #birthday-surprise .bs-back{width:44px;height:44px;padding:10px;display:grid;place-items:center;pointer-events:auto}
  #birthday-surprise .bs-back svg{width:22px;height:22px}
  #birthday-surprise .bs-retry{padding:9px 14px}
- #birthday-surprise .bs-message{grid-area:1/1;align-self:end;text-align:center;position:relative;z-index:2;width:min(90%,285px);padding:12px 0 20px;color:#f9e6db;text-shadow:0 1px 3px #1d1433;font:500 1rem/1.45 system-ui}
+ #birthday-surprise .bs-message{grid-area:1/1;align-self:end;text-align:center;position:relative;z-index:2;width:min(90%,285px);margin-bottom:calc(65px + env(safe-area-inset-bottom));padding:12px;color:#f9e6db;background:#151022c9;border-radius:12px;text-shadow:0 1px 3px #1d1433;font:500 1rem/1.45 system-ui}
  #birthday-surprise .bs-message p{margin:0 0 7px}
  #birthday-surprise button:focus-visible{outline:2px solid #ffcf9f;outline-offset:4px}
- @media(max-width:460px){
-  #birthday-surprise .bs-room{padding-inline:5px}
-  #birthday-surprise .bs-title{margin-top:4px}
+ @media (max-aspect-ratio: 9/14) {
+  #birthday-surprise :is(.bs-movie,.bs-sparks){object-fit:cover}
  }
  @media(prefers-reduced-motion:reduce){
   #birthday-surprise .bs-room::before,#birthday-surprise .bs-screen{transition:none}
@@ -221,7 +221,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   const $=s=>dlg.querySelector(s), room=$('.bs-room'), movie=$('.bs-movie'), 
     title=$('.bs-title'), back=$('.bs-back'), retry=$('.bs-retry'), message=$('.bs-message'), 
     status=message.querySelector('p'), canvas=$('.bs-sparks'), ctx=canvas.getContext('2d');
-  const movieURL='./assets/birthday-2026/sanni-film.mp4';
+  const movieURL='./assets/birthday-2026/sanni-film.mp4?v=20261121-immersive';
   let taps=0, open=false, serial=0, shownAt=0, returnAt=0, returnTimer=0, resumeFocus=true,
     pieces=[],titleMotion=null,coda=null,audio=null,canvasLoop=0,fallbackStart=0,playback=0,savedY=0;
   function alert(text='',play=false){
@@ -269,7 +269,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   }
   function beginTail(){
     if(!open)return;
-    alert();movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
+    alert();dlg.setAttribute('data-film','');title.hidden=true;movie.hidden=true;canvas.hidden=false;stopCanvas();stopCoda();
     if(mode.matches){fireworks(performance.now(),true);return;}
     try{coda=startFireworks(canvas,{reduced:false,audio,startAt:20.42});}catch(_){showCanvas();}
   }
@@ -318,7 +318,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
     open=false;serial++;clearTimeout(returnTimer);returnAt=0;shownAt=0;playback=0;
     stopCanvas();stopCoda();halt(movie);if(audio?.state==='running')audio.suspend().catch(()=>{});
     for(const a of pieces)a.cancel();pieces=[];titleMotion?.cancel();titleMotion=null;
-    dlg.removeAttribute('data-reveal');back.hidden=true;alert();taps=0;
+    dlg.removeAttribute('data-reveal');dlg.removeAttribute('data-film');title.hidden=false;back.hidden=true;alert();taps=0;
     document.body.classList.remove('bs-stage-open');
     if(dlg.open&&typeof dlg.close==='function')dlg.close();else dlg.removeAttribute('open');
     window.scrollTo(0,savedY);
@@ -339,7 +339,7 @@ import { startFireworks } from "./assets/birthday-2026/sanni-fireworks.js";
   gift.addEventListener('click',()=>{if(!open&&!document.getElementById('birthday-card').hidden&&++taps===3)openStage();});
   movie.addEventListener('playing',()=>{
     if(!open)return;
-    playback=1;startReturnTimer();alert();movie.hidden=false;hideCanvas();
+    playback=1;dlg.setAttribute('data-film','');title.hidden=true;startReturnTimer();alert();movie.hidden=false;hideCanvas();
   });
   movie.addEventListener('ended',beginTail);
   movie.addEventListener('error',()=>{if(open&&playback!==1){alert('Der Film konnte nicht geladen werden.',true);back.hidden=false;}else if(open){beginTail();back.hidden=false;}});
